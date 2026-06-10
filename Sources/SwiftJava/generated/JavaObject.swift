@@ -6,43 +6,6 @@ open class JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
-  /// Java method `finalize`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// protected void java.lang.Object.finalize() throws java.lang.Throwable
-  /// ```
-  @available(*, deprecated)
-  @JavaMethod
-  open func finalize() throws
-
-  /// Java method `equals`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.Object.equals(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open func equals(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `toString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.Object.toString()
-  /// ```
-  @JavaMethod
-  open func toString() -> String
-
-  /// Java method `hashCode`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public native int java.lang.Object.hashCode()
-  /// ```
-  @JavaMethod
-  open func hashCode() -> Int32
-
   /// Java method `getClass`.
   ///
   /// ### Java method signature
@@ -60,6 +23,34 @@ open class JavaObject {
   /// ```
   @JavaMethod
   open func clone() throws -> JavaObject!
+
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.Object.equals(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func equals(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `finalize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// protected void java.lang.Object.finalize() throws java.lang.Throwable
+  /// ```
+  @available(*, deprecated)
+  @JavaMethod
+  open func finalize() throws
+
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public native int java.lang.Object.hashCode()
+  /// ```
+  @JavaMethod
+  open func hashCode() -> Int32
 
   /// Java method `notify`.
   ///
@@ -79,6 +70,24 @@ open class JavaObject {
   @JavaMethod
   open func notifyAll()
 
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.Object.toString()
+  /// ```
+  @JavaMethod
+  open func toString() -> String
+
+  /// Java method `wait`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final void java.lang.Object.wait() throws java.lang.InterruptedException
+  /// ```
+  @JavaMethod
+  open func wait() throws
+
   /// Java method `wait`.
   ///
   /// ### Java method signature
@@ -96,13 +105,4 @@ open class JavaObject {
   /// ```
   @JavaMethod
   open func wait(_ arg0: Int64, _ arg1: Int32) throws
-
-  /// Java method `wait`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public final void java.lang.Object.wait() throws java.lang.InterruptedException
-  /// ```
-  @JavaMethod
-  open func wait() throws
 }

@@ -5,10 +5,6 @@ import SwiftJavaJNICore
 open class JavaURL: JavaObject {
   @available(*, deprecated)
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: JavaURL?, _ arg1: String, environment: JNIEnvironment? = nil) throws
-
-  @available(*, deprecated)
-  @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @available(*, deprecated)
@@ -19,41 +15,54 @@ open class JavaURL: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, _ arg1: String, _ arg2: String, environment: JNIEnvironment? = nil) throws
 
-  /// Java method `equals`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.net.URL.equals(java.lang.Object)
-  /// ```
+  @available(*, deprecated)
   @JavaMethod
-  open override func equals(_ arg0: JavaObject?) -> Bool
+  @_nonoverride public convenience init(_ arg0: JavaURL?, _ arg1: String, environment: JNIEnvironment? = nil) throws
 
-  /// Java method `toString`.
+  /// Java method `getAuthority`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.String java.net.URL.toString()
+  /// public java.lang.String java.net.URL.getAuthority()
   /// ```
   @JavaMethod
-  open override func toString() -> String
+  open func getAuthority() -> String
 
-  /// Java method `hashCode`.
+  /// Java method `getContent`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public synchronized int java.net.URL.hashCode()
+  /// public final java.lang.Object java.net.URL.getContent() throws java.io.IOException
   /// ```
   @JavaMethod
-  open override func hashCode() -> Int32
+  open func getContent() throws -> JavaObject!
 
-  /// Java method `openStream`.
+  /// Java method `getContent`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public final java.io.InputStream java.net.URL.openStream() throws java.io.IOException
+  /// public final java.lang.Object java.net.URL.getContent(java.lang.Class<?>[]) throws java.io.IOException
   /// ```
   @JavaMethod
-  open func openStream() throws -> InputStream!
+  open func getContent(_ arg0: [JavaClass<JavaObject>?]) throws -> JavaObject!
+
+  /// Java method `getDefaultPort`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.net.URL.getDefaultPort()
+  /// ```
+  @JavaMethod
+  open func getDefaultPort() -> Int32
+
+  /// Java method `getFile`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URL.getFile()
+  /// ```
+  @JavaMethod
+  open func getFile() -> String
 
   /// Java method `getHost`.
   ///
@@ -64,6 +73,24 @@ open class JavaURL: JavaObject {
   @JavaMethod
   open func getHost() -> String
 
+  /// Java method `openStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public final java.io.InputStream java.net.URL.openStream() throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func openStream() throws -> InputStream!
+
+  /// Java method `getPath`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URL.getPath()
+  /// ```
+  @JavaMethod
+  open func getPath() -> String
+
   /// Java method `getPort`.
   ///
   /// ### Java method signature
@@ -73,14 +100,32 @@ open class JavaURL: JavaObject {
   @JavaMethod
   open func getPort() -> Int32
 
-  /// Java method `getDefaultPort`.
+  /// Java method `getProtocol`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public int java.net.URL.getDefaultPort()
+  /// public java.lang.String java.net.URL.getProtocol()
   /// ```
   @JavaMethod
-  open func getDefaultPort() -> Int32
+  open func getProtocol() -> String
+
+  /// Java method `getQuery`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URL.getQuery()
+  /// ```
+  @JavaMethod
+  open func getQuery() -> String
+
+  /// Java method `getRef`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URL.getRef()
+  /// ```
+  @JavaMethod
+  open func getRef() -> String
 
   /// Java method `sameFile`.
   ///
@@ -100,78 +145,6 @@ open class JavaURL: JavaObject {
   @JavaMethod
   open func toExternalForm() -> String
 
-  /// Java method `getContent`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public final java.lang.Object java.net.URL.getContent(java.lang.Class<?>[]) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func getContent(_ arg0: [JavaClass<JavaObject>?]) throws -> JavaObject!
-
-  /// Java method `getContent`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public final java.lang.Object java.net.URL.getContent() throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func getContent() throws -> JavaObject!
-
-  /// Java method `getProtocol`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.net.URL.getProtocol()
-  /// ```
-  @JavaMethod
-  open func getProtocol() -> String
-
-  /// Java method `getAuthority`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.net.URL.getAuthority()
-  /// ```
-  @JavaMethod
-  open func getAuthority() -> String
-
-  /// Java method `getFile`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.net.URL.getFile()
-  /// ```
-  @JavaMethod
-  open func getFile() -> String
-
-  /// Java method `getRef`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.net.URL.getRef()
-  /// ```
-  @JavaMethod
-  open func getRef() -> String
-
-  /// Java method `getQuery`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.net.URL.getQuery()
-  /// ```
-  @JavaMethod
-  open func getQuery() -> String
-
-  /// Java method `getPath`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.net.URL.getPath()
-  /// ```
-  @JavaMethod
-  open func getPath() -> String
-
   /// Java method `getUserInfo`.
   ///
   /// ### Java method signature
@@ -180,4 +153,31 @@ open class JavaURL: JavaObject {
   /// ```
   @JavaMethod
   open func getUserInfo() -> String
+
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.net.URL.equals(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open override func equals(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized int java.net.URL.hashCode()
+  /// ```
+  @JavaMethod
+  open override func hashCode() -> Int32
+
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.net.URL.toString()
+  /// ```
+  @JavaMethod
+  open override func toString() -> String
 }

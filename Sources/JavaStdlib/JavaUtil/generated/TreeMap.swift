@@ -11,23 +11,62 @@ open class TreeMap<TreeMap_K: AnyJavaObject, TreeMap_V: AnyJavaObject>: JavaObje
   @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
-  /// Java method `remove`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public V java.util.TreeMap.remove(java.lang.Object)
-  /// ```
-  @JavaMethod(typeErasedResult: "V!")
-  open func remove(_ arg0: JavaObject?) -> V!
+  @JavaMethod
+  @_nonoverride public convenience init(_ arg0: JavaMap<K, V>?, environment: JNIEnvironment? = nil)
 
-  /// Java method `size`.
+  /// Java method `ceilingKey`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public int java.util.TreeMap.size()
+  /// public K java.util.TreeMap.ceilingKey(K)
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func ceilingKey(_ arg0: K?) -> K!
+
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.TreeMap.clear()
   /// ```
   @JavaMethod
-  open func size() -> Int32
+  open func clear()
+
+  /// Java method `containsKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.TreeMap.containsKey(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func containsKey(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `containsValue`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.TreeMap.containsValue(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func containsValue(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `firstKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.firstKey()
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func firstKey() -> K!
+
+  /// Java method `floorKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.floorKey(K)
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func floorKey(_ arg0: K?) -> K!
 
   /// Java method `get`.
   ///
@@ -38,6 +77,42 @@ open class TreeMap<TreeMap_K: AnyJavaObject, TreeMap_V: AnyJavaObject>: JavaObje
   @JavaMethod(typeErasedResult: "V!")
   open func get(_ arg0: JavaObject?) -> V!
 
+  /// Java method `higherKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.higherKey(K)
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func higherKey(_ arg0: K?) -> K!
+
+  /// Java method `keySet`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Set<K> java.util.TreeMap.keySet()
+  /// ```
+  @JavaMethod
+  open func keySet() -> JavaSet<K>!
+
+  /// Java method `lastKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.lastKey()
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func lastKey() -> K!
+
+  /// Java method `lowerKey`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public K java.util.TreeMap.lowerKey(K)
+  /// ```
+  @JavaMethod(typeErasedResult: "K!")
+  open func lowerKey(_ arg0: K?) -> K!
+
   /// Java method `put`.
   ///
   /// ### Java method signature
@@ -46,6 +121,78 @@ open class TreeMap<TreeMap_K: AnyJavaObject, TreeMap_V: AnyJavaObject>: JavaObje
   /// ```
   @JavaMethod(typeErasedResult: "V!")
   open func put(_ arg0: K?, _ arg1: V?) -> V!
+
+  /// Java method `putAll`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.TreeMap.putAll(java.util.Map<? extends K, ? extends V>)
+  /// ```
+  @JavaMethod
+  open func putAll(_ arg0: JavaMap<K, V>?)
+
+  /// Java method `putFirst`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.putFirst(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func putFirst(_ arg0: K?, _ arg1: V?) -> V!
+
+  /// Java method `putIfAbsent`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.putIfAbsent(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func putIfAbsent(_ arg0: K?, _ arg1: V?) -> V!
+
+  /// Java method `putLast`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.putLast(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func putLast(_ arg0: K?, _ arg1: V?) -> V!
+
+  /// Java method `remove`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.remove(java.lang.Object)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func remove(_ arg0: JavaObject?) -> V!
+
+  /// Java method `replace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public V java.util.TreeMap.replace(K,V)
+  /// ```
+  @JavaMethod(typeErasedResult: "V!")
+  open func replace(_ arg0: K?, _ arg1: V?) -> V!
+
+  /// Java method `replace`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.TreeMap.replace(K,V,V)
+  /// ```
+  @JavaMethod
+  open func replace(_ arg0: K?, _ arg1: V?, _ arg2: V?) -> Bool
+
+  /// Java method `size`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.TreeMap.size()
+  /// ```
+  @JavaMethod
+  open func size() -> Int32
 
   /// Java method `values`.
   ///
@@ -64,139 +211,4 @@ open class TreeMap<TreeMap_K: AnyJavaObject, TreeMap_V: AnyJavaObject>: JavaObje
   /// ```
   @JavaMethod
   open override func clone() -> JavaObject!
-
-  /// Java method `clear`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.TreeMap.clear()
-  /// ```
-  @JavaMethod
-  open func clear()
-
-  /// Java method `replace`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.TreeMap.replace(K,V,V)
-  /// ```
-  @JavaMethod
-  open func replace(_ arg0: K?, _ arg1: V?, _ arg2: V?) -> Bool
-
-  /// Java method `replace`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public V java.util.TreeMap.replace(K,V)
-  /// ```
-  @JavaMethod(typeErasedResult: "V!")
-  open func replace(_ arg0: K?, _ arg1: V?) -> V!
-
-  /// Java method `putIfAbsent`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public V java.util.TreeMap.putIfAbsent(K,V)
-  /// ```
-  @JavaMethod(typeErasedResult: "V!")
-  open func putIfAbsent(_ arg0: K?, _ arg1: V?) -> V!
-
-  /// Java method `keySet`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.Set<K> java.util.TreeMap.keySet()
-  /// ```
-  @JavaMethod
-  open func keySet() -> JavaSet<K>!
-
-  /// Java method `containsValue`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.TreeMap.containsValue(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open func containsValue(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `containsKey`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.TreeMap.containsKey(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open func containsKey(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `firstKey`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public K java.util.TreeMap.firstKey()
-  /// ```
-  @JavaMethod(typeErasedResult: "K!")
-  open func firstKey() -> K!
-
-  /// Java method `putFirst`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public V java.util.TreeMap.putFirst(K,V)
-  /// ```
-  @JavaMethod(typeErasedResult: "V!")
-  open func putFirst(_ arg0: K?, _ arg1: V?) -> V!
-
-  /// Java method `putLast`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public V java.util.TreeMap.putLast(K,V)
-  /// ```
-  @JavaMethod(typeErasedResult: "V!")
-  open func putLast(_ arg0: K?, _ arg1: V?) -> V!
-
-  /// Java method `lowerKey`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public K java.util.TreeMap.lowerKey(K)
-  /// ```
-  @JavaMethod(typeErasedResult: "K!")
-  open func lowerKey(_ arg0: K?) -> K!
-
-  /// Java method `floorKey`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public K java.util.TreeMap.floorKey(K)
-  /// ```
-  @JavaMethod(typeErasedResult: "K!")
-  open func floorKey(_ arg0: K?) -> K!
-
-  /// Java method `ceilingKey`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public K java.util.TreeMap.ceilingKey(K)
-  /// ```
-  @JavaMethod(typeErasedResult: "K!")
-  open func ceilingKey(_ arg0: K?) -> K!
-
-  /// Java method `higherKey`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public K java.util.TreeMap.higherKey(K)
-  /// ```
-  @JavaMethod(typeErasedResult: "K!")
-  open func higherKey(_ arg0: K?) -> K!
-
-  /// Java method `lastKey`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public K java.util.TreeMap.lastKey()
-  /// ```
-  @JavaMethod(typeErasedResult: "K!")
-  open func lastKey() -> K!
 }

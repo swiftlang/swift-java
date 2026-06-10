@@ -2,22 +2,26 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass<JarFile> {
+  @JavaStaticField(isFinal: true)
+  public var MANIFEST_NAME: String
+}
 @JavaClass("java.util.jar.JarFile")
 open class JarFile: JavaObject {
-  @JavaMethod
-  @_nonoverride public convenience init(_ arg0: File?, _ arg1: Bool, _ arg2: Int32, environment: JNIEnvironment? = nil) throws
-
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: File?, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: File?, _ arg1: Bool, environment: JNIEnvironment? = nil) throws
+
+  @JavaMethod
+  @_nonoverride public convenience init(_ arg0: File?, _ arg1: Bool, _ arg2: Int32, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: File?, _ arg1: Bool, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: Bool, environment: JNIEnvironment? = nil) throws
 
   /// Java method `entries`.
   ///
@@ -28,24 +32,6 @@ open class JarFile: JavaObject {
   @JavaMethod
   open func entries() -> Enumeration<JarEntry>!
 
-  /// Java method `getInputStream`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public synchronized java.io.InputStream java.util.jar.JarFile.getInputStream(java.util.zip.ZipEntry) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func getInputStream(_ arg0: ZipEntry?) throws -> InputStream!
-
-  /// Java method `getManifest`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.jar.Manifest java.util.jar.JarFile.getManifest() throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func getManifest() throws -> Manifest!
-
   /// Java method `getEntry`.
   ///
   /// ### Java method signature
@@ -54,6 +40,15 @@ open class JarFile: JavaObject {
   /// ```
   @JavaMethod
   open func getEntry(_ arg0: String) -> ZipEntry!
+
+  /// Java method `getInputStream`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public synchronized java.io.InputStream java.util.jar.JarFile.getInputStream(java.util.zip.ZipEntry) throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func getInputStream(_ arg0: ZipEntry?) throws -> InputStream!
 
   /// Java method `getJarEntry`.
   ///
@@ -64,6 +59,15 @@ open class JarFile: JavaObject {
   @JavaMethod
   open func getJarEntry(_ arg0: String) -> JarEntry!
 
+  /// Java method `getManifest`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.jar.Manifest java.util.jar.JarFile.getManifest() throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func getManifest() throws -> Manifest!
+
   /// Java method `isMultiRelease`.
   ///
   /// ### Java method signature
@@ -72,8 +76,4 @@ open class JarFile: JavaObject {
   /// ```
   @JavaMethod
   open func isMultiRelease() -> Bool
-}
-extension JavaClass<JarFile> {
-  @JavaStaticField(isFinal: true)
-  public var MANIFEST_NAME: String
 }

@@ -2,6 +2,13 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass<ZipEntry> {
+  @JavaStaticField(isFinal: true)
+  public var DEFLATED: Int32
+
+  @JavaStaticField(isFinal: true)
+  public var STORED: Int32
+}
 @JavaClass("java.util.zip.ZipEntry")
 open class ZipEntry: JavaObject {
   @JavaMethod
@@ -10,95 +17,23 @@ open class ZipEntry: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: ZipEntry?, environment: JNIEnvironment? = nil)
 
-  /// Java method `getName`.
+  /// Java method `getComment`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.String java.util.zip.ZipEntry.getName()
+  /// public java.lang.String java.util.zip.ZipEntry.getComment()
   /// ```
   @JavaMethod
-  open func getName() -> String
+  open func getComment() -> String
 
-  /// Java method `toString`.
+  /// Java method `setComment`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.String java.util.zip.ZipEntry.toString()
+  /// public void java.util.zip.ZipEntry.setComment(java.lang.String)
   /// ```
   @JavaMethod
-  open override func toString() -> String
-
-  /// Java method `hashCode`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.util.zip.ZipEntry.hashCode()
-  /// ```
-  @JavaMethod
-  open override func hashCode() -> Int32
-
-  /// Java method `clone`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object java.util.zip.ZipEntry.clone()
-  /// ```
-  @JavaMethod
-  open override func clone() -> JavaObject!
-
-  /// Java method `getMethod`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.util.zip.ZipEntry.getMethod()
-  /// ```
-  @JavaMethod
-  open func getMethod() -> Int32
-
-  /// Java method `getSize`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public long java.util.zip.ZipEntry.getSize()
-  /// ```
-  @JavaMethod
-  open func getSize() -> Int64
-
-  /// Java method `isDirectory`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.zip.ZipEntry.isDirectory()
-  /// ```
-  @JavaMethod
-  open func isDirectory() -> Bool
-
-  /// Java method `getTime`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public long java.util.zip.ZipEntry.getTime()
-  /// ```
-  @JavaMethod
-  open func getTime() -> Int64
-
-  /// Java method `setTime`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.zip.ZipEntry.setTime(long)
-  /// ```
-  @JavaMethod
-  open func setTime(_ arg0: Int64)
-
-  /// Java method `setSize`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.zip.ZipEntry.setSize(long)
-  /// ```
-  @JavaMethod
-  open func setSize(_ arg0: Int64)
+  open func setComment(_ arg0: String)
 
   /// Java method `getCompressedSize`.
   ///
@@ -118,15 +53,6 @@ open class ZipEntry: JavaObject {
   @JavaMethod
   open func setCompressedSize(_ arg0: Int64)
 
-  /// Java method `setCrc`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.zip.ZipEntry.setCrc(long)
-  /// ```
-  @JavaMethod
-  open func setCrc(_ arg0: Int64)
-
   /// Java method `getCrc`.
   ///
   /// ### Java method signature
@@ -136,23 +62,23 @@ open class ZipEntry: JavaObject {
   @JavaMethod
   open func getCrc() -> Int64
 
-  /// Java method `setMethod`.
+  /// Java method `setCrc`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.util.zip.ZipEntry.setMethod(int)
+  /// public void java.util.zip.ZipEntry.setCrc(long)
   /// ```
   @JavaMethod
-  open func setMethod(_ arg0: Int32)
+  open func setCrc(_ arg0: Int64)
 
-  /// Java method `setExtra`.
+  /// Java method `isDirectory`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.util.zip.ZipEntry.setExtra(byte[])
+  /// public boolean java.util.zip.ZipEntry.isDirectory()
   /// ```
   @JavaMethod
-  open func setExtra(_ arg0: [Int8])
+  open func isDirectory() -> Bool
 
   /// Java method `getExtra`.
   ///
@@ -163,28 +89,102 @@ open class ZipEntry: JavaObject {
   @JavaMethod
   open func getExtra() -> [Int8]
 
-  /// Java method `setComment`.
+  /// Java method `setExtra`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.util.zip.ZipEntry.setComment(java.lang.String)
+  /// public void java.util.zip.ZipEntry.setExtra(byte[])
   /// ```
   @JavaMethod
-  open func setComment(_ arg0: String)
+  open func setExtra(_ arg0: [Int8])
 
-  /// Java method `getComment`.
+  /// Java method `getMethod`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.String java.util.zip.ZipEntry.getComment()
+  /// public int java.util.zip.ZipEntry.getMethod()
   /// ```
   @JavaMethod
-  open func getComment() -> String
-}
-extension JavaClass<ZipEntry> {
-  @JavaStaticField(isFinal: true)
-  public var STORED: Int32
+  open func getMethod() -> Int32
 
-  @JavaStaticField(isFinal: true)
-  public var DEFLATED: Int32
+  /// Java method `setMethod`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setMethod(int)
+  /// ```
+  @JavaMethod
+  open func setMethod(_ arg0: Int32)
+
+  /// Java method `getName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.zip.ZipEntry.getName()
+  /// ```
+  @JavaMethod
+  open func getName() -> String
+
+  /// Java method `getSize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.util.zip.ZipEntry.getSize()
+  /// ```
+  @JavaMethod
+  open func getSize() -> Int64
+
+  /// Java method `setSize`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setSize(long)
+  /// ```
+  @JavaMethod
+  open func setSize(_ arg0: Int64)
+
+  /// Java method `getTime`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public long java.util.zip.ZipEntry.getTime()
+  /// ```
+  @JavaMethod
+  open func getTime() -> Int64
+
+  /// Java method `setTime`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.zip.ZipEntry.setTime(long)
+  /// ```
+  @JavaMethod
+  open func setTime(_ arg0: Int64)
+
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.zip.ZipEntry.clone()
+  /// ```
+  @JavaMethod
+  open override func clone() -> JavaObject!
+
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.util.zip.ZipEntry.hashCode()
+  /// ```
+  @JavaMethod
+  open override func hashCode() -> Int32
+
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.util.zip.ZipEntry.toString()
+  /// ```
+  @JavaMethod
+  open override func toString() -> String
 }

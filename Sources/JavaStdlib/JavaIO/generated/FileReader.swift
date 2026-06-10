@@ -5,17 +5,17 @@ import SwiftJavaJNICore
 @JavaClass("java.io.FileReader")
 open class FileReader: InputStreamReader {
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: File?, _ arg1: Charset?, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: File?, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: String, _ arg1: Charset?, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: File?, _ arg1: Charset?, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: FileDescriptor?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: File?, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: String, _ arg1: Charset?, environment: JNIEnvironment? = nil) throws
 }

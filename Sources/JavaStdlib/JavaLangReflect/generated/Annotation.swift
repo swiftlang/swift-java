@@ -4,6 +4,15 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.annotation.Annotation")
 public struct Annotation {
+  /// Java method `annotationType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.Class<? extends java.lang.annotation.Annotation> java.lang.annotation.Annotation.annotationType()
+  /// ```
+  @JavaMethod
+  public func annotationType() -> JavaClass<Annotation>!
+
   /// Java method `equals`.
   ///
   /// ### Java method signature
@@ -12,15 +21,6 @@ public struct Annotation {
   /// ```
   @JavaMethod
   public func equals(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `toString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.String java.lang.annotation.Annotation.toString()
-  /// ```
-  @JavaMethod
-  public func toString() -> String
 
   /// Java method `hashCode`.
   ///
@@ -31,12 +31,12 @@ public struct Annotation {
   @JavaMethod
   public func hashCode() -> Int32
 
-  /// Java method `annotationType`.
+  /// Java method `toString`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract java.lang.Class<? extends java.lang.annotation.Annotation> java.lang.annotation.Annotation.annotationType()
+  /// public abstract java.lang.String java.lang.annotation.Annotation.toString()
   /// ```
   @JavaMethod
-  public func annotationType() -> JavaClass<Annotation>!
+  public func toString() -> String
 }

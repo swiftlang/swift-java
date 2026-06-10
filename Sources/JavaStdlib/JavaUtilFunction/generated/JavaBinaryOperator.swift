@@ -6,15 +6,6 @@ import SwiftJavaJNICore
 public struct JavaBinaryOperator<JavaBinaryOperator_T: AnyJavaObject> {
   public typealias T = JavaBinaryOperator_T
 
-  /// Java method `apply`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract R java.util.function.BiFunction.apply(T,U)
-  /// ```
-  @JavaMethod(typeErasedResult: "T!")
-  public func apply(_ arg0: T?, _ arg1: T?) -> T!
-
   /// Java method `andThen`.
   ///
   /// ### Java method signature
@@ -23,4 +14,13 @@ public struct JavaBinaryOperator<JavaBinaryOperator_T: AnyJavaObject> {
   /// ```
   @JavaMethod
   public func andThen<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, V>?) -> JavaBiFunction<T, T, V>!
+
+  /// Java method `apply`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract R java.util.function.BiFunction.apply(T,U)
+  /// ```
+  @JavaMethod(typeErasedResult: "T!")
+  public func apply(_ arg0: T?, _ arg1: T?) -> T!
 }

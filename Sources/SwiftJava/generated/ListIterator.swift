@@ -5,15 +5,6 @@ import SwiftJavaJNICore
 public struct ListIterator<ListIterator_E: AnyJavaObject> {
   public typealias E = ListIterator_E
 
-  /// Java method `remove`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract void java.util.ListIterator.remove()
-  /// ```
-  @JavaMethod
-  public func remove()
-
   /// Java method `add`.
   ///
   /// ### Java method signature
@@ -32,6 +23,15 @@ public struct ListIterator<ListIterator_E: AnyJavaObject> {
   @JavaMethod
   public func hasNext() -> Bool
 
+  /// Java method `hasPrevious`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.ListIterator.hasPrevious()
+  /// ```
+  @JavaMethod
+  public func hasPrevious() -> Bool
+
   /// Java method `next`.
   ///
   /// ### Java method signature
@@ -40,15 +40,6 @@ public struct ListIterator<ListIterator_E: AnyJavaObject> {
   /// ```
   @JavaMethod(typeErasedResult: "E!")
   public func next() -> E!
-
-  /// Java method `set`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract void java.util.ListIterator.set(E)
-  /// ```
-  @JavaMethod
-  public func set(_ arg0: E?)
 
   /// Java method `nextIndex`.
   ///
@@ -59,6 +50,15 @@ public struct ListIterator<ListIterator_E: AnyJavaObject> {
   @JavaMethod
   public func nextIndex() -> Int32
 
+  /// Java method `previous`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract E java.util.ListIterator.previous()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  public func previous() -> E!
+
   /// Java method `previousIndex`.
   ///
   /// ### Java method signature
@@ -68,21 +68,21 @@ public struct ListIterator<ListIterator_E: AnyJavaObject> {
   @JavaMethod
   public func previousIndex() -> Int32
 
-  /// Java method `hasPrevious`.
+  /// Java method `remove`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract boolean java.util.ListIterator.hasPrevious()
+  /// public abstract void java.util.ListIterator.remove()
   /// ```
   @JavaMethod
-  public func hasPrevious() -> Bool
+  public func remove()
 
-  /// Java method `previous`.
+  /// Java method `set`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract E java.util.ListIterator.previous()
+  /// public abstract void java.util.ListIterator.set(E)
   /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  public func previous() -> E!
+  @JavaMethod
+  public func set(_ arg0: E?)
 }

@@ -4,69 +4,6 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.reflect.Method")
 open class Method: Executable {
-  /// Java method `invoke`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object,java.lang.Object...) throws java.lang.IllegalAccessException,java.lang.reflect.InvocationTargetException
-  /// ```
-  @JavaMethod
-  open func invoke(_ arg0: JavaObject?, _ arg1: [JavaObject?]) throws -> JavaObject!
-
-  /// Java method `getName`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.reflect.Method.getName()
-  /// ```
-  @JavaMethod
-  open override func getName() -> String
-
-  /// Java method `equals`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Method.equals(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open override func equals(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `toString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.reflect.Method.toString()
-  /// ```
-  @JavaMethod
-  open override func toString() -> String
-
-  /// Java method `hashCode`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Method.hashCode()
-  /// ```
-  @JavaMethod
-  open override func hashCode() -> Int32
-
-  /// Java method `getModifiers`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Method.getModifiers()
-  /// ```
-  @JavaMethod
-  open override func getModifiers() -> Int32
-
-  /// Java method `getTypeParameters`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.TypeVariable<java.lang.reflect.Method>[] java.lang.reflect.Method.getTypeParameters()
-  /// ```
-  @JavaMethod
-  open func getTypeParameters() -> [TypeVariable<Method>?]
-
   /// Java method `setAccessible`.
   ///
   /// ### Java method signature
@@ -76,50 +13,14 @@ open class Method: Executable {
   @JavaMethod
   open override func setAccessible(_ arg0: Bool)
 
-  /// Java method `getReturnType`.
+  /// Java method `getAnnotatedReturnType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.Class<?> java.lang.reflect.Method.getReturnType()
+  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Method.getAnnotatedReturnType()
   /// ```
   @JavaMethod
-  open func getReturnType() -> JavaClass<JavaObject>!
-
-  /// Java method `getParameterTypes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Class<?>[] java.lang.reflect.Method.getParameterTypes()
-  /// ```
-  @JavaMethod
-  open override func getParameterTypes() -> [JavaClass<JavaObject>?]
-
-  /// Java method `toGenericString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.reflect.Method.toGenericString()
-  /// ```
-  @JavaMethod
-  open override func toGenericString() -> String
-
-  /// Java method `isSynthetic`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Method.isSynthetic()
-  /// ```
-  @JavaMethod
-  open override func isSynthetic() -> Bool
-
-  /// Java method `getDeclaringClass`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Class<?> java.lang.reflect.Method.getDeclaringClass()
-  /// ```
-  @JavaMethod
-  open override func getDeclaringClass() -> JavaClass<JavaObject>!
+  open override func getAnnotatedReturnType() -> AnnotatedType!
 
   /// Java method `getAnnotation`.
   ///
@@ -130,6 +31,15 @@ open class Method: Executable {
   @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   open override func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
+  /// Java method `isBridge`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Method.isBridge()
+  /// ```
+  @JavaMethod
+  open func isBridge() -> Bool
+
   /// Java method `getDeclaredAnnotations`.
   ///
   /// ### Java method signature
@@ -139,50 +49,14 @@ open class Method: Executable {
   @JavaMethod
   open override func getDeclaredAnnotations() -> [Annotation?]
 
-  /// Java method `isVarArgs`.
+  /// Java method `getDeclaringClass`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.lang.reflect.Method.isVarArgs()
+  /// public java.lang.Class<?> java.lang.reflect.Method.getDeclaringClass()
   /// ```
   @JavaMethod
-  open override func isVarArgs() -> Bool
-
-  /// Java method `getParameterCount`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Method.getParameterCount()
-  /// ```
-  @JavaMethod
-  open override func getParameterCount() -> Int32
-
-  /// Java method `getParameterAnnotations`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.annotation.Annotation[][] java.lang.reflect.Method.getParameterAnnotations()
-  /// ```
-  @JavaMethod
-  open override func getParameterAnnotations() -> [[Annotation?]]
-
-  /// Java method `getGenericParameterTypes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.Type[] java.lang.reflect.Method.getGenericParameterTypes()
-  /// ```
-  @JavaMethod
-  open override func getGenericParameterTypes() -> [Type?]
-
-  /// Java method `getGenericExceptionTypes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.Type[] java.lang.reflect.Method.getGenericExceptionTypes()
-  /// ```
-  @JavaMethod
-  open override func getGenericExceptionTypes() -> [Type?]
+  open override func getDeclaringClass() -> JavaClass<JavaObject>!
 
   /// Java method `isDefault`.
   ///
@@ -193,14 +67,14 @@ open class Method: Executable {
   @JavaMethod
   open func isDefault() -> Bool
 
-  /// Java method `getGenericReturnType`.
+  /// Java method `getDefaultValue`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.reflect.Type java.lang.reflect.Method.getGenericReturnType()
+  /// public java.lang.Object java.lang.reflect.Method.getDefaultValue()
   /// ```
   @JavaMethod
-  open func getGenericReturnType() -> Type!
+  open func getDefaultValue() -> JavaObject!
 
   /// Java method `getExceptionTypes`.
   ///
@@ -211,30 +85,156 @@ open class Method: Executable {
   @JavaMethod
   open override func getExceptionTypes() -> [JavaClass<JavaObject>?]
 
-  /// Java method `isBridge`.
+  /// Java method `getGenericExceptionTypes`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.lang.reflect.Method.isBridge()
+  /// public java.lang.reflect.Type[] java.lang.reflect.Method.getGenericExceptionTypes()
   /// ```
   @JavaMethod
-  open func isBridge() -> Bool
+  open override func getGenericExceptionTypes() -> [Type?]
 
-  /// Java method `getDefaultValue`.
+  /// Java method `getGenericParameterTypes`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.Object java.lang.reflect.Method.getDefaultValue()
+  /// public java.lang.reflect.Type[] java.lang.reflect.Method.getGenericParameterTypes()
   /// ```
   @JavaMethod
-  open func getDefaultValue() -> JavaObject!
+  open override func getGenericParameterTypes() -> [Type?]
 
-  /// Java method `getAnnotatedReturnType`.
+  /// Java method `getGenericReturnType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Method.getAnnotatedReturnType()
+  /// public java.lang.reflect.Type java.lang.reflect.Method.getGenericReturnType()
   /// ```
   @JavaMethod
-  open override func getAnnotatedReturnType() -> AnnotatedType!
+  open func getGenericReturnType() -> Type!
+
+  /// Java method `invoke`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object,java.lang.Object...) throws java.lang.IllegalAccessException,java.lang.reflect.InvocationTargetException
+  /// ```
+  @JavaMethod
+  open func invoke(_ arg0: JavaObject?, _ arg1: [JavaObject?]) throws -> JavaObject!
+
+  /// Java method `getModifiers`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Method.getModifiers()
+  /// ```
+  @JavaMethod
+  open override func getModifiers() -> Int32
+
+  /// Java method `getName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Method.getName()
+  /// ```
+  @JavaMethod
+  open override func getName() -> String
+
+  /// Java method `getParameterAnnotations`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.annotation.Annotation[][] java.lang.reflect.Method.getParameterAnnotations()
+  /// ```
+  @JavaMethod
+  open override func getParameterAnnotations() -> [[Annotation?]]
+
+  /// Java method `getParameterCount`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Method.getParameterCount()
+  /// ```
+  @JavaMethod
+  open override func getParameterCount() -> Int32
+
+  /// Java method `getParameterTypes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Class<?>[] java.lang.reflect.Method.getParameterTypes()
+  /// ```
+  @JavaMethod
+  open override func getParameterTypes() -> [JavaClass<JavaObject>?]
+
+  /// Java method `getReturnType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Class<?> java.lang.reflect.Method.getReturnType()
+  /// ```
+  @JavaMethod
+  open func getReturnType() -> JavaClass<JavaObject>!
+
+  /// Java method `isSynthetic`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Method.isSynthetic()
+  /// ```
+  @JavaMethod
+  open override func isSynthetic() -> Bool
+
+  /// Java method `toGenericString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Method.toGenericString()
+  /// ```
+  @JavaMethod
+  open override func toGenericString() -> String
+
+  /// Java method `getTypeParameters`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.reflect.TypeVariable<java.lang.reflect.Method>[] java.lang.reflect.Method.getTypeParameters()
+  /// ```
+  @JavaMethod
+  open func getTypeParameters() -> [TypeVariable<Method>?]
+
+  /// Java method `isVarArgs`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Method.isVarArgs()
+  /// ```
+  @JavaMethod
+  open override func isVarArgs() -> Bool
+
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Method.equals(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open override func equals(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Method.hashCode()
+  /// ```
+  @JavaMethod
+  open override func hashCode() -> Int32
+
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Method.toString()
+  /// ```
+  @JavaMethod
+  open override func toString() -> String
 }

@@ -2,6 +2,16 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass<FileDescriptor> {
+  @JavaStaticField(isFinal: true)
+  public var err: FileDescriptor!
+
+  @JavaStaticField("in", isFinal: true)
+  public var `in`: FileDescriptor!
+
+  @JavaStaticField(isFinal: true)
+  public var out: FileDescriptor!
+}
 @JavaClass("java.io.FileDescriptor")
 open class FileDescriptor: JavaObject {
   @JavaMethod
@@ -24,14 +34,4 @@ open class FileDescriptor: JavaObject {
   /// ```
   @JavaMethod
   open func valid() -> Bool
-}
-extension JavaClass<FileDescriptor> {
-  @JavaStaticField("in", isFinal: true)
-  public var `in`: FileDescriptor!
-
-  @JavaStaticField(isFinal: true)
-  public var out: FileDescriptor!
-
-  @JavaStaticField(isFinal: true)
-  public var err: FileDescriptor!
 }

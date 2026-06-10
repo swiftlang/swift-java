@@ -2,9 +2,22 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass {
+  /// Java method `newHashSet`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <T> java.util.HashSet<T> java.util.HashSet.newHashSet(int)
+  /// ```
+  @JavaStaticMethod
+  public func newHashSet<E: AnyJavaObject, T: AnyJavaObject>(_ arg0: Int32) -> HashSet<T>! where ObjectType == HashSet<E>
+}
 @JavaClass("java.util.HashSet", implements: JavaSet<JavaObject>.self)
 open class HashSet<HashSet_E: AnyJavaObject>: JavaObject {
   public typealias E = HashSet_E
+
+  @JavaMethod
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
@@ -15,8 +28,50 @@ open class HashSet<HashSet_E: AnyJavaObject>: JavaObject {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
 
+  /// Java method `add`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashSet.add(E)
+  /// ```
   @JavaMethod
-  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+  open func add(_ arg0: E?) -> Bool
+
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.HashSet.clear()
+  /// ```
+  @JavaMethod
+  open func clear()
+
+  /// Java method `contains`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashSet.contains(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func contains(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.HashSet.isEmpty()
+  /// ```
+  @JavaMethod
+  open func isEmpty() -> Bool
+
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.HashSet.iterator()
+  /// ```
+  @JavaMethod
+  open func iterator() -> JavaIterator<E>!
 
   /// Java method `remove`.
   ///
@@ -36,42 +91,6 @@ open class HashSet<HashSet_E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func size() -> Int32
 
-  /// Java method `clone`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object java.util.HashSet.clone()
-  /// ```
-  @JavaMethod
-  open override func clone() -> JavaObject!
-
-  /// Java method `clear`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.HashSet.clear()
-  /// ```
-  @JavaMethod
-  open func clear()
-
-  /// Java method `isEmpty`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.HashSet.isEmpty()
-  /// ```
-  @JavaMethod
-  open func isEmpty() -> Bool
-
-  /// Java method `add`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.HashSet.add(E)
-  /// ```
-  @JavaMethod
-  open func add(_ arg0: E?) -> Bool
-
   /// Java method `toArray`.
   ///
   /// ### Java method signature
@@ -90,31 +109,12 @@ open class HashSet<HashSet_E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func toArray() -> [JavaObject?]
 
-  /// Java method `iterator`.
+  /// Java method `clone`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.util.Iterator<E> java.util.HashSet.iterator()
+  /// public java.lang.Object java.util.HashSet.clone()
   /// ```
   @JavaMethod
-  open func iterator() -> JavaIterator<E>!
-
-  /// Java method `contains`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.HashSet.contains(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open func contains(_ arg0: JavaObject?) -> Bool
-}
-extension JavaClass {
-  /// Java method `newHashSet`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static <T> java.util.HashSet<T> java.util.HashSet.newHashSet(int)
-  /// ```
-  @JavaStaticMethod
-  public func newHashSet<E: AnyJavaObject, T: AnyJavaObject>(_ arg0: Int32) -> HashSet<T>! where ObjectType == HashSet<E>
+  open override func clone() -> JavaObject!
 }

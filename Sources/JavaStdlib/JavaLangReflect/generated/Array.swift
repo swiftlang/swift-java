@@ -2,29 +2,7 @@
 import SwiftJava
 import SwiftJavaJNICore
 
-@JavaClass("java.lang.reflect.Array")
-open class Array: JavaObject {
-
-}
 extension JavaClass<Array> {
-  /// Java method `get`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static native java.lang.Object java.lang.reflect.Array.get(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
-  /// ```
-  @JavaStaticMethod
-  public func get(_ arg0: JavaObject?, _ arg1: Int32) throws -> JavaObject!
-
-  /// Java method `getLength`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static native int java.lang.reflect.Array.getLength(java.lang.Object) throws java.lang.IllegalArgumentException
-  /// ```
-  @JavaStaticMethod
-  public func getLength(_ arg0: JavaObject?) throws -> Int32
-
   /// Java method `getBoolean`.
   ///
   /// ### Java method signature
@@ -33,6 +11,15 @@ extension JavaClass<Array> {
   /// ```
   @JavaStaticMethod
   public func getBoolean(_ arg0: JavaObject?, _ arg1: Int32) throws -> Bool
+
+  /// Java method `setBoolean`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native void java.lang.reflect.Array.setBoolean(java.lang.Object,int,boolean) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// ```
+  @JavaStaticMethod
+  public func setBoolean(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Bool) throws
 
   /// Java method `getByte`.
   ///
@@ -43,14 +30,14 @@ extension JavaClass<Array> {
   @JavaStaticMethod
   public func getByte(_ arg0: JavaObject?, _ arg1: Int32) throws -> Int8
 
-  /// Java method `getShort`.
+  /// Java method `setByte`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public static native short java.lang.reflect.Array.getShort(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// public static native void java.lang.reflect.Array.setByte(java.lang.Object,int,byte) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
   /// ```
   @JavaStaticMethod
-  public func getShort(_ arg0: JavaObject?, _ arg1: Int32) throws -> Int16
+  public func setByte(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Int8) throws
 
   /// Java method `getChar`.
   ///
@@ -61,23 +48,32 @@ extension JavaClass<Array> {
   @JavaStaticMethod
   public func getChar(_ arg0: JavaObject?, _ arg1: Int32) throws -> UInt16
 
-  /// Java method `getInt`.
+  /// Java method `setChar`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public static native int java.lang.reflect.Array.getInt(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// public static native void java.lang.reflect.Array.setChar(java.lang.Object,int,char) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
   /// ```
   @JavaStaticMethod
-  public func getInt(_ arg0: JavaObject?, _ arg1: Int32) throws -> Int32
+  public func setChar(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: UInt16) throws
 
-  /// Java method `getLong`.
+  /// Java method `getDouble`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public static native long java.lang.reflect.Array.getLong(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// public static native double java.lang.reflect.Array.getDouble(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
   /// ```
   @JavaStaticMethod
-  public func getLong(_ arg0: JavaObject?, _ arg1: Int32) throws -> Int64
+  public func getDouble(_ arg0: JavaObject?, _ arg1: Int32) throws -> Double
+
+  /// Java method `setDouble`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native void java.lang.reflect.Array.setDouble(java.lang.Object,int,double) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// ```
+  @JavaStaticMethod
+  public func setDouble(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Double) throws
 
   /// Java method `getFloat`.
   ///
@@ -88,14 +84,68 @@ extension JavaClass<Array> {
   @JavaStaticMethod
   public func getFloat(_ arg0: JavaObject?, _ arg1: Int32) throws -> Float
 
-  /// Java method `getDouble`.
+  /// Java method `setFloat`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public static native double java.lang.reflect.Array.getDouble(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// public static native void java.lang.reflect.Array.setFloat(java.lang.Object,int,float) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
   /// ```
   @JavaStaticMethod
-  public func getDouble(_ arg0: JavaObject?, _ arg1: Int32) throws -> Double
+  public func setFloat(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Float) throws
+
+  /// Java method `get`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native java.lang.Object java.lang.reflect.Array.get(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// ```
+  @JavaStaticMethod
+  public func get(_ arg0: JavaObject?, _ arg1: Int32) throws -> JavaObject!
+
+  /// Java method `getInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native int java.lang.reflect.Array.getInt(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// ```
+  @JavaStaticMethod
+  public func getInt(_ arg0: JavaObject?, _ arg1: Int32) throws -> Int32
+
+  /// Java method `setInt`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native void java.lang.reflect.Array.setInt(java.lang.Object,int,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// ```
+  @JavaStaticMethod
+  public func setInt(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Int32) throws
+
+  /// Java method `getLength`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native int java.lang.reflect.Array.getLength(java.lang.Object) throws java.lang.IllegalArgumentException
+  /// ```
+  @JavaStaticMethod
+  public func getLength(_ arg0: JavaObject?) throws -> Int32
+
+  /// Java method `getLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native long java.lang.reflect.Array.getLong(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// ```
+  @JavaStaticMethod
+  public func getLong(_ arg0: JavaObject?, _ arg1: Int32) throws -> Int64
+
+  /// Java method `setLong`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static native void java.lang.reflect.Array.setLong(java.lang.Object,int,long) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// ```
+  @JavaStaticMethod
+  public func setLong(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Int64) throws
 
   /// Java method `newInstance`.
   ///
@@ -124,32 +174,14 @@ extension JavaClass<Array> {
   @JavaStaticMethod
   public func set(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: JavaObject?) throws
 
-  /// Java method `setBoolean`.
+  /// Java method `getShort`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public static native void java.lang.reflect.Array.setBoolean(java.lang.Object,int,boolean) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
+  /// public static native short java.lang.reflect.Array.getShort(java.lang.Object,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
   /// ```
   @JavaStaticMethod
-  public func setBoolean(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Bool) throws
-
-  /// Java method `setByte`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static native void java.lang.reflect.Array.setByte(java.lang.Object,int,byte) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
-  /// ```
-  @JavaStaticMethod
-  public func setByte(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Int8) throws
-
-  /// Java method `setChar`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static native void java.lang.reflect.Array.setChar(java.lang.Object,int,char) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
-  /// ```
-  @JavaStaticMethod
-  public func setChar(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: UInt16) throws
+  public func getShort(_ arg0: JavaObject?, _ arg1: Int32) throws -> Int16
 
   /// Java method `setShort`.
   ///
@@ -159,40 +191,8 @@ extension JavaClass<Array> {
   /// ```
   @JavaStaticMethod
   public func setShort(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Int16) throws
+}
+@JavaClass("java.lang.reflect.Array")
+open class Array: JavaObject {
 
-  /// Java method `setInt`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static native void java.lang.reflect.Array.setInt(java.lang.Object,int,int) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
-  /// ```
-  @JavaStaticMethod
-  public func setInt(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Int32) throws
-
-  /// Java method `setLong`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static native void java.lang.reflect.Array.setLong(java.lang.Object,int,long) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
-  /// ```
-  @JavaStaticMethod
-  public func setLong(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Int64) throws
-
-  /// Java method `setFloat`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static native void java.lang.reflect.Array.setFloat(java.lang.Object,int,float) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
-  /// ```
-  @JavaStaticMethod
-  public func setFloat(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Float) throws
-
-  /// Java method `setDouble`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static native void java.lang.reflect.Array.setDouble(java.lang.Object,int,double) throws java.lang.IllegalArgumentException,java.lang.ArrayIndexOutOfBoundsException
-  /// ```
-  @JavaStaticMethod
-  public func setDouble(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Double) throws
 }

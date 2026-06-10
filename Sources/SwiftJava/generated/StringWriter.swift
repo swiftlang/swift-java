@@ -9,24 +9,6 @@ open class StringWriter: Writer {
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: Int32, environment: JNIEnvironment? = nil)
 
-  /// Java method `toString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.io.StringWriter.toString()
-  /// ```
-  @JavaMethod
-  open override func toString() -> String
-
-  /// Java method `append`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.io.StringWriter java.io.StringWriter.append(java.lang.CharSequence,int,int)
-  /// ```
-  @JavaMethod
-  open override func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) -> StringWriter!
-
   /// Java method `append`.
   ///
   /// ### Java method signature
@@ -44,6 +26,24 @@ open class StringWriter: Writer {
   /// ```
   @JavaMethod
   open override func append(_ arg0: CharSequence?) -> StringWriter!
+
+  /// Java method `append`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.io.StringWriter java.io.StringWriter.append(java.lang.CharSequence,int,int)
+  /// ```
+  @JavaMethod
+  open override func append(_ arg0: CharSequence?, _ arg1: Int32, _ arg2: Int32) -> StringWriter!
+
+  /// Java method `close`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.io.StringWriter.close() throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open override func close() throws
 
   /// Java method `flush`.
   ///
@@ -67,10 +67,10 @@ open class StringWriter: Writer {
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.io.StringWriter.write(java.lang.String,int,int)
+  /// public void java.io.StringWriter.write(int)
   /// ```
   @JavaMethod
-  open override func write(_ arg0: String, _ arg1: Int32, _ arg2: Int32)
+  open override func write(_ arg0: Int32)
 
   /// Java method `write`.
   ///
@@ -85,17 +85,17 @@ open class StringWriter: Writer {
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.io.StringWriter.write(int)
+  /// public void java.io.StringWriter.write(java.lang.String,int,int)
   /// ```
   @JavaMethod
-  open override func write(_ arg0: Int32)
+  open override func write(_ arg0: String, _ arg1: Int32, _ arg2: Int32)
 
-  /// Java method `close`.
+  /// Java method `toString`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public void java.io.StringWriter.close() throws java.io.IOException
+  /// public java.lang.String java.io.StringWriter.toString()
   /// ```
   @JavaMethod
-  open override func close() throws
+  open override func toString() -> String
 }

@@ -5,13 +5,76 @@ import SwiftJavaJNICore
 @JavaClass("java.util.jar.Manifest")
 open class Manifest: JavaObject {
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: Manifest?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: InputStream?, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: Manifest?, environment: JNIEnvironment? = nil)
+
+  /// Java method `getAttributes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.jar.Attributes java.util.jar.Manifest.getAttributes(java.lang.String)
+  /// ```
+  @JavaMethod
+  open func getAttributes(_ arg0: String) -> Attributes!
+
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.jar.Manifest.clear()
+  /// ```
+  @JavaMethod
+  open func clear()
+
+  /// Java method `getEntries`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Map<java.lang.String, java.util.jar.Attributes> java.util.jar.Manifest.getEntries()
+  /// ```
+  @JavaMethod
+  open func getEntries() -> JavaMap<JavaString, Attributes>!
+
+  /// Java method `getMainAttributes`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.jar.Attributes java.util.jar.Manifest.getMainAttributes()
+  /// ```
+  @JavaMethod
+  open func getMainAttributes() -> Attributes!
+
+  /// Java method `read`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.jar.Manifest.read(java.io.InputStream) throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func read(_ arg0: InputStream?) throws
+
+  /// Java method `write`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.jar.Manifest.write(java.io.OutputStream) throws java.io.IOException
+  /// ```
+  @JavaMethod
+  open func write(_ arg0: OutputStream?) throws
+
+  /// Java method `clone`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Object java.util.jar.Manifest.clone()
+  /// ```
+  @JavaMethod
+  open override func clone() -> JavaObject!
 
   /// Java method `equals`.
   ///
@@ -30,58 +93,4 @@ open class Manifest: JavaObject {
   /// ```
   @JavaMethod
   open override func hashCode() -> Int32
-
-  /// Java method `clone`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object java.util.jar.Manifest.clone()
-  /// ```
-  @JavaMethod
-  open override func clone() -> JavaObject!
-
-  /// Java method `clear`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.jar.Manifest.clear()
-  /// ```
-  @JavaMethod
-  open func clear()
-
-  /// Java method `write`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.jar.Manifest.write(java.io.OutputStream) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func write(_ arg0: OutputStream?) throws
-
-  /// Java method `read`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.jar.Manifest.read(java.io.InputStream) throws java.io.IOException
-  /// ```
-  @JavaMethod
-  open func read(_ arg0: InputStream?) throws
-
-  /// Java method `getMainAttributes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.jar.Attributes java.util.jar.Manifest.getMainAttributes()
-  /// ```
-  @JavaMethod
-  open func getMainAttributes() -> Attributes!
-
-  /// Java method `getAttributes`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.jar.Attributes java.util.jar.Manifest.getAttributes(java.lang.String)
-  /// ```
-  @JavaMethod
-  open func getAttributes(_ arg0: String) -> Attributes!
 }

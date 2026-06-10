@@ -7,64 +7,10 @@ open class TreeSet<TreeSet_E: AnyJavaObject>: JavaObject {
   public typealias E = TreeSet_E
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
-
-  @JavaMethod
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
-  /// Java method `remove`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.TreeSet.remove(java.lang.Object)
-  /// ```
   @JavaMethod
-  open func remove(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `size`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.util.TreeSet.size()
-  /// ```
-  @JavaMethod
-  open func size() -> Int32
-
-  /// Java method `clone`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.Object java.util.TreeSet.clone()
-  /// ```
-  @JavaMethod
-  open override func clone() -> JavaObject!
-
-  /// Java method `floor`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.TreeSet.floor(E)
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func floor(_ arg0: E?) -> E!
-
-  /// Java method `clear`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public void java.util.TreeSet.clear()
-  /// ```
-  @JavaMethod
-  open func clear()
-
-  /// Java method `isEmpty`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.TreeSet.isEmpty()
-  /// ```
-  @JavaMethod
-  open func isEmpty() -> Bool
+  @_nonoverride public convenience init(_ arg0: JavaCollection<E>?, environment: JNIEnvironment? = nil)
 
   /// Java method `add`.
   ///
@@ -75,33 +21,6 @@ open class TreeSet<TreeSet_E: AnyJavaObject>: JavaObject {
   @JavaMethod
   open func add(_ arg0: E?) -> Bool
 
-  /// Java method `iterator`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.util.Iterator<E> java.util.TreeSet.iterator()
-  /// ```
-  @JavaMethod
-  open func iterator() -> JavaIterator<E>!
-
-  /// Java method `contains`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.util.TreeSet.contains(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open func contains(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `last`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.TreeSet.last()
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func last() -> E!
-
   /// Java method `addAll`.
   ///
   /// ### Java method signature
@@ -110,15 +29,6 @@ open class TreeSet<TreeSet_E: AnyJavaObject>: JavaObject {
   /// ```
   @JavaMethod
   open func addAll(_ arg0: JavaCollection<E>?) -> Bool
-
-  /// Java method `first`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public E java.util.TreeSet.first()
-  /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func first() -> E!
 
   /// Java method `addFirst`.
   ///
@@ -137,6 +47,96 @@ open class TreeSet<TreeSet_E: AnyJavaObject>: JavaObject {
   /// ```
   @JavaMethod
   open func addLast(_ arg0: E?)
+
+  /// Java method `ceiling`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.TreeSet.ceiling(E)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func ceiling(_ arg0: E?) -> E!
+
+  /// Java method `clear`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public void java.util.TreeSet.clear()
+  /// ```
+  @JavaMethod
+  open func clear()
+
+  /// Java method `contains`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.TreeSet.contains(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open func contains(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `descendingIterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.TreeSet.descendingIterator()
+  /// ```
+  @JavaMethod
+  open func descendingIterator() -> JavaIterator<E>!
+
+  /// Java method `isEmpty`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.util.TreeSet.isEmpty()
+  /// ```
+  @JavaMethod
+  open func isEmpty() -> Bool
+
+  /// Java method `first`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.TreeSet.first()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func first() -> E!
+
+  /// Java method `floor`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.TreeSet.floor(E)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func floor(_ arg0: E?) -> E!
+
+  /// Java method `higher`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.TreeSet.higher(E)
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func higher(_ arg0: E?) -> E!
+
+  /// Java method `iterator`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.util.Iterator<E> java.util.TreeSet.iterator()
+  /// ```
+  @JavaMethod
+  open func iterator() -> JavaIterator<E>!
+
+  /// Java method `last`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public E java.util.TreeSet.last()
+  /// ```
+  @JavaMethod(typeErasedResult: "E!")
+  open func last() -> E!
 
   /// Java method `lower`.
   ///
@@ -165,30 +165,30 @@ open class TreeSet<TreeSet_E: AnyJavaObject>: JavaObject {
   @JavaMethod(typeErasedResult: "E!")
   open func pollLast() -> E!
 
-  /// Java method `descendingIterator`.
+  /// Java method `remove`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.util.Iterator<E> java.util.TreeSet.descendingIterator()
+  /// public boolean java.util.TreeSet.remove(java.lang.Object)
   /// ```
   @JavaMethod
-  open func descendingIterator() -> JavaIterator<E>!
+  open func remove(_ arg0: JavaObject?) -> Bool
 
-  /// Java method `ceiling`.
+  /// Java method `size`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public E java.util.TreeSet.ceiling(E)
+  /// public int java.util.TreeSet.size()
   /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func ceiling(_ arg0: E?) -> E!
+  @JavaMethod
+  open func size() -> Int32
 
-  /// Java method `higher`.
+  /// Java method `clone`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public E java.util.TreeSet.higher(E)
+  /// public java.lang.Object java.util.TreeSet.clone()
   /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func higher(_ arg0: E?) -> E!
+  @JavaMethod
+  open override func clone() -> JavaObject!
 }

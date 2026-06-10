@@ -4,59 +4,14 @@ import SwiftJavaJNICore
 
 @JavaClass("java.lang.reflect.Parameter")
 open class Parameter: JavaObject {
-  /// Java method `getName`.
+  /// Java method `getAnnotatedType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.String java.lang.reflect.Parameter.getName()
+  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Parameter.getAnnotatedType()
   /// ```
   @JavaMethod
-  open func getName() -> String
-
-  /// Java method `equals`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Parameter.equals(java.lang.Object)
-  /// ```
-  @JavaMethod
-  open override func equals(_ arg0: JavaObject?) -> Bool
-
-  /// Java method `toString`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.String java.lang.reflect.Parameter.toString()
-  /// ```
-  @JavaMethod
-  open override func toString() -> String
-
-  /// Java method `hashCode`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Parameter.hashCode()
-  /// ```
-  @JavaMethod
-  open override func hashCode() -> Int32
-
-  /// Java method `getModifiers`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public int java.lang.reflect.Parameter.getModifiers()
-  /// ```
-  @JavaMethod
-  open func getModifiers() -> Int32
-
-  /// Java method `isSynthetic`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Parameter.isSynthetic()
-  /// ```
-  @JavaMethod
-  open func isSynthetic() -> Bool
+  open func getAnnotatedType() -> AnnotatedType!
 
   /// Java method `getAnnotation`.
   ///
@@ -67,15 +22,6 @@ open class Parameter: JavaObject {
   @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   open func getAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
-  /// Java method `getAnnotationsByType`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public <T extends java.lang.annotation.Annotation> T[] java.lang.reflect.Parameter.getAnnotationsByType(java.lang.Class<T>)
-  /// ```
-  @JavaMethod
-  open func getAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
-
   /// Java method `getAnnotations`.
   ///
   /// ### Java method signature
@@ -84,6 +30,15 @@ open class Parameter: JavaObject {
   /// ```
   @JavaMethod
   open func getAnnotations() -> [Annotation?]
+
+  /// Java method `getAnnotationsByType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public <T extends java.lang.annotation.Annotation> T[] java.lang.reflect.Parameter.getAnnotationsByType(java.lang.Class<T>)
+  /// ```
+  @JavaMethod
+  open func getAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
 
   /// Java method `getDeclaredAnnotation`.
   ///
@@ -94,15 +49,6 @@ open class Parameter: JavaObject {
   @JavaMethod(typeErasedResult: "T!", typeErasedResultBound: Annotation?.self)
   open func getDeclaredAnnotation<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> T!
 
-  /// Java method `getDeclaredAnnotationsByType`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public <T extends java.lang.annotation.Annotation> T[] java.lang.reflect.Parameter.getDeclaredAnnotationsByType(java.lang.Class<T>)
-  /// ```
-  @JavaMethod
-  open func getDeclaredAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
-
   /// Java method `getDeclaredAnnotations`.
   ///
   /// ### Java method signature
@@ -112,41 +58,14 @@ open class Parameter: JavaObject {
   @JavaMethod
   open func getDeclaredAnnotations() -> [Annotation?]
 
-  /// Java method `getType`.
+  /// Java method `getDeclaredAnnotationsByType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public java.lang.Class<?> java.lang.reflect.Parameter.getType()
+  /// public <T extends java.lang.annotation.Annotation> T[] java.lang.reflect.Parameter.getDeclaredAnnotationsByType(java.lang.Class<T>)
   /// ```
   @JavaMethod
-  open func getType() -> JavaClass<JavaObject>!
-
-  /// Java method `getAnnotatedType`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.AnnotatedType java.lang.reflect.Parameter.getAnnotatedType()
-  /// ```
-  @JavaMethod
-  open func getAnnotatedType() -> AnnotatedType!
-
-  /// Java method `getParameterizedType`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public java.lang.reflect.Type java.lang.reflect.Parameter.getParameterizedType()
-  /// ```
-  @JavaMethod
-  open func getParameterizedType() -> Type!
-
-  /// Java method `isVarArgs`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public boolean java.lang.reflect.Parameter.isVarArgs()
-  /// ```
-  @JavaMethod
-  open func isVarArgs() -> Bool
+  open func getDeclaredAnnotationsByType<T: AnyJavaObject>(_ arg0: JavaClass<T>?) -> [T?]
 
   /// Java method `getDeclaringExecutable`.
   ///
@@ -157,6 +76,33 @@ open class Parameter: JavaObject {
   @JavaMethod
   open func getDeclaringExecutable() -> Executable!
 
+  /// Java method `isImplicit`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Parameter.isImplicit()
+  /// ```
+  @JavaMethod
+  open func isImplicit() -> Bool
+
+  /// Java method `getModifiers`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Parameter.getModifiers()
+  /// ```
+  @JavaMethod
+  open func getModifiers() -> Int32
+
+  /// Java method `getName`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Parameter.getName()
+  /// ```
+  @JavaMethod
+  open func getName() -> String
+
   /// Java method `isNamePresent`.
   ///
   /// ### Java method signature
@@ -166,12 +112,66 @@ open class Parameter: JavaObject {
   @JavaMethod
   open func isNamePresent() -> Bool
 
-  /// Java method `isImplicit`.
+  /// Java method `getParameterizedType`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public boolean java.lang.reflect.Parameter.isImplicit()
+  /// public java.lang.reflect.Type java.lang.reflect.Parameter.getParameterizedType()
   /// ```
   @JavaMethod
-  open func isImplicit() -> Bool
+  open func getParameterizedType() -> Type!
+
+  /// Java method `isSynthetic`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Parameter.isSynthetic()
+  /// ```
+  @JavaMethod
+  open func isSynthetic() -> Bool
+
+  /// Java method `getType`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.Class<?> java.lang.reflect.Parameter.getType()
+  /// ```
+  @JavaMethod
+  open func getType() -> JavaClass<JavaObject>!
+
+  /// Java method `isVarArgs`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Parameter.isVarArgs()
+  /// ```
+  @JavaMethod
+  open func isVarArgs() -> Bool
+
+  /// Java method `equals`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public boolean java.lang.reflect.Parameter.equals(java.lang.Object)
+  /// ```
+  @JavaMethod
+  open override func equals(_ arg0: JavaObject?) -> Bool
+
+  /// Java method `hashCode`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public int java.lang.reflect.Parameter.hashCode()
+  /// ```
+  @JavaMethod
+  open override func hashCode() -> Int32
+
+  /// Java method `toString`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public java.lang.String java.lang.reflect.Parameter.toString()
+  /// ```
+  @JavaMethod
+  open override func toString() -> String
 }

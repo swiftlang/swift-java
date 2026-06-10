@@ -2,46 +2,6 @@
 import SwiftJava
 import SwiftJavaJNICore
 
-@JavaInterface("java.util.function.Predicate")
-public struct JavaPredicate<JavaPredicate_T: AnyJavaObject> {
-  public typealias T = JavaPredicate_T
-
-  /// Java method `test`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract boolean java.util.function.Predicate.test(T)
-  /// ```
-  @JavaMethod
-  public func test(_ arg0: T?) -> Bool
-
-  /// Java method `or`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default java.util.function.Predicate<T> java.util.function.Predicate.or(java.util.function.Predicate<? super T>)
-  /// ```
-  @JavaMethod
-  public func or(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<T>!
-
-  /// Java method `negate`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default java.util.function.Predicate<T> java.util.function.Predicate.negate()
-  /// ```
-  @JavaMethod
-  public func negate() -> JavaPredicate<T>!
-
-  /// Java method `and`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default java.util.function.Predicate<T> java.util.function.Predicate.and(java.util.function.Predicate<? super T>)
-  /// ```
-  @JavaMethod
-  public func and(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<T>!
-}
 extension JavaClass {
   /// Java method `isEqual`.
   ///
@@ -60,4 +20,44 @@ extension JavaClass {
   /// ```
   @JavaStaticMethod
   public func not<T: AnyJavaObject>(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<T>! where ObjectType == JavaPredicate<T>
+}
+@JavaInterface("java.util.function.Predicate")
+public struct JavaPredicate<JavaPredicate_T: AnyJavaObject> {
+  public typealias T = JavaPredicate_T
+
+  /// Java method `and`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.Predicate<T> java.util.function.Predicate.and(java.util.function.Predicate<? super T>)
+  /// ```
+  @JavaMethod
+  public func and(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<T>!
+
+  /// Java method `negate`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.Predicate<T> java.util.function.Predicate.negate()
+  /// ```
+  @JavaMethod
+  public func negate() -> JavaPredicate<T>!
+
+  /// Java method `or`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default java.util.function.Predicate<T> java.util.function.Predicate.or(java.util.function.Predicate<? super T>)
+  /// ```
+  @JavaMethod
+  public func or(_ arg0: JavaPredicate<JavaObject>?) -> JavaPredicate<T>!
+
+  /// Java method `test`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.function.Predicate.test(T)
+  /// ```
+  @JavaMethod
+  public func test(_ arg0: T?) -> Bool
 }

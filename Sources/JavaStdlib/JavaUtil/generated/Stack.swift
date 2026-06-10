@@ -27,14 +27,14 @@ open class Stack<Stack_E: AnyJavaObject>: JavaObject {
   @JavaMethod(typeErasedResult: "E!")
   open func peek() -> E!
 
-  /// Java method `search`.
+  /// Java method `pop`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public synchronized int java.util.Stack.search(java.lang.Object)
+  /// public synchronized E java.util.Stack.pop()
   /// ```
-  @JavaMethod
-  open func search(_ arg0: JavaObject?) -> Int32
+  @JavaMethod(typeErasedResult: "E!")
+  open func pop() -> E!
 
   /// Java method `push`.
   ///
@@ -45,12 +45,12 @@ open class Stack<Stack_E: AnyJavaObject>: JavaObject {
   @JavaMethod(typeErasedResult: "E!")
   open func push(_ arg0: E?) -> E!
 
-  /// Java method `pop`.
+  /// Java method `search`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public synchronized E java.util.Stack.pop()
+  /// public synchronized int java.util.Stack.search(java.lang.Object)
   /// ```
-  @JavaMethod(typeErasedResult: "E!")
-  open func pop() -> E!
+  @JavaMethod
+  open func search(_ arg0: JavaObject?) -> Int32
 }

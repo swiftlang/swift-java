@@ -2,11 +2,30 @@
 import SwiftJava
 import SwiftJavaJNICore
 
+extension JavaClass {
+  /// Java method `identity`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public static <T> java.util.function.Function<T, T> java.util.function.Function.identity()
+  /// ```
+  @JavaStaticMethod
+  public func identity<T: AnyJavaObject, R: AnyJavaObject>() -> JavaFunction<T, T>! where ObjectType == JavaFunction<T, R>
+}
 @JavaInterface("java.util.function.Function")
 public struct JavaFunction<JavaFunction_T: AnyJavaObject, JavaFunction_R: AnyJavaObject> {
   public typealias T = JavaFunction_T
 
   public typealias R = JavaFunction_R
+
+  /// Java method `andThen`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public default <V> java.util.function.Function<T, V> java.util.function.Function.andThen(java.util.function.Function<? super R, ? extends V>)
+  /// ```
+  @JavaMethod
+  public func andThen<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, V>?) -> JavaFunction<T, V>!
 
   /// Java method `apply`.
   ///
@@ -25,23 +44,4 @@ public struct JavaFunction<JavaFunction_T: AnyJavaObject, JavaFunction_R: AnyJav
   /// ```
   @JavaMethod
   public func compose<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, T>?) -> JavaFunction<V, R>!
-
-  /// Java method `andThen`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default <V> java.util.function.Function<T, V> java.util.function.Function.andThen(java.util.function.Function<? super R, ? extends V>)
-  /// ```
-  @JavaMethod
-  public func andThen<V: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, V>?) -> JavaFunction<T, V>!
-}
-extension JavaClass {
-  /// Java method `identity`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public static <T> java.util.function.Function<T, T> java.util.function.Function.identity()
-  /// ```
-  @JavaStaticMethod
-  public func identity<T: AnyJavaObject, R: AnyJavaObject>() -> JavaFunction<T, T>! where ObjectType == JavaFunction<T, R>
 }

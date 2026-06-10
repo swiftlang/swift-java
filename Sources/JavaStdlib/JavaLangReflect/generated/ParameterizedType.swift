@@ -4,6 +4,15 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.reflect.ParameterizedType", extends: Type.self)
 public struct ParameterizedType {
+  /// Java method `getActualTypeArguments`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.reflect.Type[] java.lang.reflect.ParameterizedType.getActualTypeArguments()
+  /// ```
+  @JavaMethod
+  public func getActualTypeArguments() -> [Type?]
+
   /// Java method `getOwnerType`.
   ///
   /// ### Java method signature
@@ -21,15 +30,6 @@ public struct ParameterizedType {
   /// ```
   @JavaMethod
   public func getRawType() -> Type!
-
-  /// Java method `getActualTypeArguments`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.reflect.Type[] java.lang.reflect.ParameterizedType.getActualTypeArguments()
-  /// ```
-  @JavaMethod
-  public func getActualTypeArguments() -> [Type?]
 
   /// Java method `getTypeName`.
   ///

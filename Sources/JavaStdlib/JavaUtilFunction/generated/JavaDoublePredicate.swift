@@ -4,23 +4,14 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.util.function.DoublePredicate")
 public struct JavaDoublePredicate {
-  /// Java method `test`.
+  /// Java method `and`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract boolean java.util.function.DoublePredicate.test(double)
+  /// public default java.util.function.DoublePredicate java.util.function.DoublePredicate.and(java.util.function.DoublePredicate)
   /// ```
   @JavaMethod
-  public func test(_ arg0: Double) -> Bool
-
-  /// Java method `or`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public default java.util.function.DoublePredicate java.util.function.DoublePredicate.or(java.util.function.DoublePredicate)
-  /// ```
-  @JavaMethod
-  public func or(_ arg0: JavaDoublePredicate?) -> JavaDoublePredicate!
+  public func and(_ arg0: JavaDoublePredicate?) -> JavaDoublePredicate!
 
   /// Java method `negate`.
   ///
@@ -31,12 +22,21 @@ public struct JavaDoublePredicate {
   @JavaMethod
   public func negate() -> JavaDoublePredicate!
 
-  /// Java method `and`.
+  /// Java method `or`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public default java.util.function.DoublePredicate java.util.function.DoublePredicate.and(java.util.function.DoublePredicate)
+  /// public default java.util.function.DoublePredicate java.util.function.DoublePredicate.or(java.util.function.DoublePredicate)
   /// ```
   @JavaMethod
-  public func and(_ arg0: JavaDoublePredicate?) -> JavaDoublePredicate!
+  public func or(_ arg0: JavaDoublePredicate?) -> JavaDoublePredicate!
+
+  /// Java method `test`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract boolean java.util.function.DoublePredicate.test(double)
+  /// ```
+  @JavaMethod
+  public func test(_ arg0: Double) -> Bool
 }

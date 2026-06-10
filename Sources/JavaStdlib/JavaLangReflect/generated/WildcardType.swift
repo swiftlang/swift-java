@@ -4,15 +4,6 @@ import SwiftJavaJNICore
 
 @JavaInterface("java.lang.reflect.WildcardType", extends: Type.self)
 public struct WildcardType {
-  /// Java method `getUpperBounds`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()
-  /// ```
-  @JavaMethod
-  public func getUpperBounds() -> [Type?]
-
   /// Java method `getLowerBounds`.
   ///
   /// ### Java method signature
@@ -30,4 +21,13 @@ public struct WildcardType {
   /// ```
   @JavaMethod
   public func getTypeName() -> String
+
+  /// Java method `getUpperBounds`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()
+  /// ```
+  @JavaMethod
+  public func getUpperBounds() -> [Type?]
 }

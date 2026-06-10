@@ -4,15 +4,6 @@ import SwiftJavaJNICore
 
 @JavaInterface("org.swift.swiftkit.core.SwiftInstance")
 public struct JavaSwiftInstance {
-  /// Java method `$memoryAddress`.
-  ///
-  /// ### Java method signature
-  /// ```java
-  /// public abstract long org.swift.swiftkit.core.SwiftInstance.$memoryAddress()
-  /// ```
-  @JavaMethod("$memoryAddress")
-  public func _memoryAddress() -> Int64
-
   /// Java method `$ensureAlive`.
   ///
   /// ### Java method signature
@@ -21,4 +12,13 @@ public struct JavaSwiftInstance {
   /// ```
   @JavaMethod("$ensureAlive")
   public func _ensureAlive()
+
+  /// Java method `$memoryAddress`.
+  ///
+  /// ### Java method signature
+  /// ```java
+  /// public abstract long org.swift.swiftkit.core.SwiftInstance.$memoryAddress()
+  /// ```
+  @JavaMethod("$memoryAddress")
+  public func _memoryAddress() -> Int64
 }
