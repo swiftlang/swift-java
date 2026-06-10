@@ -29,12 +29,12 @@ jobs:
     name: Documentation check
     runs-on: ubuntu-latest
     container:
-      image: 'swift:6.3-jammy'
+      image: 'swift:6.3-noble'
     strategy:
       fail-fast: true
       matrix:
         swift_version: ['6.3']
-        os_version: ['jammy']
+        os_version: ['noble']
         jdk_vendor: ['corretto']
     steps:
       - uses: actions/checkout@v6
@@ -62,7 +62,7 @@ jobs:
       fail-fast: true
       matrix:
         swift_version: ['6.3', 'nightly']
-        os_version: ['jammy']
+        os_version: ['noble']
         jdk_vendor: ['corretto']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
@@ -112,7 +112,7 @@ jobs:
       fail-fast: true
       matrix:
         swift_version: ['6.3']
-        os_version: ['jammy']
+        os_version: ['noble']
         jdk_vendor: ['corretto']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
@@ -132,7 +132,7 @@ jobs:
       fail-fast: true
       matrix:
         swift_version: ['6.3']
-        os_version: ['jammy']
+        os_version: ['noble']
         jdk_vendor: ['corretto']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
@@ -164,7 +164,7 @@ jobs:
       fail-fast: false
       matrix:
         swift_version: ['6.1.3', '6.3', 'nightly']
-        os_version: ['jammy']
+        os_version: ['noble']
         jdk_vendor: ['corretto']
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
@@ -224,7 +224,7 @@ jobs:
       fail-fast: false
       matrix:
         swift_version: ['6.3']
-        os_version: ['jammy']
+        os_version: ['noble']
         jdk_vendor: ['corretto']
         sdk_triple: ['aarch64-unknown-linux-android28', 'x86_64-unknown-linux-android28', 'armv7-unknown-linux-android28']
         ndk_version: ['r27d', 'r28c']
@@ -250,7 +250,7 @@ jobs:
       fail-fast: false
       matrix:
         swift_version: ['6.3']
-        os_version: ['jammy']
+        os_version: ['noble']
         jdk_vendor: ['corretto']
         sample_app: [  # TODO: use a reusable-workflow to generate those names
           'JavaDependencySampleApp',
@@ -319,14 +319,14 @@ jobs:
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
 
   linkage-test:
-    name: Linkage test (jammy swift:6.3)
+    name: Linkage test (noble swift:6.3)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         jdk_vendor: ['corretto']
     container:
-      image: swift:6.3-jammy
+      image: swift:6.3-noble
     steps:
       - uses: actions/checkout@v6
       - name: Prepare CI Environment
@@ -336,9 +336,9 @@ jobs:
         continue-on-error: true
         with:
           path: Tests/LinkageTest/.build
-          key: ${{ runner.os }}-swift6.3-jammy-build-linkage-${{ hashFiles('Tests/LinkageTest/Package.swift', 'Tests/LinkageTest/Package.resolved', 'Tests/LinkageTest/Sources/**/*.swift') }}
+          key: ${{ runner.os }}-swift6.3-noble-build-linkage-${{ hashFiles('Tests/LinkageTest/Package.swift', 'Tests/LinkageTest/Package.resolved', 'Tests/LinkageTest/Sources/**/*.swift') }}
           restore-keys: |
-            ${{ runner.os }}-swift6.3-jammy-build-linkage-
+            ${{ runner.os }}-swift6.3-noble-build-linkage-
       - name: Run linkage test
         run: ./scripts/run-linkage-test.sh
         env:
@@ -352,7 +352,7 @@ jobs:
       matrix:
         jdk_vendor: ['corretto']
     container:
-      image: swift:6.3-jammy
+      image: swift:6.3-noble
     steps:
       - uses: actions/checkout@v6
       - name: Mark workspace as safe for git
@@ -364,9 +364,9 @@ jobs:
         continue-on-error: true
         with:
           path: .build
-          key: ${{ runner.os }}-swift6.3-jammy-build-wrapjava-${{ hashFiles('Package.swift', 'Package.resolved', 'Sources/SwiftJavaTool/**/*.swift', 'Sources/SwiftJavaToolLib/**/*.swift', 'Sources/SwiftJava/**/*.swift') }}
+          key: ${{ runner.os }}-swift6.3-noble-build-wrapjava-${{ hashFiles('Package.swift', 'Package.resolved', 'Sources/SwiftJavaTool/**/*.swift', 'Sources/SwiftJavaToolLib/**/*.swift', 'Sources/SwiftJava/**/*.swift') }}
           restore-keys: |
-            ${{ runner.os }}-swift6.3-jammy-build-wrapjava-
+            ${{ runner.os }}-swift6.3-noble-build-wrapjava-
       - name: Regenerate JavaStdlib wrappers
         env:
           JAVA_HOME: ${{ env.JAVA_HOME_25 }}
