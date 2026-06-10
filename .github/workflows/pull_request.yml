@@ -29,7 +29,7 @@ jobs:
     name: Documentation check
     runs-on: ubuntu-latest
     container:
-      image: 'swift:6.3-noble'
+      image: 'swift:6.3-jammy'
     strategy:
       fail-fast: true
       matrix:
