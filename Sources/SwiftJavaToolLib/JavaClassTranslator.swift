@@ -371,11 +371,11 @@ extension JavaClassTranslator {
   /// Render the Swift declarations that will express this Java class in Swift.
   package func render() -> [DeclSyntax] {
     var allDecls: [DeclSyntax] = []
-    allDecls.append(renderPrimaryType())
-    allDecls.append(contentsOf: renderNestedClasses())
     if let staticMemberExtension = renderStaticMemberExtension() {
       allDecls.append(staticMemberExtension)
     }
+    allDecls.append(renderPrimaryType())
+    allDecls.append(contentsOf: renderNestedClasses())
     if let nativeMethodsProtocol = renderNativeMethodsProtocol() {
       allDecls.append(nativeMethodsProtocol)
     }
@@ -387,7 +387,7 @@ extension JavaClassTranslator {
   /// includes the constructors, non-static fields, and non-static methods.
   private func renderPrimaryType() -> DeclSyntax {
     // Render all of the instance fields as Swift properties.
-    let properties = fields.compactMap { field in
+    let properties = fields.sortedForEmission().compactMap { field in
       do {
         return try renderField(field)
       } catch {
@@ -402,7 +402,7 @@ extension JavaClassTranslator {
     let enumDecls: [DeclSyntax] = renderEnum(name: "\(swiftInnermostTypeName)Cases")
 
     // Render all of the constructors as Swift initializers.
-    let initializers = constructors.compactMap { constructor in
+    let initializers = constructors.sortedForEmission().compactMap { constructor in
       do {
         return try renderConstructor(constructor)
       } catch {
@@ -412,7 +412,7 @@ extension JavaClassTranslator {
     }
 
     // Render all of the instance methods in Swift.
-    let instanceMethods = methods.methods.compactMap { method in
+    let instanceMethods = methods.methods.sortedForEmission().compactMap { method in
       do {
         return try renderMethod(method, implementedInSwift: false)
       } catch {
@@ -432,7 +432,7 @@ extension JavaClassTranslator {
       }
 
     // Collect all of the members of this type.
-    let members = genericParameterTypeAliases + properties + enumDecls + initializers + instanceMethods
+    let members = genericParameterTypeAliases + initializers + properties + enumDecls + instanceMethods
 
     // Compute the "extends" clause for the superclass (of the struct
     // formulation) or the inheritance clause (for the class
@@ -540,7 +540,7 @@ extension JavaClassTranslator {
     }
 
     // Render static fields.
-    let properties = staticFields.compactMap { field in
+    let properties = staticFields.sortedForEmission().compactMap { field in
       // Translate each static field.
       do {
         return try renderField(field)
@@ -551,7 +551,7 @@ extension JavaClassTranslator {
     }
 
     // Render static methods.
-    let methods = staticMethods.methods.compactMap { method in
+    let methods = staticMethods.methods.sortedForEmission().compactMap { method in
       // Translate each static method.
       do {
         return try renderMethod(
@@ -600,7 +600,7 @@ extension JavaClassTranslator {
       return nil
     }
 
-    let nativeMembers = nativeMethods.compactMap { method in
+    let nativeMembers = nativeMethods.sortedForEmission().compactMap { method in
       do {
         return try renderMethod(
           method,
