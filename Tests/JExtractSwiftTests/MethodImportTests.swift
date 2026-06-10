@@ -668,6 +668,57 @@ final class MethodImportTests {
     )
   }
 
+  let overloadedInitializers_interfaceFile =
+    """
+    import Swift
+
+    public class OverloadedInitializerClass {
+      public init(throwing: Swift.Bool) throws
+      public init(doInit: Swift.Bool)
+    }
+    """
+
+  @Test(
+    "Overloaded initializers with same Java signature get suffixed Java names",
+    arguments: [
+      JExtractGenerationMode.jni, .ffm,
+    ]
+  )
+  func overloaded_initializers_suffixed(mode: JExtractGenerationMode) throws {
+    let expectedChunks: [String]
+    let notExpectedChunks: [String]
+
+    switch mode {
+    case .ffm:
+      expectedChunks = [
+        "public static OverloadedInitializerClass initThrowing(boolean throwing, AllocatingSwiftArena swiftArena)",
+        "public static OverloadedInitializerClass initDoInit(boolean doInit, AllocatingSwiftArena swiftArena)",
+      ]
+      notExpectedChunks = [
+        "public static OverloadedInitializerClass init(boolean throwing, AllocatingSwiftArena swiftArena)",
+        "public static OverloadedInitializerClass init(boolean doInit, AllocatingSwiftArena swiftArena)",
+      ]
+    case .jni:
+      expectedChunks = [
+        "public static OverloadedInitializerClass initThrowing(boolean throwing, SwiftArena swiftArena) throws Exception",
+        "public static OverloadedInitializerClass initDoInit(boolean doInit, SwiftArena swiftArena)",
+      ]
+      notExpectedChunks = [
+        "public static OverloadedInitializerClass init(boolean throwing, SwiftArena swiftArena)",
+        "public static OverloadedInitializerClass init(boolean doInit, SwiftArena swiftArena)",
+      ]
+    }
+
+    try assertOutput(
+      input: overloadedInitializers_interfaceFile,
+      mode,
+      .java,
+      swiftModuleName: "OverloadModule",
+      expectedChunks: expectedChunks,
+      notExpectedChunks: notExpectedChunks
+    )
+  }
+
   // ==== -------------------------------------------------------------------
   // MARK: JNI overloaded method disambiguation
 
@@ -776,4 +827,5 @@ final class MethodImportTests {
       ]
     )
   }
+
 }
