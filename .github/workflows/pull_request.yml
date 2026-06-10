@@ -40,6 +40,14 @@ jobs:
       - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
+      - name: Cache .build
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: .build
+          key: ${{ runner.os }}-swift${{ matrix.swift_version }}-${{ matrix.os_version }}-build-docs-${{ hashFiles('Package.swift', 'Package.resolved', 'Sources/**/*.swift', 'Plugins/**/*.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swift${{ matrix.swift_version }}-${{ matrix.os_version }}-build-docs-
       - name: Swift Build
         run: swift build --disable-experimental-prebuilts  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
       - name: Run documentation check
@@ -136,6 +144,14 @@ jobs:
         uses: ./.github/actions/prepare_env
       - name: Install jemalloc
         run: apt-get update && apt-get install -y libjemalloc-dev
+      - name: Cache Benchmarks/.build
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: Benchmarks/.build
+          key: ${{ runner.os }}-swift${{ matrix.swift_version }}-${{ matrix.os_version }}-build-benchmarks-${{ hashFiles('Benchmarks/Package.swift', 'Benchmarks/Package.resolved', 'Benchmarks/Benchmarks/**/*.swift', 'Benchmarks/Sources/**/*.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swift${{ matrix.swift_version }}-${{ matrix.os_version }}-build-benchmarks-
       - name: Swift Benchmarks
         run: swift package --package-path Benchmarks/ --disable-experimental-prebuilts benchmark  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
 
@@ -158,6 +174,14 @@ jobs:
       - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
+      - name: Cache .build
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: .build
+          key: ${{ runner.os }}-swift${{ matrix.swift_version }}-${{ matrix.os_version }}-build-test-${{ hashFiles('Package.swift', 'Package.resolved', 'Sources/**/*.swift', 'Plugins/**/*.swift', 'Tests/**/*.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swift${{ matrix.swift_version }}-${{ matrix.os_version }}-build-test-
       - name: Swift Build
         run: swift build --build-tests --disable-sandbox --disable-experimental-prebuilts  # FIXME: until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
       - name: Swift Test (XCTest)
@@ -307,6 +331,14 @@ jobs:
       - uses: actions/checkout@v6
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
+      - name: Cache Tests/LinkageTest/.build
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: Tests/LinkageTest/.build
+          key: ${{ runner.os }}-swift6.3-jammy-build-linkage-${{ hashFiles('Tests/LinkageTest/Package.swift', 'Tests/LinkageTest/Package.resolved', 'Tests/LinkageTest/Sources/**/*.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swift6.3-jammy-build-linkage-
       - name: Run linkage test
         run: ./scripts/run-linkage-test.sh
         env:
@@ -327,6 +359,14 @@ jobs:
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
+      - name: Cache .build
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: .build
+          key: ${{ runner.os }}-swift6.3-jammy-build-wrapjava-${{ hashFiles('Package.swift', 'Package.resolved', 'Sources/SwiftJavaTool/**/*.swift', 'Sources/SwiftJavaToolLib/**/*.swift', 'Sources/SwiftJava/**/*.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swift6.3-jammy-build-wrapjava-
       - name: Regenerate JavaStdlib wrappers
         env:
           JAVA_HOME: ${{ env.JAVA_HOME_25 }}
