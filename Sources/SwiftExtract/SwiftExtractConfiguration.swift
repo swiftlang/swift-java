@@ -53,13 +53,6 @@ public protocol SwiftExtractConfiguration {
   /// Minimum access level required for a declaration to be extracted.
   var swiftExtractAccessLevel: AccessLevelMode { get }
 
-  /// Whether operator declarations (e.g. `static func + (…)`) should be
-  /// extracted as ordinary `.function`s. Most targets (e.g. Java) cannot express
-  /// Swift operators and leave this `false`; other language code generators that
-  /// map operators to language constructs set it `true` and recognize the
-  /// operator functions in a post-analysis pass.
-  var extractsOperators: Bool { get }
-
   /// Verbosity for the analyzer's logger; `nil` falls back to `.info`.
   var swiftExtractLogLevel: Logger.Level? { get }
 
@@ -124,7 +117,6 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
   public var importedModuleStubs: [String: [String]]?
   public var swiftExtractAccessLevel: AccessLevelMode
   public var swiftExtractLogLevel: Logger.Level?
-  public var extractsOperators: Bool
   public var extractsGenericTypeInitializers: Bool
   public var availableImportModules: Set<String>
   public var permitsUnresolvedTypeReferences: Bool
@@ -133,7 +125,6 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     swiftModule: String? = nil,
     accessLevel: AccessLevelMode = .public,
     logLevel: Logger.Level? = nil,
-    extractsOperators: Bool = false,
     extractsGenericTypeInitializers: Bool = false,
     staticBuildConfigurationFile: String? = nil,
     swiftFilterInclude: [String]? = nil,
@@ -145,7 +136,6 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     self.swiftModule = swiftModule
     self.swiftExtractAccessLevel = accessLevel
     self.swiftExtractLogLevel = logLevel
-    self.extractsOperators = extractsOperators
     self.extractsGenericTypeInitializers = extractsGenericTypeInitializers
     self.staticBuildConfigurationFile = staticBuildConfigurationFile
     self.swiftFilterInclude = swiftFilterInclude

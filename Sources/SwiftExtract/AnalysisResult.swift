@@ -12,10 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// The complete analysis result of the analyzed Swift inputs.
+/// This is used as the primary input to source generators, which then act on the analyzed decls.
 public struct AnalysisResult {
-  public let extractedTypes: [String: ExtractedNominalType]
-  public let extractedGlobalVariables: [ExtractedFunc]
-  public let extractedGlobalFuncs: [ExtractedFunc]
+  public var extractedTypes: [String: ExtractedNominalType]
+  public var extractedGlobalVariables: [ExtractedFunc]
+  public var extractedGlobalFuncs: [ExtractedFunc]
 
   public init(
     extractedTypes: [String: ExtractedNominalType],

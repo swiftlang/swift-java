@@ -41,9 +41,7 @@ extension Configuration: SwiftExtractConfiguration {
     }
   }
 
-  // swift-java targets Java, which cannot express Swift operators or
-  // construct open generic types directly: leave both knobs off
-  public var extractsOperators: Bool { false }
+  // swift-java targets Java, which cannot construct open generic types directly
   public var extractsGenericTypeInitializers: Bool { false }
 }
 

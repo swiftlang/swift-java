@@ -14,20 +14,54 @@
 
 import SwiftSyntax
 
-/// A pluggable extraction decision for downstream language generators
+/// Per-decl extraction policy for a downstream language target
 ///
-/// The built-in analyzer always applies its access-level filter; a supplied
-/// `ExtractDecider` can override that decision on a per-decl basis to encode
-/// language-specific rules. For example, the Java target uses one to honor
-/// `@JavaExport` (force-include even when access-level would skip) and to
-/// skip Swift wrappers of Java types (`@JavaClass`, `@JavaInterface`, …)
+/// `SwiftExtract` itself is language-neutral and applies no extraction
+/// policy of its own beyond resolving the declaration. The decider is the
+/// single place that decides, for a given decl, whether the analyzer should
+/// import it. That covers the access-level filter, attribute rules
+/// (e.g. Java's `@JavaExport` / `@JavaClass` family), and target-specific
+/// quirks (e.g. skipping Swift operators when the language can't render
+/// them). When no decider is provided, the analyzer falls back to
+/// `DefaultExtractDecider`, which only enforces the configured access
+/// level
 public protocol ExtractDecider {
+  /// Decide whether `decl` should be extracted.
+  ///
   /// - Parameters:
   ///   - decl: the declaration being considered
-  ///   - accessLevelPasses: whether the analyzer's built-in access-level
-  ///     check admits the decl
-  /// - Returns: `true` to force-extract (even when `accessLevelPasses`
-  ///   is `false`), `false` to skip (even when `accessLevelPasses` is
-  ///   `true`), or `nil` to defer to the default behavior
-  func shouldExtract(decl: DeclSyntax, accessLevelPasses: Bool) -> Bool?
+  ///   - parent: the nominal type containing `decl`, when applicable
+  ///   - log: the analyzer's logger; deciders should emit a `.trace` line
+  ///     for each skip path so users can see why a decl was dropped
+  func shouldExtract(
+    decl: DeclSyntax,
+    in parent: ExtractedNominalType?,
+    log: Logger
+  ) -> Bool
+}
+
+/// Minimal `ExtractDecider` that enforces only the configured access-level
+/// filter. Used by `SwiftAnalyzer` when no decider is supplied
+public struct DefaultExtractDecider: ExtractDecider {
+  public let accessLevel: AccessLevelMode
+
+  public init(accessLevel: AccessLevelMode) {
+    self.accessLevel = accessLevel
+  }
+
+  public func shouldExtract(
+    decl: DeclSyntax,
+    in parent: ExtractedNominalType?,
+    log: Logger
+  ) -> Bool {
+    guard let mod = decl.asProtocol((any WithModifiersSyntax).self) else {
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': not a modifier-bearing decl")
+      return false
+    }
+    let ok = mod.passesAccessLevel(accessLevel, in: parent)
+    if !ok {
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': not at least \(accessLevel)")
+    }
+    return ok
+  }
 }

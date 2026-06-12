@@ -15,24 +15,57 @@
 import SwiftExtract
 import SwiftSyntax
 
-/// Java-specific extraction overrides applied on top of SwiftExtract's
-/// built-in access-level filter:
+/// Java-specific per-decl extraction policy
 ///
-/// - `@JavaExport` forces extraction even of non-public decls
-/// - `@JavaClass` / `@JavaInterface` / `@JavaField` / `@JavaStaticField` /
-///   `@JavaMethod` / `@JavaStaticMethod` / `@JavaImplementation` are Swift
-///   wrappers of Java types — skip them during extraction
+/// In addition to the configured access-level filter, the Java target:
+///
+/// - Force-extracts decls annotated `@JavaExport` even if they would
+///   otherwise be filtered by access level
+/// - Skips Swift wrappers of Java types (`@JavaClass`, `@JavaInterface`,
+///   `@JavaField`, `@JavaStaticField`, `@JavaMethod`, `@JavaStaticMethod`,
+///   `@JavaImplementation`) since those are bridged the other way
+/// - Skips Swift operators (`+`, `-`, prefix/postfix forms) — Java has no
+///   operator-overload syntax, so the generator can't render them
 public struct JavaExtractDecider: ExtractDecider {
-  public init() {}
+  public let accessLevel: AccessLevelMode
 
-  public func shouldExtract(decl: DeclSyntax, accessLevelPasses: Bool) -> Bool? {
-    let attrs = decl.asProtocol(WithAttributesSyntax.self)?.attributes
+  public init(accessLevel: AccessLevelMode = .default) {
+    self.accessLevel = accessLevel
+  }
+
+  public func shouldExtract(
+    decl: DeclSyntax,
+    in parent: ExtractedNominalType?,
+    log: Logger
+  ) -> Bool {
+    let attrs = decl.asProtocol((any WithAttributesSyntax).self)?.attributes
     if attrs?.contains(where: { $0.isJavaExport }) == true {
       return true
     }
     if attrs?.contains(where: { $0.isSwiftJavaMacro }) == true {
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': swift-java macro-wrapped Java type")
       return false
     }
-    return nil
+
+    // Swift operators have no Java mapping
+    if let fn = decl.as(FunctionDeclSyntax.self) {
+      switch fn.name.tokenKind {
+      case .binaryOperator, .prefixOperator, .postfixOperator:
+        log.trace("Skip '\(decl.qualifiedNameForDebug)': operators are not supported on Java")
+        return false
+      default:
+        break
+      }
+    }
+
+    guard let mod = decl.asProtocol((any WithModifiersSyntax).self) else {
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': not a modifier-bearing decl")
+      return false
+    }
+    let ok = mod.passesAccessLevel(accessLevel, in: parent)
+    if !ok {
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': not at least \(accessLevel)")
+    }
+    return ok
   }
 }

@@ -35,7 +35,10 @@ public struct SwiftToJava {
       fatalError("Missing '--swift-module' name.")
     }
 
-    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let translator = SwiftAnalyzer(
+      config: config,
+      extractDecider: JavaExtractDecider(accessLevel: config.swiftExtractAccessLevel),
+    )
     let log = translator.log
 
     if config.javaPackage == nil || config.javaPackage!.isEmpty {

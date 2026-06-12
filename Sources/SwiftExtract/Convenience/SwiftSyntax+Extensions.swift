@@ -121,11 +121,35 @@ extension WithModifiersSyntax {
       modifier.isAtLeastInternal
     }
   }
+
+  /// Whether this declaration's access level is at least `mode`. The `parent`
+  /// is consulted only by the `.public` mode (so e.g. members of a public
+  /// protocol are themselves treated as public).
+  public func passesAccessLevel(
+    _ mode: AccessLevelMode,
+    in parent: ExtractedNominalType?
+  ) -> Bool {
+    self.passesAccessLevel(mode, in: parent?.swiftNominal.syntax)
+  }
+
+  /// Lower-level overload taking the parent's syntax node directly. Used by
+  /// the analyzer; downstream `ExtractDecider`s use the `ExtractedNominalType`
+  /// overload above.
+  package func passesAccessLevel(
+    _ mode: AccessLevelMode,
+    in parent: NominalTypeDeclSyntaxNode?
+  ) -> Bool {
+    switch mode {
+    case .public: return self.isPublic(in: parent)
+    case .package: return self.isAtLeastPackage
+    case .internal: return self.isAtLeastInternal
+    }
+  }
 }
 
 extension DeclSyntaxProtocol {
   /// Find inner most "decl" node in ancestors.
-  package var ancestorDecl: DeclSyntax? {
+  public var ancestorDecl: DeclSyntax? {
     var node: Syntax = Syntax(self)
     while let parent = node.parent {
       if let decl = parent.as(DeclSyntax.self) {
@@ -137,7 +161,7 @@ extension DeclSyntaxProtocol {
   }
 
   /// Declaration name primarily for debugging.
-  package var nameForDebug: String {
+  public var nameForDebug: String {
     switch DeclSyntax(self).as(DeclSyntaxEnum.self) {
     case .accessorDecl(let node):
       node.accessorSpecifier.text
@@ -205,7 +229,7 @@ extension DeclSyntaxProtocol {
   }
 
   /// Qualified declaration name primarily for debugging.
-  package var qualifiedNameForDebug: String {
+  public var qualifiedNameForDebug: String {
     if let parent = ancestorDecl {
       parent.qualifiedNameForDebug + "." + nameForDebug
     } else {

@@ -27,8 +27,7 @@ public struct CodePrinter: Sendable {
   public var verbose: Bool = false
 
   /// When true, terminators of `.sloc` append a `// function @ file:line`
-  /// trailer to each line. Useful for debugging the generator (the default,
-  /// preserving long-standing behavior). Downstream targets that compare
+  /// trailer to each line. Useful for debugging the generator. Downstream targets that compare
   /// generated output against goldens can flip this off to get a clean
   /// terminator equivalent to `.newLine`.
   public var emitSourceLocations: Bool = true

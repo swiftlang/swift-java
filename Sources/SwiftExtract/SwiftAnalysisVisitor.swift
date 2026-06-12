@@ -183,20 +183,6 @@ final class SwiftAnalysisVisitor {
       return
     }
 
-    switch node.name.tokenKind {
-    case .binaryOperator, .prefixOperator, .postfixOperator:
-      // Operators are extracted as ordinary `.function`s only when the target
-      // opts in (other language code generators may map them to language
-      // constructs in a post-pass). Most targets (e.g. Java) cannot express
-      // Swift operators and skip them.
-      guard config.extractsOperators else {
-        self.log.debug("Skip importing: '\(node.qualifiedNameForDebug)'; Operators are not supported.")
-        return
-      }
-    default:
-      break
-    }
-
     self.log.debug("Import function: '\(node.qualifiedNameForDebug)'")
 
     let signature: SwiftFunctionSignature
@@ -722,38 +708,17 @@ final class SwiftAnalysisVisitor {
 extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyntax {
   /// Decide whether this declaration should be extracted
   ///
-  /// Built-in logic checks only the access level required by `config`. An
-  /// optional `decider` supplied by a downstream language target can override
-  /// the result on a per-decl basis (e.g. Java honors `@JavaExport` /
-  /// `@JavaClass` here)
+  /// Delegates entirely to the supplied `decider`, falling back to a
+  /// `DefaultExtractDecider` (access-level-only) when none was provided.
+  /// All per-decl policy lives in the decider — see `ExtractDecider`
   func shouldExtract(
     config: any SwiftExtractConfiguration,
     log: Logger,
     in parent: ExtractedNominalType?,
     decider: (any ExtractDecider)?
   ) -> Bool {
-    let accessLevelPasses: Bool =
-      switch config.swiftExtractAccessLevel {
-      case .public: self.isPublic(in: parent?.swiftNominal.syntax)
-      case .package: self.isAtLeastPackage
-      case .internal: self.isAtLeastInternal
-      }
-
-    if let override = decider?.shouldExtract(
-      decl: DeclSyntax(self),
-      accessLevelPasses: accessLevelPasses
-    ) {
-      if !override {
-        log.debug("Skip import '\(self.qualifiedNameForDebug)': decider rejected")
-      }
-      return override
-    }
-
-    if !accessLevelPasses {
-      log.debug(
-        "Skip import '\(self.qualifiedNameForDebug)': not at least \(config.swiftExtractAccessLevel)"
-      )
-    }
-    return accessLevelPasses
+    let effective: any ExtractDecider =
+      decider ?? DefaultExtractDecider(accessLevel: config.swiftExtractAccessLevel)
+    return effective.shouldExtract(decl: DeclSyntax(self), in: parent, log: log)
   }
 }
