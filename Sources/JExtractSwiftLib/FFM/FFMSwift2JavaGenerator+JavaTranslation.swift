@@ -518,7 +518,7 @@ extension FFMSwift2JavaGenerator {
         // Otherwise, not supported yet.
         throw JavaTranslationError.unhandledType(swiftType)
 
-      case .composite:
+      case .composite, .inlineArray:
         throw JavaTranslationError.unhandledType(swiftType)
       }
     }
@@ -816,7 +816,7 @@ extension FFMSwift2JavaGenerator {
           resultAnnotations: resultAnnotations
         )
 
-      case .genericParameter, .function, .existential, .opaque, .composite:
+      case .genericParameter, .function, .existential, .opaque, .composite, .inlineArray:
         throw JavaTranslationError.unhandledType(swiftType)
       }
 

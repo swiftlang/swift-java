@@ -407,6 +407,8 @@ extension SwiftAnalyzer {
         return check(ty)
       case .composite(let types):
         return types.contains(where: check)
+      case .inlineArray(_, let element):
+        return check(element)
       case .genericParameter:
         return false
       }

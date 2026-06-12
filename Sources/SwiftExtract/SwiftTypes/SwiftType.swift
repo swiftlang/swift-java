@@ -55,6 +55,12 @@ public enum SwiftType: Equatable {
   /// `type1` & `type2`
   indirect case composite([SwiftType])
 
+  /// `[N of T]` — fixed-size `InlineArray<N, T>`. `count` is `nil` when the
+  /// count is a wildcard `_`, a non-literal expression, or a non-positive
+  /// literal — downstream consumers treat these as unsupported and drop the
+  /// surrounding declaration.
+  indirect case inlineArray(count: Int?, element: SwiftType)
+
   public static var void: Self {
     .tuple([])
   }
@@ -63,7 +69,7 @@ public enum SwiftType: Equatable {
     switch self {
     case .nominal(let nominal): nominal
     case .tuple(let elements): elements.count == 1 ? elements[0].type.asNominalType : nil
-    case .genericParameter, .function, .metatype, .existential, .opaque, .composite: nil
+    case .genericParameter, .function, .metatype, .existential, .opaque, .composite, .inlineArray: nil
     }
   }
 
@@ -107,7 +113,7 @@ public enum SwiftType: Equatable {
       return nominal.nominalTypeDecl.isReferenceType
     case .metatype, .function:
       return true
-    case .genericParameter, .tuple, .existential, .opaque, .composite:
+    case .genericParameter, .tuple, .existential, .opaque, .composite, .inlineArray:
       return false
     }
   }
@@ -154,7 +160,7 @@ extension SwiftType: CustomStringConvertible {
   private var postfixRequiresParentheses: Bool {
     switch self {
     case .function, .existential, .opaque, .composite: true
-    case .genericParameter, .metatype, .nominal, .tuple: false
+    case .genericParameter, .metatype, .nominal, .tuple, .inlineArray: false
     }
   }
 
@@ -187,6 +193,9 @@ extension SwiftType: CustomStringConvertible {
       }
     case .composite(let types):
       return types.map(\.description).joined(separator: " & ")
+    case .inlineArray(let count, let element):
+      let countStr = count.map(String.init) ?? "_"
+      return "[\(countStr) of \(element)]"
     }
   }
 }
@@ -295,8 +304,35 @@ extension SwiftType {
     switch type.as(TypeSyntaxEnum.self) {
     case .classRestrictionType,
       .missingType, .namedOpaqueReturnType,
-      .packElementType, .packExpansionType, .suppressedType, .inlineArrayType:
+      .packElementType, .packExpansionType, .suppressedType:
       throw TypeTranslationError.unimplementedType(type)
+
+    case .inlineArrayType(let inlineArrayType):
+      // `[N of T]` — the element is a normal type argument; the count is an
+      // expression argument (always an integer literal in well-formed code,
+      // or `_` wildcard in generic constraints).
+      guard case .type(let elementTy) = inlineArrayType.element.argument else {
+        throw TypeTranslationError.unimplementedType(type)
+      }
+      let elementType = try SwiftType(elementTy, lookupContext: lookupContext)
+
+      let count: Int?
+      switch inlineArrayType.count.argument {
+      case .expr(let expr):
+        if let lit = expr.as(IntegerLiteralExprSyntax.self),
+          let value = lit.representedLiteralValue, value > 0
+        {
+          count = value
+        } else {
+          count = nil
+        }
+      case .type:
+        // Wildcard `_` or other non-literal type expression — preserved as
+        // unknown; downstream gates treat this as unsupported.
+        count = nil
+      }
+
+      self = .inlineArray(count: count, element: elementType)
 
     case .attributedType(let attributedType):
       // Recognize "@convention(c)", "@convention(swift)", and "@escaping" attributes on function types.
@@ -595,6 +631,11 @@ extension SwiftType {
       return .opaque(inner.substituting(genericParameters: substitutions))
     case .composite(let types):
       return .composite(types.map { $0.substituting(genericParameters: substitutions) })
+    case .inlineArray(let count, let element):
+      return .inlineArray(
+        count: count,
+        element: element.substituting(genericParameters: substitutions)
+      )
     }
   }
 

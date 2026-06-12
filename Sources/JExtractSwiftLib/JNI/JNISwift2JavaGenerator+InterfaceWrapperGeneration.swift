@@ -232,7 +232,7 @@ extension JNISwift2JavaGenerator {
       case .tuple([]): // void
         return .placeholder
 
-      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
+      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -259,7 +259,7 @@ extension JNISwift2JavaGenerator {
           )
         )
 
-      case .composite, .existential, .function, .genericParameter, .metatype, .opaque, .tuple:
+      case .composite, .existential, .function, .genericParameter, .metatype, .opaque, .tuple, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
       }
     }
@@ -315,7 +315,7 @@ extension JNISwift2JavaGenerator {
       case .tuple([]): // void
         return .placeholder
 
-      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
+      case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(type)
       }
     }
@@ -342,7 +342,7 @@ extension JNISwift2JavaGenerator {
           )
         )
 
-      case .composite, .existential, .function, .genericParameter, .metatype, .opaque, .tuple:
+      case .composite, .existential, .function, .genericParameter, .metatype, .opaque, .tuple, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
       }
     }
@@ -477,7 +477,7 @@ extension SwiftType {
         return false
       }
 
-    case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
+    case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite, .inlineArray:
       return false
     }
   }

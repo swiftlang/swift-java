@@ -576,7 +576,7 @@ extension JNISwift2JavaGenerator {
 
       case .tuple:
         throw JavaTranslationError.emptyTuple()
-      case .composite:
+      case .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -974,7 +974,7 @@ extension JNISwift2JavaGenerator {
           genericRequirements: genericRequirements,
         )
 
-      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
+      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -1107,7 +1107,7 @@ extension JNISwift2JavaGenerator {
         }
         return .tuple(elementTypes: elementJavaTypes)
 
-      case .metatype, .function, .existential, .opaque, .composite:
+      case .metatype, .function, .existential, .opaque, .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }

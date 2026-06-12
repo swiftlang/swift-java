@@ -73,7 +73,7 @@ extension CType {
     case .tuple([]):
       self = .void
 
-    case .genericParameter, .metatype, .tuple, .opaque, .existential, .composite:
+    case .genericParameter, .metatype, .tuple, .opaque, .existential, .composite, .inlineArray:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }
