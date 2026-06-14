@@ -101,12 +101,15 @@ extension SwiftObjects {
 
   @JavaMethod
   public static func equals(environment: UnsafeMutablePointer<JNIEnv?>!, lhsPointer: Int64, lhsTypePointer: Int64, rhsPointer: Int64, rhsTypePointer: Int64) -> Bool {
+    // Fallback for non-equatable types (such as classes)
+    let isEquatableByIdentity = lhsPointer == rhsPointer && lhsTypePointer == rhsTypePointer
+
     guard let lhsType$ = UnsafeRawPointer(bitPattern: Int(lhsTypePointer)) else {
       fatalError("lhsType metadata address was null")
     }
     let lhsMetatype = unsafeBitCast(lhsType$, to: Any.Type.self)
     guard let lhsMetatype = lhsMetatype as? (any Equatable.Type) else {
-      return false
+      return isEquatableByIdentity
     }
 
     guard let rhsType$ = UnsafeRawPointer(bitPattern: Int(rhsTypePointer)) else {
@@ -114,7 +117,7 @@ extension SwiftObjects {
     }
     let rhsMetatype = unsafeBitCast(rhsType$, to: Any.Type.self)
     guard let rhsMetatype = rhsMetatype as? (any Equatable.Type) else {
-      return false
+      return isEquatableByIdentity
     }
 
     func perform<L: Equatable, R: Equatable>(lhsType: L.Type, rhsType: R.Type) -> Bool {
