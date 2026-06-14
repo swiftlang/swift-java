@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,16 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftJavaJNICore
+import Observation
 
-extension JavaType {
+@Observable
+public class CounterModel {
+  public var count: Int64 = 0
 
-  /// A container for receiving Swift generic instances.
-  static var _OutSwiftGenericInstance: JavaType {
-    .class(package: "org.swift.swiftkit.core", name: "_OutSwiftGenericInstance")
+  public init() {}
+
+  public func increment() {
+    count += 1
   }
 
-  static var SwiftObserverCallback: JavaType {
-    .class(package: "org.swift.swiftkit.compose", name: "SwiftObserverCallback")
+  public func reset() {
+    count = 0
   }
 }

@@ -15,6 +15,12 @@
 
 pluginManagement {
     includeBuild("BuildLogic")
+    repositories {
+        gradlePluginPortal()
+        // Android Gradle Plugin (com.android.*) markers are published to Google's Maven.
+        google()
+        mavenCentral()
+    }
 }
 
 rootProject.name = "swift-java"
@@ -66,9 +72,40 @@ val ffmModules = setOf(
     "SwiftAndJavaJarFFMSampleLib",
 )
 
+// ==== -----------------------------------------------------------------------
+// MARK: Android SDK detection
+//
+// The Android Compose sample applies the Android Gradle Plugin, which requires
+// an Android SDK. Contributors without one (and most CI jobs) should still be
+// able to build everything else, so we exclude the sample when no SDK is found.
+//
+// Resolution order: ANDROID_HOME / ANDROID_SDK_ROOT env vars, then a sdk.dir
+// entry in local.properties.
+fun detectAndroidSdk(): Boolean {
+    val env = System.getenv()
+    if (listOf("ANDROID_HOME", "ANDROID_SDK_ROOT").any { env[it]?.let { dir -> File(dir).isDirectory } == true }) {
+        return true
+    }
+    val localProperties = File(rootDir, "local.properties")
+    if (localProperties.isFile) {
+        return localProperties.readLines().any { it.trim().startsWith("sdk.dir=") }
+    }
+    return false
+}
+
+val androidAvailable = detectAndroidSdk()
+
+// Samples that apply the Android Gradle Plugin.
+val androidModules = setOf(
+    "SwiftKitAndroidComposeSample",
+)
+
 val skipped = mutableListOf<String>()
 
 include("SwiftKitCore")
+// Kotlin + Compose helpers for the Swift @Observable bridge. Pure JVM (no Android
+// Gradle Plugin), so it builds on the same JDK matrix as SwiftKitCore.
+include("SwiftKitCompose")
 if (ffmCapable) {
     include("SwiftKitFFM")
 } else {
@@ -81,7 +118,9 @@ if (!(settings.providers.gradleProperty("skipSamples").orNull.toBoolean())) {
         if (it.isDirectory && (File(it, "build.gradle").exists() || File(it, "build.gradle.kts").exists())) {
             val name = it.name
             if (name in ffmModules && !ffmCapable) {
-                skipped += "Samples:$name"
+                skipped += "Samples:$name (needs JDK 22+ for FFM)"
+            } else if (name in androidModules && !androidAvailable) {
+                skipped += "Samples:$name (needs an Android SDK)"
             } else {
                 include(":Samples:$name")
             }
@@ -90,7 +129,7 @@ if (!(settings.providers.gradleProperty("skipSamples").orNull.toBoolean())) {
 }
 
 if (skipped.isNotEmpty()) {
-    println("[swift-java] JDK $swiftJavaJdk detected — skipping: ${skipped.joinToString(", ")}")
+    println("[swift-java] JDK $swiftJavaJdk, Android SDK ${if (androidAvailable) "available" else "absent"} — skipping: ${skipped.joinToString(", ")}")
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

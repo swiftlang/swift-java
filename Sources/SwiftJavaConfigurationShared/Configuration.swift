@@ -322,6 +322,12 @@ public struct Configuration: Codable {
   /// ```
   public var staticBuildConfigurationFile: String?
 
+  /// Enables support for backing Jetpack Compose UI with `@Observable` objects.
+  public var observableComposeBridging: Bool?
+  public var effectiveObservableComposeBridging: Bool {
+    observableComposeBridging ?? false
+  }
+
   // ==== wrap-java ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.
