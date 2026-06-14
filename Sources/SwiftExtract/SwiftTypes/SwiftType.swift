@@ -298,6 +298,14 @@ extension SwiftNominalType.Parent: CustomStringConvertible {
 }
 
 extension SwiftNominalType {
+  public var isSwiftJavaWrapper: Bool {
+    nominalTypeDecl.syntax.attributes.contains(where: \.isSwiftJavaMacro)
+  }
+
+  public var isObservable: Bool {
+    nominalTypeDecl.syntax.attributes.contains(where: \.isSwiftObservable)
+  }
+
   public var isProtocol: Bool {
     nominalTypeDecl.kind == .protocol
   }

@@ -339,6 +339,10 @@ extension JNISwift2JavaGenerator {
 
       printer.println()
 
+      if config.effectiveObservableComposeBridging, decl.isObservable {
+        printObservableSupport(&printer, decl)
+      }
+
       if decl.swiftNominal.kind == .enum {
         printEnumHelpers(&printer, decl)
         printer.println()
@@ -398,6 +402,62 @@ extension JNISwift2JavaGenerator {
     }
   }
 
+  private func printObservableSupport(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+    printer.print(
+      """
+      /** Pointer to the "Subscription" type that is observing changes to this object */
+      private long observerPointer;
+      
+      /** The count of how many are observing changes to this object */
+      private int observerCount;
+      """
+    )
+
+    for variable in decl.observableVariables {
+      printer.print("private final TrackingToken \(variable.observableTrackerName) = new TrackingToken();")
+    }
+
+    printer.println()
+
+    printer.print(
+      """
+      @Override
+      public void retainObserver() {
+        if (observerCount++ == 0) {
+          observerPointer = $observe(selfPointer, this);
+        }
+      }
+
+      @Override
+      public void releaseObserver() {
+        if (--observerCount == 0) {
+          $cancelObserve(observerPointer);
+          observerPointer = 0;
+        }
+      }
+      """
+    )
+
+    printer.println()
+
+    printer.printBraceBlock("@Override public void onPropertyChanged(int id)") { printer in
+      printer.printBraceBlock("switch (id)") { printer in
+        for (id, variable) in decl.observableVariables.enumerated() {
+          printer.print("case \(id) -> \(variable.observableTrackerName).invalidate();")
+        }
+      }
+    }
+
+    printer.println()
+
+    printer.print(
+      """
+      private static native long $observe(long selfPointer, SwiftObserverCallback cb);
+      private static native void $cancelObserve(long observerPointer);
+      """
+    )
+  }
+
   /// Prints helpers for specific types like `Foundation.Date`
   private func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     guard let knownType = decl.swiftNominal.knownTypeKind else { return }
@@ -437,6 +497,11 @@ extension JNISwift2JavaGenerator {
     for i in JNISwift2JavaGenerator.defaultJavaImports {
       printer.print("import \(i);")
     }
+
+    if config.effectiveObservableComposeBridging {
+      printer.print("import org.swift.swiftkit.compose.*;")
+    }
+
     printer.print("")
   }
 
@@ -454,6 +519,11 @@ extension JNISwift2JavaGenerator {
     }
     modifiers.append("final")
     var implements = ["JNISwiftInstance"]
+
+    if config.effectiveObservableComposeBridging, decl.isObservable {
+      implements += ["SwiftObservable", "SwiftObserverCallback"]
+    }
+
     implements += decl.inheritedTypes
       .compactMap(\.asNominalTypeDeclaration)
       .filter { $0.kind == .protocol }
@@ -799,10 +869,21 @@ extension JNISwift2JavaGenerator {
       printer.print("\(signature);")
     } else {
       printer.printBraceBlock(signature) { printer in
+        if let importedFunc {
+          printObservableTriggerIfNeeded(&printer, importedFunc)
+        }
         printDowncall(&printer, translatedDecl)
       }
 
       printNativeFunction(&printer, translatedDecl)
+    }
+  }
+
+  private func printObservableTriggerIfNeeded(_ printer: inout CodePrinter, _ importedFunc: ImportedFunc) {
+    guard let parentNominalType = importedFunc.parentType?.asNominalType else { return }
+
+    if config.effectiveObservableComposeBridging, importedFunc.isCandiateForObservation {
+      printer.print("\(importedFunc.observableTrackerName).observe();")
     }
   }
 

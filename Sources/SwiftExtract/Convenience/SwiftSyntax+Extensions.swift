@@ -145,6 +145,27 @@ extension WithModifiersSyntax {
     case .internal: return self.isAtLeastInternal
     }
   }
+  /// Whether this is a `@ObservationIgnored` type.
+  var isObservationIgnored: Bool {
+    guard case let .attribute(attr) = self else { return false }
+    guard let attrName = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text else { return false }
+    return attrName == "ObservationIgnored"
+  }
+
+  /// Whether this is a `@Observable` type.
+  var isSwiftObservable: Bool {
+    guard case let .attribute(attr) = self else { return false }
+    guard let attrName = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text else { return false }
+    return attrName == "Observable"
+  }
+
+  /// Whether this is a `@JavaExport` attribute (used on typealiases for specialization,
+  /// or on struct/class/enum to force-include them even when excluded by filters)
+  var isJavaExport: Bool {
+    guard case let .attribute(attr) = self else { return false }
+    guard let attrName = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text else { return false }
+    return attrName == "JavaExport"
+  }
 }
 
 extension DeclSyntaxProtocol {

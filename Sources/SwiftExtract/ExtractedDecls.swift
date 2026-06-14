@@ -77,7 +77,20 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
     !genericParameterNames.isEmpty && genericParameterNames.allSatisfy { genericArguments.keys.contains($0) }
   }
 
+<<<<<<< HEAD:Sources/SwiftExtract/ExtractedDecls.swift
   public init(swiftNominal: SwiftNominalTypeDeclaration, lookupContext: SwiftTypeLookupContext) throws {
+=======
+  var isObservable: Bool {
+    self.swiftNominal.asSwiftNominalType.isObservable
+  }
+
+  /// Variables that are observable if the parent is observable
+  var observableVariables: [ImportedFunc] {
+    self.variables.filter { $0.isCandiateForObservation }
+  }
+
+  init(swiftNominal: SwiftNominalTypeDeclaration, lookupContext: SwiftTypeLookupContext) throws {
+>>>>>>> 57646527 (wip):Sources/JExtractSwiftLib/ImportedDecls.swift
     self.swiftNominal = swiftNominal
     self.specializationBaseType = nil
     self.inheritedTypes =
@@ -402,6 +415,49 @@ extension ExtractedFunc: Hashable {
   }
   public static func == (lhs: ExtractedFunc, rhs: ExtractedFunc) -> Bool {
     lhs === rhs
+  }
+}
+
+extension ExtractedFunc {
+  var javaGetterName: String {
+    let returnsBoolean = self.functionSignature.result.type.asNominalTypeDeclaration?.knownTypeKind == .bool
+
+    if !returnsBoolean {
+      return "get\(self.name.firstCharacterUppercased)"
+    } else if !self.name.hasJavaBooleanNamingConvention {
+      return "is\(self.name.firstCharacterUppercased)"
+    } else {
+      return self.name
+    }
+  }
+
+  var javaSetterName: String {
+    let isBooleanSetter = self.functionSignature.parameters.first?.type.asNominalTypeDeclaration?.knownTypeKind == .bool
+
+    // If the variable is already named "isX", then we make
+    // the setter "setX" to match beans spec.
+    if isBooleanSetter && self.name.hasJavaBooleanNamingConvention {
+      // Safe to force unwrap due to `hasJavaBooleanNamingConvention` check.
+      let propertyName = self.name.split(separator: "is", maxSplits: 1).last!
+      return "set\(propertyName)"
+    } else {
+      return "set\(self.name.firstCharacterUppercased)"
+    }
+  }
+
+  /// The `TrackingToken` Java variable name for Swift Observation
+  var observableTrackerName: String {
+    "\(self.name)Tracker"
+  }
+
+  var isCandiateForObservation: Bool {
+    guard let asVariableSyntax = self.swiftDecl.as(VariableDeclSyntax.self) else { return false }
+    guard let binding = asVariableSyntax.bindings.first else {
+      return false
+    }
+    let supportedAccessorKinds = asVariableSyntax.supportedAccessorKinds(binding: binding)
+    let isObservationIgnored = asVariableSyntax.attributes.contains(where: { $0.isObservationIgnored })
+    return self.apiKind == .getter && !self.isStatic && !isObservationIgnored && supportedAccessorKinds.contains(.set)
   }
 }
 
