@@ -129,8 +129,6 @@ struct SpecializationTests {
     #expect(toolCountFunc.parentType?.description == "ToolBox")
   }
 
-  /// Java cannot construct an open generic, so `JavaExtractDecider` drops
-  /// initializers on an unspecialized base type.
   @Test("JavaExtractDecider drops initializers on the unspecialized generic base")
   func javaDeciderDropsBaseGenericInitializers() throws {
     var config = Configuration()

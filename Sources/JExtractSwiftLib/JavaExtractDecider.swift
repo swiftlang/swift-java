@@ -27,10 +27,7 @@ public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
 ///
 /// In addition to the configured access-level filter, the Java target:
 ///
-/// - Skips initializers of unspecialized generic types — Java has no way to
-///   construct an open generic, so `init` on a `<T>`-parameterized type is
-///   only useful once a specific `T` is fixed. swift-java doesn't yet model
-///   such specializations, so the base type's initializers are dropped
+/// - Skips initializers of unspecialized generic types
 /// - Force-extracts decls annotated `@JavaExport` even if they would
 ///   otherwise be filtered by access level
 /// - Skips Swift wrappers of Java types (`@JavaClass`, `@JavaInterface`,
@@ -51,9 +48,7 @@ public struct JavaExtractDecider: ExtractDecider {
     log: Logger
   ) -> Bool {
     // Initializers of an unspecialized generic type can't be constructed from
-    // Java — drop them regardless of attribute or access level. Runs before
-    // the `@JavaExport` force-include path because an explicit export still
-    // doesn't help: there's no concrete type to instantiate.
+    // Java — drop them regardless of attribute or access level.
     if let parent,
       decl.is(InitializerDeclSyntax.self),
       parent.swiftNominal.isGeneric,

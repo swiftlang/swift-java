@@ -67,7 +67,7 @@ public final class SwiftAnalyzer {
   }
 
   /// Language-specific per-decl extraction policy. Every language target
-  /// must supply one — pass `DefaultExtractDecider` for the
+  /// must supply one — pass `DefaultAccessLevelExtractDecider` for the
   /// access-level-only baseline.
   package let extractDecider: any ExtractDecider
 
@@ -250,14 +250,14 @@ extension SwiftAnalyzer {
     return base
   }
 
-  /// The set of effective output names of every specialization currently
-  /// registered with the analyzer (across all base types). Useful for
-  /// callers driving `registerSpecialization` from a hook to skip names
+  /// The set of effective Swift-side type names of every specialization
+  /// currently registered with the analyzer (across all base types). Useful
+  /// for callers driving `registerSpecialization` from a hook to skip names
   /// already registered by the analyzer's own typealias-decl visitor and
   /// avoid double-registering distinct `ExtractedNominalType` instances
-  /// with the same effective output name.
+  /// with the same effective name.
   public var registeredSpecializationNames: Set<String> {
-    Set(self.specializations.values.flatMap { $0 }.map(\.effectiveOutputName))
+    Set(self.specializations.values.flatMap { $0 }.map(\.effectiveTypeName))
   }
 
   /// Top-level convenience: run analysis on the given Swift sources and return

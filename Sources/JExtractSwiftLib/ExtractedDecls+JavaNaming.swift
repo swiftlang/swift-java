@@ -21,13 +21,24 @@ package typealias JavaClassName = String
 package typealias JavaFullyQualifiedClassName = String
 package typealias JavaPackageName = String
 
-// ==== -----------------------------------------------------------------------
-// MARK: Java-facing name aliases for ExtractedNominalType
-
 extension ExtractedNominalType {
+  /// Structured Java-output-facing type name — "FishBox" for a specialization
+  /// registered via `typealias FishBox = Box<Fish>`, the qualified base name
+  /// for a non-specialized type. For Java generation that's also the
+  /// generated class name.
   package var effectiveJavaTypeName: SwiftQualifiedTypeName { effectiveOutputTypeName }
-  package var effectiveJavaName: String { effectiveOutputName }
-  package var effectiveJavaSimpleName: String { effectiveOutputSimpleName }
+
+  /// Fully-qualified Java-output name (string form of `effectiveJavaTypeName`).
+  package var effectiveJavaName: String {
+    effectiveJavaTypeName.fullName
+  }
+
+  /// Simple (unqualified) Java-output class name. Used for file naming
+  /// and Java-side declarations.
+  package var effectiveJavaSimpleName: String {
+    specializedTypeName ?? swiftNominal.name
+  }
+
   package var javaGenericClause: String { outputGenericClause }
 }
 

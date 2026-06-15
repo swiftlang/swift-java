@@ -128,14 +128,13 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
     return swiftNominal.qualifiedTypeName
   }
 
-  /// The effective output-facing name — "FishBox" for specialized, "Box" for base
-  public var effectiveOutputName: String {
+  /// The effective Swift-side type name used as a registration key in the
+  /// analyzer's type table - "FishBox" for a specialization registered via
+  /// `typealias FishBox = Box<Fish>`, the qualified base name (e.g. "Box")
+  /// for a non-specialized type. Output-language-facing names live on the
+  /// downstream code generator (e.g. JExtractSwiftLib's `effectiveJavaName`).
+  public var effectiveTypeName: String {
     effectiveOutputTypeName.fullName
-  }
-
-  /// The simple output-facing class name (no qualification) for file naming purposes
-  public var effectiveOutputSimpleName: String {
-    specializedTypeName ?? swiftNominal.name
   }
 
   /// The Swift type for thunk generation — "Box<Fish>" for specialized, "Box" for base

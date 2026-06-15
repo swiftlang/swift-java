@@ -18,7 +18,7 @@ import SwiftExtract
 // MARK: Test analysis helpers
 
 /// Drive `SwiftAnalyzer.analyze` from the test suite without spelling out an
-/// `extractDecider:` argument every time. Builds a `DefaultExtractDecider`
+/// `extractDecider:` argument every time. Builds a `DefaultAccessLevelExtractDecider`
 /// from the supplied (or inferred) configuration's access-level setting,
 /// matching the prior implicit-fallback behavior — these tests exercise the
 /// language-neutral analysis layer, so the access-level-only baseline
@@ -35,6 +35,6 @@ func analyze(
     moduleName: moduleName,
     config: effectiveConfig,
     sourceDependencies: sourceDependencies,
-    extractDecider: DefaultExtractDecider(accessLevel: effectiveConfig.effectiveMinimumInputAccessLevelMode)
+    extractDecider: DefaultAccessLevelExtractDecider(accessLevel: effectiveConfig.effectiveMinimumInputAccessLevelMode)
   )
 }
