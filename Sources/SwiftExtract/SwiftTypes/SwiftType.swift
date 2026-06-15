@@ -77,6 +77,14 @@ public enum SwiftType: Equatable {
     asNominalType?.nominalTypeDecl
   }
 
+  /// True when this type is a synthetic placeholder produced by SwiftExtract
+  /// for an unresolved name — see
+  /// `SwiftNominalTypeDeclaration.isUnresolvedTypePlaceholder` for why these
+  /// exist.
+  public var isUnresolvedTypePlaceholder: Bool {
+    asNominalTypeDeclaration?.isUnresolvedTypePlaceholder ?? false
+  }
+
   /// Whether this is the "Void" type, which is actually an empty tuple.
   public var isVoid: Bool {
     switch self {
@@ -502,8 +510,8 @@ extension SwiftType {
     }
     guard let typeDecl else {
       // Lenient mode (opt-in via SwiftExtractConfiguration.permitsUnresolvedTypeReferences):
-      // synthesize an unresolved nominal so a downstream pass can substitute
-      // or recognize it. Generic-argument names are kept (so e.g.
+      // synthesize an unresolved nominal placeholder so a downstream pass can
+      // substitute or recognize it. Generic-argument names are kept (so e.g.
       // `Box<Element>` becomes a synthetic nominal carrying the unresolved
       // `Element` argument).
       if lookupContext.permitsUnresolvedTypeReferences {

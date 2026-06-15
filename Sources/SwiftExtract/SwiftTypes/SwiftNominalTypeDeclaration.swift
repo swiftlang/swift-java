@@ -75,6 +75,34 @@ public class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   /// The generic parameters of this nominal type.
   public let genericParameters: [SwiftGenericParameterDeclaration]
 
+  /// True when this declaration is a placeholder synthesized by
+  /// `SwiftSyntheticTypes.unresolvedNominal(_:)` because the symbol table
+  /// couldn't resolve the name.
+  ///
+  /// Exists to support **lazy specializations** — code generators that
+  /// resolve names later than analysis time. Without lenient mode the
+  /// analyzer would drop entire declarations the moment any unresolved name
+  /// appeared in their signature; lenient mode keeps the decl and stamps the
+  /// unknown name with this flag, letting a downstream substitution pass
+  /// recognize and replace it.
+  ///
+  /// Canonical case: an associated type in a protocol requirement. For
+  ///
+  ///     protocol Container {
+  ///       associatedtype Element
+  ///       func first() -> Element
+  ///     }
+  ///
+  /// the symbol table has no top-level `Element` when walking `first()` — it
+  /// resolves later when a conforming type fixes a carrier
+  /// (`MyCollection: Container where Element == Int`). Strict mode would
+  /// drop `first()` from the analysis result; lenient mode keeps it with
+  /// `Element` as a placeholder a later substitution pass replaces with the
+  /// carrier's real type. Generic-parameter references in the body of a
+  /// generic type and externally-bridged simple-name types follow the same
+  /// shape.
+  public let isUnresolvedTypePlaceholder: Bool
+
   /// Identify this nominal declaration as one of the known standard library
   /// types, like 'Swift.Int[.
   public private(set) lazy var knownTypeKind: SwiftKnownTypeDeclKind? = {
@@ -89,9 +117,11 @@ public class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     moduleName: String,
     parent: SwiftNominalTypeDeclaration?,
     node: NominalTypeDeclSyntaxNode,
+    isUnresolvedTypePlaceholder: Bool = false,
   ) {
     self.parent = parent
     self.syntax = node
+    self.isUnresolvedTypePlaceholder = isUnresolvedTypePlaceholder
     self.genericParameters =
       node.asProtocol(WithGenericParametersSyntax.self)?.genericParameterClause?.parameters.map {
         SwiftGenericParameterDeclaration(sourceFilePath: sourceFilePath, moduleName: moduleName, node: $0)

@@ -74,14 +74,13 @@ public protocol SwiftExtractConfiguration {
   /// Java/JNI, where the generator can't render code referencing an
   /// unresolved Swift type.
   ///
-  /// Other language code generators that treat unresolved names *symbolically*
-  /// (e.g. associated types in a protocol requirement before carrier
-  /// substitution; a property type that names a generic parameter to be
-  /// replaced during specialization; an external type the user is expected
-  /// to bridge by simple name) can opt-in by setting this `true`. Unresolved
-  /// names then become synthetic nominal types via
-  /// `SwiftSyntheticTypes.unresolvedNominal(_:)` so downstream passes can
-  /// substitute or recognize them. Default: false.
+  /// Code generators that resolve names later than analysis time
+  /// (lazy specializations) can opt-in by setting this `true`. Unresolved
+  /// names then become synthetic nominal types stamped with
+  /// `isUnresolvedTypePlaceholder == true` so downstream passes can substitute
+  /// or recognize them. See
+  /// `SwiftNominalTypeDeclaration.isUnresolvedTypePlaceholder` for the long
+  /// form. Default: false.
   var permitsUnresolvedTypeReferences: Bool { get }
 
   /// Whether the given module name has stub declarations configured.
