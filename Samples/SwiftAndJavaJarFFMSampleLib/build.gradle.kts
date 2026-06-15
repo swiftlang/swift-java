@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import utilities.jextractGeneratedJavaDirs
 import utilities.registerJextractTask
 
 plugins {
@@ -47,16 +48,20 @@ dependencies {
 
 val jextract = registerJextractTask()
 
-// Add the java-swift generated Java sources
+// Add the java-swift generated Java sources.
+// `srcDir(jextract)` wires the build dependency; the explicit dir registration
+// below makes the source root visible to IDE project importers (vscode-java).
 sourceSets {
     main {
         java {
             srcDir(jextract)
+            jextractGeneratedJavaDirs().forEach { srcDir(it) }
         }
     }
     test {
         java {
             srcDir(jextract)
+            jextractGeneratedJavaDirs().forEach { srcDir(it) }
         }
     }
 }

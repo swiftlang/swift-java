@@ -15,6 +15,8 @@
 package utilities
 
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
@@ -25,6 +27,27 @@ private fun Project.swiftTargetsWithJExtractPlugin(): List<String> = swiftPMPack
 }.map {
     it.name
 }
+
+/**
+ * The directory into which the SwiftPM JExtractSwiftPlugin emits generated Java sources
+ * for a given Swift target.
+ *
+ * The path is computed lazily as a `Provider<Directory>`, so callers can register it as a
+ * `srcDir` even before the `jextract` task has executed. We need that explicit registration
+ * so e.g. vscode or other IDEs can index the generated sources without first running the build.
+ */
+fun Project.jextractGeneratedJavaDir(targetName: String): Provider<Directory> =
+    layout.buildDirectory.dir(
+        "../.build/plugins/outputs/${layout.projectDirectory.asFile.name.lowercase()}/${targetName}/destination/JExtractSwiftPlugin/src/generated/java"
+    )
+
+/**
+ * One generated-Java source directory per Swift target that uses the JExtractSwiftPlugin.
+ * Use this in `sourceSets { main { java { srcDir(...) } } }` alongside `srcDir(jextract)`
+ * so the dir is visible to IDEs regardless of task-execution order.
+ */
+fun Project.jextractGeneratedJavaDirs(): List<Provider<Directory>> =
+    swiftTargetsWithJExtractPlugin().map { jextractGeneratedJavaDir(it) }
 
 private fun Project.registerSwiftCheckValidTask(): TaskProvider<*> = tasks.register<Exec>("swift-check-valid") {
     commandLine("swift")
@@ -52,11 +75,7 @@ fun Project.registerJextractTask(
         swiftTargetsWithJExtractPlugin().forEach { targetName ->
             logger.info("[swift-java:jextract (Gradle)] Swift input target: ${targetName}")
             inputs.dir(File(layout.projectDirectory.asFile, "Sources/${targetName}"))
-            outputs.dir(
-                layout.buildDirectory.dir(
-                    "../.build/plugins/outputs/${layout.projectDirectory.asFile.getName().lowercase()}/${targetName}/destination/JExtractSwiftPlugin/src/generated/java"
-                )
-            )
+            outputs.dir(jextractGeneratedJavaDir(targetName))
         }
 
         workingDir = layout.projectDirectory.asFile
