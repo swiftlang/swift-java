@@ -324,13 +324,6 @@ final class SwiftAnalysisVisitor {
       return
     }
 
-    if typeContext.swiftNominal.isGeneric && !typeContext.isSpecialization
-      && !config.extractsGenericTypeInitializers
-    {
-      log.debug("Skip Importing generic type initializer \(node.kind) '\(node.qualifiedNameForDebug)'")
-      return
-    }
-
     self.log.debug("Import initializer: \(node.kind) '\(node.qualifiedNameForDebug)'")
 
     let signature: SwiftFunctionSignature
@@ -579,8 +572,8 @@ final class SwiftAnalysisVisitor {
     }
 
     for specialized in specializations {
-      analyzer.extractedTypes[specialized.effectiveOutputName] = specialized
-      log.info("Applied specialization: \(specialized.effectiveOutputName) -> \(specialized.effectiveSwiftTypeName)")
+      analyzer.extractedTypes[specialized.effectiveTypeName] = specialized
+      log.info("Applied specialization: \(specialized.effectiveTypeName) -> \(specialized.effectiveSwiftTypeName)")
     }
   }
 
@@ -589,11 +582,11 @@ final class SwiftAnalysisVisitor {
   func applyPendingSpecializations() {
     for (_, specializations) in analyzer.specializations {
       for specialized in specializations {
-        if analyzer.extractedTypes[specialized.effectiveOutputName] != nil {
+        if analyzer.extractedTypes[specialized.effectiveTypeName] != nil {
           continue
         }
-        analyzer.extractedTypes[specialized.effectiveOutputName] = specialized
-        log.info("Applied pending specialization: \(specialized.effectiveOutputName) -> \(specialized.effectiveSwiftTypeName)")
+        analyzer.extractedTypes[specialized.effectiveTypeName] = specialized
+        log.info("Applied pending specialization: \(specialized.effectiveTypeName) -> \(specialized.effectiveSwiftTypeName)")
       }
     }
 

@@ -56,14 +56,6 @@ public protocol SwiftExtractConfiguration {
   /// Verbosity for the analyzer's logger; `nil` falls back to `.info`.
   var swiftExtractLogLevel: Logger.Level? { get }
 
-  /// Whether to extract initializers of *generic* nominal types even when they
-  /// are not (yet) specialized. swift-java skips these by default (an open
-  /// generic isn't directly constructible); other language code generators that
-  /// specialize generics in a post-analysis pass set this `true` so the base
-  /// type's initializers are available to clone onto the specialization.
-  /// Default: false.
-  var extractsGenericTypeInitializers: Bool { get }
-
   /// Module names that should be treated as importable when resolving
   /// `#if canImport(<module>)` conditions, in addition to whatever the build
   /// configuration already knows. Lets a target opt-in to extracting code
@@ -117,7 +109,6 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
   public var importedModuleStubs: [String: [String]]?
   public var effectiveMinimumInputAccessLevelMode: AccessLevelMode
   public var swiftExtractLogLevel: Logger.Level?
-  public var extractsGenericTypeInitializers: Bool
   public var availableImportModules: Set<String>
   public var permitsUnresolvedTypeReferences: Bool
 
@@ -125,7 +116,6 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     swiftModule: String? = nil,
     accessLevel: AccessLevelMode = .public,
     logLevel: Logger.Level? = nil,
-    extractsGenericTypeInitializers: Bool = false,
     staticBuildConfigurationFile: String? = nil,
     swiftFilterInclude: [String]? = nil,
     swiftFilterExclude: [String]? = nil,
@@ -136,7 +126,6 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     self.swiftModule = swiftModule
     self.effectiveMinimumInputAccessLevelMode = accessLevel
     self.swiftExtractLogLevel = logLevel
-    self.extractsGenericTypeInitializers = extractsGenericTypeInitializers
     self.staticBuildConfigurationFile = staticBuildConfigurationFile
     self.swiftFilterInclude = swiftFilterInclude
     self.swiftFilterExclude = swiftFilterExclude

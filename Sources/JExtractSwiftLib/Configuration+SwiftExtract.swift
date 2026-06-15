@@ -37,9 +37,6 @@ extension Configuration: SwiftExtractConfiguration {
     case .critical: return .critical
     }
   }
-
-  // swift-java targets Java, which cannot construct open generic types directly
-  public var extractsGenericTypeInitializers: Bool { false }
 }
 
 extension LogLevel {

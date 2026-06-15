@@ -129,6 +129,21 @@ struct SpecializationTests {
     #expect(toolCountFunc.parentType?.description == "ToolBox")
   }
 
+  /// Java cannot construct an open generic, so `JavaExtractDecider` drops
+  /// initializers on an unspecialized base type.
+  @Test("JavaExtractDecider drops initializers on the unspecialized generic base")
+  func javaDeciderDropsBaseGenericInitializers() throws {
+    var config = Configuration()
+    config.swiftModule = "SwiftModule"
+    let translator = makeSwiftJavaAnalyzer(config: config)
+    try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
+
+    let baseBox = try #require(translator.extractedTypes["Box"])
+    #expect(baseBox.swiftNominal.isGeneric)
+    #expect(!baseBox.isSpecialization)
+    #expect(baseBox.initializers.isEmpty, "Base 'Box<Element>' init should be dropped by JavaExtractDecider")
+  }
+
   @Test("Specializations keyed by base type contain all entries")
   func specializationEntriesContainAll() throws {
     var config = Configuration()

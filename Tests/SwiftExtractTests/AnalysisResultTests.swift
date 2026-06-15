@@ -317,10 +317,13 @@ struct AnalysisResultSuite {
   // ==== -----------------------------------------------------------------------
   // MARK: Configuration knobs
 
-  /// By default, initializers on an unspecialized generic type are NOT
-  /// extracted: the open generic isn't directly constructible, so swift-java
-  /// (and any caller leaving the knob at its default `false`) drops them.
-  @Test func unspecializedGenericInitializersAreSkippedByDefault() throws {
+  /// `SwiftExtract` is language-neutral: every per-decl extraction decision
+  /// lives in the supplied `ExtractDecider`. The minimal
+  /// `DefaultAccessLevelExtractDecider` only enforces access level, so an
+  /// initializer of an unspecialized generic type passes through — language
+  /// targets that can't construct an open generic (e.g. swift-java's
+  /// `JavaExtractDecider`) are responsible for dropping it themselves.
+  @Test func unspecializedGenericInitializersFlowThroughByDefault() throws {
     let result = try analyze(
       sources: [
         (
@@ -334,35 +337,6 @@ struct AnalysisResultSuite {
         )
       ],
       moduleName: "Aquarium"
-    )
-
-    let tank = try #require(result.extractedTypes["Tank"])
-    #expect(tank.swiftNominal.isGeneric)
-    #expect(!tank.isSpecialization)
-    #expect(tank.initializers.isEmpty)
-  }
-
-  /// Opting into `extractsGenericTypeInitializers` keeps the base type's
-  /// initializers in the analysis result so post-analysis specializers can
-  /// clone them onto a concrete `Tank<Fish>`.
-  @Test func extractsGenericTypeInitializersKeepsBaseInitializers() throws {
-    var config = DefaultSwiftExtractConfiguration()
-    config.extractsGenericTypeInitializers = true
-
-    let result = try analyze(
-      sources: [
-        (
-          "/fake/Source.swift",
-          """
-          public struct Tank<Fish> {
-            public init() {}
-            public init(capacity: Int) {}
-          }
-          """
-        )
-      ],
-      moduleName: "Aquarium",
-      config: config
     )
 
     let tank = try #require(result.extractedTypes["Tank"])
