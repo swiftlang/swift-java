@@ -53,7 +53,7 @@ public final class SwiftAnalyzer {
 
   package var extractedGlobalFuncs: [ExtractedFunc] = []
 
-  /// A mapping from Swift type names (e.g., A.B) over to the imported nominal
+  /// A mapping from Swift type names (e.g., A.B) over to the extracted nominal
   /// type representation.
   package var extractedTypes: [String: ExtractedNominalType] = [:]
 
@@ -79,7 +79,7 @@ public final class SwiftAnalyzer {
     guard let swiftModule = moduleName ?? config.swiftModule else {
       fatalError("Missing 'swiftModule' name.") // FIXME: can we make it required in config? but we shared config for many cases
     }
-    self.log = Logger(label: "translator", logLevel: config.swiftExtractLogLevel ?? .info)
+    self.log = Logger(label: "analyzer", logLevel: config.swiftExtractLogLevel ?? .info)
     self.config = config
     self.swiftModuleName = swiftModule
     self.extractDecider = extractDecider
@@ -159,7 +159,7 @@ extension SwiftAnalyzer {
   ) throws {
     prepareForTranslation()
 
-    let visitor = SwiftAnalysisVisitor(translator: self)
+    let visitor = SwiftAnalysisVisitor(analyzer: self)
 
     for input in self.inputs {
       log.trace("Analyzing \(input.path)")
@@ -295,13 +295,13 @@ extension SwiftAnalyzer {
     beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void
   ) throws -> AnalysisResult {
     let effectiveConfig = config ?? DefaultSwiftExtractConfiguration(swiftModule: moduleName)
-    let translator = SwiftAnalyzer(config: effectiveConfig, moduleName: moduleName, extractDecider: extractDecider)
-    translator.sourceDependencies = sourceDependencies
+    let analyzer = SwiftAnalyzer(config: effectiveConfig, moduleName: moduleName, extractDecider: extractDecider)
+    analyzer.sourceDependencies = sourceDependencies
     for source in sources {
-      translator.add(filePath: source.path, text: source.text)
+      analyzer.add(filePath: source.path, text: source.text)
     }
-    try translator.analyze(beforeProcessingDeferredExtensions: hook)
-    return translator.result
+    try analyzer.analyze(beforeProcessingDeferredExtensions: hook)
+    return analyzer.result
   }
 
   private func visitFoundationDeclsIfNeeded(with visitor: SwiftAnalysisVisitor) {
@@ -383,7 +383,7 @@ extension SwiftAnalyzer {
       self.config.permitsUnresolvedTypeReferences
   }
 
-  /// Check if any of the imported decls uses a nominal declaration that satisfies
+  /// Check if any of the extracted decls uses a nominal declaration that satisfies
   /// the given predicate.
   func isUsing(where predicate: (SwiftNominalTypeDeclaration) -> Bool) -> Bool {
     func check(_ type: SwiftType) -> Bool {
@@ -426,14 +426,14 @@ extension SwiftAnalyzer {
     if self.extractedGlobalVariables.contains(where: check) {
       return true
     }
-    for importedType in self.extractedTypes.values {
-      if importedType.initializers.contains(where: check) {
+    for extractedType in self.extractedTypes.values {
+      if extractedType.initializers.contains(where: check) {
         return true
       }
-      if importedType.methods.contains(where: check) {
+      if extractedType.methods.contains(where: check) {
         return true
       }
-      if importedType.variables.contains(where: check) {
+      if extractedType.variables.contains(where: check) {
         return true
       }
     }
@@ -444,7 +444,7 @@ extension SwiftAnalyzer {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Type translation
 extension SwiftAnalyzer {
-  /// Try to resolve the given nominal declaration node into its imported representation.
+  /// Try to resolve the given nominal declaration node into its extracted representation.
   func extractedNominalType(
     _ nominalNode: some DeclGroupSyntax & NamedDeclSyntax & WithModifiersSyntax & WithAttributesSyntax,
     parent: ExtractedNominalType?,
@@ -459,7 +459,7 @@ extension SwiftAnalyzer {
     return self.extractedNominalType(nominal)
   }
 
-  /// Try to resolve the given nominal type node into its imported representation.
+  /// Try to resolve the given nominal type node into its extracted representation.
   func extractedNominalType(
     _ typeNode: TypeSyntax
   ) -> ExtractedNominalType? {
@@ -492,14 +492,14 @@ extension SwiftAnalyzer {
       return nil
     }
 
-    if let alreadyImported = extractedTypes[fullName] {
-      return alreadyImported
+    if let alreadyExtracted = extractedTypes[fullName] {
+      return alreadyExtracted
     }
 
-    let importedNominal = try? ExtractedNominalType(swiftNominal: nominal, lookupContext: lookupContext)
+    let extractedNominal = try? ExtractedNominalType(swiftNominal: nominal, lookupContext: lookupContext)
 
-    extractedTypes[fullName] = importedNominal
-    return importedNominal
+    extractedTypes[fullName] = extractedNominal
+    return extractedNominal
   }
 }
 

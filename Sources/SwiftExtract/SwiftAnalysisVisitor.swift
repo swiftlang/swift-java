@@ -19,16 +19,16 @@ import SwiftParser
 import SwiftSyntax
 
 final class SwiftAnalysisVisitor {
-  let translator: SwiftAnalyzer
+  let analyzer: SwiftAnalyzer
   var config: any SwiftExtractConfiguration {
-    self.translator.config
+    self.analyzer.config
   }
 
-  init(translator: SwiftAnalyzer) {
-    self.translator = translator
+  init(analyzer: SwiftAnalyzer) {
+    self.analyzer = analyzer
   }
 
-  var log: Logger { translator.log }
+  var log: Logger { analyzer.log }
 
   /// Constrained extensions deferred until specializations are applied
   private struct DeferredConstrainedExtension {
@@ -89,7 +89,7 @@ final class SwiftAnalysisVisitor {
     in parent: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
-    guard let extractedNominalType = translator.extractedNominalType(node, parent: parent) else {
+    guard let extractedNominalType = analyzer.extractedNominalType(node, parent: parent) else {
       return
     }
 
@@ -120,7 +120,7 @@ final class SwiftAnalysisVisitor {
       // 'extension' in a nominal type is invalid. Ignore
       return
     }
-    guard let extractedNominalType = translator.extractedNominalType(node.extendedType) else {
+    guard let extractedNominalType = analyzer.extractedNominalType(node.extendedType) else {
       return
     }
 
@@ -135,7 +135,7 @@ final class SwiftAnalysisVisitor {
       // The extension is unconstrained: add to the base type (visible through all specializations)
       extractedNominalType.inheritedTypes +=
         node.inheritanceClause?.inheritedTypes.compactMap {
-          try? SwiftType($0.type, lookupContext: translator.lookupContext)
+          try? SwiftType($0.type, lookupContext: analyzer.lookupContext)
         } ?? []
       for memberItem in node.memberBlock.members {
         self.visit(decl: memberItem.decl, in: extractedNominalType, sourceFilePath: sourceFilePath)
@@ -179,7 +179,7 @@ final class SwiftAnalysisVisitor {
     in typeContext: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
-    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: translator.extractDecider) else {
+    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: analyzer.extractDecider) else {
       return
     }
 
@@ -190,30 +190,30 @@ final class SwiftAnalysisVisitor {
       signature = try SwiftFunctionSignature(
         node,
         enclosingType: typeContext?.swiftType,
-        lookupContext: translator.lookupContext,
+        lookupContext: analyzer.lookupContext,
       )
     } catch {
       self.log.warning(
         Self.makeMissingTypeMessage(
-          "Failed to import: '\(node.qualifiedNameForDebug)' in module '\(translator.swiftModuleName)'; \(error)"
+          "Failed to import: '\(node.qualifiedNameForDebug)' in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
       return
     }
 
-    let imported = ExtractedFunc(
-      module: translator.swiftModuleName,
+    let extracted = ExtractedFunc(
+      module: analyzer.swiftModuleName,
       swiftDecl: node,
       name: node.name.text.unescapedSwiftName,
       apiKind: .function,
       functionSignature: signature,
     )
 
-    log.debug("Record imported method \(node.qualifiedNameForDebug)")
+    log.debug("Record extracted method \(node.qualifiedNameForDebug)")
     if let typeContext {
-      typeContext.methods.append(imported)
+      typeContext.methods.append(extracted)
     } else {
-      translator.extractedGlobalFuncs.append(imported)
+      analyzer.extractedGlobalFuncs.append(extracted)
     }
   }
 
@@ -231,25 +231,25 @@ final class SwiftAnalysisVisitor {
         self.log.debug("Import case \(caseElement.name) of enum \(node.qualifiedNameForDebug)")
 
         let parameters = try caseElement.parameterClause?.parameters.map {
-          try SwiftEnumCaseParameter($0, lookupContext: translator.lookupContext)
+          try SwiftEnumCaseParameter($0, lookupContext: analyzer.lookupContext)
         }
 
         let signature = try SwiftFunctionSignature(
           caseElement,
           enclosingType: typeContext.swiftType,
-          lookupContext: translator.lookupContext,
+          lookupContext: analyzer.lookupContext,
         )
 
         let caseName = caseElement.name.text.unescapedSwiftName
         let caseFunction = ExtractedFunc(
-          module: translator.swiftModuleName,
+          module: analyzer.swiftModuleName,
           swiftDecl: node,
           name: caseName,
           apiKind: .enumCase,
           functionSignature: signature,
         )
 
-        let importedCase = ExtractedEnumCase(
+        let extractedCase = ExtractedEnumCase(
           name: caseName,
           parameters: parameters ?? [],
           swiftDecl: node,
@@ -257,12 +257,12 @@ final class SwiftAnalysisVisitor {
           caseFunction: caseFunction,
         )
 
-        typeContext.cases.append(importedCase)
+        typeContext.cases.append(extractedCase)
       }
     } catch {
       self.log.warning(
         Self.makeMissingTypeMessage(
-          "Failed to import: \(node.qualifiedNameForDebug) in module '\(translator.swiftModuleName)'; \(error)"
+          "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
     }
@@ -273,7 +273,7 @@ final class SwiftAnalysisVisitor {
     in typeContext: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
-    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: translator.extractDecider) else {
+    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: analyzer.extractDecider) else {
       return
     }
 
@@ -306,7 +306,7 @@ final class SwiftAnalysisVisitor {
     } catch {
       self.log.warning(
         Self.makeMissingTypeMessage(
-          "Failed to import: \(node.qualifiedNameForDebug) in module '\(translator.swiftModuleName)'; \(error)"
+          "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
     }
@@ -320,7 +320,7 @@ final class SwiftAnalysisVisitor {
       self.log.info("Initializer must be within a current type; \(node)")
       return
     }
-    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: translator.extractDecider) else {
+    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: analyzer.extractDecider) else {
       return
     }
 
@@ -338,32 +338,32 @@ final class SwiftAnalysisVisitor {
       signature = try SwiftFunctionSignature(
         node,
         enclosingType: typeContext.swiftType,
-        lookupContext: translator.lookupContext,
+        lookupContext: analyzer.lookupContext,
       )
     } catch {
       self.log.warning(
         Self.makeMissingTypeMessage(
-          "Failed to import: \(node.qualifiedNameForDebug) in module '\(translator.swiftModuleName)'; \(error)"
+          "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
       return
     }
-    let imported = ExtractedFunc(
-      module: translator.swiftModuleName,
+    let extracted = ExtractedFunc(
+      module: analyzer.swiftModuleName,
       swiftDecl: node,
       name: "init",
       apiKind: .initializer,
       functionSignature: signature,
     )
 
-    typeContext.initializers.append(imported)
+    typeContext.initializers.append(extracted)
   }
 
   private func visit(
     subscriptDecl node: SubscriptDeclSyntax,
     in typeContext: ExtractedNominalType?,
   ) {
-    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: translator.extractDecider) else {
+    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: analyzer.extractDecider) else {
       return
     }
 
@@ -394,7 +394,7 @@ final class SwiftAnalysisVisitor {
     } catch {
       self.log.warning(
         Self.makeMissingTypeMessage(
-          "Failed to import: \(node.qualifiedNameForDebug) in module '\(translator.swiftModuleName)'; \(error)"
+          "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
     }
@@ -405,7 +405,7 @@ final class SwiftAnalysisVisitor {
     in parent: ExtractedNominalType?,
     sourceFilePath: String
   ) {
-    let (clause, _) = node.activeClause(in: translator.buildConfig)
+    let (clause, _) = node.activeClause(in: analyzer.buildConfig)
     if let clause, let elements = clause.elements {
       switch elements {
       case .statements(let codeBlock):
@@ -438,22 +438,22 @@ final class SwiftAnalysisVisitor {
         varNode,
         isSet: kind == .setter,
         enclosingType: typeContext?.swiftType,
-        lookupContext: translator.lookupContext,
+        lookupContext: analyzer.lookupContext,
       )
     case .subscriptDecl(let subscriptNode):
       signature = try SwiftFunctionSignature(
         subscriptNode,
         isSet: kind == .subscriptSetter,
         enclosingType: typeContext?.swiftType,
-        lookupContext: translator.lookupContext,
+        lookupContext: analyzer.lookupContext,
       )
     default:
       log.warning("Not supported declaration type \(node.kind) while calling importAccessor!")
       return
     }
 
-    let imported = ExtractedFunc(
-      module: translator.swiftModuleName,
+    let extracted = ExtractedFunc(
+      module: analyzer.swiftModuleName,
       swiftDecl: node,
       name: name,
       apiKind: kind,
@@ -461,12 +461,12 @@ final class SwiftAnalysisVisitor {
     )
 
     log.debug(
-      "Record imported variable accessor \(kind == .getter || kind == .subscriptGetter ? "getter" : "setter"):\(node.qualifiedNameForDebug)"
+      "Record extracted variable accessor \(kind == .getter || kind == .subscriptGetter ? "getter" : "setter"):\(node.qualifiedNameForDebug)"
     )
     if let typeContext {
-      typeContext.variables.append(imported)
+      typeContext.variables.append(extracted)
     } else {
-      translator.extractedGlobalVariables.append(imported)
+      analyzer.extractedGlobalVariables.append(extracted)
     }
   }
 
@@ -474,31 +474,31 @@ final class SwiftAnalysisVisitor {
     enumDecl node: EnumDeclSyntax,
     in parent: ExtractedNominalType?,
   ) {
-    guard let imported = translator.extractedNominalType(node, parent: parent) else {
+    guard let extracted = analyzer.extractedNominalType(node, parent: parent) else {
       return
     }
 
-    if let firstInheritanceType = imported.swiftNominal.firstInheritanceType,
+    if let firstInheritanceType = extracted.swiftNominal.firstInheritanceType,
       let inheritanceType = try? SwiftType(
         firstInheritanceType,
-        lookupContext: translator.lookupContext,
+        lookupContext: analyzer.lookupContext,
       ),
       inheritanceType.isRawTypeCompatible
     {
-      if !imported.variables.contains(where: {
+      if !extracted.variables.contains(where: {
         $0.name == "rawValue" && $0.functionSignature.result.type == inheritanceType
       }) {
         let decl: DeclSyntax = "public var rawValue: \(raw: inheritanceType.description) { get }"
-        self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
+        self.visit(decl: decl, in: extracted, sourceFilePath: extracted.sourceFilePath)
       }
 
-      if !imported.initializers.contains(where: {
+      if !extracted.initializers.contains(where: {
         $0.functionSignature.parameters.count == 1
           && $0.functionSignature.parameters.first?.parameterName == "rawValue"
           && $0.functionSignature.parameters.first?.type == inheritanceType
       }) {
         let decl: DeclSyntax = "public init?(rawValue: \(raw: inheritanceType))"
-        self.visit(decl: decl, in: imported, sourceFilePath: imported.sourceFilePath)
+        self.visit(decl: decl, in: extracted, sourceFilePath: extracted.sourceFilePath)
       }
     }
   }
@@ -527,7 +527,7 @@ final class SwiftAnalysisVisitor {
     guard !genericArgs.isEmpty else { return }
 
     // Resolve the base type through the symbol table
-    guard let baseType = translator.extractedNominalType(rhsType) else {
+    guard let baseType = analyzer.extractedNominalType(rhsType) else {
       log.debug("Could not resolve base type for specialization: \(rhsType.trimmedDescription)")
       return
     }
@@ -565,7 +565,7 @@ final class SwiftAnalysisVisitor {
       log.warning("Failed to specialize \(baseType.baseTypeName) as \(outputName): \(error)")
       return
     }
-    translator.specializations[baseType, default: []].insert(specialized)
+    analyzer.specializations[baseType, default: []].insert(specialized)
     log.info("Registered specialization: \(outputName) = \(rhsDescription)")
   }
 
@@ -573,13 +573,13 @@ final class SwiftAnalysisVisitor {
   // MARK: Specialization support
 
   /// Apply specializations to a type if matching entries exist
-  func applySpecialization(to importedType: ExtractedNominalType) {
-    guard let specializations = translator.specializations[importedType] else {
+  func applySpecialization(to extractedType: ExtractedNominalType) {
+    guard let specializations = analyzer.specializations[extractedType] else {
       return
     }
 
     for specialized in specializations {
-      translator.extractedTypes[specialized.effectiveOutputName] = specialized
+      analyzer.extractedTypes[specialized.effectiveOutputName] = specialized
       log.info("Applied specialization: \(specialized.effectiveOutputName) -> \(specialized.effectiveSwiftTypeName)")
     }
   }
@@ -587,19 +587,19 @@ final class SwiftAnalysisVisitor {
   /// Apply specializations that were registered after their target types were visited,
   /// then process any deferred constrained extensions
   func applyPendingSpecializations() {
-    for (_, specializations) in translator.specializations {
+    for (_, specializations) in analyzer.specializations {
       for specialized in specializations {
-        if translator.extractedTypes[specialized.effectiveOutputName] != nil {
+        if analyzer.extractedTypes[specialized.effectiveOutputName] != nil {
           continue
         }
-        translator.extractedTypes[specialized.effectiveOutputName] = specialized
+        analyzer.extractedTypes[specialized.effectiveOutputName] = specialized
         log.info("Applied pending specialization: \(specialized.effectiveOutputName) -> \(specialized.effectiveSwiftTypeName)")
       }
     }
 
     // Process constrained extensions that were deferred
     for deferred in deferredConstrainedExtensions {
-      guard let baseType = translator.extractedNominalType(deferred.node.extendedType) else {
+      guard let baseType = analyzer.extractedNominalType(deferred.node.extendedType) else {
         continue
       }
       let matchingSpecializations = findMatchingSpecializations(
@@ -664,7 +664,7 @@ final class SwiftAnalysisVisitor {
     extendedType: ExtractedNominalType,
     whereConstraints: [ParsedWhereConstraint],
   ) -> [ExtractedNominalType] {
-    guard let specializations = translator.specializations[extendedType] else {
+    guard let specializations = analyzer.specializations[extendedType] else {
       return []
     }
     return specializations.filter { specialized in
@@ -689,10 +689,10 @@ final class SwiftAnalysisVisitor {
         guard let concreteName = specialized.genericArguments[typeParam] else {
           return false
         }
-        guard let concreteType = translator.extractedTypes[concreteName] else {
+        guard let concreteType = analyzer.extractedTypes[concreteName] else {
           return false
         }
-        guard concreteType.conformsTo(proto, in: translator.extractedTypes) else {
+        guard concreteType.conformsTo(proto, in: analyzer.extractedTypes) else {
           return false
         }
       }

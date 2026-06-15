@@ -317,7 +317,7 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
   }
 
   /// If this function/method is member of a class/struct/protocol,
-  /// this will contain that declaration's imported name.
+  /// this will contain that declaration's extracted name.
   public var hasParent: Bool { functionSignature.selfParameter != nil }
 
   /// A display name to use to refer to the Swift declaration with its
