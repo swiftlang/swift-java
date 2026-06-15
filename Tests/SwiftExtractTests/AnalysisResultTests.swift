@@ -26,7 +26,7 @@ struct AnalysisResultSuite {
   // MARK: Top-level types
 
   @Test func topLevelTypesAreRecorded() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -65,7 +65,7 @@ struct AnalysisResultSuite {
   // MARK: Methods on a type
 
   @Test func methodsAreRecordedOnEnclosingType() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -91,7 +91,7 @@ struct AnalysisResultSuite {
   // MARK: Properties (variables) — getter/setter pair
 
   @Test func storedPropertyProducesGetterAndSetter() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -113,7 +113,7 @@ struct AnalysisResultSuite {
   }
 
   @Test func readOnlyPropertyHasOnlyGetter() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -138,7 +138,7 @@ struct AnalysisResultSuite {
   // MARK: Global functions and variables
 
   @Test func globalFunctionLandsInImportedGlobalFuncs() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -157,7 +157,7 @@ struct AnalysisResultSuite {
   }
 
   @Test func globalVariableProducesGetterSetterPair() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -178,7 +178,7 @@ struct AnalysisResultSuite {
   // MARK: Effect specifiers (throws / async)
 
   @Test func effectSpecifiersAreCapturedOnFunctionSignatures() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -214,7 +214,7 @@ struct AnalysisResultSuite {
   // MARK: Access-level filtering
 
   @Test func internalDeclarationsAreNotImportedByDefault() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -246,7 +246,7 @@ struct AnalysisResultSuite {
     var config = DefaultSwiftExtractConfiguration()
     config.swiftFilterExclude = ["Skip*"]
 
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -276,7 +276,7 @@ struct AnalysisResultSuite {
   // MARK: Generic typealias produces a specialization
 
   @Test func genericTypealiasProducesSpecializationEntry() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -302,7 +302,7 @@ struct AnalysisResultSuite {
   // MARK: Empty input
 
   @Test func emptyModuleProducesEmptyResult() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         ("/fake/Source.swift", "// nothing here")
       ],
@@ -321,7 +321,7 @@ struct AnalysisResultSuite {
   /// extracted: the open generic isn't directly constructible, so swift-java
   /// (and any caller leaving the knob at its default `false`) drops them.
   @Test func unspecializedGenericInitializersAreSkippedByDefault() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -349,7 +349,7 @@ struct AnalysisResultSuite {
     var config = DefaultSwiftExtractConfiguration()
     config.extractsGenericTypeInitializers = true
 
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -375,7 +375,7 @@ struct AnalysisResultSuite {
   /// build configuration doesn't know about — the type guarded behind them
   /// must not appear in the analysis result.
   @Test func canImportGuardedDeclsAreSkippedWhenModuleNotAvailable() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",
@@ -404,7 +404,7 @@ struct AnalysisResultSuite {
     var config = DefaultSwiftExtractConfiguration()
     config.availableImportModules = ["MadeUpModule"]
 
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         (
           "/fake/Source.swift",

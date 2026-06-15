@@ -706,19 +706,16 @@ final class SwiftAnalysisVisitor {
 }
 
 extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyntax {
-  /// Decide whether this declaration should be extracted
+  /// Decide whether this declaration should be extracted.
   ///
-  /// Delegates entirely to the supplied `decider`, falling back to a
-  /// `DefaultExtractDecider` (access-level-only) when none was provided.
-  /// All per-decl policy lives in the decider — see `ExtractDecider`
+  /// Delegates entirely to the supplied `decider`; all per-decl policy
+  /// lives there — see `ExtractDecider`.
   func shouldExtract(
     config: any SwiftExtractConfiguration,
     log: Logger,
     in parent: ExtractedNominalType?,
-    decider: (any ExtractDecider)?
+    decider: any ExtractDecider
   ) -> Bool {
-    let effective: any ExtractDecider =
-      decider ?? DefaultExtractDecider(accessLevel: config.swiftExtractAccessLevel)
-    return effective.shouldExtract(decl: DeclSyntax(self), in: parent, log: log)
+    decider.shouldExtract(decl: DeclSyntax(self), in: parent, log: log)
   }
 }

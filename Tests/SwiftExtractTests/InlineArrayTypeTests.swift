@@ -25,7 +25,7 @@ struct InlineArrayTypeSuite {
   // MARK: Parsing the sugar form `[N of T]`
 
   @Test func sugarFormIsParsedAsInlineArray() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         ("/fake/Source.swift", "public func take(_ a: [3 of Int]) {}")
       ],
@@ -48,7 +48,7 @@ struct InlineArrayTypeSuite {
   // MARK: Underscore digit separator and radix prefixes
 
   @Test func underscoreSeparatedCountIsParsed() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         ("/fake/Source.swift", "public func take(_ a: [1_024 of Double]) {}")
       ],
@@ -64,7 +64,7 @@ struct InlineArrayTypeSuite {
   }
 
   @Test func hexCountIsParsed() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         ("/fake/Source.swift", "public func take(_ a: [0xA of UInt8]) {}")
       ],
@@ -84,7 +84,7 @@ struct InlineArrayTypeSuite {
   // MARK: Returns and result types
 
   @Test func returnTypeIsParsedAsInlineArray() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         ("/fake/Source.swift", "public func get() -> [4 of Float] { fatalError() }")
       ],
@@ -104,7 +104,7 @@ struct InlineArrayTypeSuite {
   // MARK: Nested inline arrays
 
   @Test func nestedInlineArrayIsParsed() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         ("/fake/Source.swift", "public func take(_ a: [3 of [4 of Int]]) {}")
       ],
@@ -129,7 +129,7 @@ struct InlineArrayTypeSuite {
   // MARK: Description (printed form)
 
   @Test func descriptionUsesSugarForm() throws {
-    let result = try SwiftAnalyzer.analyze(
+    let result = try analyze(
       sources: [
         ("/fake/Source.swift", "public func take(_ a: [3 of Int]) {}")
       ],

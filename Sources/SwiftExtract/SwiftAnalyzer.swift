@@ -66,14 +66,15 @@ public final class SwiftAnalyzer {
     lookupContext?.symbolTable
   }
 
-  /// Optional language-specific extraction decider that can override the
-  /// built-in access-level filter on a per-decl basis
-  package let extractDecider: (any ExtractDecider)?
+  /// Language-specific per-decl extraction policy. Every language target
+  /// must supply one — pass `DefaultExtractDecider` for the
+  /// access-level-only baseline.
+  package let extractDecider: any ExtractDecider
 
   public init(
     config: any SwiftExtractConfiguration,
     moduleName: String? = nil,
-    extractDecider: (any ExtractDecider)? = nil
+    extractDecider: any ExtractDecider
   ) {
     guard let swiftModule = moduleName ?? config.swiftModule else {
       fatalError("Missing 'swiftModule' name.") // FIXME: can we make it required in config? but we shared config for many cases
@@ -266,7 +267,7 @@ extension SwiftAnalyzer {
     moduleName: String,
     config: (any SwiftExtractConfiguration)? = nil,
     sourceDependencies: SourceDependencies = SourceDependencies(),
-    extractDecider: (any ExtractDecider)? = nil
+    extractDecider: any ExtractDecider
   ) throws -> AnalysisResult {
     try analyze(
       sources: sources,
@@ -290,7 +291,7 @@ extension SwiftAnalyzer {
     moduleName: String,
     config: (any SwiftExtractConfiguration)? = nil,
     sourceDependencies: SourceDependencies = SourceDependencies(),
-    extractDecider: (any ExtractDecider)? = nil,
+    extractDecider: any ExtractDecider,
     beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void
   ) throws -> AnalysisResult {
     let effectiveConfig = config ?? DefaultSwiftExtractConfiguration(swiftModule: moduleName)
