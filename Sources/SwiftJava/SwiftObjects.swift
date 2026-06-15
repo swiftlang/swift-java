@@ -109,7 +109,7 @@ extension SwiftObjects {
     }
     let lhsMetatype = unsafeBitCast(lhsType$, to: Any.Type.self)
     guard let lhsMetatype = lhsMetatype as? (any Equatable.Type) else {
-      return isEquatableByIdentity
+      return isPointerIdentityEqual
     }
 
     guard let rhsType$ = UnsafeRawPointer(bitPattern: Int(rhsTypePointer)) else {
@@ -117,7 +117,7 @@ extension SwiftObjects {
     }
     let rhsMetatype = unsafeBitCast(rhsType$, to: Any.Type.self)
     guard let rhsMetatype = rhsMetatype as? (any Equatable.Type) else {
-      return isEquatableByIdentity
+      return isPointerIdentityEqual
     }
 
     func perform<L: Equatable, R: Equatable>(lhsType: L.Type, rhsType: R.Type) -> Bool {
