@@ -13,7 +13,15 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftExtract
+import SwiftJavaConfigurationShared
 import SwiftSyntax
+
+public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
+  SwiftAnalyzer(
+    config: config,
+    extractDecider: JavaExtractDecider(accessLevel: config.swiftExtractAccessLevel),
+  )
+}
 
 /// Java-specific per-decl extraction policy
 ///

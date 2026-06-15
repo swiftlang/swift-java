@@ -42,7 +42,7 @@ final class FuncCallbackImportTests {
   func func_callMeFunc_callback() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
@@ -132,7 +132,7 @@ final class FuncCallbackImportTests {
   func func_callMeMoreFunc_callback() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
 
     try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
@@ -247,7 +247,7 @@ final class FuncCallbackImportTests {
   func func_withBuffer_body() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)

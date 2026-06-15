@@ -34,7 +34,7 @@ final class FFMNestedTypesTests {
   func test_nested_in_extension() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)

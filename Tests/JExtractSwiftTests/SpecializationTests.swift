@@ -76,7 +76,7 @@ struct SpecializationTests {
   func multipleSpecializationsProduceDistinctTypes() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
 
     // Both specialized types should be registered
@@ -133,7 +133,7 @@ struct SpecializationTests {
   func specializationEntriesContainAll() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
 
     let baseBox = try #require(translator.extractedTypes["Box"])
@@ -193,7 +193,7 @@ struct SpecializationTests {
     // Verify observeTheFish does NOT appear inside ToolBox's class body
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swiftinterface", text: multiSpecializationInput)
     let toolBox = try #require(translator.extractedTypes["ToolBox"])
     let methodNames = toolBox.methods.map(\.name)
@@ -338,7 +338,7 @@ struct SpecializationTests {
   func specializeNonGenericTypeThrows() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(
       path: "/fake/Fake.swiftinterface",
       text: """

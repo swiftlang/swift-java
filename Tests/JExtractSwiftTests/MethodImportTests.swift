@@ -72,7 +72,7 @@ final class MethodImportTests {
   func method_helloWorld() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -114,7 +114,7 @@ final class MethodImportTests {
   func func_globalTakeInt() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -163,7 +163,7 @@ final class MethodImportTests {
   func func_globalTakeIntLongString() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -209,7 +209,7 @@ final class MethodImportTests {
   func func_globalReturnClass() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -255,7 +255,7 @@ final class MethodImportTests {
   func func_globalSwapRawBufferPointer() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -304,7 +304,7 @@ final class MethodImportTests {
   func method_class_helloMemberFunction() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -349,7 +349,7 @@ final class MethodImportTests {
   func method_class_makeInt() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .info
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -400,7 +400,7 @@ final class MethodImportTests {
   func class_constructor() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .info
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -454,7 +454,7 @@ final class MethodImportTests {
   func struct_constructor() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
 
     st.log.logLevel = .info
 
@@ -509,7 +509,7 @@ final class MethodImportTests {
   func func_globalReturnAny() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)

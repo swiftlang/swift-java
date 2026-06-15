@@ -35,10 +35,7 @@ func assertLoweredFunction(
 ) throws {
   var config = Configuration()
   config.swiftModule = swiftModuleName
-  let translator = SwiftAnalyzer(
-    config: config,
-    extractDecider: JavaExtractDecider(accessLevel: config.swiftExtractAccessLevel),
-  )
+  let translator = makeSwiftJavaAnalyzer(config: config)
 
   if let sourceFile {
     translator.add(filePath: "Fake.swift", text: sourceFile)
@@ -124,10 +121,7 @@ func assertLoweredVariableAccessor(
 ) throws {
   var config = Configuration()
   config.swiftModule = swiftModuleName
-  let translator = SwiftAnalyzer(
-    config: config,
-    extractDecider: JavaExtractDecider(accessLevel: config.swiftExtractAccessLevel),
-  )
+  let translator = makeSwiftJavaAnalyzer(config: config)
 
   if let sourceFile {
     translator.add(filePath: "Fake.swift", text: sourceFile)

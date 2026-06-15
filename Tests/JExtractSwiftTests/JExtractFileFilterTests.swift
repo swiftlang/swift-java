@@ -335,7 +335,7 @@ struct JExtractFileFilterTests {
     config.swiftModule = "__FakeModule"
     config.swiftFilterInclude = include
     config.swiftFilterExclude = exclude
-    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let translator = makeSwiftJavaAnalyzer(config: config)
     translator.log.logLevel = .error
     try translator.analyze(path: "Fake.swift", text: Self.nestedTypeSource)
     return translator

@@ -238,7 +238,7 @@ extension FunctionDescriptorTests {
   ) throws {
     var config = Configuration()
     config.swiftModule = swiftModuleName
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = logLevel
 
     try st.analyze(path: "/fake/Sample.swiftinterface", text: interfaceFile)
@@ -272,7 +272,7 @@ extension FunctionDescriptorTests {
   ) throws {
     var config = Configuration()
     config.swiftModule = swiftModuleName
-    let st = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = logLevel
 
     try st.analyze(path: "/fake/Sample.swiftinterface", text: interfaceFile)

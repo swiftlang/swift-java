@@ -355,7 +355,7 @@ struct JNIEnumTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = SwiftAnalyzer(config: config, extractDecider: JavaExtractDecider())
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try! translator.analyze(path: "/fake/Fake.swiftinterface", text: input)
 
     var printer: CodePrinter = CodePrinter(mode: .accumulateAll)

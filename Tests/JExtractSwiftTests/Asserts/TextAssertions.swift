@@ -52,10 +52,7 @@ func assertOutput(
 ) throws {
   var config = config ?? Configuration()
   config.swiftModule = swiftModuleName
-  let translator = SwiftAnalyzer(
-    config: config,
-    extractDecider: JavaExtractDecider(accessLevel: config.swiftExtractAccessLevel),
-  )
+  let translator = makeSwiftJavaAnalyzer(config: config)
   translator.sourceDependencies.addJavaWrapperStubs(Array(javaClassLookupTable.keys))
   for (depModule, depSource) in dependencySwiftSources {
     let syntax = Parser.parse(source: depSource)
