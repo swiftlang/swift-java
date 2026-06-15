@@ -20,10 +20,6 @@ import SwiftSyntax
 
 /// Drives the analysis of Swift source code into an `AnalysisResult` that
 /// downstream language generators can consume.
-///
-/// The analysis output is language-neutral; language-specific extraction rules
-/// (such as honoring Java's `@JavaExport` or skipping `@JavaClass`-wrapped
-/// types) are layered in via an optional `ExtractDecider`
 public final class SwiftAnalyzer {
   static let SWIFT_INTERFACE_SUFFIX = ".swiftinterface"
 
@@ -150,10 +146,9 @@ extension SwiftAnalyzer {
   /// constrained-extension queue is processed against those specializations.
   ///
   /// Downstream language code generators that drive specialization from a
-  /// configuration source other than Swift typealiases (e.g. swift-python's
-  /// `@Python typealias` post-pass, or a `specialize:` config entry that
-  /// names a base type by qualified name) can use the hook to call
-  /// `registerSpecialization(_:outputName:typeArgs:)` so their
+  /// configuration source other than Swift typealiases (e.g. a `specialize:`
+  /// config entry that names a base type by qualified name) can use the hook
+  /// to call `registerSpecialization(_:outputName:typeArgs:)` so their
   /// specializations participate in `findMatchingSpecializations` alongside
   /// the analyzer's natively-registered ones. Without the hook, those
   /// specializations are registered too late and any constrained extension
@@ -287,9 +282,9 @@ extension SwiftAnalyzer {
   /// walk and before deferred-constrained-extension processing. See
   /// `SwiftAnalyzer.analyze(beforeProcessingDeferredExtensions:)` for the
   /// hook semantics. Use to drive specialization registration from
-  /// downstream configuration sources (e.g. `@Python typealias`,
-  /// `specialize:` config entries) so deferred constrained extensions
-  /// match against those specializations before they're dropped.
+  /// downstream configuration sources (e.g. `specialize:` config entries)
+  /// so deferred constrained extensions match against those specializations
+  /// before they're dropped.
   public static func analyze(
     sources: [(path: String, text: String)],
     moduleName: String,
