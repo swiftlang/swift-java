@@ -32,6 +32,12 @@ public struct CodePrinter: Sendable {
   /// terminator equivalent to `.newLine`.
   public var emitSourceLocations: Bool = true
 
+  /// Token used to start an inline comment. Defaults to `//` for Swift- and
+  /// Java-style output. Hash-comment languages can flip this to `.hash` so
+  /// source-location trailers, `printSeparator` banners, and echo-mode
+  /// headers render with the right comment lead.
+  public var inlineCommentStyle: InlineCommentStyle = .slashSlash
+
   public var indentationDepth: Int = 0 {
     didSet {
       indentationText = String(repeating: indentationPart, count: indentationDepth)
@@ -174,7 +180,7 @@ public struct CodePrinter: Sendable {
 
     if terminator == .sloc {
       if emitSourceLocations {
-        append(" // \(function) @ \(file):\(line)\n")
+        append(" \(inlineCommentStyle.rawValue) \(function) @ \(file):\(line)\n")
       } else {
         append("\n")
       }
@@ -191,11 +197,12 @@ public struct CodePrinter: Sendable {
 
   public mutating func printSeparator(_ text: String) {
     assert(!text.contains(where: \.isNewline))
+    let lead = inlineCommentStyle.rawValue
     print(
       """
 
-      // ==== --------------------------------------------------
-      // \(text)
+      \(lead) ==== --------------------------------------------------
+      \(lead) \(text)
 
       """
     )
@@ -223,6 +230,18 @@ public struct CodePrinter: Sendable {
     Swift.print("// CodePrinter.dump @ \(file):\(line)")
     Swift.print(contents)
   }
+}
+
+// ==== -----------------------------------------------------------------------
+// MARK: InlineCommentStyle
+
+/// Inline comment lead used by `CodePrinter` for source-location trailers,
+/// `printSeparator` banners, and echo-mode headers. Swift, Java, and other
+/// `//`-comment languages use `.slashSlash`; hash-comment languages use
+/// `.hash`.
+public enum InlineCommentStyle: String, Sendable {
+  case slashSlash = "//"
+  case hash = "#"
 }
 
 // ==== -----------------------------------------------------------------------
@@ -295,19 +314,20 @@ extension CodePrinter {
       // if we're accumulating everything, we don't want to finalize/flush
       // any contents; let's mark that this is where a write would have
       // happened though:
-      print("// ^^^^ Contents of: \(outputDirectory)\(PATH_SEPARATOR)\(filename)")
+      print("\(inlineCommentStyle.rawValue) ^^^^ Contents of: \(outputDirectory)\(PATH_SEPARATOR)\(filename)")
       return nil
     }
 
     let contents = finalize()
     if outputDirectory == "-" {
+      let lead = inlineCommentStyle.rawValue
       print(
-        "// ==== ---------------------------------------------------------------------------------------------------"
+        "\(lead) ==== ---------------------------------------------------------------------------------------------------"
       )
       if let javaPackagePath {
-        print("// \(javaPackagePath)\(PATH_SEPARATOR)\(filename)")
+        print("\(lead) \(javaPackagePath)\(PATH_SEPARATOR)\(filename)")
       } else {
-        print("// \(filename)")
+        print("\(lead) \(filename)")
       }
       print(contents)
       return nil

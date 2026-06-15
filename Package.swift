@@ -497,6 +497,13 @@ let package = Package(
     ),
 
     .testTarget(
+      name: "CodePrintingTests",
+      dependencies: [
+        "CodePrinting"
+      ]
+    ),
+
+    .testTarget(
       name: "SwiftRuntimeFunctionsTests",
       dependencies: [
         "SwiftRuntimeFunctions"
