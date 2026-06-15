@@ -35,6 +35,6 @@ func analyze(
     moduleName: moduleName,
     config: effectiveConfig,
     sourceDependencies: sourceDependencies,
-    extractDecider: DefaultExtractDecider(accessLevel: effectiveConfig.swiftExtractAccessLevel)
+    extractDecider: DefaultExtractDecider(accessLevel: effectiveConfig.effectiveMinimumInputAccessLevelMode)
   )
 }

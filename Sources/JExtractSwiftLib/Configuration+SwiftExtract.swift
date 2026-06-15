@@ -19,15 +19,12 @@ import SwiftJavaConfigurationShared
 /// `SwiftExtractConfiguration` surface consumed by `SwiftExtract`.
 ///
 /// Most members are satisfied directly by `Configuration`'s own properties.
-/// `Configuration` shares `AccessLevelMode` with the analyzer (both pull it in
-/// from `SwiftExtractConfigurationShared`), so `swiftExtractAccessLevel` is a
-/// straight passthrough. Only `swiftExtractLogLevel` needs a mapping from
-/// swift-java's `LogLevel` onto the neutral `Logger.Level`.
+/// `Configuration` shares `AccessLevelMode` with the analyzer (both pull it
+/// in from `SwiftExtractConfigurationShared`), so
+/// `effectiveMinimumInputAccessLevelMode` already conforms without a bridge.
+/// Only `swiftExtractLogLevel` needs a mapping from swift-java's `LogLevel`
+/// onto the neutral `Logger.Level`.
 extension Configuration: SwiftExtractConfiguration {
-  public var swiftExtractAccessLevel: AccessLevelMode {
-    effectiveMinimumInputAccessLevelMode
-  }
-
   public var swiftExtractLogLevel: SwiftExtract.Logger.Level? {
     guard let logLevel else { return nil }
     switch logLevel {

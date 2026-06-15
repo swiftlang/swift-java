@@ -51,7 +51,7 @@ public protocol SwiftExtractConfiguration {
   var importedModuleStubs: [String: [String]]? { get }
 
   /// Minimum access level required for a declaration to be extracted.
-  var swiftExtractAccessLevel: AccessLevelMode { get }
+  var effectiveMinimumInputAccessLevelMode: AccessLevelMode { get }
 
   /// Verbosity for the analyzer's logger; `nil` falls back to `.info`.
   var swiftExtractLogLevel: Logger.Level? { get }
@@ -115,7 +115,7 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
   public var swiftFilterInclude: [String]?
   public var swiftFilterExclude: [String]?
   public var importedModuleStubs: [String: [String]]?
-  public var swiftExtractAccessLevel: AccessLevelMode
+  public var effectiveMinimumInputAccessLevelMode: AccessLevelMode
   public var swiftExtractLogLevel: Logger.Level?
   public var extractsGenericTypeInitializers: Bool
   public var availableImportModules: Set<String>
@@ -134,7 +134,7 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     permitsUnresolvedTypeReferences: Bool = false
   ) {
     self.swiftModule = swiftModule
-    self.swiftExtractAccessLevel = accessLevel
+    self.effectiveMinimumInputAccessLevelMode = accessLevel
     self.swiftExtractLogLevel = logLevel
     self.extractsGenericTypeInitializers = extractsGenericTypeInitializers
     self.staticBuildConfigurationFile = staticBuildConfigurationFile

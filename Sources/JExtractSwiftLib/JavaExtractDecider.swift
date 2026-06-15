@@ -19,7 +19,7 @@ import SwiftSyntax
 public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
   SwiftAnalyzer(
     config: config,
-    extractDecider: JavaExtractDecider(accessLevel: config.swiftExtractAccessLevel),
+    extractDecider: JavaExtractDecider(accessLevel: config.effectiveMinimumInputAccessLevelMode),
   )
 }
 
