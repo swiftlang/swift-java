@@ -102,7 +102,7 @@ extension SwiftObjects {
   @JavaMethod
   public static func equals(environment: UnsafeMutablePointer<JNIEnv?>!, lhsPointer: Int64, lhsTypePointer: Int64, rhsPointer: Int64, rhsTypePointer: Int64) -> Bool {
     // Fallback for non-equatable types (such as classes)
-    let isEquatableByIdentity = lhsPointer == rhsPointer && lhsTypePointer == rhsTypePointer
+    let isPointerIdentityEqual = lhsTypePointer == rhsTypePointer && lhsPointer == rhsPointer
 
     guard let lhsType$ = UnsafeRawPointer(bitPattern: Int(lhsTypePointer)) else {
       fatalError("lhsType metadata address was null")
