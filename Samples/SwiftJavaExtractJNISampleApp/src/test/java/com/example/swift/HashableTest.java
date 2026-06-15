@@ -70,6 +70,37 @@ public class HashableTest {
     }
 
     @Test
+    void nonEquatableReferenceTypeFallsBackToIdentity() {
+        // MySwiftClass does not conform to Swift's `Equatable`, so the JNI
+        // bridge should fall back to identity equality.
+        try (var arena = SwiftArena.ofConfined()) {
+            var a = MySwiftClass.init(42, 1, arena);
+            var b = MySwiftClass.init(42, 1, arena);
+            assertEquals(a, a);
+            assertEquals(b, b);
+            // Different instances with equal field values must NOT be equal,
+            // since the type is not Equatable
+            assertNotEquals(a, b);
+            assertNotEquals(b, a);
+            assertNotEquals(a, "foo");
+        }
+    }
+
+    @Test
+    void nonEquatableReferenceTypeHashSetUsesIdentity() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var a = MySwiftClass.init(42, 1, arena);
+            var b = MySwiftClass.init(42, 1, arena);
+            var set = new HashSet<>(List.of(a, b));
+            assertTrue(set.contains(a));
+            assertTrue(set.contains(b));
+            // Two distinct instances of a non-Equatable class are distinct
+            // entries in the set
+            assertEquals(2, set.size());
+        }
+    }
+
+    @Test
     void hashSetReferenceType() {
         try (var arena = SwiftArena.ofConfined()) {
             var a = HashableClass.init(42, arena);

@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import utilities.javaLibraryPaths
+import utilities.jextractGeneratedJavaDirs
 import utilities.registerJextractTask
 
 plugins {
@@ -44,21 +45,27 @@ val jextract = registerJextractTask {
     cmdArgs
 }
 
-// Add the java-swift generated Java sources
+// Add the java-swift generated Java sources.
+// `srcDir(jextract)` wires the build dependency (compile depends on jextract);
+// `srcDir(it)` for each generated dir registers the path explicitly so IDEs
+// (notably vscode-java) index the generated sources without having to run jextract first.
 sourceSets {
     main {
         java {
             srcDir(jextract)
+            jextractGeneratedJavaDirs().forEach { srcDir(it) }
         }
     }
     test {
         java {
             srcDir(jextract)
+            jextractGeneratedJavaDirs().forEach { srcDir(it) }
         }
     }
     this.jmh {
         java {
             srcDir(jextract)
+            jextractGeneratedJavaDirs().forEach { srcDir(it) }
         }
     }
 }
