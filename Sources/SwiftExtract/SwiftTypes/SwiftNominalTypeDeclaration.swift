@@ -110,7 +110,7 @@ public class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
 
   /// Create a nominal type declaration from the syntax node for a nominal type
   /// declaration.
-  @_spi(Testing) public init(
+  public init(
     name: String,
     sourceFilePath: String,
     moduleName: String,
