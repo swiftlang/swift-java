@@ -62,7 +62,7 @@ public struct JavaExtractDecider: ExtractDecider {
     if attrs?.contains(where: { $0.isJavaExport }) == true {
       return true
     }
-    if attrs?.contains(where: { $0.isSwiftJavaMacro }) == true {
+    if attrs?.contains(where: { $0.isJavaKitMacro }) == true {
       log.trace("Skip '\(decl.qualifiedNameForDebug)': swift-java macro-wrapped Java type")
       return false
     }

@@ -15,23 +15,35 @@
 import SwiftExtract
 import SwiftSyntax
 
+/// Names of the JavaKit macros that wrap a Java class/interface/member from
+/// Swift (Java -> Swift direction). A nominal carrying any of these is
+/// skipped during jextract because the binding goes the other way.
+///
+/// `@JavaExport` is intentionally NOT here — it forces export of a Swift
+/// type to Java (Swift -> Java direction) and uses a separate predicate.
+let KnownJavaKitMacroNames: [String] = [
+  "JavaClass",
+  "JavaInterface",
+  "JavaField",
+  "JavaStaticField",
+  "JavaMethod",
+  "JavaStaticMethod",
+  "JavaImplementation",
+]
+
 extension AttributeListSyntax.Element {
-  /// Whether this node has `SwiftJava` wrapping attributes (types that wrap Java classes).
-  /// These are skipped during jextract because they represent Java->Swift wrappers.
-  /// Note: `@JavaExport` is NOT included here — it forces export of Swift types to Java.
-  package var isSwiftJavaMacro: Bool {
+  /// Whether this node carries one of the JavaKit wrapping macros (types
+  /// that wrap Java classes). These are skipped during jextract because they
+  /// represent Java->Swift wrappers.
+  /// Note: `@JavaExport` is NOT included here — it forces export of Swift
+  /// types to Java.
+  package var isJavaKitMacro: Bool {
     guard case let .attribute(attr) = self else {
       // FIXME: Handle #if.
       return false
     }
     guard let attrName = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text else { return false }
-    switch attrName {
-    case "JavaClass", "JavaInterface", "JavaField", "JavaStaticField", "JavaMethod", "JavaStaticMethod",
-      "JavaImplementation":
-      return true
-    default:
-      return false
-    }
+    return KnownJavaKitMacroNames.contains(attrName)
   }
 
   /// Whether this is a `@JavaExport` attribute (used on typealiases for specialization,
@@ -48,6 +60,6 @@ extension SwiftNominalType {
   /// macros (`@JavaClass`, `@JavaInterface`, …) — meaning the type represents
   /// a Java class wrapped for Swift, not a Swift type to be re-exported
   public var isSwiftJavaWrapper: Bool {
-    nominalTypeDecl.syntax.attributes.contains(where: \.isSwiftJavaMacro)
+    nominalTypeDecl.syntax.attributes.contains(where: \.isJavaKitMacro)
   }
 }
