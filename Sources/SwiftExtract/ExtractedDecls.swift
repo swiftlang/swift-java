@@ -199,7 +199,7 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
   }
 
   /// Checks if this type, or any of types it inherits from, conforms to the passed in protocol.
-  public func conformsTo(_ protocolName: String, in extractedTypes: [String: ExtractedNominalType]) -> Bool {
+  public func conformsTo(_ protocolName: String, in extractedTypes: [SwiftTypeName: ExtractedNominalType]) -> Bool {
     var visited: Set<ObjectIdentifier> = []
     var queue: [ExtractedNominalType] = [self]
     while let current = queue.popLast() {

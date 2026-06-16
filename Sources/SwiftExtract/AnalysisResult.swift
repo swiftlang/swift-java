@@ -15,12 +15,12 @@
 /// The complete analysis result of the analyzed Swift inputs.
 /// This is used as the primary input to source generators, which then act on the analyzed decls.
 public struct AnalysisResult {
-  public var extractedTypes: [String: ExtractedNominalType]
+  public var extractedTypes: [SwiftTypeName: ExtractedNominalType]
   public var extractedGlobalVariables: [ExtractedFunc]
   public var extractedGlobalFuncs: [ExtractedFunc]
 
   public init(
-    extractedTypes: [String: ExtractedNominalType],
+    extractedTypes: [SwiftTypeName: ExtractedNominalType],
     extractedGlobalVariables: [ExtractedFunc],
     extractedGlobalFuncs: [ExtractedFunc]
   ) {

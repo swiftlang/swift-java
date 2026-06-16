@@ -55,7 +55,7 @@ public final class SwiftAnalyzer {
 
   /// A mapping from Swift type names (e.g., A.B) over to the extracted nominal
   /// type representation.
-  package var extractedTypes: [String: ExtractedNominalType] = [:]
+  package var extractedTypes: [SwiftTypeName: ExtractedNominalType] = [:]
 
   /// Specializations of generic types that will get their concrete Java declarations, "as if" they were independent types
   package var specializations: [ExtractedNominalType: Set<ExtractedNominalType>] = [:]

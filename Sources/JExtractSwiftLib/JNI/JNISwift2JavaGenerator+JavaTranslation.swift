@@ -94,7 +94,7 @@ extension JNISwift2JavaGenerator {
     let protocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
     var javaIdentifiers: JavaIdentifierFactory
-    let extractedTypes: [String: ExtractedNominalType]
+    let extractedTypes: [SwiftTypeName: ExtractedNominalType]
 
     func translate(enumCase: ExtractedEnumCase) throws -> TranslatedEnumCase {
       let methodName = "" // TODO: Used for closures, replace with better name?
