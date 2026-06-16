@@ -65,8 +65,12 @@ public struct CodePrinter: Sendable {
     case accumulateAll
     case flushToFileOnWrite
   }
-  public init(mode: PrintMode = .flushToFileOnWrite) {
+  public init(
+    mode: PrintMode = .flushToFileOnWrite,
+    inlineCommentStyle: InlineCommentStyle = .slashSlash
+  ) {
     self.mode = mode
+    self.inlineCommentStyle = inlineCommentStyle
   }
 
   public mutating func append(_ text: String) {
