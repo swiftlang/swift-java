@@ -449,7 +449,7 @@ extension SwiftAnalyzer {
     _ nominalNode: some DeclGroupSyntax & NamedDeclSyntax & WithModifiersSyntax & WithAttributesSyntax,
     parent: ExtractedNominalType?,
   ) -> ExtractedNominalType? {
-    if !nominalNode.shouldExtract(config: config, log: log, in: parent, decider: extractDecider) {
+    if !nominalNode.shouldExtract(config: config, in: parent, decider: extractDecider) {
       return nil
     }
 
@@ -477,7 +477,7 @@ extension SwiftAnalyzer {
       return nil
     }
 
-    guard swiftNominalDecl.syntax.shouldExtract(config: config, log: log, in: nil as ExtractedNominalType?, decider: extractDecider) else {
+    guard swiftNominalDecl.syntax.shouldExtract(config: config, in: nil as ExtractedNominalType?, decider: extractDecider) else {
       return nil
     }
 

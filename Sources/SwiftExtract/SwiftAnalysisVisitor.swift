@@ -179,7 +179,7 @@ final class SwiftAnalysisVisitor {
     in typeContext: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
-    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: analyzer.extractDecider) else {
+    guard node.shouldExtract(config: config, in: typeContext, decider: analyzer.extractDecider) else {
       return
     }
 
@@ -273,7 +273,7 @@ final class SwiftAnalysisVisitor {
     in typeContext: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
-    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: analyzer.extractDecider) else {
+    guard node.shouldExtract(config: config, in: typeContext, decider: analyzer.extractDecider) else {
       return
     }
 
@@ -320,7 +320,7 @@ final class SwiftAnalysisVisitor {
       self.log.info("Initializer must be within a current type; \(node)")
       return
     }
-    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: analyzer.extractDecider) else {
+    guard node.shouldExtract(config: config, in: typeContext, decider: analyzer.extractDecider) else {
       return
     }
 
@@ -356,7 +356,7 @@ final class SwiftAnalysisVisitor {
     subscriptDecl node: SubscriptDeclSyntax,
     in typeContext: ExtractedNominalType?,
   ) {
-    guard node.shouldExtract(config: config, log: log, in: typeContext, decider: analyzer.extractDecider) else {
+    guard node.shouldExtract(config: config, in: typeContext, decider: analyzer.extractDecider) else {
       return
     }
 
@@ -705,10 +705,9 @@ extension DeclSyntaxProtocol where Self: WithModifiersSyntax & WithAttributesSyn
   /// lives there — see `ExtractDecider`.
   func shouldExtract(
     config: any SwiftExtractConfiguration,
-    log: Logger,
     in parent: ExtractedNominalType?,
     decider: any ExtractDecider
   ) -> Bool {
-    decider.shouldExtract(decl: DeclSyntax(self), in: parent, log: log)
+    decider.shouldExtract(decl: DeclSyntax(self), in: parent)
   }
 }

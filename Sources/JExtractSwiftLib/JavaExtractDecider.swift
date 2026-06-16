@@ -19,7 +19,10 @@ import SwiftSyntax
 public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
   SwiftAnalyzer(
     config: config,
-    extractDecider: JavaExtractDecider(accessLevel: config.effectiveMinimumInputAccessLevelMode),
+    extractDecider: JavaExtractDecider(
+      accessLevel: config.effectiveMinimumInputAccessLevelMode,
+      logLevel: config.logLevel ?? .info
+    ),
   )
 }
 
@@ -37,15 +40,16 @@ public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
 ///   operator-overload syntax, so the generator can't render them
 public struct JavaExtractDecider: ExtractDecider {
   public let accessLevel: AccessLevelMode
+  let log: Logger
 
-  public init(accessLevel: AccessLevelMode = .default) {
+  public init(accessLevel: AccessLevelMode = .default, logLevel: LogLevel = .info) {
     self.accessLevel = accessLevel
+    self.log = Logger(label: "JavaExtractDecider", logLevel: logLevel)
   }
 
   public func shouldExtract(
     decl: DeclSyntax,
-    in parent: ExtractedNominalType?,
-    log: Logger
+    in parent: ExtractedNominalType?
   ) -> Bool {
     // Initializers of an unspecialized generic type can't be constructed from
     // Java — drop them regardless of attribute or access level.

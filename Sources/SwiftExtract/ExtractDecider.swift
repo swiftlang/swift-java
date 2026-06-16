@@ -28,15 +28,15 @@ import SwiftSyntax
 public protocol ExtractDecider {
   /// Decide whether `decl` should be extracted.
   ///
+  /// Implementations should emit a `.trace` line on every skip path (using
+  /// their own logger) so users can see why a decl was dropped.
+  ///
   /// - Parameters:
   ///   - decl: the declaration being considered
   ///   - parent: the nominal type containing `decl`, when applicable
-  ///   - log: the analyzer's logger; deciders should emit a `.trace` line
-  ///     for each skip path so users can see why a decl was dropped
   func shouldExtract(
     decl: DeclSyntax,
-    in parent: ExtractedNominalType?,
-    log: Logger
+    in parent: ExtractedNominalType?
   ) -> Bool
 }
 
@@ -44,15 +44,16 @@ public protocol ExtractDecider {
 /// filter. Used by `SwiftAnalyzer` when no decider is supplied
 public struct DefaultAccessLevelExtractDecider: ExtractDecider {
   public let accessLevel: AccessLevelMode
+  let log: Logger
 
-  public init(accessLevel: AccessLevelMode) {
+  public init(accessLevel: AccessLevelMode, logLevel: LogLevel = .info) {
     self.accessLevel = accessLevel
+    self.log = Logger(label: "DefaultAccessLevelExtractDecider", logLevel: logLevel)
   }
 
   public func shouldExtract(
     decl: DeclSyntax,
-    in parent: ExtractedNominalType?,
-    log: Logger
+    in parent: ExtractedNominalType?
   ) -> Bool {
     guard let mod = decl.asProtocol((any WithModifiersSyntax).self) else {
       return false
