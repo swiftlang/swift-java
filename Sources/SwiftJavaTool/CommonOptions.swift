@@ -64,7 +64,7 @@ extension SwiftJava {
     var inputSwift: String? = nil
 
     @Option(name: .shortAndLong, help: "Configure the level of logs that should be printed")
-    var logLevel: SwiftExtract.Logger.Level = .info
+    var logLevel: LogLevel = .info
 
     @Option(help: "A path to a custom swift-java.config to use")
     var config: String? = nil

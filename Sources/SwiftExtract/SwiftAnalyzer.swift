@@ -79,7 +79,7 @@ public final class SwiftAnalyzer {
     guard let swiftModule = moduleName ?? config.swiftModule else {
       fatalError("Missing 'swiftModule' name.") // FIXME: can we make it required in config? but we shared config for many cases
     }
-    self.log = Logger(label: "analyzer", logLevel: config.swiftExtractLogLevel ?? .info)
+    self.log = Logger(label: "analyzer", logLevel: config.logLevel ?? .info)
     self.config = config
     self.swiftModuleName = swiftModule
     self.extractDecider = extractDecider

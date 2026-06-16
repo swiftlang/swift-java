@@ -31,7 +31,7 @@ protocol SwiftJavaBaseAsyncParsableCommand: AsyncParsableCommand {
 
   var log: Logging.Logger { get }
 
-  var logLevel: SwiftExtract.Logger.Level { get set }
+  var logLevel: LogLevel { get set }
 
   /// Must be implemented with an `@OptionGroup` in Command implementations
   var commonOptions: SwiftJava.CommonOptions { get set }
@@ -104,7 +104,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
     .init(label: "swift-java")
   }
 
-  var logLevel: SwiftExtract.Logger.Level {
+  var logLevel: LogLevel {
     get {
       self.commonOptions.logLevel
     }
@@ -183,7 +183,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
       config = Configuration()
     }
     // override configuration with options from command line
-    config.logLevel = LogLevel(command.logLevel)
+    config.logLevel = command.logLevel
     return config
   }
 }

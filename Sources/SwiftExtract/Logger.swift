@@ -13,14 +13,15 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+@_exported import SwiftExtractConfigurationShared
 import SwiftSyntax
 
 // Placeholder for some better logger, we could depend on swift-log
 public struct Logger {
   public var label: String
-  public var logLevel: Logger.Level
+  public var logLevel: LogLevel
 
-  public init(label: String, logLevel: Logger.Level) {
+  public init(label: String, logLevel: LogLevel) {
     self.label = label
     self.logLevel = logLevel
   }
@@ -108,48 +109,5 @@ public struct Logger {
       metadata.isEmpty ? "" : "\(metadata)"
 
     print("[trace][\(file):\(line)](\(function)) \(message()) \(metadataString)")
-  }
-}
-
-extension Logger {
-  /// Log verbosity levels for the analysis layer's lightweight logger.
-  ///
-  /// Language-neutral; language-specific configuration modules map their own
-  /// log-level enums onto this via `SwiftExtractConfiguration`.
-  public enum Level: String, Codable, Hashable, Sendable {
-    case trace
-    case debug
-    case info
-    case notice
-    case warning
-    case error
-    case critical
-  }
-}
-
-extension Logger.Level {
-  var naturalIntegralValue: Int {
-    switch self {
-    case .trace:
-      return 0
-    case .debug:
-      return 1
-    case .info:
-      return 2
-    case .notice:
-      return 3
-    case .warning:
-      return 4
-    case .error:
-      return 5
-    case .critical:
-      return 6
-    }
-  }
-}
-
-extension Logger.Level: Comparable {
-  public static func < (lhs: Logger.Level, rhs: Logger.Level) -> Bool {
-    lhs.naturalIntegralValue < rhs.naturalIntegralValue
   }
 }

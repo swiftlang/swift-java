@@ -233,7 +233,7 @@ extension FunctionDescriptorTests {
     _ methodIdentifier: String,
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
-    logLevel: Logger.Level = .trace,
+    logLevel: LogLevel = .trace,
     body: (String) throws -> Void
   ) throws {
     var config = Configuration()
@@ -267,7 +267,7 @@ extension FunctionDescriptorTests {
     _ accessorKind: SwiftAPIKind,
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
-    logLevel: Logger.Level = .trace,
+    logLevel: LogLevel = .trace,
     body: (String) throws -> Void
   ) throws {
     var config = Configuration()

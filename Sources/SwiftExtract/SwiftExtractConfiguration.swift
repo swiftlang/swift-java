@@ -24,14 +24,10 @@
 /// (e.g. Java/JNI/FFM, or other language code generators) without pulling
 /// target-specific config types into `SwiftExtract`.
 ///
-/// `AccessLevelMode` lives in the small `SwiftExtractConfigurationShared`
-/// target so language-specific configuration shared modules (e.g.
-/// `SwiftJavaConfigurationShared`) can use the same enum directly without
-/// taking a dependency on SwiftSyntax.
-///
-/// The enum-typed `swiftExtractLogLevel` member uses a `swiftExtract`-prefixed
-/// name so a conforming type can keep its own, differently-typed `logLevel`
-/// member without a name collision.
+/// `AccessLevelMode` and `LogLevel` live in the small
+/// `SwiftExtractConfigurationShared` target so language-specific configuration
+/// shared modules (e.g. `SwiftJavaConfigurationShared`) can use the same
+/// enums directly without taking a dependency on SwiftSyntax.
 public protocol SwiftExtractConfiguration {
   /// Name of the Swift module being analyzed.
   var swiftModule: String? { get }
@@ -54,7 +50,7 @@ public protocol SwiftExtractConfiguration {
   var effectiveMinimumInputAccessLevelMode: AccessLevelMode { get }
 
   /// Verbosity for the analyzer's logger; `nil` falls back to `.info`.
-  var swiftExtractLogLevel: Logger.Level? { get }
+  var logLevel: LogLevel? { get }
 
   /// Module names that should be treated as importable when resolving
   /// `#if canImport(<module>)` conditions, in addition to whatever the build
@@ -107,14 +103,14 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
   public var swiftFilterExclude: [String]?
   public var importedModuleStubs: [String: [String]]?
   public var effectiveMinimumInputAccessLevelMode: AccessLevelMode
-  public var swiftExtractLogLevel: Logger.Level?
+  public var logLevel: LogLevel?
   public var availableImportModules: Set<String>
   public var permitsUnresolvedTypeReferences: Bool
 
   public init(
     swiftModule: String? = nil,
     accessLevel: AccessLevelMode = .public,
-    logLevel: Logger.Level? = nil,
+    logLevel: LogLevel? = nil,
     staticBuildConfigurationFile: String? = nil,
     swiftFilterInclude: [String]? = nil,
     swiftFilterExclude: [String]? = nil,
@@ -124,7 +120,7 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
   ) {
     self.swiftModule = swiftModule
     self.effectiveMinimumInputAccessLevelMode = accessLevel
-    self.swiftExtractLogLevel = logLevel
+    self.logLevel = logLevel
     self.staticBuildConfigurationFile = staticBuildConfigurationFile
     self.swiftFilterInclude = swiftFilterInclude
     self.swiftFilterExclude = swiftFilterExclude

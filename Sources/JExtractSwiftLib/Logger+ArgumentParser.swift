@@ -16,7 +16,7 @@ import ArgumentParser
 import SwiftExtract
 import SwiftJavaConfigurationShared
 
-extension Logger.Level: ExpressibleByArgument {
+extension LogLevel: ExpressibleByArgument {
   public var defaultValueDescription: String {
     "log level"
   }
