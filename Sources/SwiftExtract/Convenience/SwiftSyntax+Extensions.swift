@@ -125,17 +125,17 @@ extension WithModifiersSyntax {
   /// Whether this declaration's access level is at least `mode`. The `parent`
   /// is consulted only by the `.public` mode (so e.g. members of a public
   /// protocol are themselves treated as public).
-  public func passesAccessLevel(
+  public func isAtLeast(
     _ mode: AccessLevelMode,
     in parent: ExtractedNominalType?
   ) -> Bool {
-    self.passesAccessLevel(mode, in: parent?.swiftNominal.syntax)
+    self.isAtLeast(mode, in: parent?.swiftNominal.syntax)
   }
 
   /// Lower-level overload taking the parent's syntax node directly. Used by
   /// the analyzer; downstream `ExtractDecider`s use the `ExtractedNominalType`
   /// overload above.
-  package func passesAccessLevel(
+  package func isAtLeast(
     _ mode: AccessLevelMode,
     in parent: NominalTypeDeclSyntaxNode?
   ) -> Bool {

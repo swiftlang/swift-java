@@ -81,7 +81,7 @@ public struct JavaExtractDecider: ExtractDecider {
     guard let mod = decl.asProtocol((any WithModifiersSyntax).self) else {
       return false
     }
-    let ok = mod.passesAccessLevel(accessLevel, in: parent)
+    let ok = mod.isAtLeast(accessLevel, in: parent)
     if !ok {
       log.trace("Skip '\(decl.qualifiedNameForDebug)': not at least \(accessLevel)")
     }
