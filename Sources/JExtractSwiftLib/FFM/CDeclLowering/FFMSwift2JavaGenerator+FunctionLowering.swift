@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaJNICore
 import SwiftSyntax
 
@@ -364,10 +365,6 @@ struct CdeclLowering {
         case .foundationData, .essentialsData:
           break
 
-        case .swiftJavaError:
-          // SwiftJavaError is a class — treat as arbitrary nominal type below
-          break
-
         default:
           // Unreachable? Should be handled by `CType(cdeclType:)` lowering above.
           throw LoweringError.unhandledType(type)
@@ -448,6 +445,9 @@ struct CdeclLowering {
       throw LoweringError.unhandledType(type)
 
     case .composite:
+      throw LoweringError.unhandledType(type)
+
+    case .inlineArray:
       throw LoweringError.unhandledType(type)
     }
   }
@@ -541,7 +541,7 @@ struct CdeclLowering {
       }
       throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
 
-    case .function, .metatype, .composite:
+    case .function, .metatype, .composite, .inlineArray:
       throw LoweringError.unhandledType(knownTypes.optionalSugar(wrappedType))
     }
   }
@@ -643,7 +643,7 @@ struct CdeclLowering {
       // Custom types are not supported yet.
       throw LoweringError.unhandledType(type)
 
-    case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite:
+    case .genericParameter, .function, .metatype, .tuple, .existential, .opaque, .composite, .inlineArray:
       // TODO: Implement
       throw LoweringError.unhandledType(type)
     }
@@ -859,7 +859,7 @@ struct CdeclLowering {
         conversion: .tupleExplode(conversions, name: outParameterName),
       )
 
-    case .genericParameter, .function, .existential, .opaque, .composite:
+    case .genericParameter, .function, .existential, .opaque, .composite, .inlineArray:
       throw LoweringError.unhandledType(type)
     }
   }

@@ -13,13 +13,14 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 
 extension FFMSwift2JavaGenerator {
   package func printFunctionDowncallMethods(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
   ) {
     guard let _ = translatedDecl(for: decl) else {
       // Failed to translate. Skip.
@@ -39,7 +40,7 @@ extension FFMSwift2JavaGenerator {
   /// Print FFM Java binding descriptors for the imported Swift API.
   package func printJavaBindingDescriptorClass(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
   ) {
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
     let translated = self.translatedDecl(for: decl)!
@@ -270,7 +271,7 @@ extension FFMSwift2JavaGenerator {
   /// * User-facing functional interfaces.
   func printJavaBindingWrapperHelperClass(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
   ) {
     let translated = self.translatedDecl(for: decl)!
     let bindingDescriptorName = self.thunkNameRegistry.functionThunkName(decl: decl)
@@ -359,7 +360,7 @@ extension FFMSwift2JavaGenerator {
   /// with adding `SwiftArena.ofAuto()` at the end.
   package func printJavaBindingWrapperMethod(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
   ) {
     let translated = self.translatedDecl(for: decl)!
     let methodName = translated.name
@@ -420,7 +421,7 @@ extension FFMSwift2JavaGenerator {
   /// This assumes that all the parameters are passed-in with appropriate names.
   package func printDowncall(
     _ printer: inout CodePrinter,
-    _ decl: ImportedFunc,
+    _ decl: ExtractedFunc,
   ) {
     //===  Part 1: prepare temporary arena if needed.
     let translatedSignature = self.translatedDecl(for: decl)!.translatedSignature
@@ -454,7 +455,7 @@ extension FFMSwift2JavaGenerator {
 
       let arena =
         if let className = type.className,
-          analysis.importedTypes[className] != nil
+          analysis.extractedTypes[className] != nil
         {
           // Use passed-in 'SwiftArena' for 'SwiftValue'.
           "swiftArena"

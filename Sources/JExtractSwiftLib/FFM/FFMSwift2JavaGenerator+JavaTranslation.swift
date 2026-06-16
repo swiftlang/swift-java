@@ -12,12 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 
 extension FFMSwift2JavaGenerator {
   func translatedDecl(
-    for decl: ImportedFunc
+    for decl: ExtractedFunc
   ) -> TranslatedFunctionDecl? {
     if let cached = translatedDecls[decl] {
       return cached
@@ -175,7 +176,7 @@ extension FFMSwift2JavaGenerator {
       self.javaIdentifiers = javaIdentifiers
     }
 
-    func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
+    func translate(_ decl: ExtractedFunc) throws -> TranslatedFunctionDecl {
       let lowering = CdeclLowering(knownTypes: knownTypes)
       let loweredSignature = try lowering.lowerFunctionSignature(decl.functionSignature)
 
@@ -450,10 +451,6 @@ extension FFMSwift2JavaGenerator {
           case .foundationData, .essentialsData:
             break
 
-          case .swiftJavaError:
-            // SwiftJavaError is a class — treat as arbitrary nominal type below
-            break
-
           default:
             throw JavaTranslationError.unhandledType(swiftType)
           }
@@ -521,7 +518,7 @@ extension FFMSwift2JavaGenerator {
         // Otherwise, not supported yet.
         throw JavaTranslationError.unhandledType(swiftType)
 
-      case .composite:
+      case .composite, .inlineArray:
         throw JavaTranslationError.unhandledType(swiftType)
       }
     }
@@ -819,7 +816,7 @@ extension FFMSwift2JavaGenerator {
           resultAnnotations: resultAnnotations
         )
 
-      case .genericParameter, .function, .existential, .opaque, .composite:
+      case .genericParameter, .function, .existential, .opaque, .composite, .inlineArray:
         throw JavaTranslationError.unhandledType(swiftType)
       }
 

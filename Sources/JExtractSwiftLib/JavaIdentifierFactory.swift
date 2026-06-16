@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
+
 /// Detects Java method name conflicts caused by Swift overloads that differ
 /// only in parameter labels. When a conflict is detected, the affected methods
 /// get a camelCase suffix derived from their parameter labels (e.g. `takeValueA`,
@@ -21,20 +23,20 @@ package struct JavaIdentifierFactory {
 
   package init() {}
 
-  package init(_ methods: [ImportedFunc]) {
+  package init(_ methods: [ExtractedFunc]) {
     self.init()
     record(methods)
   }
 
   /// Analyze the given methods and record any base names that have conflicts.
-  private mutating func record(_ methods: [ImportedFunc]) {
+  private mutating func record(_ methods: [ExtractedFunc]) {
     // Group methods by their Java base name.
-    var methodsByBaseName: [String: [ImportedFunc]] = [:]
+    var methodsByBaseName: [String: [ExtractedFunc]] = [:]
     for method in methods {
       let baseName: String =
         switch method.apiKind {
-        case .getter, .subscriptGetter: method.javaGetterName
-        case .setter, .subscriptSetter: method.javaSetterName
+        case .getter, .subscriptGetter: method.javaGetterName!
+        case .setter, .subscriptSetter: method.javaSetterName!
         case .function, .initializer, .enumCase: method.name
         }
       methodsByBaseName[baseName, default: []].append(method)
@@ -61,11 +63,11 @@ package struct JavaIdentifierFactory {
   }
 
   /// Compute the disambiguated Java method name for a declaration.
-  package func makeJavaMethodName(_ decl: ImportedFunc) -> String {
+  package func makeJavaMethodName(_ decl: ExtractedFunc) -> String {
     let baseName: String =
       switch decl.apiKind {
-      case .getter, .subscriptGetter: decl.javaGetterName
-      case .setter, .subscriptSetter: decl.javaSetterName
+      case .getter, .subscriptGetter: decl.javaGetterName!
+      case .setter, .subscriptSetter: decl.javaSetterName!
       case .function, .initializer, .enumCase: decl.name
       }
     var methodName = baseName + paramsSuffix(decl, baseName: baseName)
@@ -75,7 +77,7 @@ package struct JavaIdentifierFactory {
     return methodName
   }
 
-  private func paramsSuffix(_ decl: ImportedFunc, baseName: String) -> String {
+  private func paramsSuffix(_ decl: ExtractedFunc, baseName: String) -> String {
     switch decl.apiKind {
     case .getter, .subscriptGetter, .setter, .subscriptSetter:
       return ""

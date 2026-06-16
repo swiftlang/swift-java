@@ -44,6 +44,11 @@ let package = Package(
     ),
 
     .library(
+      name: "SwiftExtractConfigurationShared",
+      targets: ["SwiftExtractConfigurationShared"]
+    ),
+
+    .library(
       name: "JavaUtil",
       targets: ["JavaUtil"]
     ),
@@ -106,6 +111,16 @@ let package = Package(
     .library(
       name: "SwiftRuntimeFunctionsStatic",
       targets: ["SwiftRuntimeFunctions"]
+    ),
+
+    .library(
+      name: "SwiftExtract",
+      targets: ["SwiftExtract"]
+    ),
+
+    .library(
+      name: "CodePrinting",
+      targets: ["CodePrinting"]
     ),
 
     .library(
@@ -271,7 +286,14 @@ let package = Package(
     ),
 
     .target(
-      name: "SwiftJavaConfigurationShared"
+      name: "SwiftJavaConfigurationShared",
+      dependencies: [
+        "SwiftExtractConfigurationShared"
+      ]
+    ),
+
+    .target(
+      name: "SwiftExtractConfigurationShared"
     ),
 
     .target(
@@ -337,6 +359,33 @@ let package = Package(
     ),
 
     .target(
+      name: "SwiftExtract",
+      dependencies: [
+        .product(name: "SwiftBasicFormat", package: "swift-syntax"),
+        .product(name: "SwiftIfConfig", package: "swift-syntax"),
+        .product(name: "SwiftLexicalLookup", package: "swift-syntax"),
+        .product(name: "SwiftParser", package: "swift-syntax"),
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+        .product(name: "Logging", package: "swift-log"),
+        "SwiftExtractConfigurationShared",
+      ],
+      path: "Sources/SwiftExtract",
+      resources: [
+        // Holds the `dummy.json` placeholder so SwiftPM emits a `Bundle.module`
+        // for this target. The real `static-build-config.json` is generated at
+        // build time by the `_StaticBuildConfigPlugin` build tool below.
+        .process("Resources")
+      ],
+      swiftSettings: [
+        .swiftLanguageMode(.v5)
+      ],
+      plugins: [
+        .plugin(name: "_StaticBuildConfigPlugin")
+      ]
+    ),
+
+    .target(
       name: "JExtractSwiftLib",
       dependencies: [
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
@@ -347,19 +396,14 @@ let package = Package(
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "OrderedCollections", package: "swift-collections"),
         .product(name: "SwiftJavaJNICore", package: "swift-java-jni-core"),
+        "SwiftExtract",
         "SwiftJavaShared",
         "SwiftJavaConfigurationShared",
         "CodePrinting",
       ],
-      resources: [
-        .process("Resources")
-      ],
       swiftSettings: [
         .swiftLanguageMode(.v5),
         .enableUpcomingFeature("BareSlashRegexLiterals"),
-      ],
-      plugins: [
-        .plugin(name: "_StaticBuildConfigPlugin")
       ]
     ),
 
@@ -435,10 +479,27 @@ let package = Package(
       name: "JExtractSwiftTests",
       dependencies: [
         "JExtractSwiftLib",
+        "SwiftExtract",
         "CodePrinting",
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
+      ]
+    ),
+
+    .testTarget(
+      name: "SwiftExtractTests",
+      dependencies: [
+        "SwiftExtract",
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "SwiftParser", package: "swift-syntax"),
+      ]
+    ),
+
+    .testTarget(
+      name: "CodePrintingTests",
+      dependencies: [
+        "CodePrinting"
       ]
     ),
 

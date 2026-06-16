@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -48,10 +49,10 @@ struct TypealiasResolutionTests {
   func primitiveAliasResolvesStructMembers() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: primitiveAliasInput)
 
-    let user = try #require(translator.importedTypes["TypealiasUser"])
+    let user = try #require(translator.extractedTypes["TypealiasUser"])
 
     #expect(user.variables.contains { $0.name == "amount" }, "Property `amount: Amount` should be extracted")
     #expect(user.methods.contains { $0.name == "doubled" }, "Method `doubled() -> Amount` should be extracted")
@@ -62,11 +63,11 @@ struct TypealiasResolutionTests {
   func primitiveAliasResolvesFreeFunc() throws {
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: primitiveAliasInput)
 
     #expect(
-      translator.importedGlobalFuncs.contains { $0.name == "makeAmount" },
+      translator.extractedGlobalFuncs.contains { $0.name == "makeAmount" },
       "Global func `makeAmount(_:)` should be extracted"
     )
   }
@@ -88,10 +89,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let holder = try #require(translator.importedTypes["Holder"])
+    let holder = try #require(translator.extractedTypes["Holder"])
     #expect(holder.variables.contains { $0.name == "value" })
     #expect(!holder.initializers.isEmpty)
   }
@@ -112,10 +113,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "unwrapOrZero" })
+    let fn = try #require(translator.extractedGlobalFuncs.first { $0.name == "unwrapOrZero" })
     let paramType = try #require(fn.functionSignature.parameters.first?.type)
 
     // The parameter type should be Optional<Int64> (substituted), preserving
@@ -143,10 +144,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "describe" })
+    let fn = try #require(translator.extractedGlobalFuncs.first { $0.name == "describe" })
     let paramType = try #require(fn.functionSignature.parameters.first?.type)
 
     guard case .nominal(let nominal) = paramType else {
@@ -175,10 +176,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let holder = try #require(translator.importedTypes["Holder"])
+    let holder = try #require(translator.extractedTypes["Holder"])
     #expect(holder.variables.isEmpty, "Property `bad: OneArg` should be dropped (arity mismatch)")
   }
 
@@ -200,12 +201,12 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
     // The struct itself is still imported, but its members are dropped
     // because the alias never resolves.
-    let usesAlias = try #require(translator.importedTypes["UsesAlias"])
+    let usesAlias = try #require(translator.extractedTypes["UsesAlias"])
     #expect(usesAlias.variables.isEmpty, "Property `x: A` should be silently dropped (cycle)")
   }
 
@@ -259,10 +260,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "passA" })
+    let fn = try #require(translator.extractedGlobalFuncs.first { $0.name == "passA" })
     let paramType = try #require(fn.functionSignature.parameters.first?.type)
     #expect(
       paramType.description == "Int64",
@@ -284,10 +285,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "unwrap" })
+    let fn = try #require(translator.extractedGlobalFuncs.first { $0.name == "unwrap" })
     let paramType = try #require(fn.functionSignature.parameters.first?.type)
 
     guard case .nominal(let nominal) = paramType else {
@@ -309,10 +310,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "first" })
+    let fn = try #require(translator.extractedGlobalFuncs.first { $0.name == "first" })
     let paramType = try #require(fn.functionSignature.parameters.first?.type)
 
     guard case .nominal(let nominal) = paramType else {
@@ -343,10 +344,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "add" })
+    let fn = try #require(translator.extractedGlobalFuncs.first { $0.name == "add" })
     let paramType = try #require(fn.functionSignature.parameters.first?.type)
     #expect(
       paramType.description == "Int64",
@@ -375,10 +376,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let player = try #require(translator.importedTypes["Player"])
+    let player = try #require(translator.extractedTypes["Player"])
     let bump = try #require(player.methods.first { $0.name == "bump" })
     let paramType = try #require(bump.functionSignature.parameters.first?.type)
     #expect(paramType.description == "Int64")
@@ -400,10 +401,10 @@ struct TypealiasResolutionTests {
 
     var config = Configuration()
     config.swiftModule = "SwiftModule"
-    let translator = Swift2JavaTranslator(config: config)
+    let translator = makeSwiftJavaAnalyzer(config: config)
     try translator.analyze(path: "/fake/Fake.swift", text: input)
 
-    let fn = try #require(translator.importedGlobalFuncs.first { $0.name == "openIntBag" })
+    let fn = try #require(translator.extractedGlobalFuncs.first { $0.name == "openIntBag" })
     let paramType = try #require(fn.functionSignature.parameters.first?.type)
     guard case .nominal(let nominal) = paramType else {
       Issue.record("Expected Optional nominal, got \(paramType)")

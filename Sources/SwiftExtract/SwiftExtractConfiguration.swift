@@ -1,0 +1,131 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2024-2026 Apple Inc. and the Swift.org project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift.org project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+@_exported import SwiftExtractConfigurationShared
+
+/// The configuration surface required by the language-neutral `SwiftExtract`
+/// analysis layer.
+///
+/// `SwiftExtract` deliberately does NOT depend on any language-specific
+/// configuration module. Instead, each language layer makes its own
+/// `Configuration` type conform to this protocol, mapping its settings onto the
+/// neutral surface below. This keeps the analysis layer reusable across targets
+/// (e.g. Java/JNI/FFM, or other language code generators) without pulling
+/// target-specific config types into `SwiftExtract`.
+///
+/// `AccessLevelMode` and `LogLevel` live in the small
+/// `SwiftExtractConfigurationShared` target so language-specific configuration
+/// shared modules (e.g. `SwiftJavaConfigurationShared`) can use the same
+/// enums directly without taking a dependency on SwiftSyntax.
+public protocol SwiftExtractConfiguration {
+  /// Name of the Swift module being analyzed.
+  var swiftModule: String? { get }
+
+  /// Optional path to a JSON `StaticBuildConfiguration` used to resolve `#if`.
+  var staticBuildConfigurationFile: String? { get }
+
+  /// Glob patterns selecting which Swift files/types to extract.
+  var swiftFilterInclude: [String]? { get }
+
+  /// Glob patterns excluding Swift files/types from extraction.
+  var swiftFilterExclude: [String]? { get }
+
+  /// Stub declarations for imported modules whose source is unavailable to the
+  /// analyzer. Keyed by module name; values are Swift declaration strings parsed
+  /// as if they belonged to that module.
+  var importedModuleStubs: [String: [String]]? { get }
+
+  /// Minimum access level required for a declaration to be extracted.
+  var effectiveMinimumInputAccessLevelMode: AccessLevelMode { get }
+
+  /// Verbosity for the analyzer's logger; `nil` falls back to `.info`.
+  var logLevel: LogLevel? { get }
+
+  /// Module names that should be treated as importable when resolving
+  /// `#if canImport(<module>)` conditions, in addition to whatever the build
+  /// configuration already knows. Lets a target opt-in to extracting code
+  /// guarded behind `#if canImport(MyModule)` (e.g. another language code
+  /// generator can declare its runtime module importable here). Default: empty.
+  var availableImportModules: Set<String> { get }
+
+  /// Whether type lookups that can't resolve a name should fall back to a
+  /// synthetic, unresolved nominal reference instead of throwing
+  /// `TypeTranslationError.unknown`.
+  ///
+  /// `SwiftExtract` defaults to a strict policy: when a parameter, return
+  /// type, property type, etc. references a name the symbol table can't
+  /// resolve, the enclosing declaration is silently dropped (the analyzer
+  /// emits a `[warning] Failed to import: …` log line). That's correct for
+  /// Java/JNI, where the generator can't render code referencing an
+  /// unresolved Swift type.
+  ///
+  /// Code generators that resolve names later than analysis time
+  /// (lazy specializations) can opt-in by setting this `true`. Unresolved
+  /// names then become synthetic nominal types stamped with
+  /// `isUnresolvedTypePlaceholder == true` so downstream passes can substitute
+  /// or recognize them. See
+  /// `SwiftNominalTypeDeclaration.isUnresolvedTypePlaceholder` for the long
+  /// form. Default: false.
+  var allowUnresolvedTypeReferences: Bool { get }
+
+  /// Whether the given module name has stub declarations configured.
+  func hasImportedModuleStub(moduleOfNominal moduleName: String) -> Bool
+}
+
+extension SwiftExtractConfiguration {
+  public var availableImportModules: Set<String> { [] }
+
+  public var allowUnresolvedTypeReferences: Bool { false }
+
+  public func hasImportedModuleStub(moduleOfNominal moduleName: String) -> Bool {
+    importedModuleStubs?.keys.contains(moduleName) ?? false
+  }
+}
+
+/// A minimal, self-contained `SwiftExtractConfiguration` for callers that only
+/// need analysis (tests, tools) and don't have a richer language-specific
+/// configuration to supply.
+public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
+  public var swiftModule: String?
+  public var staticBuildConfigurationFile: String?
+  public var swiftFilterInclude: [String]?
+  public var swiftFilterExclude: [String]?
+  public var importedModuleStubs: [String: [String]]?
+  public var effectiveMinimumInputAccessLevelMode: AccessLevelMode
+  public var logLevel: LogLevel?
+  public var availableImportModules: Set<String>
+  public var allowUnresolvedTypeReferences: Bool
+
+  public init(
+    swiftModule: String? = nil,
+    accessLevel: AccessLevelMode = .public,
+    logLevel: LogLevel? = nil,
+    staticBuildConfigurationFile: String? = nil,
+    swiftFilterInclude: [String]? = nil,
+    swiftFilterExclude: [String]? = nil,
+    importedModuleStubs: [String: [String]]? = nil,
+    availableImportModules: Set<String> = [],
+    allowUnresolvedTypeReferences: Bool = false
+  ) {
+    self.swiftModule = swiftModule
+    self.effectiveMinimumInputAccessLevelMode = accessLevel
+    self.logLevel = logLevel
+    self.staticBuildConfigurationFile = staticBuildConfigurationFile
+    self.swiftFilterInclude = swiftFilterInclude
+    self.swiftFilterExclude = swiftFilterExclude
+    self.importedModuleStubs = importedModuleStubs
+    self.availableImportModules = availableImportModules
+    self.allowUnresolvedTypeReferences = allowUnresolvedTypeReferences
+  }
+}

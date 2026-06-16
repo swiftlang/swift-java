@@ -21,10 +21,22 @@ import Foundation
 // ==== -----------------------------------------------------------------------
 // MARK: CodePrinter
 
-public struct CodePrinter {
+public struct CodePrinter: Sendable {
   public var contents: String = ""
 
   public var verbose: Bool = false
+
+  /// When true, terminators of `.sloc` append a `// function @ file:line`
+  /// trailer to each line. Useful for debugging the generator. Downstream targets that compare
+  /// generated output against goldens can flip this off to get a clean
+  /// terminator equivalent to `.newLine`.
+  public var emitSourceLocations: Bool = true
+
+  /// Token used to start an inline comment. Defaults to `//` for Swift- and
+  /// Java-style output. Hash-comment languages can flip this to `.hash` so
+  /// source-location trailers, `printSeparator` banners, and echo-mode
+  /// headers render with the right comment lead.
+  public var inlineCommentStyle: InlineCommentStyle = .slashSlash
 
   public var indentationDepth: Int = 0 {
     didSet {
@@ -49,12 +61,16 @@ public struct CodePrinter {
   }
 
   public var mode: PrintMode
-  public enum PrintMode {
+  public enum PrintMode: Sendable {
     case accumulateAll
     case flushToFileOnWrite
   }
-  public init(mode: PrintMode = .flushToFileOnWrite) {
+  public init(
+    mode: PrintMode = .flushToFileOnWrite,
+    inlineCommentStyle: InlineCommentStyle = .slashSlash
+  ) {
     self.mode = mode
+    self.inlineCommentStyle = inlineCommentStyle
   }
 
   public mutating func append(_ text: String) {
@@ -167,7 +183,11 @@ public struct CodePrinter {
     }
 
     if terminator == .sloc {
-      append(" // \(function) @ \(file):\(line)\n")
+      if emitSourceLocations {
+        append(" \(inlineCommentStyle.rawValue) \(function) @ \(file):\(line)\n")
+      } else {
+        append("\n")
+      }
       atNewline = true
     } else {
       append(terminator.rawValue)
@@ -181,11 +201,12 @@ public struct CodePrinter {
 
   public mutating func printSeparator(_ text: String) {
     assert(!text.contains(where: \.isNewline))
+    let lead = inlineCommentStyle.rawValue
     print(
       """
 
-      // ==== --------------------------------------------------
-      // \(text)
+      \(lead) ==== --------------------------------------------------
+      \(lead) \(text)
 
       """
     )
@@ -216,9 +237,21 @@ public struct CodePrinter {
 }
 
 // ==== -----------------------------------------------------------------------
+// MARK: InlineCommentStyle
+
+/// Inline comment lead used by `CodePrinter` for source-location trailers,
+/// `printSeparator` banners, and echo-mode headers. Swift, Java, and other
+/// `//`-comment languages use `.slashSlash`; hash-comment languages use
+/// `.hash`.
+public enum InlineCommentStyle: String, Sendable {
+  case slashSlash = "//"
+  case hash = "#"
+}
+
+// ==== -----------------------------------------------------------------------
 // MARK: PrinterTerminator
 
-public enum PrinterTerminator: String {
+public enum PrinterTerminator: String, Sendable {
   case newLine = "\n"
   case space = " "
   case commaSpace = ", "
@@ -285,19 +318,20 @@ extension CodePrinter {
       // if we're accumulating everything, we don't want to finalize/flush
       // any contents; let's mark that this is where a write would have
       // happened though:
-      print("// ^^^^ Contents of: \(outputDirectory)\(PATH_SEPARATOR)\(filename)")
+      print("\(inlineCommentStyle.rawValue) ^^^^ Contents of: \(outputDirectory)\(PATH_SEPARATOR)\(filename)")
       return nil
     }
 
     let contents = finalize()
     if outputDirectory == "-" {
+      let lead = inlineCommentStyle.rawValue
       print(
-        "// ==== ---------------------------------------------------------------------------------------------------"
+        "\(lead) ==== ---------------------------------------------------------------------------------------------------"
       )
       if let javaPackagePath {
-        print("// \(javaPackagePath)\(PATH_SEPARATOR)\(filename)")
+        print("\(lead) \(javaPackagePath)\(PATH_SEPARATOR)\(filename)")
       } else {
-        print("// \(filename)")
+        print("\(lead) \(filename)")
       }
       print(contents)
       return nil

@@ -14,6 +14,13 @@
 
 import Foundation
 
+// In a real module build this resolves to a separate target. In plugin builds
+// the file is inlined (via symlink) alongside `AccessLevelMode.swift`, so the
+// module isn't a discoverable import — guard with canImport.
+#if canImport(SwiftExtractConfigurationShared)
+@_exported import SwiftExtractConfigurationShared
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 // This file is only supposed to be edited in `Shared/` and must be symlinked //
 // from everywhere else! We cannot share dependencies with or between plugins //
@@ -62,8 +69,8 @@ public struct Configuration: Codable {
     writeEmptyFiles ?? false
   }
 
-  public var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
-  public var effectiveMinimumInputAccessLevelMode: JExtractMinimumAccessLevelMode {
+  public var minimumInputAccessLevelMode: AccessLevelMode?
+  public var effectiveMinimumInputAccessLevelMode: AccessLevelMode {
     minimumInputAccessLevelMode ?? .default
   }
 
@@ -658,51 +665,5 @@ public struct SpecializationConfigEntry: Codable, Sendable {
   public init(base: String, typeArgs: [String: String]) {
     self.base = base
     self.typeArgs = typeArgs
-  }
-}
-
-public enum LogLevel: String, ExpressibleByStringLiteral, Codable, Hashable {
-  case trace = "trace"
-  case debug = "debug"
-  case info = "info"
-  case notice = "notice"
-  case warning = "warning"
-  case error = "error"
-  case critical = "critical"
-
-  public init(stringLiteral value: String) {
-    self = LogLevel(rawValue: value) ?? .info
-  }
-}
-
-extension LogLevel {
-  public init(from decoder: any Decoder) throws {
-    let container = try decoder.singleValueContainer()
-    let string = try container.decode(String.self)
-    switch string {
-    case "trace": self = .trace
-    case "debug": self = .debug
-    case "info": self = .info
-    case "notice": self = .notice
-    case "warning": self = .warning
-    case "error": self = .error
-    case "critical": self = .critical
-    default: fatalError("Unknown value for \(LogLevel.self): \(string)")
-    }
-  }
-
-  public func encode(to encoder: any Encoder) throws {
-    var container = encoder.singleValueContainer()
-    let text =
-      switch self {
-      case .trace: "trace"
-      case .debug: "debug"
-      case .info: "info"
-      case .notice: "notice"
-      case .warning: "warning"
-      case .error: "error"
-      case .critical: "critical"
-      }
-    try container.encode(text)
   }
 }

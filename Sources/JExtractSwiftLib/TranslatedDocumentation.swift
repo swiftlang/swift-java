@@ -13,12 +13,13 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftSyntax
 
 enum TranslatedDocumentation {
   static func printDocumentation(
-    importedFunc: ImportedFunc,
+    importedFunc: ExtractedFunc,
     translatedDecl: FFMSwift2JavaGenerator.TranslatedFunctionDecl,
     config: Configuration,
     in printer: inout CodePrinter
@@ -38,7 +39,7 @@ enum TranslatedDocumentation {
   }
 
   static func printDocumentation(
-    importedFunc: ImportedFunc,
+    importedFunc: ExtractedFunc,
     translatedDecl: JNISwift2JavaGenerator.TranslatedFunctionDecl,
     config: Configuration,
     in printer: inout CodePrinter

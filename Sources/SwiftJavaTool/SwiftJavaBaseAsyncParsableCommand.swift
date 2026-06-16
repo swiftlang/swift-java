@@ -19,6 +19,7 @@ import JavaLangReflect
 import JavaNet
 import JavaUtilJar
 import Logging
+import SwiftExtract
 import SwiftJava
 import SwiftJavaConfigurationShared
 import SwiftJavaShared
@@ -30,7 +31,7 @@ protocol SwiftJavaBaseAsyncParsableCommand: AsyncParsableCommand {
 
   var log: Logging.Logger { get }
 
-  var logLevel: JExtractSwiftLib.Logger.Level { get set }
+  var logLevel: LogLevel { get set }
 
   /// Must be implemented with an `@OptionGroup` in Command implementations
   var commonOptions: SwiftJava.CommonOptions { get set }
@@ -103,7 +104,7 @@ extension SwiftJavaBaseAsyncParsableCommand {
     .init(label: "swift-java")
   }
 
-  var logLevel: JExtractSwiftLib.Logger.Level {
+  var logLevel: LogLevel {
     get {
       self.commonOptions.logLevel
     }

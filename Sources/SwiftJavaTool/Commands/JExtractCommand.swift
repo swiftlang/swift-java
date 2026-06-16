@@ -66,7 +66,7 @@ extension SwiftJava {
     var writeEmptyFiles: Bool?
 
     @Option(help: "The lowest access level of Swift declarations that should be extracted, defaults to 'public'.")
-    var minimumInputAccessLevelMode: JExtractMinimumAccessLevelMode?
+    var minimumInputAccessLevelMode: AccessLevelMode?
 
     @Option(
       help:
@@ -222,6 +222,6 @@ struct IllegalModeCombinationError: Error {
 }
 
 extension JExtractGenerationMode: ExpressibleByArgument {}
-extension JExtractMinimumAccessLevelMode: ExpressibleByArgument {}
+extension AccessLevelMode: ExpressibleByArgument {}
 extension JExtractMemoryManagementMode: ExpressibleByArgument {}
 extension JExtractAsyncFuncMode: ExpressibleByArgument {}

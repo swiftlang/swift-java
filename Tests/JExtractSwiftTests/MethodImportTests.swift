@@ -14,6 +14,7 @@
 
 import CodePrinting
 import JExtractSwiftLib
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -71,7 +72,7 @@ final class MethodImportTests {
   func method_helloWorld() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -84,7 +85,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let funcDecl = try #require(st.importedGlobalFuncs.first { $0.name == "helloWorld" })
+    let funcDecl = try #require(st.extractedGlobalFuncs.first { $0.name == "helloWorld" })
 
     let output = CodePrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, funcDecl)
@@ -113,13 +114,13 @@ final class MethodImportTests {
   func func_globalTakeInt() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = try #require(
-      st.importedGlobalFuncs.first {
+      st.extractedGlobalFuncs.first {
         $0.name == "globalTakeInt"
       }
     )
@@ -162,13 +163,13 @@ final class MethodImportTests {
   func func_globalTakeIntLongString() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = try #require(
-      st.importedGlobalFuncs.first {
+      st.extractedGlobalFuncs.first {
         $0.name == "globalTakeIntLongString"
       }
     )
@@ -208,13 +209,13 @@ final class MethodImportTests {
   func func_globalReturnClass() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = try #require(
-      st.importedGlobalFuncs.first {
+      st.extractedGlobalFuncs.first {
         $0.name == "globalReturnClass"
       }
     )
@@ -254,13 +255,13 @@ final class MethodImportTests {
   func func_globalSwapRawBufferPointer() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     let funcDecl = try #require(
-      st.importedGlobalFuncs.first {
+      st.extractedGlobalFuncs.first {
         $0.name == "swapRawBufferPointer"
       }
     )
@@ -303,13 +304,13 @@ final class MethodImportTests {
   func method_class_helloMemberFunction() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = try #require(
-      st.importedTypes["MySwiftClass"]!.methods.first {
+    let funcDecl: ExtractedFunc = try #require(
+      st.extractedTypes["MySwiftClass"]!.methods.first {
         $0.name == "helloMemberFunction"
       }
     )
@@ -348,13 +349,13 @@ final class MethodImportTests {
   func method_class_makeInt() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .info
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let funcDecl: ImportedFunc = try #require(
-      st.importedTypes["MySwiftClass"]!.methods.first {
+    let funcDecl: ExtractedFunc = try #require(
+      st.extractedTypes["MySwiftClass"]!.methods.first {
         $0.name == "makeInt"
       }
     )
@@ -399,13 +400,13 @@ final class MethodImportTests {
   func class_constructor() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .info
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let initDecl: ImportedFunc = try #require(
-      st.importedTypes["MySwiftClass"]!.initializers.first {
+    let initDecl: ExtractedFunc = try #require(
+      st.extractedTypes["MySwiftClass"]!.initializers.first {
         $0.name == "init"
       }
     )
@@ -453,14 +454,14 @@ final class MethodImportTests {
   func struct_constructor() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
 
     st.log.logLevel = .info
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
-    let initDecl: ImportedFunc = try #require(
-      st.importedTypes["MySwiftStruct"]!.initializers.first {
+    let initDecl: ExtractedFunc = try #require(
+      st.extractedTypes["MySwiftStruct"]!.initializers.first {
         $0.name == "init"
       }
     )
@@ -508,13 +509,13 @@ final class MethodImportTests {
   func func_globalReturnAny() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
 
     #expect(
-      !st.importedGlobalFuncs.contains {
+      !st.extractedGlobalFuncs.contains {
         $0.name == "globalReturnAny"
       },
       "'Any' return type is not supported yet"

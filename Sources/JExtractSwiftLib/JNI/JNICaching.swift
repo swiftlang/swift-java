@@ -12,8 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
+
 enum JNICaching {
-  static func cacheName(for type: ImportedNominalType) -> String {
+  static func cacheName(for type: ExtractedNominalType) -> String {
     cacheName(for: type.effectiveJavaTypeName)
   }
 
@@ -21,7 +23,7 @@ enum JNICaching {
     cacheName(for: type.nominalTypeDecl.qualifiedTypeName)
   }
 
-  static func bridgeName(for type: ImportedNominalType) -> String {
+  static func bridgeName(for type: ExtractedNominalType) -> String {
     bridgeName(for: type.swiftNominal.qualifiedTypeName)
   }
 
@@ -37,7 +39,7 @@ enum JNICaching {
     "_JNIBridge_\(typeName.fullFlatName)"
   }
 
-  static func cacheMemberName(for enumCase: ImportedEnumCase) -> String {
+  static func cacheMemberName(for enumCase: ExtractedEnumCase) -> String {
     "\(enumCase.enumType.nominalTypeDecl.name.firstCharacterLowercased)\(enumCase.name.firstCharacterUppercased)Cache"
   }
 

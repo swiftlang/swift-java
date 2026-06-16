@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftSyntax
 import Testing
@@ -27,10 +28,9 @@ struct JavaTypeAnnotationsTests {
   init() {
     let symbolTable = SwiftSymbolTable.setup(
       moduleName: "TestModule",
-      [SwiftJavaInputFile(syntax: "" as SourceFileSyntax, path: "Fake.swift")],
+      [SwiftInputFile(syntax: "" as SourceFileSyntax, path: "Fake.swift")],
       config: nil,
-      sourceDependencies: SourceDependencies(),
-      log: Logger(label: "test", logLevel: .critical)
+      sourceDependencies: SourceDependencies()
     )
     self.knownTypes = SwiftKnownTypes(symbolTable: symbolTable)
     self.config = Configuration()

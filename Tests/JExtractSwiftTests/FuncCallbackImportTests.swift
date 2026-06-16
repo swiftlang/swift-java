@@ -14,6 +14,7 @@
 
 import CodePrinting
 import JExtractSwiftLib
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -41,12 +42,12 @@ final class FuncCallbackImportTests {
   func func_callMeFunc_callback() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMe" }!
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMe" }!
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -131,11 +132,11 @@ final class FuncCallbackImportTests {
   func func_callMeMoreFunc_callback() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
 
     try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first { $0.name == "callMeMore" }!
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeMore" }!
 
     let generator = FFMSwift2JavaGenerator(
       config: config,
@@ -246,12 +247,12 @@ final class FuncCallbackImportTests {
   func func_withBuffer_body() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first { $0.name == "withBuffer" }!
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "withBuffer" }!
 
     let generator = FFMSwift2JavaGenerator(
       config: config,

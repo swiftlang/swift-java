@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -33,7 +34,7 @@ final class FFMNestedTypesTests {
   func test_nested_in_extension() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = .error
 
     try st.analyze(path: "Fake.swift", text: class_interfaceFile)
@@ -46,6 +47,6 @@ final class FFMNestedTypesTests {
       javaOutputDirectory: "/fake"
     )
 
-    #expect(st.importedTypes["MyNamespace.MyNestedStruct"] != nil, "Didn't import nested type!")
+    #expect(st.extractedTypes["MyNamespace.MyNestedStruct"] != nil, "Didn't import nested type!")
   }
 }

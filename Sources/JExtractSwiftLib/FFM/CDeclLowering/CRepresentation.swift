@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
+
 extension CType {
   /// Lower the given Swift type down to a its corresponding C type.
   ///
@@ -71,7 +73,7 @@ extension CType {
     case .tuple([]):
       self = .void
 
-    case .genericParameter, .metatype, .tuple, .opaque, .existential, .composite:
+    case .genericParameter, .metatype, .tuple, .opaque, .existential, .composite, .inlineArray:
       throw CDeclToCLoweringError.invalidCDeclType(cdeclType)
     }
   }

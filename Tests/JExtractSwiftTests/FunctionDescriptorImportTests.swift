@@ -14,6 +14,7 @@
 
 import CodePrinting
 import JExtractSwiftLib
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import Testing
 
@@ -232,17 +233,17 @@ extension FunctionDescriptorTests {
     _ methodIdentifier: String,
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
-    logLevel: Logger.Level = .trace,
+    logLevel: LogLevel = .trace,
     body: (String) throws -> Void
   ) throws {
     var config = Configuration()
     config.swiftModule = swiftModuleName
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = logLevel
 
     try st.analyze(path: "/fake/Sample.swiftinterface", text: interfaceFile)
 
-    let funcDecl = st.importedGlobalFuncs.first {
+    let funcDecl = st.extractedGlobalFuncs.first {
       $0.name == methodIdentifier
     }!
 
@@ -266,12 +267,12 @@ extension FunctionDescriptorTests {
     _ accessorKind: SwiftAPIKind,
     javaPackage: String = "com.example.swift",
     swiftModuleName: String = "SwiftModule",
-    logLevel: Logger.Level = .trace,
+    logLevel: LogLevel = .trace,
     body: (String) throws -> Void
   ) throws {
     var config = Configuration()
     config.swiftModule = swiftModuleName
-    let st = Swift2JavaTranslator(config: config)
+    let st = makeSwiftJavaAnalyzer(config: config)
     st.log.logLevel = logLevel
 
     try st.analyze(path: "/fake/Sample.swiftinterface", text: interfaceFile)
@@ -284,8 +285,8 @@ extension FunctionDescriptorTests {
       javaOutputDirectory: "/fake"
     )
 
-    let accessorDecl: ImportedFunc? =
-      st.importedTypes.values.compactMap {
+    let accessorDecl: ExtractedFunc? =
+      st.extractedTypes.values.compactMap {
         $0.variables.first {
           $0.name == identifier && $0.apiKind == accessorKind
         }

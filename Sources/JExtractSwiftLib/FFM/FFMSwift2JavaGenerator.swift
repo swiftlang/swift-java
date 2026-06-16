@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 import SwiftSyntax
@@ -37,7 +38,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   var thunkNameRegistry: ThunkNameRegistry = ThunkNameRegistry()
 
   /// Cached Java translation result. 'nil' indicates failed translation.
-  var translatedDecls: [ImportedFunc: TranslatedFunctionDecl?] = [:]
+  var translatedDecls: [ExtractedFunc: TranslatedFunctionDecl?] = [:]
 
   /// Duplicate identifier tracking for the current batch of methods being generated.
   var currentJavaIdentifiers: JavaIdentifierFactory = JavaIdentifierFactory()
@@ -69,7 +70,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
   package init(
     config: Configuration,
-    translator: Swift2JavaTranslator,
+    translator: SwiftAnalyzer,
     javaPackage: String,
     swiftOutputDirectory: String,
     javaOutputDirectory: String,
@@ -85,7 +86,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
 
     // If we are forced to write empty files, construct the expected outputs.
     // It is sufficient to use file names only, since SwiftPM requires names to be unique within a module anyway.
-    if translator.config.effectiveWriteEmptyFiles {
+    if config.effectiveWriteEmptyFiles {
       self.expectedOutputSwiftFileNames = Set(
         translator.inputs.compactMap { (input) -> String? in
           guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
@@ -151,8 +152,8 @@ extension FFMSwift2JavaGenerator {
   ]
 
   /// Returns the Java class name for a nominal type, applying known-type overrides
-  func javaClassName(for decl: ImportedNominalType) -> String {
-    if decl.swiftNominal.knownTypeKind == .swiftJavaError {
+  func javaClassName(for decl: ExtractedNominalType) -> String {
+    if decl.swiftNominal.isSwiftJavaErrorType {
       return JavaType.swiftJavaErrorException.className!
     }
     return decl.swiftNominal.name
@@ -170,13 +171,13 @@ extension FFMSwift2JavaGenerator {
 
   /// Every imported public type becomes a public class in its own file in Java.
   package func writeExportedJavaSources(printer: inout CodePrinter) throws {
-    let typesToExport: [(key: String, value: ImportedNominalType)]
+    let typesToExport: [(key: String, value: ExtractedNominalType)]
     if let singleType = config.singleType {
-      typesToExport = analysis.importedTypes
+      typesToExport = analysis.extractedTypes
         .filter { $0.key == singleType }
         .sorted(by: { $0.key < $1.key })
     } else {
-      typesToExport = analysis.importedTypes
+      typesToExport = analysis.extractedTypes
         .sorted(by: { $0.key < $1.key })
     }
 
@@ -226,24 +227,24 @@ extension FFMSwift2JavaGenerator {
     printImports(&printer)
 
     self.currentJavaIdentifiers = JavaIdentifierFactory(
-      self.analysis.importedGlobalFuncs + self.analysis.importedGlobalVariables
+      self.analysis.extractedGlobalFuncs + self.analysis.extractedGlobalVariables
     )
 
     printModuleClass(&printer) { printer in
 
-      for decl in analysis.importedGlobalVariables {
+      for decl in analysis.extractedGlobalVariables {
         self.log.trace("Print imported decl: \(decl)")
         printFunctionDowncallMethods(&printer, decl)
       }
 
-      for decl in analysis.importedGlobalFuncs {
+      for decl in analysis.extractedGlobalFuncs {
         self.log.trace("Print imported decl: \(decl)")
         printFunctionDowncallMethods(&printer, decl)
       }
     }
   }
 
-  func printImportedNominal(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  func printImportedNominal(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer) // TODO: we could have some imports be driven from types used in the generated decl
@@ -252,7 +253,7 @@ extension FFMSwift2JavaGenerator {
       decl.initializers + decl.variables + decl.methods
     )
 
-    let isErrorType = decl.swiftNominal.knownTypeKind == .swiftJavaError
+    let isErrorType = decl.swiftNominal.isSwiftJavaErrorType
     self.currentSymbolLookup = isErrorType ? .swiftRuntime : .module
 
     printNominal(&printer, decl) { printer in
@@ -386,10 +387,10 @@ extension FFMSwift2JavaGenerator {
 
   func printNominal(
     _ printer: inout CodePrinter,
-    _ decl: ImportedNominalType,
+    _ decl: ExtractedNominalType,
     body: (inout CodePrinter) -> Void,
   ) {
-    let isErrorType = decl.swiftNominal.knownTypeKind == .swiftJavaError
+    let isErrorType = decl.swiftNominal.isSwiftJavaErrorType
 
     let baseClass: String
     let parentProtocol: String
@@ -424,8 +425,8 @@ extension FFMSwift2JavaGenerator {
 
   /// Returns a closure that prints the constructor and related extras for special nominal types
   /// (e.g. error types), or `nil` for normal types that use the default layout + constructor
-  func getSpecialNominalConstructorPrinting(_ decl: ImportedNominalType) -> ((inout CodePrinter) -> Void)? {
-    if decl.swiftNominal.knownTypeKind == .swiftJavaError {
+  func getSpecialNominalConstructorPrinting(_ decl: ExtractedNominalType) -> ((inout CodePrinter) -> Void)? {
+    if decl.swiftNominal.isSwiftJavaErrorType {
       return { printer in
         // Error constructor: wrap the opaque pointer so it becomes a pointer-to-reference
         // (matching the convention used by normal class instance thunks)
@@ -448,8 +449,8 @@ extension FFMSwift2JavaGenerator {
 
   /// Returns a closure that prints post-members extras for special nominal types
   /// (e.g. `fetchDescription` for error types), or `nil` for normal types that use `toString()`
-  func getSpecialNominalPostMembersPrinting(_ decl: ImportedNominalType) -> ((inout CodePrinter) -> Void)? {
-    if decl.swiftNominal.knownTypeKind == .swiftJavaError {
+  func getSpecialNominalPostMembersPrinting(_ decl: ExtractedNominalType) -> ((inout CodePrinter) -> Void)? {
+    if decl.swiftNominal.isSwiftJavaErrorType {
       return { printer in
         // Error types inherit toString() from Exception; print fetchDescription helper instead
         self.printSwiftJavaErrorFetchDescriptionMethod(&printer, decl)
@@ -568,7 +569,7 @@ extension FFMSwift2JavaGenerator {
     )
   }
 
-  private func printClassMemoryLayout(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printClassMemoryLayout(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     printer.print(
       """
       public static final GroupLayout $LAYOUT = (GroupLayout) SwiftValueWitnessTable.layoutOfSwiftType(TYPE_METADATA.$memorySegment());
@@ -581,7 +582,7 @@ extension FFMSwift2JavaGenerator {
 
   func printToStringMethod(
     _ printer: inout CodePrinter,
-    _ decl: ImportedNominalType,
+    _ decl: ExtractedNominalType,
   ) {
     printer.print(
       """
@@ -598,7 +599,7 @@ extension FFMSwift2JavaGenerator {
   }
 
   /// Print special helper methods for known types like Foundation.Data
-  func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  func printSpecificTypeHelpers(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     guard let knownType = decl.swiftNominal.knownTypeKind else {
       return
     }
@@ -614,7 +615,7 @@ extension FFMSwift2JavaGenerator {
   /// Print the `fetchDescription` static helper for SwiftJavaError.
   /// This calls the `errorDescription()` downcall to get the error message
   /// for the super constructor
-  func printSwiftJavaErrorFetchDescriptionMethod(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  func printSwiftJavaErrorFetchDescriptionMethod(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     // Find the errorDescription method's thunk name
     let errorDescMethod = decl.methods.first { $0.name == "errorDescription" }
     guard let errorDescMethod, let _ = translatedDecl(for: errorDescMethod) else {

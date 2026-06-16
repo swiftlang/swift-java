@@ -12,8 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+import CodePrinting
 import Foundation
 import SwiftBasicFormat
+import SwiftExtract
 import SwiftParser
 import SwiftSyntax
 
@@ -21,7 +23,7 @@ import SwiftSyntax
 package struct SwiftKitPrinting {
 
   /// Forms syntax for a Java call to a swiftkit exposed function.
-  static func renderCallGetSwiftType(module: String, nominal: ImportedNominalType) -> String {
+  static func renderCallGetSwiftType(module: String, nominal: ExtractedNominalType) -> String {
     """
     SwiftRuntime.swiftjava.getType("\(module)", "\(nominal.swiftNominal.qualifiedName)")
     """
@@ -51,7 +53,7 @@ extension SwiftKitPrinting {
 }
 
 extension SwiftKitPrinting.Names {
-  static func getType(module: String, nominal: ImportedNominalType) -> String {
+  static func getType(module: String, nominal: ExtractedNominalType) -> String {
     "swiftjava_getType_\(module)_\(nominal.swiftNominal.qualifiedTypeName.fullFlatName)"
   }
 

@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import CodePrinting
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 import SwiftSyntax
@@ -29,12 +30,12 @@ extension JNISwift2JavaGenerator {
       protocolWrappers: self.interfaceProtocolWrappers,
       logger: self.logger,
       javaIdentifiers: self.currentJavaIdentifiers,
-      importedTypes: self.analysis.importedTypes,
+      extractedTypes: self.analysis.extractedTypes,
     )
   }
 
   func translatedDecl(
-    for decl: ImportedFunc
+    for decl: ExtractedFunc
   ) -> TranslatedFunctionDecl? {
     if let cached = translatedDecls[decl] {
       return cached
@@ -53,7 +54,7 @@ extension JNISwift2JavaGenerator {
   }
 
   func translatedEnumCase(
-    for decl: ImportedEnumCase
+    for decl: ExtractedEnumCase
   ) -> TranslatedEnumCase? {
     if let cached = translatedEnumCases[decl] {
       return cached
@@ -71,7 +72,7 @@ extension JNISwift2JavaGenerator {
         protocolWrappers: self.interfaceProtocolWrappers,
         logger: self.logger,
         javaIdentifiers: self.currentJavaIdentifiers,
-        importedTypes: self.analysis.importedTypes,
+        extractedTypes: self.analysis.extractedTypes,
       )
       translated = try translation.translate(enumCase: decl)
     } catch {
@@ -90,12 +91,12 @@ extension JNISwift2JavaGenerator {
     let javaClassLookupTable: JavaClassLookupTable
     let moduleJavaPackages: ModuleJavaPackages
     var knownTypes: SwiftKnownTypes
-    let protocolWrappers: [ImportedNominalType: JavaInterfaceSwiftWrapper]
+    let protocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
     var javaIdentifiers: JavaIdentifierFactory
-    let importedTypes: [String: ImportedNominalType]
+    let extractedTypes: [SwiftTypeName: ExtractedNominalType]
 
-    func translate(enumCase: ImportedEnumCase) throws -> TranslatedEnumCase {
+    func translate(enumCase: ExtractedEnumCase) throws -> TranslatedEnumCase {
       let methodName = "" // TODO: Used for closures, replace with better name?
 
       let parameterResults = try enumCase.parameters.enumerated().map { idx, parameter in
@@ -122,9 +123,9 @@ extension JNISwift2JavaGenerator {
           }
         )
       )
-      let getAsCaseFunction: ImportedFunc? =
+      let getAsCaseFunction: ExtractedFunc? =
         if !enumCase.parameters.isEmpty {
-          ImportedFunc(
+          ExtractedFunc(
             module: enumCase.enumType.nominalTypeDecl.moduleName,
             swiftDecl: DeclSyntax("func getAs\(raw: javaCaseClassName)() -> (\(raw: associatedValueTypes))?"),
             name: "getAs\(javaCaseClassName)",
@@ -151,7 +152,7 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    func translate(_ decl: ImportedFunc) throws -> TranslatedFunctionDecl {
+    func translate(_ decl: ExtractedFunc) throws -> TranslatedFunctionDecl {
       let nativeTranslation = NativeJavaTranslation(
         config: self.config,
         javaPackage: self.javaPackage,
@@ -575,7 +576,7 @@ extension JNISwift2JavaGenerator {
 
       case .tuple:
         throw JavaTranslationError.emptyTuple()
-      case .composite:
+      case .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -973,7 +974,7 @@ extension JNISwift2JavaGenerator {
           genericRequirements: genericRequirements,
         )
 
-      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite:
+      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -1106,7 +1107,7 @@ extension JNISwift2JavaGenerator {
         }
         return .tuple(elementTypes: elementJavaTypes)
 
-      case .metatype, .function, .existential, .opaque, .composite:
+      case .metatype, .function, .existential, .opaque, .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -1578,12 +1579,12 @@ extension JNISwift2JavaGenerator {
     let name: String
 
     /// The oringinal enum case.
-    let original: ImportedEnumCase
+    let original: ExtractedEnumCase
 
     /// A list of the translated associated values
     let parameters: [JavaParameter]
 
-    let getAsCaseFunction: ImportedFunc?
+    let getAsCaseFunction: ExtractedFunc?
 
     /// Returns whether the associated values require an arena
     let requiresSwiftArena: Bool

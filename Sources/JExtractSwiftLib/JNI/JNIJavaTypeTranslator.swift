@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftJavaJNICore
 
@@ -52,8 +53,7 @@ enum JNIJavaTypeTranslator {
       .dictionary,
       .set,
       .foundationDate, .essentialsDate,
-      .foundationUUID, .essentialsUUID,
-      .swiftJavaError:
+      .foundationUUID, .essentialsUUID:
       return nil
     }
   }
@@ -79,8 +79,7 @@ enum JNIJavaTypeTranslator {
       .dictionary,
       .set,
       .foundationDate, .essentialsDate,
-      .foundationUUID, .essentialsUUID,
-      .swiftJavaError:
+      .foundationUUID, .essentialsUUID:
       nil
     }
   }
@@ -106,8 +105,7 @@ enum JNIJavaTypeTranslator {
       .dictionary,
       .set,
       .foundationDate, .essentialsDate,
-      .foundationUUID, .essentialsUUID,
-      .swiftJavaError:
+      .foundationUUID, .essentialsUUID:
       nil
     }
   }

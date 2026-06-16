@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_spi(Testing) import JExtractSwiftLib
+import SwiftExtract
 import SwiftJavaConfigurationShared
 import SwiftSyntax
 import Testing
@@ -34,7 +35,7 @@ func assertLoweredFunction(
 ) throws {
   var config = Configuration()
   config.swiftModule = swiftModuleName
-  let translator = Swift2JavaTranslator(config: config)
+  let translator = makeSwiftJavaAnalyzer(config: config)
 
   if let sourceFile {
     translator.add(filePath: "Fake.swift", text: sourceFile)
@@ -120,7 +121,7 @@ func assertLoweredVariableAccessor(
 ) throws {
   var config = Configuration()
   config.swiftModule = swiftModuleName
-  let translator = Swift2JavaTranslator(config: config)
+  let translator = makeSwiftJavaAnalyzer(config: config)
 
   if let sourceFile {
     translator.add(filePath: "Fake.swift", text: sourceFile)
