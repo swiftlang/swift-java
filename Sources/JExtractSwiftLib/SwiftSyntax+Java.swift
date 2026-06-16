@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_spi(Testing) import SwiftExtract
+import SwiftExtract
 import SwiftSyntax
 
 extension AttributeListSyntax.Element {

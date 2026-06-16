@@ -14,8 +14,7 @@
 
 import SwiftSyntax
 
-///// A syntax node for a nominal type declaration.
-@_spi(Testing)
+/// A syntax node for a nominal type declaration.
 public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax
   & WithModifiersSyntax
 
@@ -63,7 +62,7 @@ public class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
   }
 
   /// The syntax node this declaration is derived from.
-  @_spi(Testing) public let syntax: NominalTypeDeclSyntaxNode
+  public let syntax: NominalTypeDeclSyntaxNode
 
   /// The kind of nominal type.
   public let kind: Kind
