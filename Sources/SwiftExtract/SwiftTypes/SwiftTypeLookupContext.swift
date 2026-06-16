@@ -25,8 +25,8 @@ public class SwiftTypeLookupContext {
   /// When true, name lookups that fail to resolve fall back to a synthetic
   /// unresolved nominal (via `SwiftSyntheticTypes.unresolvedNominal(_:)`)
   /// instead of throwing. See
-  /// `SwiftExtractConfiguration.permitsUnresolvedTypeReferences`.
-  public var permitsUnresolvedTypeReferences: Bool = false
+  /// `SwiftExtractConfiguration.allowUnresolvedTypeReferences`.
+  public var allowUnresolvedTypeReferences: Bool = false
 
   private var typeDecls: [Syntax.ID: SwiftTypeDeclaration] = [:]
 

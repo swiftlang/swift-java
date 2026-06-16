@@ -77,7 +77,7 @@ public protocol SwiftExtractConfiguration {
   /// or recognize them. See
   /// `SwiftNominalTypeDeclaration.isUnresolvedTypePlaceholder` for the long
   /// form. Default: false.
-  var permitsUnresolvedTypeReferences: Bool { get }
+  var allowUnresolvedTypeReferences: Bool { get }
 
   /// Whether the given module name has stub declarations configured.
   func hasImportedModuleStub(moduleOfNominal moduleName: String) -> Bool
@@ -86,7 +86,7 @@ public protocol SwiftExtractConfiguration {
 extension SwiftExtractConfiguration {
   public var availableImportModules: Set<String> { [] }
 
-  public var permitsUnresolvedTypeReferences: Bool { false }
+  public var allowUnresolvedTypeReferences: Bool { false }
 
   public func hasImportedModuleStub(moduleOfNominal moduleName: String) -> Bool {
     importedModuleStubs?.keys.contains(moduleName) ?? false
@@ -105,7 +105,7 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
   public var effectiveMinimumInputAccessLevelMode: AccessLevelMode
   public var logLevel: LogLevel?
   public var availableImportModules: Set<String>
-  public var permitsUnresolvedTypeReferences: Bool
+  public var allowUnresolvedTypeReferences: Bool
 
   public init(
     swiftModule: String? = nil,
@@ -116,7 +116,7 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     swiftFilterExclude: [String]? = nil,
     importedModuleStubs: [String: [String]]? = nil,
     availableImportModules: Set<String> = [],
-    permitsUnresolvedTypeReferences: Bool = false
+    allowUnresolvedTypeReferences: Bool = false
   ) {
     self.swiftModule = swiftModule
     self.effectiveMinimumInputAccessLevelMode = accessLevel
@@ -126,6 +126,6 @@ public struct DefaultSwiftExtractConfiguration: SwiftExtractConfiguration {
     self.swiftFilterExclude = swiftFilterExclude
     self.importedModuleStubs = importedModuleStubs
     self.availableImportModules = availableImportModules
-    self.permitsUnresolvedTypeReferences = permitsUnresolvedTypeReferences
+    self.allowUnresolvedTypeReferences = allowUnresolvedTypeReferences
   }
 }

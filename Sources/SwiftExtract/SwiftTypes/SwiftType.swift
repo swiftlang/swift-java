@@ -509,12 +509,12 @@ extension SwiftType {
       typeDecl = try lookupContext.unqualifiedLookup(name: ident, from: name)
     }
     guard let typeDecl else {
-      // Lenient mode (opt-in via SwiftExtractConfiguration.permitsUnresolvedTypeReferences):
+      // Lenient mode (opt-in via SwiftExtractConfiguration.allowUnresolvedTypeReferences):
       // synthesize an unresolved nominal placeholder so a downstream pass can
       // substitute or recognize it. Generic-argument names are kept (so e.g.
       // `Box<Element>` becomes a synthetic nominal carrying the unresolved
       // `Element` argument).
-      if lookupContext.permitsUnresolvedTypeReferences {
+      if lookupContext.allowUnresolvedTypeReferences {
         self = SwiftSyntheticTypes.unresolvedNominal(name.text)
         if !genericArguments.isEmpty,
           case .nominal(let synth) = self

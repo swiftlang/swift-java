@@ -20,6 +20,6 @@ import SwiftJavaConfigurationShared
 /// `logLevel`, …) — `LogLevel` and `AccessLevelMode` are the same enums on
 /// both sides, both pulled in from `SwiftExtractConfigurationShared`. The
 /// protocol extension on `SwiftExtractConfiguration` defaults
-/// `availableImportModules` and `permitsUnresolvedTypeReferences`, so this
+/// `availableImportModules` and `allowUnresolvedTypeReferences`, so this
 /// conformance is empty.
 extension Configuration: SwiftExtractConfiguration {}
