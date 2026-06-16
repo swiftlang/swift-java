@@ -136,15 +136,11 @@ extension SwiftAnalyzer {
     try self.analyze()
   }
 
-  /// Analyze registered inputs.
-  package func analyze() throws {
-    try analyze(beforeProcessingDeferredExtensions: { _ in })
-  }
-
-  /// Analyze registered inputs, with a hook that fires after the per-source
-  /// walk has populated the specialization registry from any in-source
-  /// `typealias Alias = Base<Args…>` declarations, but before the deferred
-  /// constrained-extension queue is processed against those specializations.
+  /// Analyze registered inputs, optionally with a hook that fires after the
+  /// per-source walk has populated the specialization registry from any
+  /// in-source `typealias Alias = Base<Args…>` declarations, but before the
+  /// deferred constrained-extension queue is processed against those
+  /// specializations.
   ///
   /// Downstream language code generators that drive specialization from a
   /// configuration source other than Swift typealiases (e.g. a `specialize:`
@@ -155,7 +151,7 @@ extension SwiftAnalyzer {
   /// specializations are registered too late and any constrained extension
   /// (`extension Box where T == ConcreteT { … }`) is silently dropped.
   package func analyze(
-    beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void
+    beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void = { _ in }
   ) throws {
     prepareForTranslation()
 
@@ -261,26 +257,9 @@ extension SwiftAnalyzer {
   }
 
   /// Top-level convenience: run analysis on the given Swift sources and return
-  /// the resulting `AnalysisResult`.
-  public static func analyze(
-    sources: [(path: String, text: String)],
-    moduleName: String,
-    config: (any SwiftExtractConfiguration)? = nil,
-    sourceDependencies: SourceDependencies = SourceDependencies(),
-    extractDecider: any ExtractDecider
-  ) throws -> AnalysisResult {
-    try analyze(
-      sources: sources,
-      moduleName: moduleName,
-      config: config,
-      sourceDependencies: sourceDependencies,
-      extractDecider: extractDecider,
-      beforeProcessingDeferredExtensions: { _ in }
-    )
-  }
-
-  /// Top-level convenience that accepts a hook fired after the per-source
-  /// walk and before deferred-constrained-extension processing. See
+  /// the resulting `AnalysisResult`. Optionally accepts a hook fired after
+  /// the per-source walk and before deferred-constrained-extension
+  /// processing — see
   /// `SwiftAnalyzer.analyze(beforeProcessingDeferredExtensions:)` for the
   /// hook semantics. Use to drive specialization registration from
   /// downstream configuration sources (e.g. `specialize:` config entries)
@@ -289,10 +268,10 @@ extension SwiftAnalyzer {
   public static func analyze(
     sources: [(path: String, text: String)],
     moduleName: String,
+    extractDecider: any ExtractDecider,
     config: (any SwiftExtractConfiguration)? = nil,
     sourceDependencies: SourceDependencies = SourceDependencies(),
-    extractDecider: any ExtractDecider,
-    beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void
+    beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void = { _ in }
   ) throws -> AnalysisResult {
     let effectiveConfig = config ?? DefaultSwiftExtractConfiguration(swiftModule: moduleName)
     let analyzer = SwiftAnalyzer(config: effectiveConfig, moduleName: moduleName, extractDecider: extractDecider)

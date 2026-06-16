@@ -33,8 +33,8 @@ func analyze(
   return try SwiftAnalyzer.analyze(
     sources: sources,
     moduleName: moduleName,
+    extractDecider: DefaultAccessLevelExtractDecider(accessLevel: effectiveConfig.effectiveMinimumInputAccessLevelMode),
     config: effectiveConfig,
-    sourceDependencies: sourceDependencies,
-    extractDecider: DefaultAccessLevelExtractDecider(accessLevel: effectiveConfig.effectiveMinimumInputAccessLevelMode)
+    sourceDependencies: sourceDependencies
   )
 }
