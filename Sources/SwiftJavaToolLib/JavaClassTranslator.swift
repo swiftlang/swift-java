@@ -137,6 +137,10 @@ struct JavaClassTranslator {
     // Superclass, incl parameter types (if any)
     if !javaClass.isInterface() {
       var javaSuperclass = javaClass.getSuperclass()
+      if javaSuperclass != nil, translator.translatedClasses[JavaObject.fullJavaClassName] == nil {
+        throw TranslationError.untranslatedJavaClass(JavaObject.fullJavaClassName)
+      }
+
       var javaGenericSuperclass: Type? = javaClass.getGenericSuperclass()
       var swiftSuperclassName: String? = nil
       var swiftSuperclassTypeArgs: [String]? = nil
