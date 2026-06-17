@@ -175,7 +175,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         extension ProcessBuilder {
-          @JavaClass("java.lang.ProcessBuilder$Redirect")
+          @JavaClass("java.lang.ProcessBuilder$Redirect", extends: JavaObject.self)
           public struct Redirect {
         """,
         """
@@ -183,7 +183,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         extension ProcessBuilder.Redirect {
-          @JavaClass("java.lang.ProcessBuilder$Redirect$Type")
+          @JavaClass("java.lang.ProcessBuilder$Redirect$Type", extends: JavaObject.self)
           public struct Type {
         """,
         """
@@ -220,7 +220,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         extension ProcessBuilder {
-          @JavaClass("java.lang.ProcessBuilder$Redirect")
+          @JavaClass("java.lang.ProcessBuilder$Redirect", extends: JavaObject.self)
           public struct PBRedirect {
         """,
         """
@@ -228,7 +228,7 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
         extension ProcessBuilder.PBRedirect {
-          @JavaClass("java.lang.ProcessBuilder$Redirect$Type")
+          @JavaClass("java.lang.ProcessBuilder$Redirect$Type", extends: JavaObject.self)
           public struct JavaType {
         """,
         """
@@ -245,7 +245,7 @@ class Java2SwiftTests: XCTestCase {
       swiftTypeName: "JavaString",
       expectedChunks: [
         """
-        @JavaClass("java.lang.String")
+        @JavaClass("java.lang.String", extends: JavaObject.self)
         public struct JavaString {
         """
       ]
@@ -313,9 +313,6 @@ class Java2SwiftTests: XCTestCase {
       JavaString.self,
       swiftTypeName: "JavaString",
       asClass: true,
-      translatedClasses: [
-        "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject")
-      ],
       expectedChunks: [
         "import SwiftJava",
         """
@@ -344,6 +341,30 @@ class Java2SwiftTests: XCTestCase {
         """,
       ]
     )
+  }
+
+  func testMissingJavaObjectMappingFailsEagerly() throws {
+    let environment = try jvm.environment()
+    let translator = JavaTranslator(
+      config: Configuration(),
+      swiftModuleName: "SwiftModule",
+      environment: environment,
+      translateAsClass: true
+    )
+    translator.translatedClasses = [:]
+    translator.translatedClasses[JavaString.fullJavaClassName] = SwiftTypeName(module: nil, name: "JavaString")
+    translator.startNewFile()
+
+    try JavaString.withJNIClass(in: environment) { javaClass in
+      XCTAssertThrowsError(
+        try translator.translateClass(JavaClass<JavaObject>(javaThis: javaClass, environment: environment))
+      ) { error in
+        XCTAssertEqual(
+          String(describing: error),
+          "Java class 'java.lang.Object' has not been translated into Swift"
+        )
+      }
+    }
   }
 
   func testEnumAsClass() throws {
@@ -726,7 +747,7 @@ func assertTranslatedClass<JavaClassType: AnyJavaObject>(
     translateAsClass: asClass
   )
 
-  translator.translatedClasses = translatedClasses
+  translator.translatedClasses.merge(translatedClasses) { _, new in new }
   translator.translatedClasses[javaType.fullJavaClassName] = SwiftTypeName(module: nil, name: swiftTypeName)
   translator.nestedClasses = nestedClasses
   translator.startNewFile()
