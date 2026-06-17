@@ -70,9 +70,7 @@ tasks.test {
     }
 }
 
-/// Enable access to preview APIs, e.g. java.lang.foreign.* (Panama)
 tasks.withType<JavaCompile>().configureEach {
-    options.compilerArgs.add("--enable-preview")
     options.compilerArgs.add("-Xlint:preview")
 }
 
