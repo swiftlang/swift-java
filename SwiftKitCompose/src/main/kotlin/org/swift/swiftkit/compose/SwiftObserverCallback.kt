@@ -14,4 +14,23 @@
 
 package org.swift.swiftkit.compose
 
-fun interface SwiftObserverCallback { fun onPropertyChanged(propertyId: Int) }
+/**
+ * Callback invoked from Swift when an observed property of a bridged
+ * `@Observable` model changes.
+ *
+ * The generated Java binding of an observable type implements this interface and
+ * passes itself to the Swift side when observation starts. Swift then calls
+ * [onPropertyChanged] for each subsequent change, identifying the property by
+ * the stable id assigned to it during code generation.
+ *
+ * **Threading:** invocations are delivered on the main thread.
+ */
+fun interface SwiftObserverCallback {
+    /**
+     * Called when the observed property identified by [propertyId] changes.
+     *
+     * @param propertyId the generator-assigned id of the changed property; the
+     *   binding maps it back to the matching [TrackingToken] to invalidate.
+     */
+    fun onPropertyChanged(propertyId: Int)
+}
