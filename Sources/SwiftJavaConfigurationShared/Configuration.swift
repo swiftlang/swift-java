@@ -205,11 +205,8 @@ public struct Configuration: Codable {
   /// This allows users to provide a custom StaticBuildConfiguration for #if resolution.
   public var staticBuildConfigurationFile: String?
 
-  /// Enables support for backing Jetpack Compose UI with `@Observable` objects.
-  public var observableComposeBridging: Bool?
-  public var effectiveObservableComposeBridging: Bool {
-    observableComposeBridging ?? false
-  }
+  /// Configure the bridging of `@Observable` Swift objects.
+  public var swiftObservableBridging: JExtractSwiftObservableBridging?
 
   // ==== wrap-java ---------------------------------------------------------
 
