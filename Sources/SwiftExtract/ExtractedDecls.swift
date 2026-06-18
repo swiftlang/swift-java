@@ -462,7 +462,7 @@ extension ExtractedFunc {
       return false
     }
     let supportedAccessorKinds = asVariableSyntax.supportedAccessorKinds(binding: binding)
-    let isObservationIgnored = asVariableSyntax.attributes.contains(where: { $0.isObservationIgnored })
+    let isObservationIgnored = asVariableSyntax.attributes.contains(where: { $0.isSwiftObservationIgnored })
     return self.apiKind == .getter && !self.isStatic && !isObservationIgnored && supportedAccessorKinds.contains(.set)
   }
 }

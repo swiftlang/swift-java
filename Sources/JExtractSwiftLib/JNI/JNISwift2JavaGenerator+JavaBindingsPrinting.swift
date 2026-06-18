@@ -401,7 +401,7 @@ extension JNISwift2JavaGenerator {
 
       printer.println()
 
-      if config.effectiveObservableComposeBridging, decl.isObservable {
+      if config.swiftObservableBridging == .jetpackCompose, decl.isObservable {
         printObservableSupport(&printer, decl)
       }
 
@@ -634,7 +634,7 @@ extension JNISwift2JavaGenerator {
       printer.print("import \(i);")
     }
 
-    if config.effectiveObservableComposeBridging {
+    if config.swiftObservableBridging == .jetpackCompose {
       printer.print("import org.swift.swiftkit.compose.*;")
     }
 
@@ -656,7 +656,7 @@ extension JNISwift2JavaGenerator {
     modifiers.append("final")
     var implements = ["JNISwiftInstance"]
 
-    if config.effectiveObservableComposeBridging, decl.isObservable {
+    if config.swiftObservableBridging == .jetpackCompose, decl.isObservable {
       implements += ["SwiftObservable", "SwiftObserverCallback"]
     }
 
@@ -1021,7 +1021,7 @@ extension JNISwift2JavaGenerator {
   private func printObservableTriggerIfNeeded(_ printer: inout CodePrinter, _ importedFunc: ImportedFunc) {
     guard let parentNominalType = importedFunc.parentType?.asNominalType else { return }
 
-    if config.effectiveObservableComposeBridging, importedFunc.isCandiateForObservation {
+    if config.swiftObservableBridging == .jetpackCompose, importedFunc.isCandiateForObservation {
       printer.print("\(importedFunc.observableTrackerName).observe();")
     }
   }

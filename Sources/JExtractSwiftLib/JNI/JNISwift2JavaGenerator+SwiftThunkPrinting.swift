@@ -366,7 +366,7 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
-    if config.effectiveObservableComposeBridging, type.isObservable {
+    if config.swiftObservableBridging == .jetpackCompose, type.isObservable {
       printObservableSupport(&printer, type)
     }
 
@@ -1105,7 +1105,7 @@ extension JNISwift2JavaGenerator {
       "SwiftJavaRuntimeSupport"
     ]
 
-    if config.effectiveObservableComposeBridging {
+    if config.swiftObservableBridging == .jetpackCompose {
       imports.append("Observation")
     }
 
