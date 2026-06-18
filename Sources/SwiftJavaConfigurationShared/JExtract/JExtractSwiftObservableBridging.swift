@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkit.compose
-
-fun interface SwiftObserverCallback { fun onPropertyChanged(propertyId: Int) }
+/// Configures the mode for `@Observable` bridging
+public enum JExtractSwiftObservableBridging: String, Codable {
+  /// Extracts bindings that interact with Jetpack Compose UI
+  case jetpackCompose
+}
