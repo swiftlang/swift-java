@@ -414,6 +414,11 @@ extension JNISwift2JavaGenerator {
     )
 
     for variable in decl.observableVariables {
+      printer.print(
+        """
+        /** Tracks Compose reads of {@code \(variable.name)}, so reading it inside a composable recomposes when Swift reports it changed. */
+        """
+      )
       printer.print("private final TrackingToken \(variable.observableTrackerName) = new TrackingToken();")
     }
 
@@ -421,6 +426,15 @@ extension JNISwift2JavaGenerator {
 
     printer.print(
       """
+      /**
+       * Begins observing this Swift model on the first observer.
+       * <p>
+       * Reference counted: only the transition from 0 to 1 observers subscribes to
+       * the Swift side via {@link #$observe(long, SwiftObserverCallback)}.
+       * <p>
+       * Driven by {@code rememberSwiftObservable} from a Compose composition; expected
+       * to be called on the main thread.
+       */
       @Override
       public void retainObserver() {
         if (observerCount++ == 0) {
@@ -428,6 +442,15 @@ extension JNISwift2JavaGenerator {
         }
       }
 
+      /**
+       * Stops observing this Swift model once the last observer goes away.
+       * <p>
+       * Reference counted: only the transition from 1 to 0 observers tears down the
+       * Swift-side subscription via {@link #$cancelObserve(long)}.
+       * <p>
+       * Driven by {@code rememberSwiftObservable} from a Compose composition; expected
+       * to be called on the main thread.
+       */
       @Override
       public void releaseObserver() {
         if (--observerCount == 0) {
@@ -440,6 +463,16 @@ extension JNISwift2JavaGenerator {
 
     printer.println()
 
+    printer.print(
+      """
+      /**
+       * Invoked from Swift on the main thread when an observed property changes.
+       * <p>
+       * Dispatches on the generator-assigned property {@code id} to invalidate the
+       * matching {@link TrackingToken}, recomposing composables that read it.
+       */
+      """
+    )
     printer.printBraceBlock("@Override public void onPropertyChanged(int id)") { printer in
       printer.printBraceBlock("switch (id)") { printer in
         for (id, variable) in decl.observableVariables.enumerated() {
