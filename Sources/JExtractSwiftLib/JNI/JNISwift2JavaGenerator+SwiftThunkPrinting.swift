@@ -431,7 +431,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printObservableSubscriptionType(_ printer: inout CodePrinter, _ type: ImportedNominalType) {
+  private func printObservableSubscriptionType(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
     printer.print("@MainActor")
     printer.printBraceBlock("private final class \(type.observableSubscriptionTypeName)") { printer in
       printer.print(
@@ -1260,17 +1260,13 @@ extension SwiftNominalTypeDeclaration {
   }
 }
 
-<<<<<<< HEAD
-extension ExtractedFunc {
-=======
-extension ImportedNominalType {
+extension ExtractedNominalType {
   var observableSubscriptionTypeName: String {
     "_\(self.swiftNominal.flatName)Subscription"
   }
 }
 
-extension ImportedFunc {
->>>>>>> 57646527 (wip)
+extension ExtractedFunc {
   fileprivate var openerMethodName: String {
     let prefix =
       switch apiKind {

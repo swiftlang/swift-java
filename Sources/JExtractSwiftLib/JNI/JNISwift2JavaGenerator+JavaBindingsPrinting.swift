@@ -402,7 +402,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printObservableSupport(_ printer: inout CodePrinter, _ decl: ImportedNominalType) {
+  private func printObservableSupport(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
     printer.print(
       """
       /** Pointer to the "Subscription" type that is observing changes to this object */
@@ -912,8 +912,8 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printObservableTriggerIfNeeded(_ printer: inout CodePrinter, _ importedFunc: ImportedFunc) {
-    guard let parentNominalType = importedFunc.parentType?.asNominalType else { return }
+  private func printObservableTriggerIfNeeded(_ printer: inout CodePrinter, _ importedFunc: ExtractedFunc) {
+    guard let parentNominalType = importedFunc.parentType?.asNominalType, parentNominalType.isObservable else { return }
 
     if config.swiftObservableBridging == .jetpackCompose, importedFunc.isCandiateForObservation {
       printer.print("\(importedFunc.observableTrackerName).observe();")
