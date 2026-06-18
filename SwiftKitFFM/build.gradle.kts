@@ -12,13 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
+import org.swift.build.utils.resolveSwiftKitVersion
+
 plugins {
     id("build-logic.java-application-conventions")
     `maven-publish`
 }
 
 group = "org.swift.swiftkit"
-version = "1.0-SNAPSHOT"
+
+version = resolveSwiftKitVersion()
 
 base {
     archivesName = "swiftkit-ffm"
@@ -34,8 +37,6 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = group as? String
             artifactId = "swiftkit-ffm"
-            version = "1.0-SNAPSHOT"
-
             from(components["java"])
         }
     }
