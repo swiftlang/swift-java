@@ -191,6 +191,13 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
         message: "Missing type arguments for: \(missingParams) when specializing \(baseTypeName) as \(specializedName)"
       )
     }
+
+    if swiftNominal.kind == .enum {
+      throw SpecializationError(
+        message: "Specialization for enums are not yet supported: '\(baseTypeName)' as '\(specializedName)'"
+      )
+    }
+
     return ExtractedNominalType(
       base: self,
       specializedTypeName: specializedName,

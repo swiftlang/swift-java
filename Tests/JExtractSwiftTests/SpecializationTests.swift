@@ -364,15 +364,38 @@ struct SpecializationTests {
     let fish = try #require(translator.extractedTypes["Fish"])
     #expect(!fish.swiftNominal.isGeneric)
 
-    #expect(throws: SpecializationError.self) {
-      _ = try fish.specialize(as: "FancyFish", with: ["T": "Int"])
-    }
-
     do {
       _ = try fish.specialize(as: "FancyFish", with: ["T": "Int"])
+      Issue.record("Error not thrown")
     } catch let error as SpecializationError {
       #expect(error.message.contains("Unable to specialize non-generic type"))
       #expect(error.message.contains("Fish"))
+    }
+  }
+
+  @Test("Specializing a enum type throws an error")
+  func specializeEnumTypeThrows() throws {
+    var config = Configuration()
+    config.swiftModule = "SwiftModule"
+    let translator = makeSwiftJavaAnalyzer(config: config)
+    try translator.analyze(
+      path: "/fake/Fake.swiftinterface",
+      text: """
+        public enum Foo<T> {
+          case foo
+        }
+        """,
+    )
+
+    let foo = try #require(translator.extractedTypes["Foo"])
+    #expect(foo.swiftNominal.kind == .enum)
+
+    do {
+      _ = try foo.specialize(as: "IntFoo", with: ["T": "Int"])
+      Issue.record("Error not thrown")
+    } catch let error as SpecializationError {
+      #expect(error.message.contains("Specialization for enums are not yet supported"))
+      #expect(error.message.contains("Foo"))
     }
   }
 }
