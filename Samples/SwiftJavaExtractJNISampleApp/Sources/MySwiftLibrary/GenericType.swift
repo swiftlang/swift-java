@@ -88,6 +88,8 @@ public func makeIntGenericEnum() -> GenericEnum<Int> {
   if Bool.random() { return .foo } else { return .bar }
 }
 
+public typealias IntGenericEnum = GenericEnum<Int>
+
 public enum GenericEnumWithValue<T> {
   case some(T)
   case none
