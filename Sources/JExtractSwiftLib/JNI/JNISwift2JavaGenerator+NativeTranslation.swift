@@ -145,7 +145,7 @@ extension JNISwift2JavaGenerator {
               conversionCheck: nil
             )
 
-          case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
+          case .foundationDate, .essentialsDate, .foundationData, .essentialsData, .foundationURL, .essentialsURL:
             // Handled as wrapped struct
             break
 
@@ -743,7 +743,7 @@ extension JNISwift2JavaGenerator {
               resultName: resultName
             )
 
-          case .foundationDate, .essentialsDate, .foundationData, .essentialsData:
+          case .foundationDate, .essentialsDate, .foundationData, .essentialsData, .foundationURL, .essentialsURL:
             // Handled as wrapped struct
             break
 
