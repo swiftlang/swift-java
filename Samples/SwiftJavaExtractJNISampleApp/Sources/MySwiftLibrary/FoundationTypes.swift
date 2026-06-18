@@ -39,7 +39,3 @@ public func makeUUID() -> UUID {
 public func echoURL(_ url: URL) -> URL {
   url
 }
-
-public func makeURL() -> URL {
-  URL(string: "http://example.com")!
-}
