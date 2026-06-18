@@ -438,10 +438,7 @@ extension JNISwift2JavaGenerator {
               genericRequirements: genericRequirements,
             )
 
-          case .foundationDate, .essentialsDate:
-            break // Handled as wrapped struct
-
-          case .foundationData, .essentialsData:
+          case .foundationDate, .essentialsDate, .foundationData, .essentialsData, .foundationURL, .essentialsURL:
             break // Handled as wrapped struct
 
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
@@ -877,11 +874,7 @@ extension JNISwift2JavaGenerator {
               genericRequirements: genericRequirements,
             )
 
-          case .foundationDate, .essentialsDate:
-            // Handled as wrapped struct
-            break
-
-          case .foundationData, .essentialsData:
+          case .foundationDate, .essentialsDate, .foundationData, .essentialsData, .foundationURL, .essentialsURL:
             // Handled as wrapped struct
             break
 
@@ -1042,6 +1035,9 @@ extension JNISwift2JavaGenerator {
 
           case .foundationDataProtocol, .essentialsDataProtocol:
             return .class(package: nil, name: "DataProtocol")
+
+          case .foundationURL, .essentialsURL:
+            return .class(package: nil, name: "URL")
 
           case .foundationUUID, .essentialsUUID:
             return .javaUtilUUID

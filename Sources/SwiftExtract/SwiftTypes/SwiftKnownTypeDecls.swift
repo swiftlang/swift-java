@@ -52,6 +52,8 @@ public enum SwiftKnownType: Equatable {
   case essentialsDate
   case foundationUUID
   case essentialsUUID
+  case foundationURL
+  case essentialsURL
 
   public init?(kind: SwiftKnownTypeDeclKind, genericArguments: [SwiftType]?) {
     switch kind {
@@ -106,6 +108,8 @@ public enum SwiftKnownType: Equatable {
     case .essentialsDate: self = .essentialsDate
     case .foundationUUID: self = .foundationUUID
     case .essentialsUUID: self = .essentialsUUID
+    case .foundationURL: self = .foundationURL
+    case .essentialsURL: self = .essentialsURL
     }
   }
 
@@ -146,6 +150,8 @@ public enum SwiftKnownType: Equatable {
     case .essentialsDate: .essentialsDate
     case .foundationUUID: .foundationUUID
     case .essentialsUUID: .essentialsUUID
+    case .foundationURL: .foundationURL
+    case .essentialsURL: .essentialsURL
     }
   }
 }
@@ -189,6 +195,8 @@ public enum SwiftKnownTypeDeclKind: String, Hashable {
   case essentialsDate = "FoundationEssentials.Date"
   case foundationUUID = "Foundation.UUID"
   case essentialsUUID = "FoundationEssentials.UUID"
+  case foundationURL = "Foundation.URL"
+  case essentialsURL = "FoundationEssentials.URL"
 
   public var moduleAndName: (module: String, name: String) {
     let qualified = self.rawValue

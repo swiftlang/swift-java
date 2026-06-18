@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -19,10 +19,11 @@ import org.swift.swiftkit.core.SwiftArena;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DateTest {
+public class FoundationTypeTest {
     @Test
     void date_functions() {
         try (var arena = SwiftArena.ofConfined()) {
@@ -57,6 +58,29 @@ public class DateTest {
         try (var arena = SwiftArena.ofConfined()) {
             var date = Date.init(1000, arena);
             assertEquals(1000, date.getTimeIntervalSince1970());
+        }
+    }
+
+    @Test
+    void echoUUID() {
+        var uuid = UUID.randomUUID();
+        assertEquals(uuid, MySwiftLibrary.echoUUID(uuid));
+    }
+
+    @Test
+    void makeUUID() {
+        var uuid = MySwiftLibrary.makeUUID();
+        assertEquals(4, uuid.version());
+    }
+
+    @Test
+    void echoURL() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var url = URL.init("http://example.com", arena);
+            assertDoesNotThrow(() -> {
+                var unwrapped = url.orElseThrow();
+                assertEquals("http://example.com", unwrapped.getAbsoluteString());
+            });
         }
     }
 }

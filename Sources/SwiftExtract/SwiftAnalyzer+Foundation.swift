@@ -47,6 +47,12 @@ extension SwiftAnalyzer {
           fakeSourceFilePath: "Foundation/FAKE_FOUNDATION_UUID.swift",
         )
       ],
+      [
+        .init(
+          candidates: [.foundationURL, .essentialsURL],
+          fakeSourceFilePath: "Foundation/FAKE_FOUNDATION_URL.swift",
+        )
+      ],
     ]
 
     for group in groups {

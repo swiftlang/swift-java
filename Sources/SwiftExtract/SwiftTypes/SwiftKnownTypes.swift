@@ -51,6 +51,8 @@ public struct SwiftKnownTypes {
   public var essentialsData: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.essentialsData])) }
   public var foundationUUID: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.foundationUUID])) }
   public var essentialsUUID: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.essentialsUUID])) }
+  public var foundationURL: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.foundationURL])) }
+  public var essentialsURL: SwiftType { .nominal(SwiftNominalType(nominalTypeDecl: symbolTable[.essentialsURL])) }
 
   /// `(UnsafeRawPointer, Long) -> ()` function type.
   ///
