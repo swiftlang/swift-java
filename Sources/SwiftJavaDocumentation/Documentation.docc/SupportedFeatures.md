@@ -465,6 +465,10 @@ public final class FishBox ... {
 > NOTE: Currently no helpers are available to convert between unspecialized types to specialized ones, but this can be offered 
 >       as additional `box.as(FishBox.class)` conversion methods in the future.
 
+
+> NOTE: Currently specialization for generic enums are not yet supported.
+
+
 ### Evaluating `#if`
 
 In jextract, `#if` branches are evaluated using [SwiftIfConfig](https://github.com/swiftlang/swift-syntax/blob/main/Sources/SwiftIfConfig/SwiftIfConfig.docc/SwiftIfConfig.md).
