@@ -73,6 +73,7 @@ $SWIFT_JAVA wrap-java \
 
 echo "Regenerating SwiftJavaRuntimeSupport..."
 ./gradlew :SwiftKitCore:assemble
+./gradlew :SwiftKitCompose:assemble
 $SWIFT_JAVA wrap-java \
     --swift-module SwiftJavaRuntimeSupport \
     -o Sources/SwiftJavaRuntimeSupport/generated \

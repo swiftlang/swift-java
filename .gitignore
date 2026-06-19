@@ -25,6 +25,10 @@ BuildLogic/out/
 **/build/
 lib/
 
+# Android local SDK location + native build intermediates
+local.properties
+**/.cxx/
+
 # Ignore JVM crash logs
 **/*.log
 

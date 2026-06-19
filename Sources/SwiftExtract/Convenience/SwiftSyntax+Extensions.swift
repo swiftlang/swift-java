@@ -147,6 +147,22 @@ extension WithModifiersSyntax {
   }
 }
 
+extension AttributeListSyntax.Element {
+  /// Whether this is a `@ObservationIgnored` type.
+  public var isSwiftObservationIgnored: Bool {
+    guard case let .attribute(attr) = self else { return false }
+    guard let attrName = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text else { return false }
+    return attrName == "ObservationIgnored"
+  }
+
+  /// Whether this is a `@Observable` type.
+  public var isSwiftObservable: Bool {
+    guard case let .attribute(attr) = self else { return false }
+    guard let attrName = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text else { return false }
+    return attrName == "Observable"
+  }
+}
+
 extension DeclSyntaxProtocol {
   /// Find inner most "decl" node in ancestors.
   public var ancestorDecl: DeclSyntax? {
