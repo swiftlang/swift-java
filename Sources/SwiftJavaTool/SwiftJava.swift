@@ -43,7 +43,7 @@ struct SwiftJava: AsyncParsableCommand {
 
   public static func main() async {
     do {
-      var command = try await parseAsRoot(nil)
+      var command = try parseAsRoot(nil)
       if var asyncCommand = command as? AsyncParsableCommand {
         try await asyncCommand.run()
       } else {
