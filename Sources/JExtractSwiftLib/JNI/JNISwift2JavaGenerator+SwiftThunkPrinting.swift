@@ -602,7 +602,7 @@ extension JNISwift2JavaGenerator {
       printer.print("#if _pointerBitWidth(_32)")
 
       for check in int32OverflowChecks {
-        printer.printBraceBlock("guard \(check) else") { printer in
+        printer.printGuardBlock(check) { printer in
           printer.print("environment.throwJavaException(javaException: .integerOverflow)")
           printer.print(dummyReturn(for: nativeSignature))
         }
