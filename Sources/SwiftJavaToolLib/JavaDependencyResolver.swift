@@ -93,7 +93,7 @@ public struct JavaDependencyResolver {
     dependencies: [JavaDependencyDescriptor],
     repositories: [MavenRepositoryDescriptor]
   ) -> String {
-    var p = CodePrinter()
+    var p = JavaPrinter()
     p.indentationPart = "    "
 
     p.print("plugins { id 'java-library' }")

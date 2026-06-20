@@ -389,7 +389,7 @@ enum UpcallConversionStep {
   indirect case map(UpcallConversionStep, body: UpcallConversionStep)
 
   /// Returns the conversion string applied to the placeholder.
-  func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
+  func render(_ printer: inout SwiftPrinter, _ placeholder: String) -> String {
     switch self {
     case .placeholder:
       return placeholder
@@ -445,7 +445,7 @@ enum UpcallConversionStep {
 
     case .map(let inner, let body):
       let inner = inner.render(&printer, placeholder)
-      var printer = CodePrinter()
+      var printer = SwiftPrinter()
       printer.printBraceBlock("\(inner).map") { printer in
         let body = body.render(&printer, "$0")
         printer.print("return \(body)")

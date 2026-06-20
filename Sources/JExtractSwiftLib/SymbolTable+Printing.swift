@@ -16,7 +16,7 @@ import CodePrinting
 import SwiftExtract
 
 extension SwiftSymbolTable {
-  package func printImportedModules(_ printer: inout CodePrinter) {
+  package func printImportedModules<L>(_ printer: inout CodePrinter<L>) {
     let mainSymbolSourceModules = Set(
       self.importedModules.values.filter { $0.alternativeModules?.isMainSourceOfSymbols ?? false }.map(\.moduleName)
     )

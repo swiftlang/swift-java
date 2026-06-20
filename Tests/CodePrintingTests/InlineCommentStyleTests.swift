@@ -22,7 +22,7 @@ struct InlineCommentStyleSuite {
   // MARK: Default behavior is `//`
 
   @Test func defaultStyleEmitsSlashSlashSourceLocation() {
-    var p = CodePrinter()
+    var p = SwiftPrinter()
     p.print("hello", .sloc, function: "fn", file: "F.swift", line: 1)
 
     #expect(p.contents.contains("// fn @ F.swift:1"))
@@ -33,7 +33,7 @@ struct InlineCommentStyleSuite {
   // MARK: `.hash` flips comment lead
 
   @Test func hashStyleEmitsHashSourceLocation() {
-    var p = CodePrinter()
+    var p = SwiftPrinter()
     p.inlineCommentStyle = .hash
     p.print("hello", .sloc, function: "fn", file: "F.swift", line: 1)
 
@@ -42,7 +42,7 @@ struct InlineCommentStyleSuite {
   }
 
   @Test func hashStyleFlipsPrintSeparatorBanner() {
-    var p = CodePrinter()
+    var p = SwiftPrinter()
     p.inlineCommentStyle = .hash
     p.printSeparator("section")
 
@@ -55,7 +55,7 @@ struct InlineCommentStyleSuite {
   // MARK: emitSourceLocations off still respects style
 
   @Test func emitSourceLocationsOffSuppressesTrailerRegardlessOfStyle() {
-    var p = CodePrinter()
+    var p = SwiftPrinter()
     p.emitSourceLocations = false
     p.inlineCommentStyle = .hash
     p.print("hello", .sloc, function: "fn", file: "F.swift", line: 1)

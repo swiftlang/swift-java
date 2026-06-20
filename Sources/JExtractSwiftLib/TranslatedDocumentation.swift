@@ -22,7 +22,7 @@ enum TranslatedDocumentation {
     importedFunc: ExtractedFunc,
     translatedDecl: FFMSwift2JavaGenerator.TranslatedFunctionDecl,
     config: Configuration,
-    in printer: inout CodePrinter
+    in printer: inout JavaPrinter
   ) {
     var documentation = SwiftDocumentationParser.parse(importedFunc.swiftDecl)
 
@@ -42,7 +42,7 @@ enum TranslatedDocumentation {
     importedFunc: ExtractedFunc,
     translatedDecl: JNISwift2JavaGenerator.TranslatedFunctionDecl,
     config: Configuration,
-    in printer: inout CodePrinter
+    in printer: inout JavaPrinter
   ) {
     var documentation = SwiftDocumentationParser.parse(importedFunc.swiftDecl)
 
@@ -62,7 +62,7 @@ enum TranslatedDocumentation {
     _ parsedDocumentation: SwiftDocumentation?,
     syntax: some DeclSyntaxProtocol,
     config: Configuration,
-    in printer: inout CodePrinter
+    in printer: inout JavaPrinter
   ) {
     var groups = [String]()
     if let summary = parsedDocumentation?.summary {

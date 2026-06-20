@@ -1328,7 +1328,7 @@ extension JNISwift2JavaGenerator {
     }
 
     /// Returns the conversion string applied to the placeholder.
-    func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
+    func render(_ printer: inout SwiftPrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
       // E.g. storing a temporary values into a variable.
       switch self {
@@ -1368,7 +1368,7 @@ extension JNISwift2JavaGenerator {
         let existentialType = SwiftKitPrinting.renderExistentialType(protocolTypes)
         printer.print("let \(variableName): \(existentialType)")
 
-        func printStandardJExtractBlock(_ printer: inout CodePrinter) {
+        func printStandardJExtractBlock(_ printer: inout SwiftPrinter) {
           let pointerVariableName = "\(inner)pointer$"
           let typeMetadataVariableName = "\(inner)typeMetadata$"
           printer.print(
@@ -1492,7 +1492,7 @@ extension JNISwift2JavaGenerator {
         return "\(inner).pointee"
 
       case .closureLowering(let parameters, let nativeResult):
-        var printer = CodePrinter()
+        var printer = SwiftPrinter()
 
         let methodSignature = MethodSignature(
           resultType: nativeResult.javaType,
@@ -1541,7 +1541,7 @@ extension JNISwift2JavaGenerator {
         return printer.finalize()
 
       case .escapingClosureLowering(let syntheticFunction, let closureName):
-        var printer = CodePrinter()
+        var printer = SwiftPrinter()
 
         let fn = syntheticFunction.functionType
         let parameterNames = fn.parameters.enumerated().map { idx, param in
@@ -1553,7 +1553,7 @@ extension JNISwift2JavaGenerator {
         // Build upcall arguments using UpcallConversionStep conversions
         var upcallArguments: [String] = []
         for (idx, conversion) in syntheticFunction.parameterConversions.enumerated() {
-          var argPrinter = CodePrinter()
+          var argPrinter = SwiftPrinter()
           let paramName = parameterNames[idx]
           let converted = conversion.render(&argPrinter, paramName)
           upcallArguments.append(converted)
@@ -1562,7 +1562,7 @@ extension JNISwift2JavaGenerator {
         // Build result conversion
         // Note: The Java interface is synchronous even for async closures.
         // The async nature is on the Swift side, inferred from the expected type.
-        var resultPrinter = CodePrinter()
+        var resultPrinter = SwiftPrinter()
         let upcallExpr = "javaInterface$.apply(\(upcallArguments.joined(separator: ", ")))"
         let resultConverted = syntheticFunction.resultConversion.render(&resultPrinter, upcallExpr)
         let resultPrefix = resultPrinter.finalize()
@@ -1637,7 +1637,7 @@ extension JNISwift2JavaGenerator {
         if !returnType.isVoid {
           printer.print("let \(resultName): \(returnType.jniTypeName)")
         }
-        printer.printBraceBlock("if let innerResult$ = \(placeholder)") { printer in
+        printer.printIfBlock("let innerResult$ = \(placeholder)") { printer in
           let inner = inner.render(&printer, "innerResult$")
           if !returnType.isVoid {
             printer.print("\(resultName) = \(inner)")
@@ -1710,7 +1710,7 @@ extension JNISwift2JavaGenerator {
         return "\(inner).\(member)"
 
       case .optionalMap(let inner):
-        var printer = CodePrinter()
+        var printer = SwiftPrinter()
         printer.printBraceBlock("\(placeholder).map") { printer in
           let inner = inner.render(&printer, "$0")
           printer.print("return \(inner)")
@@ -1769,7 +1769,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        func printDo(printer: inout CodePrinter) {
+        func printDo(printer: inout SwiftPrinter) {
           // Make sure try/await are printed when necessary and avoid duplicate, or wrong-order, keywords (which would cause warnings)
           let placeholderWithoutTry =
             if placeholder.hasPrefix("try ") {
@@ -1810,7 +1810,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        func printTaskBody(printer: inout CodePrinter) {
+        func printTaskBody(printer: inout SwiftPrinter) {
           if let selfParameter = nativeFunctionSignature.selfParameter {
             for parameter in selfParameter.parameters {
               printer.print("let \(parameter.name)$ = \(parameter.name)Sendable$")
@@ -1849,7 +1849,7 @@ extension JNISwift2JavaGenerator {
 
         printer.print("var task: Task<Void, Never>? = nil")
         printer.printHashIfBlock("swift(>=6.2)") { printer in
-          printer.printBraceBlock("if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
+          printer.printIfBlock("#available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *)") { printer in
             printer.printBraceBlock("task = Task.immediate") { printer in
               // Even immediate tasks are a sending closure in Swift 6.2+, so reattach instead of capturing the caller's environment directly.
               printer.print("var environment = try! JavaVirtualMachine.shared().environment()")
@@ -1858,7 +1858,7 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        printer.printBraceBlock("if task == nil") { printer in
+        printer.printIfBlock("task == nil") { printer in
           printer.printBraceBlock("task = Task") { printer in
             // We can be on any thread, so we need to attach the thread.
             printer.print("var environment = try! JavaVirtualMachine.shared().environment()")
@@ -1869,7 +1869,7 @@ extension JNISwift2JavaGenerator {
         return ""
 
       case .closure(let args, let body):
-        var printer = CodePrinter()
+        var printer = SwiftPrinter()
         printer.printBraceBlock("", parameters: args) { printer in
           let body = body.render(&printer, placeholder)
           if !body.isEmpty {
@@ -1955,7 +1955,7 @@ extension JNISwift2JavaGenerator {
     case check32BitIntOverflow(typeWithMinAndMax: SwiftType)
 
     // Returns the check string
-    func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
+    func render(_ printer: inout SwiftPrinter, _ placeholder: String) -> String {
       switch self {
       case .check32BitIntOverflow(let minMaxSource):
         return "\(placeholder) >= \(minMaxSource).min && \(placeholder) <= \(minMaxSource).max"

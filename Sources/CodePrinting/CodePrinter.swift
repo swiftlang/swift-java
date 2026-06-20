@@ -21,7 +21,7 @@ import Foundation
 // ==== -----------------------------------------------------------------------
 // MARK: CodePrinter
 
-public struct CodePrinter: Sendable {
+public struct CodePrinter<Language: CodePrinterLanguage>: Sendable {
   public var contents: String = ""
 
   public var verbose: Bool = false
@@ -32,11 +32,10 @@ public struct CodePrinter: Sendable {
   /// terminator equivalent to `.newLine`.
   public var emitSourceLocations: Bool = true
 
-  /// Token used to start an inline comment. Defaults to `//` for Swift- and
-  /// Java-style output. Hash-comment languages can flip this to `.hash` so
-  /// source-location trailers, `printSeparator` banners, and echo-mode
-  /// headers render with the right comment lead.
-  public var inlineCommentStyle: InlineCommentStyle = .slashSlash
+  /// Token used to start an inline comment. Defaults to the language's
+  /// `defaultInlineCommentStyle`; can be overridden per instance for
+  /// special cases (e.g. testing the alternative style).
+  public var inlineCommentStyle: InlineCommentStyle
 
   public var indentationDepth: Int = 0 {
     didSet {
@@ -67,10 +66,10 @@ public struct CodePrinter: Sendable {
   }
   public init(
     mode: PrintMode = .flushToFileOnWrite,
-    inlineCommentStyle: InlineCommentStyle = .slashSlash
+    inlineCommentStyle: InlineCommentStyle? = nil
   ) {
     self.mode = mode
-    self.inlineCommentStyle = inlineCommentStyle
+    self.inlineCommentStyle = inlineCommentStyle ?? Language.defaultInlineCommentStyle
   }
 
   public mutating func append(_ text: String) {
@@ -122,27 +121,6 @@ public struct CodePrinter: Sendable {
     try body(&self)
     outdent()
     print("}", terminator, function: function, file: file, line: line)
-  }
-
-  public mutating func printIfBlock(
-    _ condition: Any,
-    function: String = #function,
-    file: String = #fileID,
-    line: UInt = #line,
-    body: (inout CodePrinter) throws -> Void
-  ) rethrows {
-    try printBraceBlock("if (\(condition))", function: function, file: file, line: line, body: body)
-  }
-
-  /// Print a Swift `guard <condition> else { … }` block.
-  public mutating func printGuardBlock(
-    _ condition: Any,
-    function: String = #function,
-    file: String = #fileID,
-    line: UInt = #line,
-    body: (inout CodePrinter) throws -> Void
-  ) rethrows {
-    try printBraceBlock("guard \(condition) else", function: function, file: file, line: line, body: body)
   }
 
   public mutating func printParts(

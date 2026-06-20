@@ -358,7 +358,7 @@ struct JNIEnumTests {
     let translator = makeSwiftJavaAnalyzer(config: config)
     try! translator.analyze(path: "/fake/Fake.swiftinterface", text: input)
 
-    var printer: CodePrinter = CodePrinter(mode: .accumulateAll)
+    var printer: SwiftPrinter = SwiftPrinter(mode: .accumulateAll)
     let generator = JNISwift2JavaGenerator(
       config: config,
       translator: translator,

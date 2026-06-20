@@ -19,7 +19,7 @@ import SwiftSyntaxBuilder
 
 extension FFMSwift2JavaGenerator {
   package func writeSwiftThunkSources() throws {
-    var printer = CodePrinter()
+    var printer = SwiftPrinter()
     try writeSwiftThunkSources(printer: &printer)
   }
 
@@ -37,7 +37,7 @@ extension FFMSwift2JavaGenerator {
     for expectedFileName in self.expectedOutputSwiftFileNames {
       log.trace("Write SwiftPM-'expected' empty file: \(expectedFileName.bold)")
 
-      var printer = CodePrinter()
+      var printer = SwiftPrinter()
       printer.print("// Empty file generated on purpose")
       _ = try printer.writeContents(
         outputDirectory: self.swiftOutputDirectory,
@@ -47,7 +47,7 @@ extension FFMSwift2JavaGenerator {
     }
   }
 
-  package func writeSwiftThunkSources(printer: inout CodePrinter) throws {
+  package func writeSwiftThunkSources(printer: inout SwiftPrinter) throws {
     // Skip global thunks when generating for a single type
     if config.singleType == nil {
       let moduleFilenameBase = "\(self.swiftModuleName)Module+SwiftJava"
@@ -133,7 +133,7 @@ extension FFMSwift2JavaGenerator {
     }
   }
 
-  public func printGlobalSwiftThunkSources(_ printer: inout CodePrinter) throws {
+  public func printGlobalSwiftThunkSources(_ printer: inout SwiftPrinter) throws {
     let stt = SwiftThunkTranslator(self)
 
     printer.print(
@@ -157,7 +157,7 @@ extension FFMSwift2JavaGenerator {
     }
   }
 
-  public func printSwiftThunkSources(_ printer: inout CodePrinter, decl: ExtractedFunc) {
+  public func printSwiftThunkSources(_ printer: inout SwiftPrinter, decl: ExtractedFunc) {
     let stt = SwiftThunkTranslator(self)
 
     for thunk in stt.render(forFunc: decl) {
@@ -166,7 +166,7 @@ extension FFMSwift2JavaGenerator {
     }
   }
 
-  package func printSwiftThunkSources(_ printer: inout CodePrinter, ty: ExtractedNominalType) throws {
+  package func printSwiftThunkSources(_ printer: inout SwiftPrinter, ty: ExtractedNominalType) throws {
     let stt = SwiftThunkTranslator(self)
 
     self.currentJavaIdentifiers = JavaIdentifierFactory(

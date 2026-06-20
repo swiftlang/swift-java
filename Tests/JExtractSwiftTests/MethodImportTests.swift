@@ -87,7 +87,7 @@ final class MethodImportTests {
 
     let funcDecl = try #require(st.extractedGlobalFuncs.first { $0.name == "helloWorld" })
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
@@ -133,7 +133,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
@@ -182,7 +182,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
@@ -228,7 +228,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
@@ -274,7 +274,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
@@ -323,7 +323,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
@@ -368,7 +368,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, funcDecl)
     }
 
@@ -419,7 +419,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, initDecl)
     }
 
@@ -474,7 +474,7 @@ final class MethodImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingWrapperMethod(&printer, initDecl)
     }
 
