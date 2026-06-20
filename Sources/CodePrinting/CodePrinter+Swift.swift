@@ -13,11 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 // ==== -----------------------------------------------------------------------
-// MARK: CodePrinter — Swift-language helpers
+// MARK: CodePrinter - Swift-language helpers
 
 extension CodePrinter where Language == SwiftLanguage {
 
-  /// Print a Swift `if <condition> { … }` block.
+  /// Print a Swift `if <condition> { ... }` block.
   /// The condition is emitted verbatim, without surrounding parentheses
   /// (Swift convention).
   public mutating func printIfBlock(
@@ -30,7 +30,7 @@ extension CodePrinter where Language == SwiftLanguage {
     try printBraceBlock("if \(condition)", function: function, file: file, line: line, body: body)
   }
 
-  /// Print a Swift `guard <condition> else { … }` block.
+  /// Print a Swift `guard <condition> else { ... }` block.
   public mutating func printGuardBlock(
     _ condition: Any,
     function: String = #function,

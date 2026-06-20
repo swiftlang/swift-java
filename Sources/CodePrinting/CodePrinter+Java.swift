@@ -13,11 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 // ==== -----------------------------------------------------------------------
-// MARK: CodePrinter — Java-language helpers
+// MARK: CodePrinter - Java-language helpers
 
 extension CodePrinter where Language == JavaLanguage {
 
-  /// Print a Java `if (<condition>) { … }` block.
+  /// Print a Java `if (<condition>) { ... }` block.
   public mutating func printIfBlock(
     _ condition: Any,
     function: String = #function,
@@ -26,5 +26,28 @@ extension CodePrinter where Language == JavaLanguage {
     body: (inout CodePrinter) throws -> Void
   ) rethrows {
     try printBraceBlock("if (\(condition))", function: function, file: file, line: line, body: body)
+  }
+
+  /// Print a Javadoc comment.
+  ///
+  /// Shape depends on `options.sourceVersion`:
+  /// - Java 23+: Markdown-style line comments (`///`) based on https://openjdk.org/jeps/467
+  /// - Earlier versions: classic `/** ... */` block, with each body line
+  ///   prefixed by ` * ` (just ` *` for blank paragraph separators).
+  ///
+  /// Pass paragraph breaks as blank lines (`\n\n`) inside `text`.
+  public mutating func printJavadocComment(_ text: String) {
+    let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+    if options.sourceVersion >= 23 {
+      for line in lines {
+        print(line.isEmpty ? "///" : "/// \(line)")
+      }
+    } else {
+      print("/**")
+      for line in lines {
+        print(line.isEmpty ? " *" : " * \(line)")
+      }
+      print(" */")
+    }
   }
 }

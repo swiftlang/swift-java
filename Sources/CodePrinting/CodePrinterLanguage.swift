@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftJavaConfigurationShared
+
 // ==== -----------------------------------------------------------------------
 // MARK: CodePrinterLanguage
 
@@ -20,24 +22,45 @@
 /// (e.g. `printGuardBlock` for Swift, `printIfBlock` shaped for Java)
 /// resolve at compile time via constrained extensions.
 public protocol CodePrinterLanguage: Sendable {
+  /// Per-language printer options. Defaults to `Void` for languages
+  /// that don't need any (e.g. Swift today). Java carries the targeted
+  /// source version so helpers can pick the right syntax shape.
+  associatedtype Options: Sendable = Void
+
   /// Default lead used for inline comments (source-location trailers,
   /// `printSeparator` banners). May be overridden at the printer instance
   /// via `CodePrinter.inlineCommentStyle`.
   static var defaultInlineCommentStyle: InlineCommentStyle { get }
+
+  /// Default value for `CodePrinter.options`.
+  static var defaultOptions: Options { get }
+}
+
+extension CodePrinterLanguage where Options == Void {
+  public static var defaultOptions: Void { () }
 }
 
 // ==== -----------------------------------------------------------------------
 // MARK: Concrete languages
 
-/// Swift output. `printIfBlock` writes `if <cond> { … }` (no parens around
-/// the condition), and `printGuardBlock` is available.
+/// Swift output.
 public enum SwiftLanguage: CodePrinterLanguage {
   public static let defaultInlineCommentStyle: InlineCommentStyle = .slashSlash
 }
 
-/// Java output. `printIfBlock` writes `if (<cond>) { … }` (C-style parens).
+/// Java output.
 public enum JavaLanguage: CodePrinterLanguage {
+  public struct Options: Sendable {
+    /// Targeted Java source version.
+    public var sourceVersion: JavaVersion
+
+    public init(sourceVersion: JavaVersion = 8) {
+      self.sourceVersion = sourceVersion
+    }
+  }
+
   public static let defaultInlineCommentStyle: InlineCommentStyle = .slashSlash
+  public static let defaultOptions = Options()
 }
 
 // ==== -----------------------------------------------------------------------

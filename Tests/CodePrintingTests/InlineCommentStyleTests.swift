@@ -65,3 +65,78 @@ struct InlineCommentStyleSuite {
     #expect(p.contents.hasSuffix("hello\n"))
   }
 }
+
+@Suite("JavaPrinter.printJavadocComment")
+struct PrintJavadocCommentSuite {
+
+  // ==== ----------------------------------------------------------------------
+  // MARK: Pre-Java-23: classic /** ... */ block
+
+  @Test func classicBlockShapeForOlderJava() {
+    var p = JavaPrinter()
+    p.emitSourceLocations = false
+    p.options.sourceVersion = 17
+    p.printJavadocComment("First line.\nSecond line.")
+
+    let out = p.contents
+    #expect(out.contains("/**"))
+    #expect(out.contains(" * First line."))
+    #expect(out.contains(" * Second line."))
+    #expect(out.contains(" */"))
+    #expect(!out.contains("///"))
+  }
+
+  @Test func blankLineBecomesBareStarSeparator() {
+    var p = JavaPrinter()
+    p.emitSourceLocations = false
+    p.options.sourceVersion = 17
+    p.printJavadocComment("Para1\n\nPara2")
+
+    // Blank paragraph separators render as a bare ` *` (no trailing space)
+    let lines = p.contents.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+    #expect(lines.contains(" *"))
+    #expect(!lines.contains(" * "))
+  }
+
+  // ==== ----------------------------------------------------------------------
+  // MARK: Java 23+: Markdown line comments (JEP 467)
+
+  @Test func markdownLineShapeFromJava23() {
+    var p = JavaPrinter()
+    p.emitSourceLocations = false
+    p.options.sourceVersion = 23
+    p.printJavadocComment("First line.\nSecond line.")
+
+    let out = p.contents
+    #expect(out.contains("/// First line."))
+    #expect(out.contains("/// Second line."))
+    #expect(!out.contains("/**"))
+    #expect(!out.contains(" */"))
+  }
+
+  @Test func markdownBlankLineIsBareTripleSlash() {
+    // JEP 467 - Markdown Documentation Comments (final in Java 23):
+    // https://openjdk.org/jeps/467
+    var p = JavaPrinter()
+    p.emitSourceLocations = false
+    p.options.sourceVersion = 23
+    p.printJavadocComment("A\n\nB")
+
+    let lines = p.contents.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+    #expect(lines.contains("///"))
+    #expect(!lines.contains("/// "))
+  }
+
+  // ==== ----------------------------------------------------------------------
+  // MARK: Default version uses classic block
+
+  @Test func defaultJavaVersionUsesClassicBlock() {
+    var p = JavaPrinter() // default sourceVersion is 8
+    p.emitSourceLocations = false
+    p.printJavadocComment("hello")
+
+    #expect(p.contents.contains("/**"))
+    #expect(p.contents.contains(" * hello"))
+    #expect(p.contents.contains(" */"))
+  }
+}

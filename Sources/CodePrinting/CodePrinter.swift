@@ -64,12 +64,19 @@ public struct CodePrinter<Language: CodePrinterLanguage>: Sendable {
     case accumulateAll
     case flushToFileOnWrite
   }
+
+  /// Per-language options (e.g. Java source version). Languages without
+  /// options use `Void`. Read by language-constrained extensions.
+  public var options: Language.Options
+
   public init(
     mode: PrintMode = .flushToFileOnWrite,
-    inlineCommentStyle: InlineCommentStyle? = nil
+    inlineCommentStyle: InlineCommentStyle? = nil,
+    options: Language.Options = Language.defaultOptions
   ) {
     self.mode = mode
     self.inlineCommentStyle = inlineCommentStyle ?? Language.defaultInlineCommentStyle
+    self.options = options
   }
 
   public mutating func append(_ text: String) {

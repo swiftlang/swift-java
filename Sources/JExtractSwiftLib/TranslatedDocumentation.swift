@@ -104,17 +104,6 @@ enum TranslatedDocumentation {
       groups.append(annotationsGroup.joined(separator: "\n"))
     }
 
-    printer.print("/**")
-    let oldIdentationText = printer.indentationText
-    printer.indentationText += " * "
-    for (idx, group) in groups.enumerated() {
-      printer.print(group)
-      if idx < groups.count - 1 {
-        printer.print("")
-      }
-    }
-    printer.indentationText = oldIdentationText
-    printer.print(" */")
-
+    printer.printJavadocComment(groups.joined(separator: "\n\n"))
   }
 }
