@@ -25,6 +25,9 @@ BuildLogic/out/
 **/build/
 lib/
 
+# Though make sure we include actual sources, even if they are ignored because e.g. /build/ in the path
+!**/src/main/kotlin/**
+
 # Ignore JVM crash logs
 **/*.log
 

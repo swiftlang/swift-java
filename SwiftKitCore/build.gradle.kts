@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import org.swift.build.utils.resolveSwiftKitVersion
+
 plugins {
     id("build-logic.java-application-conventions")
     id("me.champeau.jmh") version "0.7.2"
@@ -19,7 +21,9 @@ plugins {
 }
 
 group = "org.swift.swiftkit"
-version = "1.0-SNAPSHOT"
+
+version = resolveSwiftKitVersion()
+
 base {
     archivesName = "swiftkit-core"
 }
@@ -34,8 +38,6 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = group as? String
             artifactId = "swiftkit-core"
-            version = "1.0-SNAPSHOT"
-
             from(components["java"])
         }
     }
