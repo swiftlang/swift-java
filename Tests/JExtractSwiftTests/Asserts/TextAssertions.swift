@@ -63,7 +63,6 @@ func assertOutput(
   try! translator.analyze(path: "/fake/Fake.swiftinterface", text: input)
 
   let output: String
-  var printer: CodePrinter = CodePrinter(mode: .accumulateAll)
   switch mode {
   case .ffm:
     let generator = FFMSwift2JavaGenerator(
@@ -76,9 +75,13 @@ func assertOutput(
 
     switch renderKind {
     case .swift:
+      var printer = SwiftPrinter(mode: .accumulateAll)
       try generator.writeSwiftThunkSources(printer: &printer)
+      output = printer.finalize()
     case .java:
+      var printer = JavaPrinter(mode: .accumulateAll)
       try generator.writeExportedJavaSources(printer: &printer)
+      output = printer.finalize()
     }
 
   case .jni:
@@ -94,12 +97,15 @@ func assertOutput(
 
     switch renderKind {
     case .swift:
+      var printer = SwiftPrinter(mode: .accumulateAll)
       try generator.writeSwiftThunkSources(&printer)
+      output = printer.finalize()
     case .java:
+      var printer = JavaPrinter(mode: .accumulateAll)
       try generator.writeExportedJavaSources(&printer)
+      output = printer.finalize()
     }
   }
-  output = printer.finalize()
 
   let sourceLocation = SourceLocation(fileID: fileID, filePath: filePath, line: line, column: column)
   for notExpectedChunk in notExpectedChunks {

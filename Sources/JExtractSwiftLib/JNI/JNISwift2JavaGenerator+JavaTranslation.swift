@@ -1816,7 +1816,7 @@ extension JNISwift2JavaGenerator {
     }
 
     /// Returns the conversion string applied to the placeholder.
-    func render(_ printer: inout CodePrinter, _ placeholder: String) -> String {
+    func render(_ printer: inout JavaPrinter, _ placeholder: String) -> String {
       // NOTE: 'printer' is used if the conversion wants to cause side-effects.
       // E.g. storing a temporary values into a variable.
       switch self {
@@ -1950,7 +1950,7 @@ extension JNISwift2JavaGenerator {
         return inner.render(&printer, placeholder)
 
       case .lambda(let args, let body):
-        var printer = CodePrinter()
+        var printer = JavaPrinter()
         printer.printBraceBlock("(\(args.joined(separator: ", "))) ->") { printer in
           let body = body.render(&printer, placeholder)
           if !body.isEmpty {

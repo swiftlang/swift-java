@@ -57,7 +57,7 @@ final class FuncCallbackImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printFunctionDowncallMethods(&printer, funcDecl)
     }
 
@@ -146,7 +146,7 @@ final class FuncCallbackImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printFunctionDowncallMethods(&printer, funcDecl)
     }
 
@@ -262,7 +262,7 @@ final class FuncCallbackImportTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printFunctionDowncallMethods(&printer, funcDecl)
     }
 

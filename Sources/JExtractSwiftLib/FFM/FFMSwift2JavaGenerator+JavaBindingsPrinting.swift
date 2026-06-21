@@ -19,7 +19,7 @@ import SwiftJavaJNICore
 
 extension FFMSwift2JavaGenerator {
   package func printFunctionDowncallMethods(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ decl: ExtractedFunc,
   ) {
     guard let _ = translatedDecl(for: decl) else {
@@ -39,7 +39,7 @@ extension FFMSwift2JavaGenerator {
 
   /// Print FFM Java binding descriptors for the imported Swift API.
   package func printJavaBindingDescriptorClass(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ decl: ExtractedFunc,
   ) {
     let thunkName = thunkNameRegistry.functionThunkName(decl: decl)
@@ -58,10 +58,10 @@ extension FFMSwift2JavaGenerator {
 
   /// Reusable function to print the FFM Java binding descriptors for a C function.
   package func printJavaBindingDescriptorClass(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ cFunc: CFunction,
     symbolLookup: SymbolLookupTarget = .module,
-    additionalContent: ((inout CodePrinter) -> Void)? = nil,
+    additionalContent: ((inout JavaPrinter) -> Void)? = nil,
   ) {
     let lookup = symbolLookup.javaClassName(moduleName: self.swiftModuleName)
     printer.printBraceBlock(
@@ -89,7 +89,7 @@ extension FFMSwift2JavaGenerator {
 
   /// Print the 'FunctionDescriptor' of the lowered cdecl thunk.
   func printFunctionDescriptorDefinition(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ resultType: CType,
     _ parameters: [CParameter],
   ) {
@@ -116,7 +116,7 @@ extension FFMSwift2JavaGenerator {
   }
 
   func printJavaBindingDowncallMethod(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ cFunc: CFunction,
   ) {
     let returnTy = cFunc.resultType.javaType
@@ -160,7 +160,7 @@ extension FFMSwift2JavaGenerator {
   /// * function pointer parameter as a functional interface.
   /// * Unnamed-struct parameter as a record. (unimplemented)
   func printParameterDescriptorClasses(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ cFunc: CFunction,
   ) {
     for param in cFunc.parameters {
@@ -175,7 +175,7 @@ extension FFMSwift2JavaGenerator {
   }
 
   func printUpcallParameterDescriptorClasses(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ outCallback: OutCallback,
   ) {
     let name = outCallback.name
@@ -200,7 +200,7 @@ extension FFMSwift2JavaGenerator {
   ///
   /// If a `functionBody` is provided, a `Function$Impl` class will be emitted as well.
   func printFunctionPointerParameterDescriptorClass(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ name: String,
     _ cType: CType,
     impl: OutCallback?,
@@ -270,7 +270,7 @@ extension FFMSwift2JavaGenerator {
   ///
   /// * User-facing functional interfaces.
   func printJavaBindingWrapperHelperClass(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ decl: ExtractedFunc,
   ) {
     let translated = self.translatedDecl(for: decl)!
@@ -292,7 +292,7 @@ extension FFMSwift2JavaGenerator {
 
   /// Print "wrapper" functional interface representing a Swift closure type.
   func printJavaBindingWrapperFunctionTypeHelper(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ functionType: TranslatedFunctionType,
     _ bindingDescriptorName: String,
   ) {
@@ -359,7 +359,7 @@ extension FFMSwift2JavaGenerator {
   /// Print the calling body that forwards all the parameters to the `methodName`,
   /// with adding `SwiftArena.ofAuto()` at the end.
   package func printJavaBindingWrapperMethod(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ decl: ExtractedFunc,
   ) {
     let translated = self.translatedDecl(for: decl)!
@@ -420,7 +420,7 @@ extension FFMSwift2JavaGenerator {
   ///
   /// This assumes that all the parameters are passed-in with appropriate names.
   package func printDowncall(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ decl: ExtractedFunc,
   ) {
     //===  Part 1: prepare temporary arena if needed.
@@ -519,7 +519,7 @@ extension FFMSwift2JavaGenerator {
     let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: ", ")))"
 
     /// Helper to emit the error check after a downcall
-    func printErrorCheck(_ printer: inout CodePrinter) {
+    func printErrorCheck(_ printer: inout JavaPrinter) {
       guard translatedSignature.isThrowing else { return }
       printer.printIfBlock("!result$throws.get(ValueLayout.ADDRESS, 0).equals(MemorySegment.NULL)") { printer in
         printer.print("throw new \(JavaType.swiftJavaErrorException.className!)(result$throws.get(ValueLayout.ADDRESS, 0), AllocatingSwiftArena.ofAuto());")
@@ -586,7 +586,7 @@ extension FFMSwift2JavaGenerator {
 
   /// Print a return statement with an optional 32-bit integer overflow check.
   private func printReturnWithOverflowCheck(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     value: String,
     overflowCheck: OverflowCheckType,
   ) {
@@ -705,7 +705,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
   }
 
   /// Returns the conversion string applied to the placeholder.
-  func render(_ printer: inout CodePrinter, _ placeholder: String, placeholderForDowncall: String? = nil) -> String {
+  func render(_ printer: inout JavaPrinter, _ placeholder: String, placeholderForDowncall: String? = nil) -> String {
     // NOTE: 'printer' is used if the conversion wants to cause side-effects.
     // E.g. storing a temporary values into a variable.
     switch self {
@@ -741,7 +741,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
     case .initializeResultWithUpcall(let steps, _):
       // TODO: could we use the printing to introduce the upcall handle instead?
       return steps.map { step in
-        var printer = CodePrinter()
+        var printer = JavaPrinter()
         var out = ""
         out += step.render(&printer, placeholder, placeholderForDowncall: placeholderForDowncall)
         out += printer.contents

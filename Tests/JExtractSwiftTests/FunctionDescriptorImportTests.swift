@@ -255,7 +255,7 @@ extension FunctionDescriptorTests {
       javaOutputDirectory: "/fake"
     )
 
-    let output = CodePrinter.toString { printer in
+    let output = JavaPrinter.toString { printer in
       generator.printJavaBindingDescriptorClass(&printer, funcDecl)
     }
 
@@ -295,7 +295,7 @@ extension FunctionDescriptorTests {
       fatalError("Cannot find descriptor of: \(identifier)")
     }
 
-    let getOutput = CodePrinter.toString { printer in
+    let getOutput = JavaPrinter.toString { printer in
       generator.printJavaBindingDescriptorClass(&printer, accessorDecl)
     }
 

@@ -32,7 +32,7 @@ extension JNISwift2JavaGenerator {
   /// }
   /// ```
   func printAdHocLabeledTupleStaticClass(
-    _ printer: inout CodePrinter,
+    _ printer: inout JavaPrinter,
     _ labeledTupleType: JavaType
   ) {
     guard labeledTupleType.isSwiftJavaLabeledTuple else {

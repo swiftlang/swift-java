@@ -301,7 +301,8 @@ let package = Package(
     ),
 
     .target(
-      name: "CodePrinting"
+      name: "CodePrinting",
+      dependencies: ["SwiftJavaConfigurationShared"]
     ),
 
     .target(

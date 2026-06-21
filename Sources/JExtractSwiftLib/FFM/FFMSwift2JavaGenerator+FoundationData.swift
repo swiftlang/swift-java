@@ -24,7 +24,7 @@ import struct Foundation.URL
 extension FFMSwift2JavaGenerator {
 
   /// Print Java helper methods for Foundation.Data type
-  package func printFoundationDataHelpers(_ printer: inout CodePrinter, _ decl: ExtractedNominalType) {
+  package func printFoundationDataHelpers(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) {
     let typeName = decl.swiftNominal.name
     let thunkNameCopyBytes = "swiftjava_\(swiftModuleName)_\(typeName)_copyBytes__"
 
