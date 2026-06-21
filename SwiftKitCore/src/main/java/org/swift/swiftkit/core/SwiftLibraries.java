@@ -30,13 +30,13 @@ public final class SwiftLibraries {
     public static final String LIB_NAME_SWIFT_RUNTIME_FUNCTIONS = "SwiftRuntimeFunctions";
     public static final String LIB_NAME_SWIFT_JAVA = "SwiftJava";
 
-    /** 
+    /**
      * Allows for configuration if jextracted types should automatically attempt to load swiftCore and the library type is from.
      * <p>
      * If all libraries you need to load are available in paths passed to {@code -Djava.library.path} this should work correctly,
      * however if attempting to load libraries from e.g. the jar as a resource, you may want to disable this.
      */
-    public static final boolean AUTO_LOAD_LIBS = System.getProperty("swift-java.auto-load-libraries") == null ? 
+    public static final boolean AUTO_LOAD_LIBS = System.getProperty("swift-java.auto-load-libraries") == null ?
             true
             : Boolean.getBoolean("swiftkit.auto-load-libraries");
 
@@ -86,6 +86,7 @@ public final class SwiftLibraries {
      * @throws RuntimeException if all loading strategies fail
      */
     public static void loadLibraryWithFallbacks(String libname) {
+        Throwable loadLibraryException = null;
         // Try 1: Load from java.library.path
         try {
             System.loadLibrary(libname);
@@ -94,48 +95,55 @@ public final class SwiftLibraries {
             }
             return;
         } catch (Throwable e) {
+            loadLibraryException = e;
             if (CallTraces.TRACE_DOWNCALLS) {
                 System.err.println("[swift-java] Failed to load " + libname + " from java.library.path: " + e.getMessage());
             }
         }
 
         // Try 2: Load from JAR resources
+        Throwable loadResourceException = null;
         try {
             loadResourceLibrary(libname);
             if (CallTraces.TRACE_DOWNCALLS) {
                 System.out.println("[swift-java] Loaded " + libname + " from JAR resources");
             }
             return;
-        } catch (Throwable e2) {
+        } catch (Throwable e) {
+            loadResourceException = e;
             if (CallTraces.TRACE_DOWNCALLS) {
-                System.err.println("[swift-java] Failed to load " + libname + " from JAR: " + e2.getMessage());
+                System.err.println("[swift-java] Failed to load " + libname + " from JAR: " + e.getMessage());
             }
+        }
 
-            // Try 3: For swiftCore only, try system path
-            if (libname.equals(LIB_NAME_SWIFT_CORE)) {
-                String systemPath = libSwiftCorePath();
-                if (systemPath != null) {
-                    try {
-                        System.load(systemPath);
-                        if (CallTraces.TRACE_DOWNCALLS) {
-                            System.out.println("[swift-java] Loaded " + libname + " from system path: " + systemPath);
-                        }
-                        return;
-                    } catch (Throwable e3) {
-                        throw new RuntimeException(
-                            "Failed to load " + libname + " from java.library.path, JAR resources, and system path (" + systemPath + ")",
-                            e3
-                        );
-                    }
-                } else {
+        // Try 3: For swiftCore only, try system path
+        Throwable loadSystemPathException = null;
+        if (libname.equals(LIB_NAME_SWIFT_CORE)) {
+            String systemPath = libSwiftCorePath();
+            if (systemPath != null) {
+                try {
+                    System.load(systemPath);
                     if (CallTraces.TRACE_DOWNCALLS) {
-                        System.err.println("[swift-java] System path not available on this platform");
+                        System.out.println("[swift-java] Loaded " + libname + " from system path: " + systemPath);
                     }
+                    return;
+                } catch (Throwable e) {
+                    loadSystemPathException = e;
+                }
+            } else {
+                if (CallTraces.TRACE_DOWNCALLS) {
+                    System.err.println("[swift-java] System path not available on this platform");
                 }
             }
-
-            throw new RuntimeException("Failed to load " + libname + " from java.library.path and JAR resources", e2);
         }
+
+        var exception = new RuntimeException("Failed to load '" + libname + "'. See suppressed exceptions for details.");
+        exception.addSuppressed(loadLibraryException);
+        exception.addSuppressed(loadResourceException);
+        if (loadSystemPathException != null) {
+            exception.addSuppressed(loadSystemPathException);
+        }
+        throw exception;
     }
 
     // Cache of already-loaded libraries to prevent duplicate extraction
