@@ -76,9 +76,17 @@ public class SwiftTypeLookupContext {
         }
 
       case .lookForGenericParameters(let extensionNode):
-        // TODO: Implement
-        _ = extensionNode
-        break
+        // Resolve the extension's extended type and consult its generic
+        // parameter list, so a bare `Element` reference inside an
+        // unconstrained `extension Box<Element> { ... }` resolves to
+        // `Box.Element`.
+        guard let extendedNominal = extendedNominal(of: extensionNode) else {
+          break
+        }
+        guard let genericParam = extendedNominal.genericParameters.first(where: { $0.name == name.name }) else {
+          break
+        }
+        return genericParam
 
       case .lookForImplicitClosureParameters:
         // Dollar identifier can't be a type, ignore.
@@ -221,6 +229,22 @@ public class SwiftTypeLookupContext {
     resolvingAliases.insert(id)
     defer { resolvingAliases.remove(id) }
     return try SwiftType(decl.syntax.initializer.value, lookupContext: self)
+  }
+
+  private func extendedNominal(of extensionNode: ExtensionDeclSyntax) -> SwiftNominalTypeDeclaration? {
+    func resolve(_ extendedType: TypeSyntax) -> SwiftNominalTypeDeclaration? {
+      if let id = extendedType.as(IdentifierTypeSyntax.self) {
+        return symbolTable.lookupTopLevelNominalType(id.name.text)
+      }
+      if let member = extendedType.as(MemberTypeSyntax.self) {
+        // Recursively resolve the parent chain: for `Outer.Inner`, find Outer
+        // first, then look up Inner as its nested type.
+        guard let parent = resolve(member.baseType) else { return nil }
+        return symbolTable.lookupNestedType(member.name.text, parent: parent)
+      }
+      return nil
+    }
+    return resolve(extensionNode.extendedType)
   }
 }
 
