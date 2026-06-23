@@ -1046,7 +1046,11 @@ extension LoweredFunctionSignature {
       fatalError("Enum cases are not supported with FFM.")
 
     case .subscriptGetter:
-      let parameters = paramExprs.map { $0.description }.joined(separator: ", ")
+      let parameters = paramExprs.enumerated()
+        .map { (i, argument) -> String in
+          LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argument).description
+        }
+        .joined(separator: ", ")
       resultExpr = "\(callee)[\(raw: parameters)]"
     case .subscriptSetter:
       assert(paramExprs.count >= 1)
@@ -1054,7 +1058,11 @@ extension LoweredFunctionSignature {
       var argumentsWithoutNewValue = paramExprs
       let newValueArgument = argumentsWithoutNewValue.removeLast()
 
-      let parameters = argumentsWithoutNewValue.map { $0.description }.joined(separator: ", ")
+      let parameters = argumentsWithoutNewValue.enumerated()
+        .map { (i, argument) -> String in
+          LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argument).description
+        }
+        .joined(separator: ", ")
       resultExpr = "\(callee)[\(raw: parameters)] = \(newValueArgument)"
     }
 
