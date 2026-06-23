@@ -358,8 +358,19 @@ extension SwiftFunctionSignature {
     )
 
     let valueType: SwiftType = try SwiftType(subscriptNode.returnClause.type, lookupContext: lookupContext)
-    var nodeParameters = try subscriptNode.parameterClause.parameters.map { param in
-      try SwiftParameter(param, lookupContext: lookupContext)
+    var nodeParameters = try subscriptNode.parameterClause.parameters.map { param -> SwiftParameter in
+      var p = try SwiftParameter(param, lookupContext: lookupContext)
+      // Subscript parameters have no external argument label by default. A
+      // single-identifier subscript parameter `subscript(index: Int)` is
+      // called as `obj[5]`, not `obj[index: 5]` — only the explicit
+      // `subscript(label name: Int)` form (i.e. a `secondName` exists)
+      // surfaces an external label. SwiftParameter.init treats single-
+      // identifier params like function params (label == name); strip the
+      // label here for the subscript-specific call shape.
+      if param.secondName == nil {
+        p.argumentLabel = nil
+      }
+      return p
     }
 
     var effectSpecifiers: [SwiftEffectSpecifier]? = nil

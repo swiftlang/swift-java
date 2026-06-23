@@ -660,17 +660,30 @@ extension JNISwift2JavaGenerator {
 
       result = "\(callee).\(decl.name) = \(newValueArgument)"
     case .subscriptGetter:
-      let parameters = arguments.joined(separator: ", ")
+      let parameters = zip(
+        decl.functionSignature.parameters,
+        arguments,
+      ).map { originalParam, argument in
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
+        return "\(label)\(argument)"
+      }
+      .joined(separator: ", ")
       result = "\(callee)[\(parameters)]"
     case .subscriptSetter:
       guard let newValueArgument = arguments.last else {
         fatalError("Setter did not contain newValue parameter: \(decl)")
       }
 
-      var argumentsWithoutNewValue = arguments
-      argumentsWithoutNewValue.removeLast()
+      // Drop the trailing newValue parameter — it's the right-hand-side of
+      // the assignment, not part of the bracketed index expression
+      let indexParams = decl.functionSignature.parameters.dropLast()
+      let indexArgs = arguments.dropLast()
 
-      let parameters = argumentsWithoutNewValue.joined(separator: ", ")
+      let parameters = zip(indexParams, indexArgs).map { originalParam, argument in
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
+        return "\(label)\(argument)"
+      }
+      .joined(separator: ", ")
       result = "\(callee)[\(parameters)] = \(newValueArgument)"
     }
 

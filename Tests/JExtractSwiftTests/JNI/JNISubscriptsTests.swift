@@ -39,6 +39,17 @@ struct JNISubscriptsTests {
     }
     """
 
+  private let subscriptWithLabelledParamsSource = """
+    public struct MyStruct {
+      private var testVariable: [Int32] = []
+
+      public subscript(index idx: Int32) -> Int32 {
+        get { return testVariable[Int(idx)] }
+        set { testVariable[Int(idx)] = newValue }
+      }
+    }
+    """
+
   @Test("Test generation of JavaClass for subscript with no parameters")
   func generatesJavaClassForNoParams() throws {
     try assertOutput(
@@ -84,7 +95,73 @@ struct JNISubscriptsTests {
           MyStruct.$setSubscript(index, newValue, this.$memoryAddress());
         """,
         """
-         private static native void $setSubscript(int index, int newValue, long selfPointer);
+        private static native void $setSubscript(int index, int newValue, long selfPointer);
+        """,
+      ]
+    )
+
+    // The subscipt uses no label, just directly: `base[idx]`
+    try assertOutput(
+      input: subscriptWithParamsSource,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyStruct__00024getSubscript__IJ")
+          ...
+          return selfPointer$.pointee[Int32(fromJNI: index, in: environment)].getJNILocalRefValue(in: environment)
+        """,
+        """
+        @_cdecl("Java_com_example_swift_MyStruct__00024setSubscript__IIJ")
+          ...
+          selfPointer$.pointee[Int32(fromJNI: index, in: environment)] = Int32(fromJNI: newValue, in: environment)
+        """,
+      ]
+    )
+  }
+
+  @Test("Test generation of JavaClass for subscript with labelled parameters")
+  func generatesJavaClassForLabelledParameters() throws {
+    try assertOutput(
+      input: subscriptWithLabelledParamsSource,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        public int getSubscript(int idx) {
+          return MyStruct.$getSubscript(idx, this.$memoryAddress());
+
+        """,
+        """
+        private static native int $getSubscript(int idx, long selfPointer);
+        """,
+        """
+        public void setSubscript(int idx, int newValue) {
+          MyStruct.$setSubscript(idx, newValue, this.$memoryAddress());
+        """,
+        """
+        private static native void $setSubscript(int idx, int newValue, long selfPointer);
+        """,
+      ]
+    )
+
+    // The subscipt uses an explicit label: `base[index: idx]`
+    try assertOutput(
+      input: subscriptWithLabelledParamsSource,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyStruct__00024getSubscript__IJ")
+          ...
+          return selfPointer$.pointee[index: Int32(fromJNI: idx, in: environment)].getJNILocalRefValue(in: environment)
+        """,
+        """
+        @_cdecl("Java_com_example_swift_MyStruct__00024setSubscript__IIJ")
+          ...
+          selfPointer$.pointee[index: Int32(fromJNI: idx, in: environment)] = Int32(fromJNI: newValue, in: environment)
         """,
       ]
     )
