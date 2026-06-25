@@ -140,4 +140,103 @@ struct InlineArrayTypeSuite {
     let paramType = fn.functionSignature.parameters[0].type
     #expect(paramType.description == "[3 of Int]")
   }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Spelled-out generic form `InlineArray<N, T>`
+
+  @Test func spelledOutGenericFormIsParsedAsInlineArray() throws {
+    let result = try analyze(
+      sources: [
+        ("/fake/Source.swift", "public func take(_ a: InlineArray<3, Double>) {}")
+      ],
+      moduleName: "Test"
+    )
+
+    let fn = try #require(result.extractedGlobalFuncs.first { $0.name == "take" })
+    guard case .inlineArray(let count, let element) = fn.functionSignature.parameters[0].type else {
+      Issue.record("expected .inlineArray, got \(fn.functionSignature.parameters[0].type)")
+      return
+    }
+    #expect(count == 3)
+    #expect(element.asNominalType?.nominalTypeDecl.knownTypeKind == .double)
+  }
+
+  @Test func moduleQualifiedSpelledOutFormIsParsedAsInlineArray() throws {
+    let result = try analyze(
+      sources: [
+        ("/fake/Source.swift", "public func take(_ a: Swift.InlineArray<3, Double>) {}")
+      ],
+      moduleName: "Test"
+    )
+
+    let fn = try #require(result.extractedGlobalFuncs.first { $0.name == "take" })
+    guard case .inlineArray(let count, let element) = fn.functionSignature.parameters[0].type else {
+      Issue.record("expected .inlineArray, got \(fn.functionSignature.parameters[0].type)")
+      return
+    }
+    #expect(count == 3)
+    #expect(element.asNominalType?.nominalTypeDecl.knownTypeKind == .double)
+  }
+
+  @Test func spelledOutFormAsFuncReturn() throws {
+    let result = try analyze(
+      sources: [
+        ("/fake/Source.swift", "public func get() -> InlineArray<4, Float> { fatalError() }")
+      ],
+      moduleName: "Test"
+    )
+
+    let fn = try #require(result.extractedGlobalFuncs.first { $0.name == "get" })
+    guard case .inlineArray(let count, let element) = fn.functionSignature.result.type else {
+      Issue.record("expected .inlineArray result")
+      return
+    }
+    #expect(count == 4)
+    #expect(element.asNominalType?.nominalTypeDecl.knownTypeKind == .float)
+  }
+
+  @Test func spelledOutFormAsSubscriptReturn() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct FishTank3 {
+            public subscript(index: Int) -> InlineArray<3, Double> { fatalError() }
+            public subscript(column index: Int) -> InlineArray<3, Double> { fatalError() }
+          }
+          """
+        )
+      ],
+      moduleName: "Test"
+    )
+
+    let fishTank = try #require(
+      result.extractedTypes.values.first { $0.swiftNominal.name == "FishTank3" }
+    )
+    let subscriptGetters = fishTank.variables.filter { $0.apiKind == .subscriptGetter }
+    #expect(subscriptGetters.count == 2)
+
+    for getter in subscriptGetters {
+      guard case .inlineArray(let count, let element) = getter.functionSignature.result.type else {
+        Issue.record("expected .inlineArray subscript result for \(getter.signatureString)")
+        continue
+      }
+      #expect(count == 3)
+      #expect(element.asNominalType?.nominalTypeDecl.knownTypeKind == .double)
+    }
+  }
+
+  @Test func descriptionFromSpelledOutFormUsesSugarRoundTrip() throws {
+    let result = try analyze(
+      sources: [
+        ("/fake/Source.swift", "public func take(_ a: InlineArray<3, Int>) {}")
+      ],
+      moduleName: "Test"
+    )
+
+    let fn = try #require(result.extractedGlobalFuncs.first { $0.name == "take" })
+    let paramType = fn.functionSignature.parameters[0].type
+    #expect(paramType.description == "[3 of Int]")
+  }
 }
