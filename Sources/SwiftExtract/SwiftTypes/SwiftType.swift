@@ -323,23 +323,7 @@ extension SwiftType {
         throw TypeTranslationError.unimplementedType(type)
       }
       let elementType = try SwiftType(elementTy, lookupContext: lookupContext)
-
-      let count: Int?
-      switch inlineArrayType.count.argument {
-      case .expr(let expr):
-        if let lit = expr.as(IntegerLiteralExprSyntax.self),
-          let value = lit.representedLiteralValue, value > 0
-        {
-          count = value
-        } else {
-          count = nil
-        }
-      case .type:
-        // Wildcard `_` or other non-literal type expression — preserved as
-        // unknown; downstream gates treat this as unsupported.
-        count = nil
-      }
-
+      let count = Self.parseInlineArrayCountArgument(inlineArrayType.count.argument)
       self = .inlineArray(count: count, element: elementType)
 
     case .attributedType(let attributedType):
@@ -382,6 +366,20 @@ extension SwiftType {
       )
 
     case .identifierType(let identifierType):
+      // Recognize the spelled-out `InlineArray<N, T>`, which is equivalent
+      // to the sugar syntax `[N of T]` handled above already.
+      if identifierType.name.text == "InlineArray" {
+        let inlineArray = try Self.parseSpelledOutInlineArray(
+          genericArgumentClause: identifierType.genericArgumentClause,
+          lookupContext: lookupContext
+        )
+
+        if let inlineArray {
+          self = inlineArray
+          break
+        }
+      }
+
       // Translate the generic arguments.
       let genericArgs = try identifierType.genericArgumentClause.map { genericArgumentClause in
         try genericArgumentClause.arguments.map { argument in
@@ -407,6 +405,19 @@ extension SwiftType {
       self = knownTypes.optionalSugar(try SwiftType(optionalType.wrappedType, lookupContext: lookupContext))
 
     case .memberType(let memberType):
+      // Recognize spelled-out `Swift.InlineArray<N, T>` as the same `.inlineArray` value the sugar form produces.
+      if memberType.name.text == "InlineArray",
+        let base = memberType.baseType.as(IdentifierTypeSyntax.self),
+        base.name.trimmedDescription == "Swift",
+        let inlineArray = try Self.parseSpelledOutInlineArray(
+          genericArgumentClause: memberType.genericArgumentClause,
+          lookupContext: lookupContext
+        )
+      {
+        self = inlineArray
+        break
+      }
+
       // If the parent type is a known module name, perform a module-qualified
       // lookup instead of treating the module as a parent type
       let parentType: SwiftType?
@@ -481,6 +492,42 @@ extension SwiftType {
       let valueType = try SwiftType(dictType.value, lookupContext: lookupContext)
       self = knownTypes.dictionarySugar(keyType, valueType)
     }
+  }
+
+  /// Resolve the `count` of an `InlineArray` (`[N of T]` or `InlineArray<N, T>` form).
+  /// Returns `nil` for `_` or illegal values.
+  private static func parseInlineArrayCountArgument(
+    _ argument: GenericArgumentSyntax.Argument
+  ) -> Int? {
+    switch argument {
+    case .expr(let expr):
+      if let lit = expr.as(IntegerLiteralExprSyntax.self),
+        let value = lit.representedLiteralValue,
+        value > 0
+      {
+        return value
+      }
+      return nil
+    case .type:
+      // Wildcard `_` or other non-literal type expression.
+      return nil
+    }
+  }
+
+  /// Parse the generic argument clause of a spelled-out `InlineArray<N, T>`.
+  private static func parseSpelledOutInlineArray(
+    genericArgumentClause: GenericArgumentClauseSyntax?,
+    lookupContext: SwiftTypeLookupContext
+  ) throws -> SwiftType? {
+    guard let clause = genericArgumentClause else { return nil }
+    let args = Array(clause.arguments)
+    guard args.count == 2 else { return nil }
+
+    // Second argument must be the element type.
+    guard case .type(let elementTy) = args[1].argument else { return nil }
+    let elementType = try SwiftType(elementTy, lookupContext: lookupContext)
+    let count = parseInlineArrayCountArgument(args[0].argument)
+    return .inlineArray(count: count, element: elementType)
   }
 
   public init(
