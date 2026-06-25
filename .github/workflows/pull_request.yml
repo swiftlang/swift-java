@@ -37,7 +37,7 @@ jobs:
         os_version: ['noble']
         jdk_vendor: ['corretto']
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Cache .build
@@ -73,7 +73,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Gradle :SwiftKitCore:build
@@ -97,7 +97,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Gradle :SwiftKitCore:build
@@ -123,7 +123,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Gradle compile JMH benchmarks
@@ -143,7 +143,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install jemalloc
@@ -179,7 +179,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Cache .build
@@ -214,7 +214,7 @@ jobs:
     env:
       SWIFT_JAVA_VERBOSE: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swiftly
@@ -242,7 +242,7 @@ jobs:
         sdk_triple: ['aarch64-unknown-linux-android28', 'x86_64-unknown-linux-android28', 'armv7-unknown-linux-android28']
         ndk_version: ['r27d', 'r28c']
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swift SDK for Android and build
@@ -277,7 +277,7 @@ jobs:
     container:
       image: ${{ (contains(matrix.swift_version, 'nightly') && 'swiftlang/swift') || 'swift' }}:${{ matrix.swift_version }}-${{ matrix.os_version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Cache sample .build
@@ -312,7 +312,7 @@ jobs:
           'SwiftJavaExtractJNISampleApp',
         ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Install Swiftly  # we specifically install Swiftly in macOS jobs because we want a simpler way to find the right dylib paths for libraries
@@ -341,7 +341,7 @@ jobs:
     container:
       image: swift:6.3-noble
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Cache Tests/LinkageTest/.build
@@ -370,7 +370,7 @@ jobs:
     container:
       image: swift:6.3-noble
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Mark workspace as safe for git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Prepare CI Environment

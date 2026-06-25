@@ -68,6 +68,12 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
     swiftNominal.genericParameters.map(\.name)
   }
 
+  /// Generic parameter declarations (e.g. `[Element]` for `Box<Element>`).
+  /// Empty for non-generic types.
+  public var genericParameters: [SwiftGenericParameterDeclaration] {
+    swiftNominal.genericParameters
+  }
+
   /// Maps generic parameter -> concrete type argument. Empty for unspecialized types
   /// e.g. {"Element": "Fish"} for FishBox
   public var genericArguments: [String: String] = [:]
