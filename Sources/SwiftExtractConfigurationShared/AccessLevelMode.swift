@@ -18,7 +18,7 @@
 /// layer and language-specific configuration layers (e.g. swift-java's
 /// `SwiftJavaConfigurationShared`) can both depend on it without dragging
 /// SwiftSyntax into the latter.
-#if compiler(>=6.2)
+#if compiler(>=6.2.3)
 @nonexhaustive
 #endif
 public enum AccessLevelMode: String, Codable, Sendable {
