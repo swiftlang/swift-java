@@ -123,4 +123,35 @@ final class VariableImportTests {
       ]
     )
   }
+
+  let class_privateSetInterfaceFile =
+    """
+    public class MySwiftClass {
+      public private(set) var counterInt: Int
+    }
+    """
+
+  @Test("Import: public private(set) var counterInt: Int emits only the getter")
+  func variable_int_privateSet() throws {
+    try assertOutput(
+      input: class_privateSetInterfaceFile,
+      .ffm,
+      .java,
+      swiftModuleName: "FakeModule",
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public long getCounterInt() throws SwiftIntegerOverflowException {
+          $ensureAlive();
+          long result$checked = swiftjava_FakeModule_MySwiftClass_counterInt$get.call(this.$memorySegment());
+          ...
+        }
+        """
+      ],
+      notExpectedChunks: [
+        "swiftjava_FakeModule_MySwiftClass_counterInt$set",
+        "setCounterInt",
+      ]
+    )
+  }
 }

@@ -17,6 +17,7 @@ package com.example.swift;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftArena;
 
+import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
@@ -186,5 +187,18 @@ public class MySwiftClassTest {
             MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
             assertEquals("debug: MySwiftClass(x: 20, y: 10)", c1.toDebugString());
         }
+    }
+
+    @Test
+    void privateSetCounter_getterOnly() throws Exception {
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftClass c = MySwiftClass.init(20, 10, arena);
+            assertEquals(7, c.getPrivateSetCounter());
+        }
+
+        // The setter must not be exposed to Java for `public private(set) var`
+        Method getter = MySwiftClass.class.getMethod("getPrivateSetCounter");
+        assertNotNull(getter);
+        assertThrows(NoSuchMethodException.class, () -> MySwiftClass.class.getMethod("setPrivateSetCounter", long.class));
     }
 }

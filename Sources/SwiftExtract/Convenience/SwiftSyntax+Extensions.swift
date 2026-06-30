@@ -94,6 +94,27 @@ extension DeclModifierSyntax {
   }
 }
 
+extension AccessLevelMode {
+  package func matches(_ modifier: DeclModifierSyntax) -> Bool {
+    switch (self, modifier.name.tokenKind) {
+    case (.public, .keyword(.public)),
+      (.public, .keyword(.open)):
+      return true
+    case (.package, .keyword(.public)),
+      (.package, .keyword(.open)),
+      (.package, .keyword(.package)):
+      return true
+    case (.internal, .keyword(.public)),
+      (.internal, .keyword(.open)),
+      (.internal, .keyword(.package)),
+      (.internal, .keyword(.internal)):
+      return true
+    default:
+      return false
+    }
+  }
+}
+
 extension WithModifiersSyntax {
   package func isPublic(in type: NominalTypeDeclSyntaxNode?) -> Bool {
     if let protocolDecl = type?.as(ProtocolDeclSyntax.self) {

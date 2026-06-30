@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import JExtractSwiftLib
+import SwiftJavaConfigurationShared
 import Testing
 
 @Suite
@@ -35,6 +36,8 @@ struct JNIVariablesTests {
       }
       public var someBoolean: Bool
       public var isBoolean: Bool
+      public private(set) var privateSetCounter: Int64
+      public internal(set) var internalSetCounter: Int64
     }
     """
 
@@ -443,6 +446,137 @@ struct JNIVariablesTests {
           ...
           selfPointer$.pointee.isBoolean = Bool(fromJNI: newValue, in: environment)
         }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func privateSetCounter_javaBindings() throws {
+    try assertOutput(
+      input: membersSource,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 8,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public private(set) var privateSetCounter: Int64
+         * }
+         */
+         public long getPrivateSetCounter() {
+           return MyClass.$getPrivateSetCounter(this.$memoryAddress());
+         }
+        """,
+        """
+        private static native long $getPrivateSetCounter(long selfPointer);
+        """,
+      ],
+      notExpectedChunks: [
+        "setPrivateSetCounter",
+        "$setPrivateSetCounter",
+      ]
+    )
+  }
+
+  @Test
+  func privateSetCounter_swiftThunks() throws {
+    try assertOutput(
+      input: membersSource,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyClass__00024getPrivateSetCounter__J")
+        public func Java_com_example_swift_MyClass__00024getPrivateSetCounter__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
+          ...
+          return selfPointer$.pointee.privateSetCounter.getJNILocalRefValue(in: environment)
+        }
+        """
+      ],
+      notExpectedChunks: [
+        "setPrivateSetCounter"
+      ]
+    )
+  }
+
+  @Test
+  func internalSetCounter_javaBindings() throws {
+    try assertOutput(
+      input: membersSource,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 8,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public internal(set) var internalSetCounter: Int64
+         * }
+         */
+         public long getInternalSetCounter() {
+           return MyClass.$getInternalSetCounter(this.$memoryAddress());
+         }
+        """,
+        """
+        private static native long $getInternalSetCounter(long selfPointer);
+        """,
+      ],
+      notExpectedChunks: [
+        "setInternalSetCounter",
+        "$setInternalSetCounter",
+      ]
+    )
+  }
+
+  @Test
+  func packageSet_javaBindings_atPackageLevel() throws {
+    let src =
+      """
+      public class MyClass {
+        public package(set) var packageSetCounter: Int64
+      }
+      """
+    var config = Configuration()
+    config.minimumInputAccessLevelMode = .package
+    try assertOutput(
+      input: src,
+      config: config,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 8,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public package(set) var packageSetCounter: Int64
+         * }
+         */
+         public long getPackageSetCounter() {
+           return MyClass.$getPackageSetCounter(this.$memoryAddress());
+         }
+        """,
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public package(set) var packageSetCounter: Int64
+         * }
+         */
+         public void setPackageSetCounter(long newValue) {
+           MyClass.$setPackageSetCounter(newValue, this.$memoryAddress());
+         }
+        """,
+        """
+        private static native long $getPackageSetCounter(long selfPointer);
+        """,
+        """
+        private static native void $setPackageSetCounter(long newValue, long selfPointer);
         """,
       ]
     )
