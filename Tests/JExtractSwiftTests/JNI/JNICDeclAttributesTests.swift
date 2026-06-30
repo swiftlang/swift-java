@@ -19,7 +19,7 @@ import Testing
 struct JNICDeclAttributesTests {
 
   @Test
-  func globalFunc_hasUsedAttribute() throws {
+  func globalFunc_hasThunkAttributes() throws {
     try assertOutput(
       input: "public func hello()",
       .jni,
@@ -29,6 +29,9 @@ struct JNICDeclAttributesTests {
         #if compiler(>=6.3)
         @used
         #endif
+        #if compiler(>=6.4)
+        @diagnose(DeprecatedDeclaration, as: ignored)
+        #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024hello__")
         ...
         """
@@ -37,7 +40,7 @@ struct JNICDeclAttributesTests {
   }
 
   @Test
-  func globalFuncWithArgs_hasUsedAttribute() throws {
+  func globalFuncWithArgs_hasThunkAttributes() throws {
     try assertOutput(
       input: "public func add(a: Int64, b: Int64) -> Int64",
       .jni,
@@ -46,6 +49,9 @@ struct JNICDeclAttributesTests {
         """
         #if compiler(>=6.3)
         @used
+        #endif
+        #if compiler(>=6.4)
+        @diagnose(DeprecatedDeclaration, as: ignored)
         #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024add__JJ")
         ...

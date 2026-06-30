@@ -788,6 +788,9 @@ extension JNISwift2JavaGenerator {
       #if compiler(>=6.3)
       @used
       #endif
+      #if compiler(>=6.4)
+      @diagnose(DeprecatedDeclaration, as: ignored)
+      #endif
       @_cdecl("\(cName)")
       public func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
       """
