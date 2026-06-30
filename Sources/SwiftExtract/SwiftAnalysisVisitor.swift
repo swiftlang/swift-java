@@ -286,7 +286,10 @@ final class SwiftAnalysisVisitor {
     self.log.debug("Import variable: \(node.kind) '\(node.qualifiedNameForDebug)'")
 
     do {
-      let supportedAccessors = node.supportedAccessorKinds(binding: binding)
+      let supportedAccessors = node.supportedAccessorKinds(
+        binding: binding,
+        minimumAccessLevel: config.effectiveMinimumInputAccessLevelMode,
+      )
       if supportedAccessors.contains(.get) {
         try importAccessor(
           from: DeclSyntax(node),

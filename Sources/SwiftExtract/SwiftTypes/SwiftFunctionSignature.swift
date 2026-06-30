@@ -458,14 +458,25 @@ extension VariableDeclSyntax {
   /// Determine what operations (i.e. get and/or set) supported in this `VariableDeclSyntax`
   ///
   /// - Parameters:
-  ///   - binding the pattern binding in this declaration.
-  public func supportedAccessorKinds(binding: PatternBindingSyntax) -> AccessorBlockSyntax.SupportedAccessorKinds {
+  ///   - binding: the pattern binding in this declaration.
+  ///   - minimumAccessLevel: the minimum access level being extracted
+  public func supportedAccessorKinds(
+    binding: PatternBindingSyntax,
+    minimumAccessLevel: AccessLevelMode
+  ) -> AccessorBlockSyntax.SupportedAccessorKinds {
     if self.bindingSpecifier.tokenKind == .keyword(.let) {
       return [.get]
     }
 
     if let accessorBlock = binding.accessorBlock {
       return accessorBlock.supportedAccessorKinds()
+    }
+
+    // Account for private(set) and similar modifiers
+    for modifier in self.modifiers where modifier.detail?.detail.text == "set" {
+      if !minimumAccessLevel.matches(modifier) {
+        return [.get]
+      }
     }
 
     return [.get, .set]

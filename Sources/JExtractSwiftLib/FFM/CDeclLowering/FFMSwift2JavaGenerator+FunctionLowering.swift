@@ -59,7 +59,10 @@ extension FFMSwift2JavaGenerator {
     isSet: Bool,
     enclosingType: TypeSyntax? = nil,
   ) throws -> LoweredFunctionSignature? {
-    let supportedAccessors = decl.supportedAccessorKinds(binding: decl.bindings.first!)
+    let supportedAccessors = decl.supportedAccessorKinds(
+      binding: decl.bindings.first!,
+      minimumAccessLevel: self.config.effectiveMinimumInputAccessLevelMode,
+    )
     guard supportedAccessors.contains(isSet ? .set : .get) else {
       return nil
     }

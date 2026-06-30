@@ -44,6 +44,10 @@ public class MySwiftClass {
     }
   }
 
+  /// `public private(set)` should expose only a getter to Java; the setter
+  /// is unreachable so swift-java must not emit a setter thunk for it
+  public private(set) var privateSetCounter: Int64 = 7
+
   public static func method() {
   }
 
