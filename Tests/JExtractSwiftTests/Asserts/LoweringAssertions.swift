@@ -18,6 +18,13 @@ import SwiftJavaConfigurationShared
 import SwiftSyntax
 import Testing
 
+private let thunkDiagnoseAttribute = """
+  #if compiler(>=6.4)
+  @diagnose(DeprecatedDeclaration, as: ignored)
+  #endif
+
+  """
+
 /// Assert that the lowering of the function function declaration to a @_cdecl
 /// entrypoint matches the expected form.
 func assertLoweredFunction(
@@ -79,7 +86,7 @@ func assertLoweredFunction(
   )
 
   #expect(
-    loweredCDecl.description == expectedCDecl.description,
+    loweredCDecl.description == thunkDiagnoseAttribute + expectedCDecl.description,
     sourceLocation: Testing.SourceLocation(
       fileID: fileID,
       filePath: filePath,
@@ -147,7 +154,7 @@ func assertLoweredVariableAccessor(
   )
 
   #expect(
-    loweredCDecl?.description == expectedCDecl?.description,
+    loweredCDecl?.description == expectedCDecl.map { thunkDiagnoseAttribute + $0.description },
     sourceLocation: Testing.SourceLocation(
       fileID: fileID,
       filePath: filePath,

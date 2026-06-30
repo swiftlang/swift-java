@@ -979,6 +979,9 @@ extension LoweredFunctionSignature {
 
     var loweredCDecl = try! FunctionDeclSyntax(
       """
+      #if compiler(>=6.4)
+      @diagnose(DeprecatedDeclaration, as: ignored)
+      #endif
       @_cdecl(\(literal: cName))
       public func \(raw: cName)(\(raw: cdeclParams))\(raw: returnClause) {
       }

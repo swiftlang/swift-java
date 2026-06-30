@@ -241,6 +241,9 @@ struct SwiftThunkTranslator {
 
     return
       """
+      #if compiler(>=6.4)
+      @diagnose(DeprecatedDeclaration, as: ignored)
+      #endif
       @_cdecl("\(raw: funcName)")
       public func \(raw: funcName)() -> UnsafeMutableRawPointer /* Any.Type */ {
         return unsafeBitCast(\(raw: nominal.swiftNominal.qualifiedName).self, to: UnsafeMutableRawPointer.self)
@@ -285,6 +288,9 @@ struct SwiftThunkTranslator {
 
     let copyBytesThunk: DeclSyntax =
       """
+      #if compiler(>=6.4)
+      @diagnose(DeprecatedDeclaration, as: ignored)
+      #endif
       @_cdecl("\(raw: thunkName)")
       public func \(raw: thunkName)(
           selfPointer: UnsafeRawPointer,
