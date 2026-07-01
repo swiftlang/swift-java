@@ -29,8 +29,7 @@ extension JNISwift2JavaGenerator {
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
       protocolWrappers: self.interfaceProtocolWrappers,
       logger: self.logger,
-      javaIdentifiers: self.currentJavaIdentifiers,
-      extractedTypes: self.analysis.extractedTypes,
+      javaIdentifiers: self.currentJavaIdentifiers
     )
   }
 
@@ -72,7 +71,6 @@ extension JNISwift2JavaGenerator {
         protocolWrappers: self.interfaceProtocolWrappers,
         logger: self.logger,
         javaIdentifiers: self.currentJavaIdentifiers,
-        extractedTypes: self.analysis.extractedTypes,
       )
       translated = try translation.translate(enumCase: decl)
     } catch {
@@ -94,7 +92,6 @@ extension JNISwift2JavaGenerator {
     let protocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
     var javaIdentifiers: JavaIdentifierFactory
-    let extractedTypes: [SwiftTypeName: ExtractedNominalType]
 
     func translate(enumCase: ExtractedEnumCase) throws -> TranslatedEnumCase {
       let methodName = "" // TODO: Used for closures, replace with better name?
@@ -368,7 +365,9 @@ extension JNISwift2JavaGenerator {
         return nil
       }
       let isGeneric = selfParameter.selfType.asNominalTypeDeclaration?.isGeneric == true
-      guard isGeneric else {
+      let isProtocol = selfParameter.selfType.asNominalType?.isProtocol == true
+
+      guard isGeneric || isProtocol else {
         return nil
       }
 
@@ -967,7 +966,35 @@ extension JNISwift2JavaGenerator {
           genericRequirements: genericRequirements,
         )
 
-      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite, .inlineArray:
+      case .opaque(let proto), .existential(let proto):
+        guard case .nominal(let protoNominalType) = proto, protoNominalType.isProtocol else {
+          throw JavaTranslationError.cannotReturnNonExtractedProtocol(proto)
+        }
+
+        let interfaceJavaType = JavaType.class(
+          package: moduleJavaPackages[protoNominalType.nominalTypeDecl.moduleName],
+          name: protoNominalType.nominalTypeDecl.qualifiedName,
+        )
+        let boxJavaType = JavaType.class(
+          package: moduleJavaPackages[protoNominalType.nominalTypeDecl.moduleName],
+          name: protoNominalType.nominalTypeDecl.javaExistentialBoxName,
+        )
+
+        return TranslatedResult(
+          javaType: interfaceJavaType,
+          nativeJavaType: .void,
+          annotations: resultAnnotations,
+          outParameters: [.init(name: resultName, type: ._OutSwiftGenericInstance, allocation: .new)],
+          conversion: .wrapMemoryAddressUnsafe(
+            .commaSeparated([
+              .member(.constant(resultName), field: "selfPointer"),
+              .member(.constant(resultName), field: "selfTypePointer"),
+            ]),
+            boxJavaType
+          )
+        )
+
+      case .metatype, .tuple, .function, .genericParameter, .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -2087,6 +2114,10 @@ extension JNISwift2JavaGenerator {
     /// We cannot generate interface wrappers for
     /// protocols that we unable to be jextracted.
     case protocolWasNotExtracted
+
+    /// Returning `any P` / `some P` is only supported when `P` is a single
+    /// jextracted protocol.
+    case cannotReturnNonExtractedProtocol(SwiftType)
 
     /// Dictionary type requires exactly two generic type arguments (key and value).
     case dictionaryRequiresKeyAndValueTypes(SwiftType)

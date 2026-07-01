@@ -30,3 +30,10 @@ public class ConcreteProtocolAB: ProtocolA, ProtocolB {
     MySwiftClass(x: 10, y: 50)
   }
 }
+
+/// Returns a **reference-type** (class) `ProtocolA` conformer boxed as `any
+/// ProtocolA`, to exercise existential-box setter write-back against a
+/// class conformer.
+public func makeProtocolAClass(constantA: Int64, constantB: Int64) -> any ProtocolA {
+  ConcreteProtocolAB(constantA: constantA, constantB: constantB)
+}
