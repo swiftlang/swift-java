@@ -32,6 +32,7 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         public static class emptyClosure {
+          /** Corresponds to the Swift closure parameter of type {@code () -> ()}. */
           @FunctionalInterface
           public interface closure {
             void apply();
@@ -90,6 +91,7 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         public static class closureWithArgumentsAndReturn {
+          /** Corresponds to the Swift closure parameter of type {@code (Int64, Bool) -> Int64}. */
           @FunctionalInterface
           public interface closure {
             long apply(long _0, boolean _1);
