@@ -136,8 +136,8 @@ extension FFMSwift2JavaGenerator {
       params.append("\(annotationsStr)\(param.type.javaType) \(name)")
       args.append(name)
     }
-    let paramsStr = params.joined(separator: ", ")
-    let argsStr = args.joined(separator: ", ")
+    let paramsStr = params.joined(separator: .comma)
+    let argsStr = args.joined(separator: .comma)
 
     printer.print(
       """
@@ -236,7 +236,7 @@ extension FFMSwift2JavaGenerator {
         """
         @FunctionalInterface
         public interface Function {
-          \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", ")));
+          \(cResultType.javaType) apply(\(paramDecls.joined(separator: .comma)));
         }
         """
       )
@@ -246,7 +246,7 @@ extension FFMSwift2JavaGenerator {
           """
           public final static class Function$Impl implements Function {
             \(impl.members.joinedJavaStatements(indent: 2))
-            public \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", "))) {
+            public \(cResultType.javaType) apply(\(paramDecls.joined(separator: .comma))) {
               \(impl.body)
             }
           }
@@ -319,7 +319,7 @@ extension FFMSwift2JavaGenerator {
         """
         @FunctionalInterface
         public interface \(functionType.name) {
-          \(functionType.result.javaResultType) apply(\(apiParams.joined(separator: ", ")));
+          \(functionType.result.javaResultType) apply(\(apiParams.joined(separator: .comma)));
         }
         """
       )
@@ -333,7 +333,7 @@ extension FFMSwift2JavaGenerator {
       ) { printer in
         printer.print(
           """
-          return \(cdeclDescriptor).toUpcallStub((\(cdeclParams.joined(separator: ", "))) -> {
+          return \(cdeclDescriptor).toUpcallStub((\(cdeclParams.joined(separator: .comma))) -> {
           """
         )
         printer.indent()
@@ -343,7 +343,7 @@ extension FFMSwift2JavaGenerator {
           convertedArgs.append(arg)
         }
 
-        let call = "fi.apply(\(convertedArgs.joined(separator: ", ")))"
+        let call = "fi.apply(\(convertedArgs.joined(separator: .comma)))"
         let result = functionType.result.conversion.render(&printer, call)
         if functionType.result.javaResultType == .void {
           printer.print("\(result);")
@@ -394,7 +394,7 @@ extension FFMSwift2JavaGenerator {
     if translatedSignature.canThrowSwiftIntegerOverflowException {
       throwsClauses.append(JavaType.swiftIntegerOverflowException.className!)
     }
-    let throwsClause = throwsClauses.isEmpty ? "" : " throws \(throwsClauses.joined(separator: ", "))"
+    let throwsClause = throwsClauses.isEmpty ? "" : " throws \(throwsClauses.joined(separator: .comma))"
 
     TranslatedDocumentation.printDocumentation(
       importedFunc: decl,
@@ -404,7 +404,7 @@ extension FFMSwift2JavaGenerator {
     )
     printer.printBraceBlock(
       """
-      \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))\(throwsClause)
+      \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: .comma)))\(throwsClause)
       """
     ) { printer in
       if case .instance = decl.functionSignature.selfParameter {
@@ -516,7 +516,7 @@ extension FFMSwift2JavaGenerator {
     }
 
     //=== Part 3: Downcall.
-    let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: ", ")))"
+    let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: .comma)))"
 
     /// Helper to emit the error check after a downcall
     func printErrorCheck(_ printer: inout JavaPrinter) {
@@ -813,7 +813,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
           placeholderForDowncall: placeholderForDowncall,
         )
       }
-      return "\(tupleClassName)(\(args.joined(separator: ", ")))"
+      return "\(tupleClassName)(\(args.joined(separator: .comma)))"
     }
   }
 }

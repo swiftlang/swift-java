@@ -55,7 +55,7 @@ extension CFunction: CustomStringConvertible {
 
     // Function parameters.
     result += "("
-    result += parameters.map { $0.description }.joined(separator: ", ")
+    result += parameters.map { $0.description }.joined(separator: .comma)
     CType.printFunctionParametersSuffix(
       isVariadic: isVariadic,
       hasZeroParameters: parameters.isEmpty,

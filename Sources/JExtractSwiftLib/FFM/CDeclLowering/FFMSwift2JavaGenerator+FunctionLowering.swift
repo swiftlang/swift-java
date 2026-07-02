@@ -976,7 +976,7 @@ extension LoweredFunctionSignature {
     as apiKind: SwiftAPIKind,
   ) -> FunctionDeclSyntax {
 
-    let cdeclParams = allLoweredParameters.map(\.description).joined(separator: ", ")
+    let cdeclParams = allLoweredParameters.map(\.description).joined(separator: .comma)
     let cdeclReturnType = cdeclReturnTypeForThunk
     let returnClause = !cdeclReturnType.isVoid ? " -> \(cdeclReturnType.description)" : ""
 
@@ -1036,7 +1036,7 @@ extension LoweredFunctionSignature {
           let argExpr = original.parameters[i].convention == .inout ? "&\(argument)" : argument
           return LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argExpr).description
         }
-        .joined(separator: ", ")
+        .joined(separator: .comma)
       resultExpr = "\(callee)(\(raw: arguments))"
 
     case .getter:
@@ -1056,7 +1056,7 @@ extension LoweredFunctionSignature {
         .map { (i, argument) -> String in
           LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argument).description
         }
-        .joined(separator: ", ")
+        .joined(separator: .comma)
       resultExpr = "\(callee)[\(raw: parameters)]"
     case .subscriptSetter:
       assert(paramExprs.count >= 1)
@@ -1068,7 +1068,7 @@ extension LoweredFunctionSignature {
         .map { (i, argument) -> String in
           LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argument).description
         }
-        .joined(separator: ", ")
+        .joined(separator: .comma)
       resultExpr = "\(callee)[\(raw: parameters)] = \(newValueArgument)"
     }
 
