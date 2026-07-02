@@ -88,6 +88,24 @@ extension JNISwift2JavaGenerator {
       }
     }
 
+    // One box class per protocol returned as `any P` / `some P` from at
+    // least one extracted function.
+    for protocolType in self.existentialProtocolBoxes {
+      let boxName = protocolType.swiftNominal.javaExistentialBoxName
+      let filename = "\(boxName).java"
+      logger.debug("Printing contents: \(filename)")
+      printExistentialBoxFile(&printer, protocolType)
+
+      if let outputFile = try printer.writeContents(
+        outputDirectory: javaOutputDirectory,
+        javaPackagePath: javaPackagePath,
+        filename: filename,
+      ) {
+        exportedFileNames.append(outputFile.path(percentEncoded: false))
+        logger.info("[swift-java] Generated: \(boxName.bold).java (at \(outputFile))")
+      }
+    }
+
     // Write java sources list file
     if let generatedJavaSourcesListFileOutput = config.generatedJavaSourcesListFileOutput, !exportedFileNames.isEmpty {
       let outputPath = URL(fileURLWithPath: javaOutputDirectory).appending(path: generatedJavaSourcesListFileOutput)
@@ -187,24 +205,110 @@ extension JNISwift2JavaGenerator {
         self.logger.debug("Skipping static method '\(initializer.name)'")
       }
 
-      for method in decl.methods {
-        if method.isStatic {
-          self.logger.debug("Skipping static method '\(method.name)'")
-          continue
-        }
-        printFunctionDowncallMethods(&printer, method, skipMethodBody: true)
-        printer.println()
-      }
-
-      for variable in decl.variables {
-        if variable.isStatic {
-          self.logger.debug("Skipping static property '\(variable.name)'")
-          continue
-        }
-        printFunctionDowncallMethods(&printer, variable, skipMethodBody: true)
+      // Use the same requirement predicate as the existential box
+      // (`supportedProtocolRequirements(of:)`) so the interface never
+      // declares a requirement (e.g. a property setter) that the box
+      // doesn't implement.
+      for requirement in self.supportedProtocolRequirements(of: decl) {
+        printFunctionDowncallMethods(&printer, requirement, skipMethodBody: true)
         printer.println()
       }
     }
+  }
+
+  /// Prints the full `.java` file for a protocol's existential box — the
+  /// class used to represent a value returned as `any P` / `some P` from an
+  /// extracted Swift function.
+  private func printExistentialBoxFile(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) {
+    printHeader(&printer)
+    printPackage(&printer)
+    printImports(&printer)
+
+    self.currentJavaIdentifiers = JavaIdentifierFactory(self.allProtocolRequirementMethods(of: decl))
+
+    printExistentialBox(&printer, decl)
+  }
+
+  /// Prints `public final class <P>Box implements JNISwiftInstance, <P> { ... }`.
+  ///
+  /// Boxes a value returned as `any P` / `some P`: it carries the concrete
+  /// (dynamic) value pointer and the concrete (dynamic) type-metadata pointer.
+  private func printExistentialBox(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) {
+    let boxName = decl.swiftNominal.javaExistentialBoxName
+    let implementsClause = "JNISwiftInstance, \(decl.effectiveJavaSimpleName)"
+
+    printer.printBraceBlock("final class \(boxName) implements \(implementsClause)") { printer in
+      printDesignatedConstructor(&printer, javaName: boxName, pointerParams: ["selfPointer", "selfTypePointer"])
+      printer.println()
+      printWrapMemoryAddressUnsafeFactory(
+        &printer,
+        javaName: boxName,
+        genericClause: "",
+        pointerParams: ["selfPointer", "selfTypePointer"],
+        docSummary: "Assume that the passed {@code long}s represent a memory address and type metadata address of a {@link \(boxName)}."
+      )
+      printer.println()
+      printer.print(
+        """
+        /** Pointer to the "self". */
+        private final long selfPointer;
+
+        /** Pointer to the metatype of the concrete dynamic value boxed here. */
+        private final long selfTypePointer;
+
+        /** Tracks whether this instance has been destroyed; doubles as the destroyed-state holder. */
+        private final SwiftInstanceCleanup $cleanup;
+
+        public long $memoryAddress() {
+          return this.selfPointer;
+        }
+
+        @Override
+        public SwiftInstanceCleanup $cleanup() {
+          return $cleanup;
+        }
+
+        @Override
+        public long $typeMetadataAddress() {
+          return this.selfTypePointer;
+        }
+        """
+      )
+      printer.println()
+
+      for method in self.allProtocolRequirementMethods(of: decl) {
+        printExistentialBoxMethod(&printer, decl, method)
+        printer.println()
+      }
+
+      printSwiftInstanceObjectMethods(&printer)
+      printer.println()
+    }
+  }
+
+  /// Prints one existential box method.
+  /// Reuses `javaTranslator.translate(_:)` for the
+  /// parameter/result shape, but the translation is *not* cached via
+  /// `translatedDecl(for:)` (that cache is keyed by the protocol method decl
+  /// and is shared with the plain `interface P` printing, which never prints
+  /// a body) — and `parentName` is overridden to the box's own name so the
+  /// native downcall target and JNI symbol are unique to the box, not the
+  /// interface.
+  private func printExistentialBoxMethod(
+    _ printer: inout JavaPrinter,
+    _ decl: ExtractedNominalType,
+    _ method: ExtractedFunc
+  ) {
+    guard var translated = try? self.javaTranslator.translate(method) else {
+      self.logger.debug("Failed to translate protocol requirement for existential box: \(method)")
+      return
+    }
+    translated.parentName = SwiftQualifiedTypeName(decl.swiftNominal.javaExistentialBoxName)
+
+    printer.printSeparator(method.displayName)
+    // We pass importedFunc as nil because we are not printing based on the protocol
+    // but rather as the concrete box class.
+    printJavaBindingWrapperMethod(&printer, translated, importedFunc: nil, skipMethodBody: false)
   }
 
   private func printConcreteType(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) {
@@ -254,63 +358,22 @@ extension JNISwift2JavaGenerator {
         printer.println()
       }
 
-      printer.print(
-        """
-        /**
-        * The designated constructor of any imported Swift types.
-        *
-        * @param selfPointer  a pointer to the memory containing the value
-        * @param swiftArena   the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
-        */
-        """
-      )
       // Specialized types are concrete — no selfTypePointer needed
       let isEffectivelyGeneric = decl.swiftNominal.isGeneric && !decl.isSpecialization
       var swiftPointerParams = ["selfPointer"]
       if isEffectivelyGeneric {
         swiftPointerParams.append("selfTypePointer")
       }
-      let swiftPointerArg = swiftPointerParams.map { "long \($0)" }.joined(separator: .comma)
-      printer.printBraceBlock("private \(decl.effectiveJavaSimpleName)(\(swiftPointerArg), SwiftArena swiftArena)") { printer in
-        for param in swiftPointerParams {
-          printer.print(
-            """
-            SwiftObjects.requireNonZero(\(param), "\(param)");
-            this.\(param) = \(param);
-            """
-          )
-        }
-        printer.print(
-          """
-          this.$cleanup = $createCleanup();
-
-          // Only register once we have fully initialized the object since this will need the object pointer.
-          swiftArena.register(this);
-          """
-        )
-      }
+      let javaName = decl.effectiveJavaSimpleName
+      printDesignatedConstructor(&printer, javaName: javaName, pointerParams: swiftPointerParams)
       printer.println()
       let genericClause = decl.javaGenericClause
-      let javaName = decl.effectiveJavaSimpleName
-      printer.print(
-        """
-        /**
-         * Assume that the passed {@code long} represents a memory address of a {@link \(javaName)}.
-         * <p>
-         * Warnings:
-         * <ul>
-         *   <li>No checks are performed about the compatibility of the pointed at memory and the actual \(javaName) types.</li>
-         *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
-         * </ul>
-         */
-        public static\(genericClause) \(javaName)\(genericClause) wrapMemoryAddressUnsafe(\(swiftPointerArg), SwiftArena swiftArena) {
-          return new \(javaName)\(genericClause)(\(swiftPointerParams.joined(separator: .comma)), swiftArena);
-        }
-
-        public static\(genericClause) \(javaName)\(genericClause) wrapMemoryAddressUnsafe(\(swiftPointerArg)) {
-          return new \(javaName)\(genericClause)(\(swiftPointerParams.joined(separator: .comma)), SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
-        }
-        """
+      printWrapMemoryAddressUnsafeFactory(
+        &printer,
+        javaName: javaName,
+        genericClause: genericClause,
+        pointerParams: swiftPointerParams,
+        docSummary: "Assume that the passed {@code long} represents a memory address of a {@link \(javaName)}."
       )
 
       printer.print(
@@ -372,30 +435,111 @@ extension JNISwift2JavaGenerator {
       printTypeMetadataAddressFunction(&printer, decl)
       printer.println()
 
-      printer.print(
-        """
-        public boolean equals(Object obj) {
-          if (obj instanceof JNISwiftInstance rhs) {
-            return SwiftObjects.equals(this.$memoryAddress(), this.$typeMetadataAddress(), rhs.$memoryAddress(), rhs.$typeMetadataAddress());
-          }
-          return false;
-        }
-
-        public int hashCode() {
-          return SwiftObjects.hashCode(this.$memoryAddress(), this.$typeMetadataAddress());
-        }
-
-        public java.lang.String toString() {
-          return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
-        }
-
-        public java.lang.String toDebugString() {
-          return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
-        }
-        """
-      )
+      printSwiftInstanceObjectMethods(&printer)
       printer.println()
     }
+  }
+
+  /// Prints the designated (memory-managed) constructor shared by every `JNISwiftInstance`
+  /// (both existential boxes and concrete imported types): it takes the pointer params
+  /// (`selfPointer`, and `selfTypePointer` when present) plus a `SwiftArena`, null-checks and
+  /// stores each pointer, creates the cleanup, and registers with the arena.
+  private func printDesignatedConstructor(
+    _ printer: inout JavaPrinter,
+    javaName: String,
+    pointerParams: [String],
+  ) {
+    printer.print(
+      """
+      /**
+      * The designated constructor of any imported Swift types.
+      *
+      * @param selfPointer  a pointer to the memory containing the value
+      * @param swiftArena   the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
+      */
+      """
+    )
+    let pointerArg = pointerParams.map { "long \($0)" }.joined(separator: ", ")
+    printer.printBraceBlock("private \(javaName)(\(pointerArg), SwiftArena swiftArena)") { printer in
+      for param in pointerParams {
+        printer.print(
+          """
+          SwiftObjects.requireNonZero(\(param), "\(param)");
+          this.\(param) = \(param);
+          """
+        )
+      }
+      printer.print(
+        """
+        this.$cleanup = $createCleanup();
+
+        // Only register once we have fully initialized the object since this will need the object pointer.
+        swiftArena.register(this);
+        """
+      )
+    }
+  }
+
+  /// Prints the `wrapMemoryAddressUnsafe` factory pair shared by every `JNISwiftInstance`
+  /// (both existential boxes and concrete imported types). The doc summary sentence differs
+  /// between callers (a box also carries type metadata), so it is passed in verbatim.
+  private func printWrapMemoryAddressUnsafeFactory(
+    _ printer: inout JavaPrinter,
+    javaName: String,
+    genericClause: String,
+    pointerParams: [String],
+    docSummary: String,
+  ) {
+    let pointerArg = pointerParams.map { "long \($0)" }.joined(separator: ", ")
+    let pointerArgNames = pointerParams.joined(separator: ", ")
+    printer.print(
+      """
+      /**
+       * \(docSummary)
+       * <p>
+       * Warnings:
+       * <ul>
+       *   <li>No checks are performed about the compatibility of the pointed at memory and the actual \(javaName) types.</li>
+       *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
+       * </ul>
+       */
+      public static\(genericClause) \(javaName)\(genericClause) wrapMemoryAddressUnsafe(\(pointerArg), SwiftArena swiftArena) {
+        return new \(javaName)\(genericClause)(\(pointerArgNames), swiftArena);
+      }
+
+      public static\(genericClause) \(javaName)\(genericClause) wrapMemoryAddressUnsafe(\(pointerArg)) {
+        return new \(javaName)\(genericClause)(\(pointerArgNames), SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
+      }
+      """
+    )
+  }
+
+  /// Prints the `equals`/`hashCode`/`toString`/`toDebugString` overrides shared by
+  /// every `JNISwiftInstance` (both existential boxes and concrete imported types):
+  /// they all delegate to `SwiftObjects` using `$memoryAddress()`/`$typeMetadataAddress()`.
+  private func printSwiftInstanceObjectMethods(_ printer: inout JavaPrinter) {
+    printer.print(
+      """
+      public boolean equals(Object obj) {
+        if (obj instanceof JNISwiftInstance rhs) {
+          return SwiftObjects.equals(this.$memoryAddress(), this.$typeMetadataAddress(), rhs.$memoryAddress(), rhs.$typeMetadataAddress());
+        }
+        return false;
+      }
+
+      public int hashCode() {
+        return SwiftObjects.hashCode(this.$memoryAddress(), this.$typeMetadataAddress());
+      }
+
+      public java.lang.String toString() {
+        return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
+      }
+
+      public java.lang.String toDebugString() {
+        return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
+      }
+      """
+    )
   }
 
   /// Prints helpers for specific types like `Foundation.Date`
