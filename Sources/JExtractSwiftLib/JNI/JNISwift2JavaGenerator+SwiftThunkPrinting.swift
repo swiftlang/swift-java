@@ -185,7 +185,7 @@ extension JNISwift2JavaGenerator {
     let inheritedWrappers = self.inheritedProtocols(of: translatedWrapper.importedType).compactMap { self.interfaceProtocolWrappers[$0] }
     let inheritedTypes = [translatedWrapper.swiftName] + inheritedWrappers.map(\.wrapperName)
 
-    printer.printBraceBlock("protocol \(translatedWrapper.wrapperName): \(inheritedTypes.joined(separator: ", "))") { printer in
+    printer.printBraceBlock("protocol \(translatedWrapper.wrapperName): \(inheritedTypes.joined(separator: .comma))") { printer in
       printer.print(
         "var \(translatedWrapper.javaInterfaceVariableName): \(translatedWrapper.javaInterfaceName) { get }"
       )
@@ -260,7 +260,7 @@ extension JNISwift2JavaGenerator {
 
         let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""
         let javaUpcall =
-          "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
+          "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: .comma)))"
 
         let result = function.resultConversion.render(&printer, javaUpcall)
         printer.print("\(returnStmt)\(result)")
@@ -455,11 +455,11 @@ extension JNISwift2JavaGenerator {
       printer.printBraceBlock("extension \(enumType.effectiveSwiftTypeName)") { printer in
         let associatedValueTypes = enumCase.original.parameters.map { param in
           param.type.description
-        }.joined(separator: ", ")
+        }.joined(separator: .comma)
         printer.printBraceBlock("fileprivate func getAs\(enumCase.name)() -> (\(associatedValueTypes))?") { printer in
           let params = enumCase.original.parameters.enumerated().map { i, param in
             param.name ?? "_\(i)"
-          }.joined(separator: ", ")
+          }.joined(separator: .comma)
           printer.printIfBlock("case let .\(enumCase.original.name)(\(params)) = self") { printer in
             printer.print("return (\(params))")
           }
@@ -554,7 +554,7 @@ extension JNISwift2JavaGenerator {
         parameterName: parameterName,
         parentName: decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedTypeName ?? SwiftQualifiedTypeName(swiftModuleName),
       )
-      let implementingProtocols = protocolWrappers.map(\.wrapperName).joined(separator: ", ")
+      let implementingProtocols = protocolWrappers.map(\.wrapperName).joined(separator: .comma)
 
       printer.printBraceBlock("final class \(swiftClassName): \(implementingProtocols)") { printer in
         let variables: [(String, String)] = protocolWrappers.map { wrapper in
@@ -564,7 +564,7 @@ extension JNISwift2JavaGenerator {
           printer.print("let \(name): \(type)")
         }
         printer.println()
-        let initializerParameters = variables.map { "\($0): \($1)" }.joined(separator: ", ")
+        let initializerParameters = variables.map { "\($0): \($1)" }.joined(separator: .comma)
 
         printer.printBraceBlock("init(\(initializerParameters))") { printer in
           for (name, _) in variables {
@@ -691,7 +691,7 @@ extension JNISwift2JavaGenerator {
         let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
-      .joined(separator: ", ")
+      .joined(separator: .comma)
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
 
     case .enumCase:
@@ -703,7 +703,7 @@ extension JNISwift2JavaGenerator {
         return "\(label)\(argument)"
       }
 
-      let associatedValues = !downcallArguments.isEmpty ? "(\(downcallArguments.joined(separator: ", ")))" : ""
+      let associatedValues = !downcallArguments.isEmpty ? "(\(downcallArguments.joined(separator: .comma)))" : ""
       result = "\(callee).\(decl.name)\(associatedValues)"
 
     case .getter:
@@ -723,7 +723,7 @@ extension JNISwift2JavaGenerator {
         let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
-      .joined(separator: ", ")
+      .joined(separator: .comma)
       result = "\(callee)[\(parameters)]"
     case .subscriptSetter:
       guard let newValueArgument = arguments.last else {
@@ -739,7 +739,7 @@ extension JNISwift2JavaGenerator {
         let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
-      .joined(separator: ", ")
+      .joined(separator: .comma)
       result = "\(callee)[\(parameters)] = \(newValueArgument)"
     }
 
@@ -900,7 +900,7 @@ extension JNISwift2JavaGenerator {
       @diagnose(DeprecatedDeclaration, as: ignored)
       #endif
       @_cdecl("\(cName)")
-      public func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
+      public func \(cName)(\(thunkParameters.joined(separator: .comma)))\(thunkReturnType)
       """
     ) { printer in
       body(&printer)
@@ -959,7 +959,7 @@ extension JNISwift2JavaGenerator {
       if type.genericParameterNames.isEmpty {
         type.effectiveSwiftTypeName
       } else {
-        "\(type.baseTypeName)<\(type.swiftNominal.genericParameters.map(\.packExpansionName).joined(separator: ", "))>"
+        "\(type.baseTypeName)<\(type.swiftNominal.genericParameters.map(\.packExpansionName).joined(separator: .comma))>"
       }
     let parentProtocol = isEffectivelyGeneric ? "JextractedGenericTypeBridge" : "JextractedTypeBridge"
 
@@ -1116,7 +1116,7 @@ extension JNISwift2JavaGenerator {
       + parameters.map { javaParameter in
         "\(javaParameter.name): \(javaParameter.name)"
       }
-    let call = "openerType.\(decl.openerMethodName)(\(openerArguments.joined(separator: ", ")))"
+    let call = "openerType.\(decl.openerMethodName)(\(openerArguments.joined(separator: .comma)))"
 
     if !decl.functionSignature.result.type.isVoid {
       printer.print("return \(call)")
@@ -1155,7 +1155,7 @@ extension JNISwift2JavaGenerator {
         ] + translatedParameters
       let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""
 
-      let signature = #"static func \#(decl.openerMethodName)(\#(thunkParameters.joined(separator: ", ")))\#(thunkReturnType)"#
+      let signature = #"static func \#(decl.openerMethodName)(\#(thunkParameters.joined(separator: .comma)))\#(thunkReturnType)"#
       if !skipMethodBody {
         printer.printBraceBlock(signature) { printer in
           printFunctionDowncall(&printer, decl)

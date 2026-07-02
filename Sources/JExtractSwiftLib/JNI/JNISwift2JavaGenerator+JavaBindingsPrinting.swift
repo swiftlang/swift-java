@@ -198,7 +198,7 @@ extension JNISwift2JavaGenerator {
     if !self.interfaceProtocolWrappers.keys.contains(decl) && !extends.contains("JNISwiftInstance") {
       extends.append("JNISwiftInstance")
     }
-    let extendsString = extends.isEmpty ? "" : " extends \(extends.joined(separator: ", "))"
+    let extendsString = extends.isEmpty ? "" : " extends \(extends.joined(separator: .comma))"
 
     printer.printBraceBlock("public interface \(decl.effectiveJavaSimpleName)\(extendsString)") { printer in
       for initializer in decl.initializers {
@@ -602,7 +602,7 @@ extension JNISwift2JavaGenerator {
       .compactMap(\.asNominalTypeDeclaration)
       .filter { $0.kind == .protocol }
       .map(\.name)
-    let implementsClause = implements.joined(separator: ", ")
+    let implementsClause = implements.joined(separator: .comma)
     // Specialized types are concrete — no generic clause on the Java side
     let genericClause = decl.javaGenericClause
     printer.printBraceBlock(
@@ -654,7 +654,7 @@ extension JNISwift2JavaGenerator {
       if decl.genericParameterNames.isEmpty {
         ""
       } else {
-        "<\(decl.genericParameterNames.joined(separator: ", "))>"
+        "<\(decl.genericParameterNames.joined(separator: .comma))>"
       }
 
     printer.printBraceBlock("public sealed interface Case\(caseGenericClause)") { printer in
@@ -668,7 +668,7 @@ extension JNISwift2JavaGenerator {
         }
 
         // Print record
-        printer.print("record \(translatedCase.name)\(caseGenericClause)(\(members.joined(separator: ", "))) implements Case\(caseGenericClause) {}")
+        printer.print("record \(translatedCase.name)\(caseGenericClause)(\(members.joined(separator: .comma))) implements Case\(caseGenericClause) {}")
       }
     }
     printer.println()
@@ -735,7 +735,7 @@ extension JNISwift2JavaGenerator {
           } else {
             (0..<enumCase.parameters.count).map { i in
               "t.$\(i)"
-            }.joined(separator: ", ")
+            }.joined(separator: .comma)
           }
         let translatedResult = getAsCaseFunction.translatedFunctionSignature.result
         getAsCaseFunction.translatedFunctionSignature.result.conversion = .method(
@@ -823,7 +823,7 @@ extension JNISwift2JavaGenerator {
       """
       @FunctionalInterface
       public interface \(functionType.name) {
-        \(functionType.result.javaType) apply(\(apiParams.joined(separator: ", ")));
+        \(functionType.result.javaType) apply(\(apiParams.joined(separator: .comma)));
       }
       """
     )
@@ -876,7 +876,7 @@ extension JNISwift2JavaGenerator {
       generics.append((name, extends))
     }
     .map { "\($0) extends \($1.compactMap(\.className).joined(separator: " & "))" }
-    .joined(separator: ", ")
+    .joined(separator: .comma)
 
     if !generics.isEmpty {
       modifiers.append("<" + generics + ">")
@@ -885,7 +885,7 @@ extension JNISwift2JavaGenerator {
     var annotationsStr = translatedSignature.annotations.map({ $0.render() }).joined(separator: "\n")
     if !annotationsStr.isEmpty { annotationsStr += "\n" }
 
-    let parametersStr = parameters.joined(separator: ", ")
+    let parametersStr = parameters.joined(separator: .comma)
 
     // Print default global arena variation
     // If we have enabled javaCallbacks we must emit default
@@ -916,7 +916,7 @@ extension JNISwift2JavaGenerator {
       ) { printer in
         let globalArenaName = "SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA"
         let arguments = translatedDecl.translatedFunctionSignature.parameters.map(\.parameter.name) + [globalArenaName]
-        let call = "\(translatedDecl.name)(\(arguments.joined(separator: ", ")))"
+        let call = "\(translatedDecl.name)(\(arguments.joined(separator: .comma)))"
         if translatedDecl.translatedFunctionSignature.result.javaType.isVoid {
           printer.print("\(call);")
         } else {
@@ -938,7 +938,7 @@ extension JNISwift2JavaGenerator {
       )
     }
     let signature =
-      "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: ", ")))\(throwsClause)"
+      "\(annotationsStr)\(modifiers.joined(separator: " ")) \(resultType) \(translatedDecl.name)(\(parameters.joined(separator: .comma)))\(throwsClause)"
     if skipMethodBody {
       printer.print("\(signature);")
     } else {
@@ -964,7 +964,7 @@ extension JNISwift2JavaGenerator {
 
     let renderedParameters = parameters.map { javaParameter in
       "\(javaParameter.type) \(javaParameter.name)"
-    }.joined(separator: ", ")
+    }.joined(separator: .comma)
 
     printer.print("private static native \(resultType) \(translatedDecl.nativeFunctionName)(\(renderedParameters));")
   }
@@ -1006,7 +1006,7 @@ extension JNISwift2JavaGenerator {
     // TODO: If we always generate a native method and a "public" method, we can actually choose our own thunk names
     // using the registry?
     let downcall =
-      "\(translatedDecl.parentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: ", ")))"
+      "\(translatedDecl.parentName).\(translatedDecl.nativeFunctionName)(\(arguments.joined(separator: .comma)))"
 
     //=== Part 4: Convert the return value.
     if translatedFunctionSignature.result.javaType.isVoid {

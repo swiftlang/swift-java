@@ -111,7 +111,7 @@ extension JNISwift2JavaGenerator {
 
       let associatedValueTypes = enumCase.parameters.map { param in
         param.type.description
-      }.joined(separator: ", ")
+      }.joined(separator: .comma)
       let javaCaseClassName = enumCase.name.firstCharacterUppercased
       let resultType = knownTypes.optionalSugar(
         .tuple(
@@ -1857,7 +1857,7 @@ extension JNISwift2JavaGenerator {
         return "\(placeholder)_\(component)"
 
       case .commaSeparated(let list):
-        return list.map({ $0.render(&printer, placeholder) }).joined(separator: ", ")
+        return list.map({ $0.render(&printer, placeholder) }).joined(separator: .comma)
 
       case .valueMemoryAddress:
         return "\(placeholder).$memoryAddress()"
@@ -1877,7 +1877,7 @@ extension JNISwift2JavaGenerator {
         }
         let genericClause =
           if !typeParameters.isEmpty {
-            "<\(typeParameters.map(\.description).joined(separator: ", "))>"
+            "<\(typeParameters.map(\.description).joined(separator: .comma))>"
           } else {
             ""
           }
@@ -1897,7 +1897,7 @@ extension JNISwift2JavaGenerator {
       case .method(let inner, let methodName, let arguments):
         let inner = inner.render(&printer, placeholder)
         let args = arguments.map { $0.render(&printer, placeholder) }
-        let argsStr = args.joined(separator: ", ")
+        let argsStr = args.joined(separator: .comma)
         return "\(inner).\(methodName)(\(argsStr))"
 
       case .member(let inner, let fieldName):
@@ -1944,7 +1944,7 @@ extension JNISwift2JavaGenerator {
       case .subscriptOf(let inner, let arguments):
         let inner = inner.render(&printer, placeholder)
         let arguments = arguments.map { $0.render(&printer, placeholder) }
-        return "\(inner)[\(arguments.joined(separator: ", "))]"
+        return "\(inner)[\(arguments.joined(separator: .comma))]"
 
       case .aggregate(let variable, let steps):
         precondition(!steps.isEmpty, "Aggregate must contain steps")
@@ -1978,7 +1978,7 @@ extension JNISwift2JavaGenerator {
 
       case .lambda(let args, let body):
         var printer = JavaPrinter()
-        printer.printBraceBlock("(\(args.joined(separator: ", "))) ->") { printer in
+        printer.printBraceBlock("(\(args.joined(separator: .comma))) ->") { printer in
           let body = body.render(&printer, placeholder)
           if !body.isEmpty {
             printer.print("return \(body);")
@@ -2003,7 +2003,7 @@ extension JNISwift2JavaGenerator {
           let converted = element.elementConversion.render(&printer, "\(element.outParamName)[0]")
           args.append(converted)
         }
-        return "new \(tupleClassName)(\(args.joined(separator: ", ")))"
+        return "new \(tupleClassName)(\(args.joined(separator: .comma)))"
 
       case .placeToVar(let inner, let name, let type):
         let inner = inner.render(&printer, placeholder)

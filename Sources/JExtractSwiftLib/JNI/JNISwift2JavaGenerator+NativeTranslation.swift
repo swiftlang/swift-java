@@ -1176,7 +1176,7 @@ extension JNISwift2JavaGenerator {
         if nominalType.genericArguments.isEmpty {
           return bridgeName
         } else {
-          return "\(bridgeName)<\(nominalType.genericArguments.map(\.description).joined(separator: ", "))>"
+          return "\(bridgeName)<\(nominalType.genericArguments.map(\.description).joined(separator: .comma))>"
         }
 
       case .genericParameter:
@@ -1472,7 +1472,7 @@ extension JNISwift2JavaGenerator {
               return
                 "\(nominalTypeDecl.javaInterfaceVariableName): \(nominalTypeDecl.javaInterfaceName)(javaThis: \(inner)!, environment: environment)"
             }
-            printer.print("\(variableName) = \(swiftWrapperClassName)(\(arguments.joined(separator: ", ")))")
+            printer.print("\(variableName) = \(swiftWrapperClassName)(\(arguments.joined(separator: .comma)))")
           }
         } else {
           printStandardJExtractBlock(&printer)
@@ -1612,7 +1612,7 @@ extension JNISwift2JavaGenerator {
         )
 
         let names = parameters.flatMap { $0.parameters.map(\.name) }
-        let closureParameters = !parameters.isEmpty ? "\(names.joined(separator: ", ")) in" : ""
+        let closureParameters = !parameters.isEmpty ? "\(names.joined(separator: .comma)) in" : ""
         printer.print("{ \(closureParameters)")
         printer.indent()
 
@@ -1626,7 +1626,7 @@ extension JNISwift2JavaGenerator {
           let class$ = environment.interface.GetObjectClass(environment, \(placeholder))
           let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "\(methodSignature.mangledName)")!
           environment.interface.DeleteLocalRef(environment, class$)
-          let arguments$: [jvalue] = [\(arguments.joined(separator: ", "))]
+          let arguments$: [jvalue] = [\(arguments.joined(separator: .comma))]
           """
         )
 
@@ -1652,7 +1652,7 @@ extension JNISwift2JavaGenerator {
         let parameterNames = fn.parameters.enumerated().map { idx, param in
           param.parameterName ?? "_\(idx)"
         }
-        let closureParameters = parameterNames.joined(separator: ", ")
+        let closureParameters = parameterNames.joined(separator: .comma)
         let isVoid = fn.resultType == .tuple([])
 
         // Build upcall arguments using UpcallConversionStep conversions
@@ -1668,7 +1668,7 @@ extension JNISwift2JavaGenerator {
         // Note: The Java interface is synchronous even for async closures.
         // The async nature is on the Swift side, inferred from the expected type.
         var resultPrinter = SwiftPrinter()
-        let upcallExpr = "javaInterface$.apply(\(upcallArguments.joined(separator: ", ")))"
+        let upcallExpr = "javaInterface$.apply(\(upcallArguments.joined(separator: .comma)))"
         let resultConverted = syntheticFunction.resultConversion.render(&resultPrinter, upcallExpr)
         let resultPrefix = resultPrinter.finalize()
 
@@ -1807,7 +1807,7 @@ extension JNISwift2JavaGenerator {
             return value
           }
         }
-        let argsStr = args.joined(separator: ", ")
+        let argsStr = args.joined(separator: .comma)
         return "\(swiftType)(\(argsStr))"
 
       case .method(let inner, let methodName, let arguments):
@@ -1820,7 +1820,7 @@ extension JNISwift2JavaGenerator {
             return value
           }
         }
-        let argsStr = args.joined(separator: ", ")
+        let argsStr = args.joined(separator: .comma)
         return "\(inner).\(methodName)(\(argsStr))"
 
       case .member(let inner, let member):
@@ -2041,7 +2041,7 @@ extension JNISwift2JavaGenerator {
             return converted
           }
         }
-        return "(\(parts.joined(separator: ", ")))"
+        return "(\(parts.joined(separator: .comma)))"
 
       case .tupleDestructure(let elements):
         let tupleVar = "tupleResult$"

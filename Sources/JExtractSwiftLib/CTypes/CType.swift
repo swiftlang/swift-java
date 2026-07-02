@@ -216,7 +216,7 @@ extension CType: CustomStringConvertible {
       result += "("
 
       // Render the parameter types.
-      result += parameters.map { $0.description }.joined(separator: ", ")
+      result += parameters.map { $0.description }.joined(separator: .comma)
 
       CType.printFunctionParametersSuffix(
         isVariadic: variadic,
