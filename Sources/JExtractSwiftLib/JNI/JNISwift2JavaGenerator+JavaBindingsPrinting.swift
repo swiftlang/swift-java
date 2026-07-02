@@ -646,8 +646,6 @@ extension JNISwift2JavaGenerator {
   }
 
   /// Print the helper type container for a user-facing Java API.
-  ///
-  /// * User-facing functional interfaces.
   private func printJavaBindingWrapperHelperClass(
     _ printer: inout JavaPrinter,
     _ decl: ExtractedFunc,
@@ -675,6 +673,11 @@ extension JNISwift2JavaGenerator {
   ) {
     let apiParams = functionType.parameters.map({ $0.parameter.renderParameter() })
 
+    printer.printJavadocComment(
+      """
+      Corresponds to the Swift closure parameter of type {@code \(functionType.swiftType)}.
+      """
+    )
     printer.print(
       """
       @FunctionalInterface
