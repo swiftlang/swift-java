@@ -58,15 +58,15 @@ extension JNISwift2JavaGenerator {
 
     // Generic type parameter names: T0, T1, ...
     let typeParams = (0..<arity).map { "T\($0)" }
-    let typeParamsClause = "<\(typeParams.joined(separator: ", "))>"
+    let typeParamsClause = "<\(typeParams.joined(separator: .comma))>"
     let baseTupleClass = "org.swift.swiftkit.core.tuple.Tuple\(arity)"
 
     // Constructor parameters: T0 param0, T1 param1, ...
     // Use paramN names (not $0, $1) because `$N` is invalid as a Swift parameter name,
     // and the wrap-java generator copies parameter names verbatim into Swift wrappers
     let paramNames = (0..<arity).map { "param\($0)" }
-    let ctorParams = zip(typeParams, paramNames).map { "\($0) \($1)" }.joined(separator: ", ")
-    let superArgs = paramNames.joined(separator: ", ")
+    let ctorParams = zip(typeParams, paramNames).map { "\($0) \($1)" }.joined(separator: .comma)
+    let superArgs = paramNames.joined(separator: .comma)
 
     printer.printBraceBlock("public static final class \(rawClassName)\(typeParamsClause) extends \(baseTupleClass)\(typeParamsClause)") { printer in
       // Constructor
