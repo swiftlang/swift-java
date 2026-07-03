@@ -250,28 +250,51 @@ extension JNISwift2JavaGenerator {
 
         // @Sendable is not supported yet as "environment" is later captured inside the closure.
         if fn.isEscaping {
-          // Use the protocol infrastructure for escaping closures.
-          // This provides full support for optionals, arrays, custom types, async, etc.
-          let wrapJavaInterfaceName = "Java\(parentName).\(methodName).\(parameterName)"
+          // For escaping closures we e need to create a Swift wrapper around
+          // the passed down Java functional interface because we must keep it
+          // alive with a global ref, that will remain around for as long as the
+          // escaping closure is.
+          //
+          // Prepare the name and shapes of the Java side functional interface
+          // and Swift side @JavaInterface wrapper we'll use to implement that
+          // interface (and keep the Java object reachable).
+
+          // Name it: interface MyClass_myMethod_theClosure { ... }
+          let javaClosureInterfaceName = String.flatName(
+            prefix: "Java",
+            parent: parentName,
+            method: methodName,
+            parameter: parameterName,
+          )
+          let javaBinaryName = String.javaBinaryName(
+            package: self.javaPackage,
+            parent: parentName,
+            method: methodName,
+            qualifier: parameterName,
+          )
           let generator = JavaInterfaceProtocolWrapperGenerator()
           let syntheticFunction = try generator.generateSyntheticClosureFunction(
             functionType: fn,
-            wrapJavaInterfaceName: wrapJavaInterfaceName
+            javaInterfaceName: javaClosureInterfaceName,
+            javaBinaryName: javaBinaryName,
           )
 
           return NativeParameter(
             parameters: [
               JavaParameter(
                 name: parameterName,
-                type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)")
+                type: .class(
+                  package: javaPackage,
+                  name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
+                )
               )
             ],
             conversion: .escapingClosureLowering(
-              syntheticFunction: syntheticFunction,
-              closureName: parameterName
+              syntheticFunction: syntheticFunction
             ),
             indirectConversion: nil,
-            conversionCheck: nil
+            conversionCheck: nil,
+            syntheticClosure: syntheticFunction
           )
         }
 
@@ -292,7 +315,10 @@ extension JNISwift2JavaGenerator {
           parameters: [
             JavaParameter(
               name: parameterName,
-              type: .class(package: javaPackage, name: "\(parentName).\(methodName).\(parameterName)")
+              type: .class(
+                package: javaPackage,
+                name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
+              )
             )
           ],
           conversion: .closureLowering(
@@ -1163,6 +1189,13 @@ extension JNISwift2JavaGenerator {
 
     /// Represents check operations executed in if/guard conditional block for check during conversion
     let conversionCheck: NativeSwiftConversionCheck?
+
+    /// Non-nil when this parameter is an `@escaping` closure. Carries the
+    /// spec needed to emit the matching `@JavaInterface` Swift wrapper
+    /// struct alongside the cdecl thunk. Threaded upward into
+    /// ``TranslatedFunctionType/syntheticClosure`` by the Java-translation
+    /// pass in ``JavaTranslation/translate(_:)``.
+    var syntheticClosure: SyntheticEscapingClosureFunctionType? = nil
   }
 
   struct NativeResult {
@@ -1236,9 +1269,12 @@ extension JNISwift2JavaGenerator {
 
     /// Escaping closure lowering using the protocol infrastructure.
     /// This uses UpcallConversionStep for full support of optionals, arrays, custom types, etc.
+    /// The closure parameter's user-facing name is supplied by `render(_:_:)`
+    /// via the `placeholder` argument; the renderer derives its local
+    /// variable names (`javaInterface_<name>$`) from that, so no separate
+    /// name payload is needed on the case.
     indirect case escapingClosureLowering(
-      syntheticFunction: SyntheticClosureFunction,
-      closureName: String
+      syntheticFunction: SyntheticEscapingClosureFunctionType
     )
 
     indirect case initializeSwiftJavaWrapper(NativeSwiftConversionStep, wrapperName: String)
@@ -1540,7 +1576,7 @@ extension JNISwift2JavaGenerator {
 
         return printer.finalize()
 
-      case .escapingClosureLowering(let syntheticFunction, let closureName):
+      case .escapingClosureLowering(let syntheticFunction):
         var printer = SwiftPrinter()
 
         let fn = syntheticFunction.functionType
@@ -1548,7 +1584,9 @@ extension JNISwift2JavaGenerator {
           param.parameterName ?? "_\(idx)"
         }
         let closureParameters = parameterNames.joined(separator: .comma)
-        let isVoid = fn.resultType == .tuple([])
+        let isVoid = fn.resultType.isVoid
+
+        let javaInterfaceVar = "javaInterface_\(placeholder)$"
 
         // Build upcall arguments using UpcallConversionStep conversions
         var upcallArguments: [String] = []
@@ -1563,7 +1601,7 @@ extension JNISwift2JavaGenerator {
         // Note: The Java interface is synchronous even for async closures.
         // The async nature is on the Swift side, inferred from the expected type.
         var resultPrinter = SwiftPrinter()
-        let upcallExpr = "javaInterface$.apply(\(upcallArguments.joined(separator: .comma)))"
+        let upcallExpr = "\(javaInterfaceVar).apply(\(upcallArguments.joined(separator: .comma)))"
         let resultConverted = syntheticFunction.resultConversion.render(&resultPrinter, upcallExpr)
         let resultPrefix = resultPrinter.finalize()
 
@@ -1574,21 +1612,18 @@ extension JNISwift2JavaGenerator {
           ? "{"
           : "{ \(closureParameters) in"
 
+        // Construct the generated `@JavaInterface` wrap-java struct.
+        // It will cause a new global ref on the javaThis, so no need for explicit global refs.
+        // This object will be closed over by the closure we pass to Swift, and therefore keep alive the
+        // Java side that we'll make an up-call into when the closure runs.
         printer.print(
           """
           {
             guard let \(placeholder) else {
               fatalError(\"\(placeholder) is null\")
             }
-
-            let closureContext_\(closureName)$ = JavaObjectHolder(object: \(placeholder), environment: environment)
-            
+            let \(javaInterfaceVar) = \(syntheticFunction.javaInterfaceName)(javaThis: \(placeholder), environment: environment)
             return \(closureHeader)
-              guard let env$ = try? JavaVirtualMachine.shared().environment() else {
-                fatalError(\"Failed to get JNI environment for escaping closure call\")
-              }
-
-              let javaInterface$ = \(syntheticFunction.wrapJavaInterfaceName)(javaThis: closureContext_\(closureName)$.object!, environment: env$)
               \(resultPrefix)\(isVoid ? resultConverted : "return \(resultConverted)")
             }
           }()
