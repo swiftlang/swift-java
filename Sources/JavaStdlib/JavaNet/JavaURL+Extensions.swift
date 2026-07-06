@@ -12,13 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftJava
+import SwiftJavaJNICore
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import SwiftJava
-import SwiftJavaJNICore
 
 extension JavaURL {
   @JavaMethod
