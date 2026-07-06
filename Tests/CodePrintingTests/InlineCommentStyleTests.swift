@@ -133,10 +133,59 @@ struct PrintJavadocCommentSuite {
   @Test func defaultJavaVersionUsesClassicBlock() {
     var p = JavaPrinter() // default sourceVersion is 8
     p.emitSourceLocations = false
-    p.printJavadocComment("hello")
+    p.printJavadocComment("First line.\nSecond line.")
 
     #expect(p.contents.contains("/**"))
-    #expect(p.contents.contains(" * hello"))
+    #expect(p.contents.contains(" * First line."))
+    #expect(p.contents.contains(" * Second line."))
     #expect(p.contents.contains(" */"))
+  }
+
+  // ==== ----------------------------------------------------------------------
+  // MARK: Single-line input collapses to `/** text */`
+
+  @Test func singleLineCollapsesToInlineBlockForOlderJava() {
+    var p = JavaPrinter()
+    p.emitSourceLocations = false
+    p.options.sourceVersion = 17
+    p.printJavadocComment("hello")
+
+    #expect(p.contents.trimmingCharacters(in: .whitespacesAndNewlines) == "/** hello */")
+  }
+
+  // ==== ----------------------------------------------------------------------
+  // MARK: `{@code X}` rewrites to Markdown backticks in `///` mode
+
+  @Test func markdownRewritesInlineCodeTagsToBackticks() {
+    // JEP 467 recommends Markdown code spans instead of `{@code}` in `///`
+    // documentation comments; the printer normalizes for us.
+    var p = JavaPrinter()
+    p.emitSourceLocations = false
+    p.options.sourceVersion = 23
+    p.printJavadocComment("Corresponds to Swift closure of type {@code () -> Void}.")
+
+    #expect(p.contents.contains("/// Corresponds to Swift closure of type `() -> Void`."))
+    #expect(!p.contents.contains("{@code"))
+  }
+
+  @Test func markdownRewriteHandlesMultipleInlineCodeTagsPerLine() {
+    var p = JavaPrinter()
+    p.emitSourceLocations = false
+    p.options.sourceVersion = 23
+    p.printJavadocComment("Apply {@code f} to {@code x}.")
+
+    #expect(p.contents.contains("/// Apply `f` to `x`."))
+  }
+
+  @Test func classicBlockLeavesInlineCodeTagsIntact() {
+    // In `/** */` (older Java) mode `{@code}` remains a first-class Javadoc
+    // tag; leave it alone.
+    var p = JavaPrinter()
+    p.emitSourceLocations = false
+    p.options.sourceVersion = 17
+    p.printJavadocComment("See {@code Foo}.")
+
+    #expect(p.contents.contains("{@code Foo}"))
+    #expect(!p.contents.contains("`Foo`"))
   }
 }

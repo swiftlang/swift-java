@@ -267,8 +267,6 @@ extension FFMSwift2JavaGenerator {
   }
 
   /// Print the helper type container for a user-facing Java API.
-  ///
-  /// * User-facing functional interfaces.
   func printJavaBindingWrapperHelperClass(
     _ printer: inout JavaPrinter,
     _ decl: ExtractedFunc,

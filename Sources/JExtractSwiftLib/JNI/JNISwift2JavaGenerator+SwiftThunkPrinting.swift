@@ -475,7 +475,7 @@ extension JNISwift2JavaGenerator {
       return
     }
 
-    printSwiftFunctionHelperClasses(&printer, decl)
+    printAllSwiftFunctionHelperClasses(&printer, decl)
 
     printCDecl(
       &printer,
@@ -489,7 +489,22 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printSwiftFunctionHelperClasses(
+  private func printAllSwiftFunctionHelperClasses(
+    _ printer: inout SwiftPrinter,
+    _ decl: ExtractedFunc,
+  ) {
+    // Emit the `@JavaInterface` Swift wrappers for any `@escaping` closure parameters.
+    if let translatedDecl = translatedDecl(for: decl) {
+      printEscapingClosureSwiftFunctionHelperClasses(&printer, translatedDecl)
+    }
+
+    // Emit the `@JavaInterface` Swift wrappers any existential / protocol parameters.
+    printProtocolParameterSwiftFunctionHelperClasses(&printer, decl)
+  }
+
+  /// Emits Swift wrapper types for any parameter type that is a protocol
+  /// (or a `some`/`any`/generic constraint bound to protocols).
+  private func printProtocolParameterSwiftFunctionHelperClasses(
     _ printer: inout SwiftPrinter,
     _ decl: ExtractedFunc,
   ) {
@@ -854,13 +869,12 @@ extension JNISwift2JavaGenerator {
       signature += parameter.type.jniTypeSignature
     }
 
-    let cName =
-      "Java_"
-      + self.javaPackage.replacingOccurrences(of: ".", with: "_")
-      + "_\(parentName.jniEscapedName.escapedJNIIdentifier)_"
-      + javaMethodName.escapedJNIIdentifier
-      + "__"
-      + jniSignature.escapedJNIIdentifier
+    let cName = String.jniSymbolName(
+      package: self.javaPackage,
+      parent: parentName,
+      method: javaMethodName,
+      signature: jniSignature,
+    )
 
     self.generatedCDeclSymbolNames.append(cName)
 

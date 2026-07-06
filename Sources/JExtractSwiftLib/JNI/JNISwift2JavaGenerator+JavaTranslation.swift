@@ -191,11 +191,24 @@ extension JNISwift2JavaGenerator {
 
         switch param.type {
         case .function(let funcTy):
-          let translatedClosure = try translateFunctionType(
+          var translatedClosure = try translateFunctionType(
             name: parameterName,
             swiftType: funcTy,
             parentName: parentName,
           )
+          // Lift the escaping-closure spec off the matching `NativeParameter`
+          // onto the `TranslatedFunctionType`. This keeps the wrap-java
+          // emission colocated with the decl it belongs to, so the thunk
+          // printer can emit the `@JavaInterface` Swift struct alongside
+          // the cdecl thunk that references it - no generator-level
+          // sink/dict/pre-pass required. `NativeParameter` runs 1:1 with
+          // the Swift parameters here (a Swift param can lower to multiple
+          // *JavaParameter*s but stays one `NativeParameter`), so indexing
+          // by `idx` is correct.
+          if idx < nativeFunctionSignature.parameters.count {
+            translatedClosure.syntheticClosureType =
+              nativeFunctionSignature.parameters[idx].syntheticClosure
+          }
           funcTypes.append(translatedClosure)
         default:
           break
@@ -507,7 +520,10 @@ extension JNISwift2JavaGenerator {
         return TranslatedParameter(
           parameter: JavaParameter(
             name: parameterName,
-            type: .class(package: javaPackage, name: "\(parentName.fullName).\(methodName).\(parameterName)"),
+            type: .class(
+              package: javaPackage,
+              name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
+            ),
             annotations: parameterAnnotations,
           ),
           conversion: .placeholder,
@@ -1732,6 +1748,17 @@ extension JNISwift2JavaGenerator {
     var parameters: [TranslatedParameter]
     var result: TranslatedResult
     var swiftType: SwiftFunctionType
+
+    var isEscaping: Bool { swiftType.isEscaping }
+
+    /// Represents this `TranslatedFunctionType` if we need to create a synthetic protocol
+    /// to handle the cross-language call to the function (closure).
+    ///
+    /// E.g. if the function type we're in is `@escaping` we need to create an
+    /// interface on the Java side to represent it, and a Swift side wrapper to
+    /// retain/wrap it, that will be then called into from the escaping Swift-side
+    /// closure we forward to the downcall target.
+    var syntheticClosureType: SyntheticEscapingClosureFunctionType?
   }
 
   /// Describes how to convert values between Java types and the native Java function
