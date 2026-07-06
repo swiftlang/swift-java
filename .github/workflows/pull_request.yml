@@ -342,6 +342,11 @@ jobs:
       image: swift:6.3-noble
     steps:
       - uses: actions/checkout@v7
+      - name: Install jq
+        shell: bash
+        run: |
+          apt-get update -qq
+          apt-get install -qq -y jq
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Cache Tests/LinkageTest/.build

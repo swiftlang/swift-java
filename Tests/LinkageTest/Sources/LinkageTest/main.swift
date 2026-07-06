@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024-2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024-2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,7 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
+// Import every runtime library product exported from swift-java. If any of
+// these libraries accidentally does `import Foundation` we'll catch it via `ldd`.
+//
+// See `Package.swift` for the authoritative list.
+// IMPORT_RUNTIME_LIBRARY_PRODUCTS:START
+import JavaIO
+import JavaLangReflect
+import JavaNet
+import JavaUtil
+import JavaUtilFunction
+import JavaUtilJar
 import SwiftJava
+import SwiftRuntimeFunctions
+
+// IMPORT_RUNTIME_LIBRARY_PRODUCTS:END
 
 let _ = try? JavaVirtualMachine.shared()
 let _ = SwiftPlatform.debugOrRelease
