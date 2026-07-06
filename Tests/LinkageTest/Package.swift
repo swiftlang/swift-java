@@ -3,6 +3,26 @@
 import Foundation
 import PackageDescription
 
+// Every runtime product exported from swift-java should be included here.
+// This is to verify none of the modules would accidentally pull in Foundation.
+// `scripts/run-linkage-test.sh` enforces set equality with the root package.
+let runtimeLibraryProducts: [String] = [
+  // RUNTIME_LIBRARY_PRODUCTS:START
+  "JavaIO",
+  "JavaLangReflect",
+  "JavaNet",
+  "JavaUtil",
+  "JavaUtilFunction",
+  "JavaUtilJar",
+  "SwiftJava",
+  "SwiftRuntimeFunctions",
+  // RUNTIME_LIBRARY_PRODUCTS:END
+]
+
+let runtimeDependencies: [Target.Dependency] = runtimeLibraryProducts.map {
+  .product(name: $0, package: "swift-java")
+}
+
 let package = Package(
   name: "linkage-test",
   platforms: [
@@ -14,15 +34,11 @@ let package = Package(
   targets: [
     .executableTarget(
       name: "LinkageTest",
-      dependencies: [
-        .product(name: "SwiftJava", package: "swift-java")
-      ]
+      dependencies: runtimeDependencies
     ),
     .executableTarget(
       name: "JExtractLinkageTest",
-      dependencies: [
-        .product(name: "SwiftJava", package: "swift-java")
-      ],
+      dependencies: runtimeDependencies,
       exclude: [
         "swift-java.config"
       ],
