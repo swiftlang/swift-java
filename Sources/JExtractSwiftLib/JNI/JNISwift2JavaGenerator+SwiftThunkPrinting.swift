@@ -387,11 +387,6 @@ extension JNISwift2JavaGenerator {
   /// Prints one `@_cdecl` dispatch thunk per requirement of a protocol
   /// that's returned as `any P` / `some P` from at least one extracted
   /// function (including requirements inherited from refined protocols).
-  ///
-  /// Each thunk carries both `selfPointer` and `selfTypePointer` — exactly
-  /// like a generic-instance method thunk — and reconstructs `any P` from
-  /// them via `extractSwiftProtocolValue` before
-  /// calling the requirement directly on the opened existential.
   private func printExistentialBoxDispatchThunks(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
     let boxParentName = SwiftQualifiedTypeName(type.swiftNominal.javaExistentialBoxName)
 
@@ -778,26 +773,16 @@ extension JNISwift2JavaGenerator {
     "return \(nativeSignature.result.javaType.swiftJniPlaceholderExpr)"
   }
 
-  /// Prints the body of an existential box's per-requirement setter thunk:
-  /// `(selfPointer, selfTypePointer)` identify the concrete dynamic value
-  /// boxed by `any P`, but unlike the read path there's no `let`
-  /// reconstruction we can assign through — opening an existential yields a
-  /// *copy* of the underlying value, so mutating that copy would silently
-  /// not persist for value types.
-  ///
-  /// Instead this opens the existential generically over the concrete
-  /// dynamic type `Ty` bound to `selfTypePointer`'s metadata, reads the
-  /// typed value out of `selfPointer`'s storage as `any P`, mutates the
-  /// requirement being set on that existential copy, and writes the mutated
-  /// existential back into `selfPointer`'s storage as `Ty` — a normal
-  /// in-place mutation for reference types, and a real load-mutate-store
-  /// round-trip for value types.
+  /// Prints the body of an existential box's setter thunk.
   private func printExistentialBoxSetterDowncall(
     _ printer: inout SwiftPrinter,
     _ decl: ExtractedFunc,
     protocolType: SwiftNominalType,
     newValueArgument: String,
   ) {
+    // We need to do a "load-mutate-store" flow, because
+    // the underlying type could be a struct, so we cannot mutate that in place.
+
     let existentialType = SwiftKitPrinting.renderExistentialType([protocolType])
     let selfName = "selfPointer"
 
