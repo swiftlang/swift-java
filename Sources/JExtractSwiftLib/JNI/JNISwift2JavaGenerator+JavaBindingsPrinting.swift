@@ -58,52 +58,20 @@ extension JNISwift2JavaGenerator {
     // Each parent type goes into its own file
     // any nested types are printed inside the body as `static class`
     for (_, ty) in typesToExport.filter({ _, type in type.parent == nil }) {
-      let filename = "\(ty.effectiveJavaSimpleName).java"
-      logger.debug("Printing contents: \(filename)")
-      printImportedNominal(&printer, ty)
-
-      if let outputFile = try printer.writeContents(
-        outputDirectory: javaOutputDirectory,
-        javaPackagePath: javaPackagePath,
-        filename: filename,
-      ) {
-        exportedFileNames.append(outputFile.path(percentEncoded: false))
-        logger.info("[swift-java] Generated: \(ty.effectiveJavaSimpleName.bold).java (at \(outputFile))")
-      }
+      let filename = printExtractedNominalFile(&printer, ty)
+      try writeGeneratedFile(&printer, filename: filename, displayName: ty.effectiveJavaSimpleName, into: &exportedFileNames)
     }
 
     // Skip the module-level .swift file when generating for a single type
     if config.singleType == nil {
-      let filename = "\(self.swiftModuleName).java"
-      logger.trace("Printing module class: \(filename)")
-      printModule(&printer)
-
-      if let outputFile = try printer.writeContents(
-        outputDirectory: javaOutputDirectory,
-        javaPackagePath: javaPackagePath,
-        filename: filename,
-      ) {
-        exportedFileNames.append(outputFile.path(percentEncoded: false))
-        logger.info("[swift-java] Generated: \(self.swiftModuleName).java (at \(outputFile))")
-      }
+      let filename = printExtractedModuleFile(&printer)
+      try writeGeneratedFile(&printer, filename: filename, displayName: self.swiftModuleName, into: &exportedFileNames)
     }
 
-    // One box class per protocol returned as `any P` / `some P` from at
-    // least one extracted function.
+    // Print "`PBox`" Java class for any protocol returned as `any P` / `some P`.
     for protocolType in self.existentialProtocolBoxes {
-      let boxName = protocolType.swiftNominal.javaExistentialBoxName
-      let filename = "\(boxName).java"
-      logger.debug("Printing contents: \(filename)")
-      printExistentialBoxFile(&printer, protocolType)
-
-      if let outputFile = try printer.writeContents(
-        outputDirectory: javaOutputDirectory,
-        javaPackagePath: javaPackagePath,
-        filename: filename,
-      ) {
-        exportedFileNames.append(outputFile.path(percentEncoded: false))
-        logger.info("[swift-java] Generated: \(boxName.bold).java (at \(outputFile))")
-      }
+      let filename = printExistentialBoxFile(&printer, protocolType)
+      try writeGeneratedFile(&printer, filename: filename, displayName: protocolType.swiftNominal.javaExistentialBoxName, into: &exportedFileNames)
     }
 
     // Write java sources list file
@@ -118,14 +86,42 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printModule(_ printer: inout JavaPrinter) {
+  /// Write the printer's accumulated contents to `<filename>`, append the
+  /// resulting path to `exportedFileNames`, and emit the "Generated: ..."
+  /// info log. Shared by every top-level `printXFile(...)` call site.
+  private func writeGeneratedFile(
+    _ printer: inout JavaPrinter,
+    filename: String,
+    displayName: String,
+    into exportedFileNames: inout OrderedSet<String>
+  ) throws {
+    if let outputFile = try printer.writeContents(
+      outputDirectory: javaOutputDirectory,
+      javaPackagePath: javaPackagePath,
+      filename: filename,
+    ) {
+      exportedFileNames.append(outputFile.path(percentEncoded: false))
+      logger.info("[swift-java] Generated: \(displayName.bold).java (at \(outputFile))")
+    }
+  }
+
+  /// Reset the Java-identifier disambiguation factory for a new Java output
+  /// file. `JavaIdentifierFactory` scopes overload disambiguation per Java
+  /// class file, so every top-level `printXFile(&printer, ...)` method must
+  /// call this once before it emits anything the translator will name.
+  private func resetForNewOutputFile(_ methods: [ExtractedFunc]) {
+    self.currentJavaIdentifiers = JavaIdentifierFactory(methods)
+  }
+
+  private func printExtractedModuleFile(_ printer: inout JavaPrinter) -> String {
+    let filename = "\(self.swiftModuleName).java"
+    logger.debug("Printing contents: \(filename)")
+
+    resetForNewOutputFile(self.analysis.extractedGlobalFuncs + self.analysis.extractedGlobalVariables)
+
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer)
-
-    self.currentJavaIdentifiers = JavaIdentifierFactory(
-      self.analysis.extractedGlobalFuncs + self.analysis.extractedGlobalVariables
-    )
 
     printModuleClass(&printer) { printer in
       printer.print(
@@ -170,16 +166,18 @@ extension JNISwift2JavaGenerator {
         printer.println()
       }
     }
+    return filename
   }
 
-  private func printImportedNominal(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) {
+  private func printExtractedNominalFile(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) -> String {
+    let filename = "\(decl.effectiveJavaSimpleName).java"
+    logger.debug("Printing contents: \(filename)")
+
+    resetForNewOutputFile(decl.initializers + decl.variables + decl.methods)
+
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer)
-
-    self.currentJavaIdentifiers = JavaIdentifierFactory(
-      decl.initializers + decl.variables + decl.methods
-    )
 
     switch decl.swiftNominal.kind {
     case .actor, .class, .enum, .struct:
@@ -187,6 +185,7 @@ extension JNISwift2JavaGenerator {
     case .protocol:
       printProtocol(&printer, decl)
     }
+    return filename
   }
 
   private func printProtocol(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) {
@@ -219,16 +218,19 @@ extension JNISwift2JavaGenerator {
   /// Prints the full `.java` file for a protocol's existential box — the
   /// class used to represent a value returned as `any P` / `some P` from an
   /// extracted Swift function.
-  private func printExistentialBoxFile(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) {
-    assert(decl.swiftNominal.kind == .protocol, "printExistentialBoxFile must only be called for a protocol, but was called with: \(decl)")
+  private func printExistentialBoxFile(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) -> String {
+    assert(decl.swiftNominal.kind == .protocol, "Expected protocol, got \(decl.swiftNominal.kind): \(decl.qualifiedName)")
+    let filename = "\(decl.swiftNominal.javaExistentialBoxName).java"
+    logger.debug("Printing contents: \(filename)")
+
+    resetForNewOutputFile(self.allProtocolRequirementMethods(of: decl))
 
     printHeader(&printer)
     printPackage(&printer)
     printImports(&printer)
 
-    self.currentJavaIdentifiers = JavaIdentifierFactory(self.allProtocolRequirementMethods(of: decl))
-
     printExistentialBox(&printer, decl)
+    return filename
   }
 
   /// Prints `public final class <P>Box implements JNISwiftInstance, <P> { ... }`.
