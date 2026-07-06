@@ -24,3 +24,7 @@ public struct ConcreteProtocolC: ProtocolC {
     constantC = c
   }
 }
+
+public func makeProtocolC(b: Int64, c: Int64) -> any ProtocolC {
+  ConcreteProtocolC(b: b, c: c)
+}

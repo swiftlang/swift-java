@@ -49,24 +49,43 @@ extension JNISwift2JavaGenerator {
       }
 
       // Lower the self parameter.
+      let selfIsExtractedProtocolRequirement = self.extractedProtocol(for: functionSignature.selfParameter?.selfType) != nil
+
       let nativeSelf: NativeParameter? =
         switch functionSignature.selfParameter {
         case .instance(_, let swiftType):
-          try translateParameter(
-            type: swiftType,
-            parameterName: "selfPointer",
-            methodName: methodName,
-            parentName: parentName,
-            genericParameters: functionSignature.genericParameters,
-            genericRequirements: functionSignature.genericRequirements
-          )
+          if let protocolType = self.extractedProtocol(for: swiftType) {
+            // 'self' of a protocol requirement is reconstructed by opening
+            // the existential from (selfPointer, selfTypePointer).
+            NativeParameter(
+              parameters: [
+                JavaParameter(name: "selfPointer", type: .long)
+              ],
+              conversion: .extractSwiftProtocolValue(
+                .constant("selfPointer"),
+                typeMetadataVariableName: .constant("selfTypePointer"),
+                protocolTypes: [protocolType]
+              ),
+              indirectConversion: nil,
+              conversionCheck: nil
+            )
+          } else {
+            try translateParameter(
+              type: swiftType,
+              parameterName: "selfPointer",
+              methodName: methodName,
+              parentName: parentName,
+              genericParameters: functionSignature.genericParameters,
+              genericRequirements: functionSignature.genericRequirements
+            )
+          }
         case nil, .initializer(_), .staticMethod(_):
           nil
         }
 
       let selfTypeParameter: NativeParameter? =
         if let selfType = functionSignature.selfParameter?.selfType,
-          selfType.asNominalTypeDeclaration?.isGeneric == true
+          selfType.asNominalTypeDeclaration?.isGeneric == true || selfIsExtractedProtocolRequirement
         {
           try translateParameter(
             type: .metatype(selfType),
@@ -841,9 +860,34 @@ extension JNISwift2JavaGenerator {
       case .tuple(let elements) where !elements.isEmpty:
         return try translateTupleResult(methodName: methodName, elements: elements, resultName: resultName)
 
-      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite, .inlineArray:
+      case .opaque(let proto), .existential(let proto):
+        guard case .nominal(let protoNominalType) = proto, protoNominalType.isProtocol else {
+          throw JavaTranslationError.cannotReturnNonExtractedProtocol(proto)
+        }
+
+        return translateProtocolResult(
+          protocolType: SwiftNominalType(nominalTypeDecl: protoNominalType.nominalTypeDecl),
+          resultName: resultName
+        )
+
+      case .metatype, .tuple, .function, .genericParameter, .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
+    }
+
+    /// Boxes a returned `any P` / `some P` value.
+    private func translateProtocolResult(
+      protocolType: SwiftNominalType,
+      resultName: String
+    ) -> NativeResult {
+      NativeResult(
+        javaType: .void,
+        conversion: .existentialValueIndirectReturn(
+          .allocateExistentialValue(.placeholder, name: resultName, protocolTypes: [protocolType]),
+          outArgumentName: resultName + "Out"
+        ),
+        outParameters: [.init(name: resultName + "Out", type: ._OutSwiftGenericInstance)]
+      )
     }
 
     func translateTupleResult(
@@ -1166,6 +1210,13 @@ extension JNISwift2JavaGenerator {
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
+
+    private func extractedProtocol(for type: SwiftType?) -> SwiftNominalType? {
+      guard case .nominal(let nominalType) = type, nominalType.isProtocol else {
+        return nil
+      }
+      return nominalType
+    }
   }
 
   struct NativeFunctionSignature {
@@ -1261,6 +1312,8 @@ extension JNISwift2JavaGenerator {
     /// Allocate memory for a Swift value and outputs the pointer
     indirect case allocateSwiftValue(NativeSwiftConversionStep, name: String, swiftType: SwiftType)
 
+    indirect case allocateExistentialValue(NativeSwiftConversionStep, name: String, protocolTypes: [SwiftNominalType])
+
     /// The thing to which the pointer typed, which is the `pointee` property
     /// of the `Unsafe(Mutable)Pointer` types in Swift.
     indirect case pointee(NativeSwiftConversionStep)
@@ -1301,6 +1354,11 @@ extension JNISwift2JavaGenerator {
     indirect case genericValueIndirectReturn(
       NativeSwiftConversionStep,
       swiftFunctionResultType: SwiftType,
+      outArgumentName: String
+    )
+
+    indirect case existentialValueIndirectReturn(
+      NativeSwiftConversionStep,
       outArgumentName: String
     )
 
@@ -1523,6 +1581,40 @@ extension JNISwift2JavaGenerator {
         )
         return bitsName
 
+      case .allocateExistentialValue(let inner, let name, let protocolTypes):
+        let inner = inner.render(&printer, placeholder)
+        let existentialType = SwiftKitPrinting.renderExistentialType(protocolTypes)
+        let existentialName = "\(name)Existential$"
+        let boxedName = "\(name)Boxed$"
+
+        // Bind at existential type first: for `some P` the static result type
+        // is the opaque type, not `(any P)` — binding here erases it to the
+        // existential so the boxing helper below can open it uniformly.
+        printer.print("let \(existentialName): \(existentialType) = \(inner)")
+
+        printer.print(
+          """
+          #if hasFeature(ImplicitOpenExistentials)
+          let \(boxedName): (Int64, Int64) = {
+            let value = \(existentialName)
+            let pointer = UnsafeMutablePointer<type(of: value)>.allocate(capacity: 1)
+            pointer.initialize(to: value)
+            let metadataPointer = unsafeBitCast(type(of: value), to: UnsafeRawPointer.self)
+            return (Int64(Int(bitPattern: pointer)), Int64(Int(bitPattern: metadataPointer)))
+          }()
+          #else
+          func \(name)Box$<T>(_ value: T) -> (Int64, Int64) {
+            let pointer = UnsafeMutablePointer<T>.allocate(capacity: 1)
+            pointer.initialize(to: value)
+            let metadataPointer = unsafeBitCast(T.self, to: UnsafeRawPointer.self)
+            return (Int64(Int(bitPattern: pointer)), Int64(Int(bitPattern: metadataPointer)))
+          }
+          let \(boxedName) = _openExistential(\(existentialName), do: \(name)Box$)
+          #endif
+          """
+        )
+        return boxedName
+
       case .pointee(let inner):
         let inner = inner.render(&printer, placeholder)
         return "\(inner).pointee"
@@ -1710,6 +1802,19 @@ extension JNISwift2JavaGenerator {
             let metadataPointer = unsafeBitCast(\(swiftFunctionResultType).self, to: UnsafeRawPointer.self)
             let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
             environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+            """
+          )
+        }
+        return ""
+
+      case .existentialValueIndirectReturn(let inner, let outArgumentName):
+        let boxed = inner.render(&printer, placeholder)
+        printer.printBraceBlock("do") { printer in
+          printer.print(
+            """
+            let (selfPointerBits$, selfTypePointerBits$) = \(boxed)
+            environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, selfPointerBits$.getJNIValue(in: environment))
+            environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, selfTypePointerBits$.getJNIValue(in: environment))
             """
           )
         }

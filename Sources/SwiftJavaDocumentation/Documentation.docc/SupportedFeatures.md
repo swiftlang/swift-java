@@ -74,12 +74,13 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Protocols static requirements: `static func`, `init(rawValue:)`                      | ❌        | ❌   |
 | Existential parameters `f(x: any SomeProtocol)` (excepts `Any`)                      | ❌        | ✅   |
 | Existential parameters `f(x: any (A & B)) `                                          | ❌        | ✅   |
-| Existential return types `f() -> any Collection`                                     | ❌        | ❌   |
+| Existential return types of a single protocol: `f() -> any SomeProtocol`             | ❌        | ✅   |
+| Existential return types of a composite: `f() -> any (A & B)`                        | ❌        | ❌   |
 | Foundation Data and DataProtocol: `f(x: any DataProtocol) -> Data`                   | ✅        | ✅   |
 | Foundation Date: `f(date: Date) -> Date`                                             | ❌        | ✅   |
 | Foundation UUID: `f(uuid: UUID) -> UUID`                                             | ❌        | ✅   |
 | Opaque parameters: `func take(worker: some Builder) -> some Builder`                 | ❌        | ✅   |
-| Opaque return types: `func get() -> some Builder`                                    | ❌        | ❌   |
+| Opaque return types: `func get() -> some Builder`                                    | ❌        | ✅   |
 | Optional parameters: `func f(i: Int?, class: MyClass?)`                              | ✅        | ✅   |
 | Optional return types: `func f() -> Int?`, `func g() -> MyClass?`                    | ❌        | ✅   |
 | Primitive types: `Bool`, `Int`, `Int8`, `Int16`, `Int32`, `Int64`, `Float`, `Double` | ✅        | ✅   |
@@ -355,7 +356,44 @@ which conform a to a given Swift protocol.
 
 #### Returning protocol types
 
-Protocols are not yet supported as return types.
+> Note: Returning protocol types is currently only supported in JNI mode.
+
+Functions that return an existential (`any SomeProtocol`) or opaque (`some SomeProtocol`)
+value of a single protocol are supported. For example:
+
+```swift
+protocol Greeter {
+    func greeting() -> String
+}
+
+func makeEnglishGreeter(name: String) -> any Greeter { ... }
+func makeOpaqueGreeter(name: String) -> some Greeter { ... }
+```
+
+The returned value is wrapped in a generated *existential box* — a Java class named
+`<Protocol>Box` that implements the protocol's Java `interface`. The box carries the
+concrete (dynamic) value together with its type metadata, and dispatches each protocol
+requirement through a dedicated native thunk that reconstructs the existential from that
+value. This means the dynamic type of the returned value is preserved, and each
+requirement is called on the underlying concrete conformer:
+
+```java
+try (var arena = SwiftArena.ofConfined()) {
+    Greeter english = MySwiftLibrary.makeEnglishGreeter("World", arena);
+    Greeter danish = MySwiftLibrary.makeDanishGreeter("Verden", arena);
+    assertEquals("Hello, World!", english.greeting());
+    assertEquals("Hej, Verden!", danish.greeting());
+}
+```
+
+Using the returned value works just like using any other imported interface: its
+requirements are callable through the box, it can be passed back into functions that
+accept the protocol (including generic and opaque parameters), and refined protocols
+expose both their own and their inherited requirements.
+
+Static requirements (`static func`, `init`) and returning a *composite* existential
+(`any (A & B)`) are not currently supported; such requirements are simply omitted from
+the generated box, and composite returns are not extracted.
 
 ### Swift closures
 

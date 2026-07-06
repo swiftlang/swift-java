@@ -54,6 +54,9 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   var translatedEnumCases: [ExtractedEnumCase: TranslatedEnumCase] = [:]
   var interfaceProtocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper] = [:]
 
+  /// Protocols that should be boxed to support returning them as `any P / some P`
+  private(set) var existentialProtocolBoxes: [ExtractedNominalType] = []
+
   /// Duplicate identifier tracking for the current batch of methods being generated.
   var currentJavaIdentifiers: JavaIdentifierFactory = JavaIdentifierFactory()
 
@@ -123,6 +126,12 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       // in Java.
       self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(self.analysis.extractedTypes.values))
     }
+
+    // Every extracted protocol that also gets a plain Java `interface`
+    // generated for it is eligible to be boxed as an existential.
+    self.existentialProtocolBoxes = self.analysis.extractedTypes.values
+      .filter { $0.swiftNominal.kind == .protocol }
+      .sorted { $0.swiftNominal.qualifiedName < $1.swiftNominal.qualifiedName }
   }
 
   func generate() throws {
@@ -150,5 +159,33 @@ extension JNISwift2JavaGenerator {
       .compactMap {
         self.analysis.extractedTypes[$0.qualifiedName]
       }
+  }
+
+  /// The direct (non-inherited) requirements of `type` (a protocol) that are
+  /// wrappable on the Java side: instance methods and variable accessors
+  /// (getters/setters), excluding statics and anything whose signature
+  /// doesn't translate (e.g. referencing `Self`/associated types).
+  func supportedProtocolRequirements(of type: ExtractedNominalType) -> [ExtractedFunc] {
+    (type.methods + type.variables).filter { requirement in
+      !requirement.isStatic && self.translatedDecl(for: requirement) != nil
+    }
+  }
+
+  /// All wrappable requirements for `type` (a protocol), including those
+  /// inherited from refined protocols — the transitive closure of
+  /// `supportedProtocolRequirements(of:)`. Used to build an existential
+  /// box's method bodies and per-requirement `@_cdecl` dispatch thunks,
+  /// since the box must implement everything the protocol (directly or
+  /// transitively) requires.
+  func allProtocolRequirementMethods(of type: ExtractedNominalType) -> [ExtractedFunc] {
+    var visited: Set<ObjectIdentifier> = []
+    var queue: [ExtractedNominalType] = [type]
+    var methods: [ExtractedFunc] = []
+    while let current = queue.popLast() {
+      guard visited.insert(ObjectIdentifier(current)).inserted else { continue }
+      methods.append(contentsOf: self.supportedProtocolRequirements(of: current))
+      queue.append(contentsOf: inheritedProtocols(of: current))
+    }
+    return methods
   }
 }

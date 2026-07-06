@@ -51,6 +51,37 @@ struct JNIProtocolTests {
       }
     """
 
+  let returnSource = """
+      public protocol Greeter {
+        public func greeting() -> String
+        public var favoriteNumber: Int64 { get set }
+      }
+
+      public func makeGreeter() -> any Greeter
+      public func makeOpaqueGreeter() -> some Greeter
+    """
+
+  let partialReturnSource = """
+      public protocol Loader {
+        public func load() -> Int64
+        public static func make() -> Loader
+      }
+
+      public func makeLoader() -> any Loader
+    """
+
+  let protocolInheritanceReturnSource = """
+      public protocol ParentProtocol {
+        public func parentMethod()
+      }
+
+      public protocol ChildProtocol: ParentProtocol {
+        public func childMethod()
+      }
+
+      public func makeChild() -> any ChildProtocol
+    """
+
   @Test
   func generatesJavaInterface() throws {
     try assertOutput(
@@ -414,6 +445,199 @@ struct JNIProtocolTests {
             ...
           }
         }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func returnsExistentialProtocol_java() throws {
+    try assertOutput(
+      input: returnSource,
+      config: config,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        final class GreeterBox implements JNISwiftInstance, Greeter {
+          ...
+          public static GreeterBox wrapMemoryAddressUnsafe(long selfPointer, long selfTypePointer, SwiftArena swiftArena) {
+            return new GreeterBox(selfPointer, selfTypePointer, swiftArena);
+          }
+        """,
+        """
+          public long $typeMetadataAddress() {
+            return this.selfTypePointer;
+          }
+        """,
+        """
+          public java.lang.String greeting() {
+            return GreeterBox.$greeting(this.$memoryAddress(), this.$typeMetadataAddress());
+          }
+          private static native java.lang.String $greeting(long selfPointer, long selfTypePointer);
+        """,
+        """
+        public static Greeter makeGreeter(SwiftArena swiftArena) {
+          org.swift.swiftkit.core._OutSwiftGenericInstance result = new org.swift.swiftkit.core._OutSwiftGenericInstance();
+          SwiftModule.$makeGreeter(result);
+          return GreeterBox.wrapMemoryAddressUnsafe(result.selfPointer, result.selfTypePointer, swiftArena);
+        }
+        private static native void $makeGreeter(org.swift.swiftkit.core._OutSwiftGenericInstance resultOut);
+        """,
+        """
+        public static Greeter makeOpaqueGreeter(SwiftArena swiftArena) {
+          org.swift.swiftkit.core._OutSwiftGenericInstance result = new org.swift.swiftkit.core._OutSwiftGenericInstance();
+          SwiftModule.$makeOpaqueGreeter(result);
+          return GreeterBox.wrapMemoryAddressUnsafe(result.selfPointer, result.selfTypePointer, swiftArena);
+        }
+        private static native void $makeOpaqueGreeter(org.swift.swiftkit.core._OutSwiftGenericInstance resultOut);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func returnsExistentialProtocol_swift() throws {
+    try assertOutput(
+      input: returnSource,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024makeGreeter__Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2")
+        public func Java_com_example_swift_SwiftModule__00024makeGreeter__Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, resultOut: jobject?) {
+          let resultExistential$: (any Greeter) = SwiftModule.makeGreeter()
+          ...
+          do {
+            let (selfPointerBits$, selfTypePointerBits$) = resultBoxed$
+            environment.interface.SetLongField(environment, resultOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, selfPointerBits$.getJNIValue(in: environment))
+            environment.interface.SetLongField(environment, resultOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, selfTypePointerBits$.getJNIValue(in: environment))
+          }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_GreeterBox__00024greeting__JJ")
+        public func Java_com_example_swift_GreeterBox__00024greeting__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jstring? {
+          guard let selfPointerTypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: selfTypePointer, in: environment))) else {
+            fatalError("selfTypePointer memory address was null")
+          }
+          let selfPointerDynamicType$: Any.Type = unsafeBitCast(selfPointerTypeMetadataPointer$, to: Any.Type.self)
+          guard let selfPointerRawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: selfPointer, in: environment))) else {
+            fatalError("selfPointer memory address was null")
+          }
+          #if hasFeature(ImplicitOpenExistentials)
+          let selfPointerExistential$ = selfPointerRawPointer$.load(as: selfPointerDynamicType$) as! (any Greeter)
+          #else
+          func selfPointerDoLoad<Ty>(_ ty: Ty.Type) -> (any Greeter) {
+            selfPointerRawPointer$.load(as: ty) as! (any Greeter)
+          }
+          let selfPointerExistential$ = _openExistential(selfPointerDynamicType$, do: selfPointerDoLoad)
+          #endif
+          return selfPointerExistential$.greeting().getJNILocalRefValue(in: environment)
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func existentialBoxPropertyAccessors_swift() throws {
+    try assertOutput(
+      input: returnSource,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_GreeterBox__00024getFavoriteNumber__JJ")
+        public func Java_com_example_swift_GreeterBox__00024getFavoriteNumber__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jlong {
+          ...
+          return selfPointerExistential$.favoriteNumber.getJNILocalRefValue(in: environment)
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_GreeterBox__00024setFavoriteNumber__JJJ")
+        public func Java_com_example_swift_GreeterBox__00024setFavoriteNumber__JJJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, selfPointer: jlong, selfTypePointer: jlong) {
+          ...
+          #if hasFeature(ImplicitOpenExistentials)
+          var selfPointerExistential$: (any Greeter) = selfPointerRawPointer$.load(as: selfPointerDynamicType$) as! (any Greeter)
+          selfPointerExistential$.favoriteNumber = Int64(fromJNI: newValue, in: environment)
+          func selfPointerDoStore$<Ty>(_ value: Ty) {
+            selfPointerRawPointer$.assumingMemoryBound(to: Ty.self).pointee = value
+          }
+          selfPointerDoStore$(selfPointerExistential$)
+          #else
+          func selfPointerDoSet$<Ty>(_ ty: Ty.Type) {
+            let typed$ = selfPointerRawPointer$.assumingMemoryBound(to: Ty.self)
+            var existential$: (any Greeter) = typed$.pointee as! (any Greeter)
+            existential$.favoriteNumber = Int64(fromJNI: newValue, in: environment)
+            typed$.pointee = existential$ as! Ty
+          }
+          _openExistential(selfPointerDynamicType$, do: selfPointerDoSet$)
+          #endif
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func existentialBoxOmitsUnsupportedRequirement() throws {
+    try assertOutput(
+      input: partialReturnSource,
+      config: config,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public interface Loader extends JNISwiftInstance {
+          ...
+          public long load();
+          ...
+        }
+        """,
+        """
+        final class LoaderBox implements JNISwiftInstance, Loader {
+          ...
+          public long load() {
+            return LoaderBox.$load(this.$memoryAddress(), this.$typeMetadataAddress());
+          }
+          private static native long $load(long selfPointer, long selfTypePointer);
+        """,
+      ],
+      notExpectedChunks: [
+        "// Loader.make",
+        "$make(",
+      ]
+    )
+  }
+
+  @Test
+  func returnsInheritedProtocol_java() throws {
+    try assertOutput(
+      input: protocolInheritanceReturnSource,
+      config: config,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        final class ChildProtocolBox implements JNISwiftInstance, ChildProtocol {
+          ...
+          public void childMethod() {
+            ChildProtocolBox.$childMethod(this.$memoryAddress(), this.$typeMetadataAddress());
+          }
+          private static native void $childMethod(long selfPointer, long selfTypePointer);
+        """,
+        """
+          public void parentMethod() {
+            ChildProtocolBox.$parentMethod(this.$memoryAddress(), this.$typeMetadataAddress());
+          }
+          private static native void $parentMethod(long selfPointer, long selfTypePointer);
         """,
       ]
     )

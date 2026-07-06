@@ -23,6 +23,18 @@ public func useProtocolWithStatic(_ value: any ProtocolWithStatic) -> Int {
   return meta.myFunc()
 }
 
+public struct ConcreteProtocolWithStatic: ProtocolWithStatic {
+  public init() {}
+
+  public static func myFunc() -> Int {
+    42
+  }
+}
+
+public func makeProtocolWithStatic() -> any ProtocolWithStatic {
+  ConcreteProtocolWithStatic()
+}
+
 public protocol ProtocolWithStaticProperty {
   static var value: Int { get }
 }

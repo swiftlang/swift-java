@@ -372,11 +372,36 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocolThunks(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) throws {
-    guard let protocolWrapper = self.interfaceProtocolWrappers[type] else {
-      return
+    if let protocolWrapper = self.interfaceProtocolWrappers[type] {
+      try printSwiftInterfaceWrapper(&printer, protocolWrapper)
     }
 
-    try printSwiftInterfaceWrapper(&printer, protocolWrapper)
+    // Independent of `interfaceProtocolWrappers`/`enableJavaCallbacks` — this
+    // is the opposite direction (Swift-implements / Java-receives a
+    // downcall), so it must not be gated on the upcall machinery.
+    if self.existentialProtocolBoxes.contains(type) {
+      printExistentialBoxDispatchThunks(&printer, type)
+    }
+  }
+
+  /// Prints one `@_cdecl` dispatch thunk per requirement of a protocol
+  /// that's returned as `any P` / `some P` from at least one extracted
+  /// function (including requirements inherited from refined protocols).
+  private func printExistentialBoxDispatchThunks(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
+    let boxParentName = SwiftQualifiedTypeName(type.swiftNominal.javaExistentialBoxName)
+
+    for method in self.allProtocolRequirementMethods(of: type) {
+      guard var translated = try? self.javaTranslator.translate(method) else {
+        self.logger.debug("Failed to translate protocol requirement for existential box dispatch thunk: \(method)")
+        continue
+      }
+      translated.parentName = boxParentName
+
+      printCDecl(&printer, translated) { printer in
+        self.printFunctionDowncall(&printer, method)
+      }
+      printer.println()
+    }
   }
 
   private func printEnumRawDiscriminator(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
@@ -625,6 +650,32 @@ extension JNISwift2JavaGenerator {
       printer.print("#endif")
     }
 
+    // A setter accessor dispatched on a protocol `self`
+    // cannot reuse the generic callee/result machinery below:
+    // nativeSignature.selfParameter's conversion
+    // (`extractSwiftProtocolValue`) reconstructs `self` by loading the
+    // concrete value out of the existential's storage into a let.
+    // Even if it were mutable, mutating a loaded
+    // existential only mutates a copy for value types. Instead, open the
+    // existential, mutate it, and store the mutated existential back into
+    // the original storage.
+    if decl.apiKind == .setter,
+      case .instance = decl.functionSignature.selfParameter,
+      let protocolType = decl.functionSignature.selfParameter?.selfType.asNominalType,
+      protocolType.isProtocol
+    {
+      guard let newValueArgument = arguments.first else {
+        fatalError("Setter did not contain newValue parameter: \(decl)")
+      }
+      printExistentialBoxSetterDowncall(
+        &printer,
+        decl,
+        protocolType: protocolType,
+        newValueArgument: newValueArgument,
+      )
+      return
+    }
+
     // Callee
     let callee: String =
       switch decl.functionSignature.selfParameter {
@@ -735,6 +786,48 @@ extension JNISwift2JavaGenerator {
 
   private func dummyReturn(for nativeSignature: NativeFunctionSignature) -> String {
     "return \(nativeSignature.result.javaType.swiftJniPlaceholderExpr)"
+  }
+
+  /// Prints the body of an existential box's setter thunk.
+  private func printExistentialBoxSetterDowncall(
+    _ printer: inout SwiftPrinter,
+    _ decl: ExtractedFunc,
+    protocolType: SwiftNominalType,
+    newValueArgument: String,
+  ) {
+    // We need to do a "load-mutate-store" flow, because
+    // the underlying type could be a struct, so we cannot mutate that in place.
+
+    let existentialType = SwiftKitPrinting.renderExistentialType([protocolType])
+    let selfName = "selfPointer"
+
+    printer.print(
+      """
+      guard let \(selfName)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: selfTypePointer, in: environment))) else {
+        fatalError("selfTypePointer memory address was null")
+      }
+      let \(selfName)DynamicType$: Any.Type = unsafeBitCast(\(selfName)TypeMetadataPointer$, to: Any.Type.self)
+      guard let \(selfName)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: \(selfName), in: environment))) else {
+        fatalError("\(selfName) memory address was null")
+      }
+      #if hasFeature(ImplicitOpenExistentials)
+      var \(selfName)Existential$: \(existentialType) = \(selfName)RawPointer$.load(as: \(selfName)DynamicType$) as! \(existentialType)
+      \(selfName)Existential$.\(decl.name) = \(newValueArgument)
+      func \(selfName)DoStore$<Ty>(_ value: Ty) {
+        \(selfName)RawPointer$.assumingMemoryBound(to: Ty.self).pointee = value
+      }
+      \(selfName)DoStore$(\(selfName)Existential$)
+      #else
+      func \(selfName)DoSet$<Ty>(_ ty: Ty.Type) {
+        let typed$ = \(selfName)RawPointer$.assumingMemoryBound(to: Ty.self)
+        var existential$: \(existentialType) = typed$.pointee as! \(existentialType)
+        existential$.\(decl.name) = \(newValueArgument)
+        typed$.pointee = existential$ as! Ty
+      }
+      _openExistential(\(selfName)DynamicType$, do: \(selfName)DoSet$)
+      #endif
+      """
+    )
   }
 
   private func printCDecl(
@@ -1147,6 +1240,12 @@ extension SwiftNominalTypeDeclaration {
 
   var javaInterfaceVariableName: String {
     "_\(javaInterfaceName.firstCharacterLowercased)Interface"
+  }
+
+  /// The name of the generated Java class that boxes a value returned as
+  /// `any P` / `some P` from a Swift function.
+  var javaExistentialBoxName: String {
+    "\(safeProtocolName)Box"
   }
 
   var generatedJavaClassMacroName: String {
