@@ -197,9 +197,9 @@ extension JNISwift2JavaGenerator {
     // then we require only JExtracted types can conform to this.
     if !self.interfaceProtocolWrappers.keys.contains(decl) && !extends.contains("JNISwiftInstance") {
       extends.append("JNISwiftInstance")
-    } else if !extends.contains("JNISwiftInstance") {
-      extends.append("SwiftDowncastable")
     }
+
+    extends.append("SwiftDowncastable")
     let extendsString = extends.isEmpty ? "" : " extends \(extends.joined(separator: .comma))"
 
     printer.printBraceBlock("public interface \(decl.effectiveJavaSimpleName)\(extendsString)") { printer in

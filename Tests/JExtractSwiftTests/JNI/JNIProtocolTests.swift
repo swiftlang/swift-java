@@ -101,7 +101,7 @@ struct JNIProtocolTests {
         import org.swift.swiftkit.core.util.*;
         """,
         """
-        public interface SomeProtocol {
+        public interface SomeProtocol extends SwiftDowncastable {
           ...
           public void method();
           ...
@@ -123,14 +123,14 @@ struct JNIProtocolTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public interface ParentProtocol {
+        public interface ParentProtocol extends SwiftDowncastable {
           ...
           public void parentMethod();
           ...
         }
         """,
         """
-        public interface ChildProtocol extends ParentProtocol {
+        public interface ChildProtocol extends ParentProtocol, SwiftDowncastable {
           ...
           public void childMethod();
           ...
@@ -594,7 +594,7 @@ struct JNIProtocolTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public interface Loader extends JNISwiftInstance {
+        public interface Loader extends JNISwiftInstance, SwiftDowncastable {
           ...
           public long load();
           ...
