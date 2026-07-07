@@ -31,5 +31,5 @@ public class SwiftObjects {
     public static native String typeDescription(long selfTypePointer);
     public static native boolean equals(long lhsPointer, long lhsTypePointer, long rhsPointer, long rhsTypePointer);
     public static native int hashCode(long selfPointer, long selfTypePointer);
-    public static native int dynamicCast(long selfPointer, long selfTypePointer, long targetTypePointer);
+    public static native long dynamicCast(long selfPointer, long selfTypePointer, long targetTypePointer);
 }

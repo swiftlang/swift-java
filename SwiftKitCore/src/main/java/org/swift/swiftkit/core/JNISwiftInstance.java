@@ -14,7 +14,7 @@
 
 package org.swift.swiftkit.core;
 
-public interface JNISwiftInstance extends SwiftInstance {
+public interface JNISwiftInstance extends SwiftInstance, SwiftDowncastable {
     /**
      * Creates a function that will be called when the value should be destroyed.
      * This will be code-generated to call a native method to do deinitialization and deallocation.
