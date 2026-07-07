@@ -76,6 +76,7 @@ SwiftJava's `swift-java jextract` tool automates generating Java bindings from S
 | Existential parameters `f(x: any (A & B)) `                                          | ❌        | ✅   |
 | Existential return types of a single protocol: `f() -> any SomeProtocol`             | ❌        | ✅   |
 | Existential return types of a composite: `f() -> any (A & B)`                        | ❌        | ❌   |
+| Downcasting a returned protocol value to its concrete type: `greeter.as(EnglishGreeter.class, arena)` | ❌ | ✅ |
 | Foundation Data and DataProtocol: `f(x: any DataProtocol) -> Data`                   | ✅        | ✅   |
 | Foundation Date: `f(date: Date) -> Date`                                             | ❌        | ✅   |
 | Foundation UUID: `f(uuid: UUID) -> UUID`                                             | ❌        | ✅   |
@@ -394,6 +395,44 @@ expose both their own and their inherited requirements.
 Static requirements (`static func`, `init`) and returning a *composite* existential
 (`any (A & B)`) are not currently supported; such requirements are simply omitted from
 the generated box, and composite returns are not extracted.
+
+#### Downcasting to the concrete type (`as`)
+
+> Note: Downcasting returned protocol values is currently only supported in JNI mode.
+
+A value returned as `any P` / `some P` preserves its concrete dynamic type, so it can be
+recovered — the equivalent of Swift's `as?`. Every imported protocol `interface` therefore
+exposes an `as` method:
+
+```java
+<T extends JNISwiftInstance> Optional<T> as(Class<T> type, SwiftArena arena);
+<T extends JNISwiftInstance> Optional<T> as(Class<T> type); // uses the default arena
+```
+
+`type` must be a concrete jextracted type (a `class`, `struct`, or `enum` binding — the
+`JNISwiftInstance` bound enforces this at compile time). The cast succeeds only when the
+value's dynamic Swift type is exactly that type, in which case you receive a fresh binding
+registered in the given arena; otherwise the result is `Optional.empty()`.
+
+Continuing the `Greeter` example, where `makeEnglishGreeter` returns `any Greeter` backed
+by a concrete `EnglishGreeter`:
+
+```java
+try (var arena = SwiftArena.ofConfined()) {
+    Greeter greeter = MySwiftLibrary.makeEnglishGreeter("World", arena);
+
+    // Recover the concrete type — its `struct`-only members become available:
+    Optional<EnglishGreeter> english = greeter.as(EnglishGreeter.class, arena);
+    assertEquals("World", english.orElseThrow().getName());
+
+    // A cast to the wrong dynamic type yields an empty Optional:
+    assertTrue(greeter.as(DanishGreeter.class, arena).isEmpty());
+}
+```
+
+The cast returns `Optional.empty()` — rather than throwing — whenever it cannot apply: when
+the dynamic type differs, when `type` is not a concrete jextracted type (e.g. a generic type
+or another protocol), or when the receiver is not backed by a wrapped Swift value.
 
 ### Swift closures
 
