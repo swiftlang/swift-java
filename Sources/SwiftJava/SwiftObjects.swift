@@ -158,6 +158,36 @@ extension SwiftObjects {
     }
     return perform(as: typeMetadata)
   }
+
+  @JavaMethod
+  public static func dynamicCast(
+    environment: UnsafeMutablePointer<JNIEnv?>!,
+    selfPointer: Int64,
+    selfTypePointer: Int64,
+    targetTypePointter: Int64
+  ) -> Int64 {
+    guard let selfType$ = UnsafeRawPointer(bitPattern: Int(selfTypePointer)) else {
+      fatalError("selfType metadata address was null")
+    }
+    guard let targetType$ = UnsafeRawPointer(bitPattern: Int(targetTypePointter)) else {
+      fatalError("targetType metadata address was null")
+    }
+
+    let selfTypeMetadata = unsafeBitCast(selfType$, to: Any.Type.self)
+    let targetTypeMetadata = unsafeBitCast(targetType$, to: Any.Type.self)
+
+    func perform<S, T>(srcType: S.Type, targetType: T.Type) -> Int64 {
+      guard let self$ = UnsafeMutablePointer<S>(bitPattern: Int(selfPointer)) else {
+        fatalError("self memory address was null")
+      }
+
+      guard let castedValue = self$.pointee as? T else { return 0 }
+      let castedPointer = UnsafeMutablePointer<T>.allocate(capacity: 1)
+      castedPointer.initialize(to: castedValue)
+      return Int64(Int(bitPattern: castedPointer))
+    }
+    return perform(srcType: selfTypeMetadata, targetType: targetTypeMetadata)
+  }
 }
 
 public class HashableClass: Hashable {
