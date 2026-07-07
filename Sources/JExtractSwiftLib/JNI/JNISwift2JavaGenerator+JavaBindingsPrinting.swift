@@ -28,6 +28,7 @@ extension JNISwift2JavaGenerator {
     "org.swift.swiftkit.core.util.*",
     "org.swift.swiftkit.core.collections.*",
     "java.util.*",
+    "java.lang.reflect.Method",
 
     // NonNull, Unsigned and friends
     "org.swift.swiftkit.core.annotations.*",
@@ -213,6 +214,9 @@ extension JNISwift2JavaGenerator {
         printFunctionDowncallMethods(&printer, requirement, skipMethodBody: true)
         printer.println()
       }
+
+      // Print the `as` helper
+      printDynamicCastFunction(&printer, inProtocol: true)
     }
   }
 
@@ -431,6 +435,7 @@ extension JNISwift2JavaGenerator {
       printer.println()
 
       printSwiftInstanceObjectMethods(&printer)
+      printDynamicCastFunction(&printer, inProtocol: false)
       printer.println()
     }
   }
@@ -528,6 +533,41 @@ extension JNISwift2JavaGenerator {
       }
       """
     )
+  }
+
+  private func printDynamicCastFunction(_ printer: inout JavaPrinter, inProtocol: Bool) {
+    let modifier = inProtocol ? "default" : "public"
+
+    // Java does not support static protocol requirements
+    // and we need to access the type memory address of T
+    // so we use Java reflection to call the static native downcall instead.
+    // and also the "constructor" to get back the correct Java wrapper.
+    printer.printBraceBlock("\(modifier) <T extends JNISwiftInstance> Optional<T> as(Class<T> type, SwiftArena arena)") { printer in
+      printer.print(
+        """
+        if (!(this instanceof JNISwiftInstance src)) return Optional.empty();
+        try { 
+          Method m = type.getDeclaredMethod("$typeMetadataAddressDowncall");
+          m.setAccessible(true);
+          long targetType = (long) m.invoke(null);
+          long p = SwiftObjects.dynamicCast(src.$memoryAddress(), src.$typeMetadataAddress(), targetType);
+          if (p == 0) return Optional.empty();
+          Method wrap = type.getMethod("wrapMemoryAddressUnsafe", long.class, SwiftArena.class);
+          return Optional.of(type.cast(wrap.invoke(null, p, arena)));
+        } catch (ReflectiveOperationException e) {
+          // Not a concrete JExtract type
+          return Optional.empty();
+        }
+        """
+      )
+    }
+
+    if config.effectiveMemoryManagementMode.requiresGlobalArena {
+      printer.println()
+      printer.printBraceBlock("\(modifier) <T extends JNISwiftInstance> Optional<T> as(Class<T> type)") { printer in
+        printer.print("return as(type, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);")
+      }
+    }
   }
 
   /// Prints helpers for specific types like `Foundation.Date`
