@@ -119,7 +119,7 @@ final class FuncCallbackImportTests {
          * public func callMe(callback: () -> Void)
          * }
          */
-        public static void callMe(callMe.callback callback) {
+        public static void callMe(java.lang.Runnable callback) {
           try(var arena$ = Arena.ofConfined()) {
             swiftjava___FakeModule_callMe_callback.call(callMe.$toUpcallStub(callback, arena$));
           }
@@ -234,7 +234,7 @@ final class FuncCallbackImportTests {
          * public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())
          * }
          */
-        public static void callMeMore(callMeMore.callback callback, callMeMore.fn fn) {
+        public static void callMeMore(callMeMore.callback callback, java.lang.Runnable fn) {
           try(var arena$ = Arena.ofConfined()) {
             swiftjava___FakeModule_callMeMore_callback_fn.call(callMeMore.$toUpcallStub(callback, arena$), callMeMore.$toUpcallStub(fn, arena$));
           }
