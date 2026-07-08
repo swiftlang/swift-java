@@ -14,6 +14,7 @@
 
 package com.example.swift;
 
+// snippet.helloSubclass
 public class HelloSubclass extends HelloSwift {
     private String greeting;
 
@@ -25,3 +26,4 @@ public class HelloSubclass extends HelloSwift {
         super.greet(greeting);
     }
 }
+// snippet.end

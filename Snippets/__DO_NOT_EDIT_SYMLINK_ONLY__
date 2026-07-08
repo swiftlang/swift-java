@@ -1,0 +1,7 @@
+DO NOT EDIT DIRECTLY IN THIS DIRECTORY.
+
+Files in here are not expected to compile as-is; they are symlinks to actual test
+and sample files validated elsewhere. 
+
+This way, the tests are actually compiled and executed, 
+and the snippet files are available for swift-docc which needs to resolve them in the Snippets/ directory.

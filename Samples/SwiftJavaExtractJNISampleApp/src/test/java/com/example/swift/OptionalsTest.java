@@ -59,8 +59,18 @@ public class OptionalsTest {
 
     @Test
     void optionalLong() {
+        // snippet.optionalUsageJava
         assertEquals(OptionalLong.empty(), MySwiftLibrary.optionalLong(OptionalLong.empty()));
         assertEquals(OptionalLong.of(999), MySwiftLibrary.optionalLong(OptionalLong.of(999)));
+        // snippet.end
+    }
+
+    @Test
+    void optionalLongOrZero() {
+        // snippet.optionalParameterUsageJava
+        assertEquals(0, MySwiftLibrary.optionalLongOrZero(OptionalLong.empty()));
+        assertEquals(999, MySwiftLibrary.optionalLongOrZero(OptionalLong.of(999)));
+        // snippet.end
     }
 
     @Test

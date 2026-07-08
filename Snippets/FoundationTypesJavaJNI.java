@@ -1,0 +1,1 @@
+../Samples/SwiftJavaExtractJNISampleApp/src/test/java/com/example/swift/FoundationTypeTest.java

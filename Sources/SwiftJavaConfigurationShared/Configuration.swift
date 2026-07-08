@@ -28,15 +28,25 @@ import Foundation
 
 public typealias JavaVersion = Int
 
-/// Configuration for the SwiftJava tools and plugins, provided on a per-target basis.
+/// Configuration for the SwiftJava tools and plugins, provided on a per-target basis.Ó
 public struct Configuration: Codable {
 
+  // ==== General --------------------------------------------------------------
+
+  /// The minimum log level at which log messages will be printed at by swift-java.
   public var logLevel: LogLevel?
 
-  // ==== swift 2 java / jextract swift ---------------------------------------
+  // ==== jextract ------------------------------------------------------------
 
+  /// The Java package the generated Java code should be emitted into.
+  ///
+  /// Example:
+  /// ```swift
+  /// "com.example.mypackage"
+  /// ```
   public var javaPackage: String?
 
+  /// The name of the Swift module into which the resulting Swift types will be generated.
   public var swiftModule: String?
 
   /// The name of the native library to load at runtime via `System.loadLibrary()`.
@@ -53,37 +63,52 @@ public struct Configuration: Codable {
   /// When set to an empty array `[]`, no library loading code is emitted at all.
   public var overrideStaticBlockLibraryLoading: [String]?
 
+  /// Directory containing Swift files which should be extracted into Java bindings (jextract mode).
+  /// Must be paired with `outputSwiftDirectory` and `outputJavaDirectory`.
   public var inputSwiftDirectory: String?
 
+  /// The directory where generated Swift files should be written. Generally used with jextract mode.
   public var outputSwiftDirectory: String?
 
+  /// The directory where generated Java files should be written. Generally used with jextract mode.
   public var outputJavaDirectory: String?
 
+  /// Determine `jextract` source generation mode, using JNI or FFM.
   public var mode: JExtractGenerationMode?
+
   public var effectiveMode: JExtractGenerationMode {
     mode ?? .default
   }
 
+  /// Some build systems require an output to be present when it was "expected", even if empty.
+  /// This is used by the JExtractSwiftPlugin build plugin, but otherwise should not be necessary.
   public var writeEmptyFiles: Bool?
   public var effectiveWriteEmptyFiles: Bool {
     writeEmptyFiles ?? false
   }
 
+  /// The lowest access level of Swift declarations that should be extracted, defaults to `public`.
   public var minimumInputAccessLevelMode: AccessLevelMode?
   public var effectiveMinimumInputAccessLevelMode: AccessLevelMode {
     minimumInputAccessLevelMode ?? .default
   }
 
+  /// The memory management mode to use for the generated code. By default, the user must explicitly
+  /// provide a `SwiftArena` to all calls that require it. By choosing `allowGlobalAutomatic`, the user
+  /// can omit this parameter and a global GC-based arena will be used.
   public var memoryManagementMode: JExtractMemoryManagementMode?
   public var effectiveMemoryManagementMode: JExtractMemoryManagementMode {
     memoryManagementMode ?? .default
   }
 
+  /// The mode to use for extracting asynchronous Swift functions. By default async methods are
+  /// extracted as Java functions returning `CompletableFuture`.
   public var asyncFuncMode: JExtractAsyncFuncMode?
   public var effectiveAsyncFuncMode: JExtractAsyncFuncMode {
     asyncFuncMode ?? .default
   }
 
+  /// The Java source level to target when generating Java code.
   public var javaSourceLevel: JavaSourceLevel?
   public var effectiveJavaSourceLevel: JavaSourceLevel {
     javaSourceLevel ?? .default
@@ -120,20 +145,24 @@ public struct Configuration: Codable {
     }
   }
 
+  /// By enabling this mode, JExtract will generate Java code that allows you to implement Swift
+  /// protocols using Java classes. This feature requires disabling the SwiftPM sandbox, and is
+  /// only supported in `jni` mode.
   public var enableJavaCallbacks: Bool?
   public var effectiveEnableJavaCallbacks: Bool {
     enableJavaCallbacks ?? false
   }
 
+  /// If specified, JExtract will output to this file a list of paths to all generated Java source files.
   public var generatedJavaSourcesListFileOutput: String?
 
   /// If set, only generate bindings for this single Swift type name
   public var singleType: String?
 
   /// If set, JExtract (JNI mode) will write a linker version script to this
-  /// path, listing all generated JNI ``@_cdecl`` entry-point symbols as
+  /// path, listing all generated JNI `@_cdecl` entry-point symbols as
   /// global exports and hiding everything else with `local: *`. Pass this
-  /// file to the linker via ``-Xlinker --version-script=<path>`` to enable
+  /// file to the linker via `-Xlinker --version-script=<path>` to enable
   /// precise dead-code elimination of unused Swift code in the final shared
   /// library.
   public var linkerExportListOutput: String?
@@ -181,10 +210,22 @@ public struct Configuration: Codable {
     importedModuleStubs?.keys.contains(moduleName) ?? false
   }
 
-  /// Specialization entries for generic types, mapping a Java-facing name
-  /// to its base Swift type and concrete type arguments.
+  /// Force specialization of generic types, mapping them to a specific generated Java-facing name.
+  /// This allows generating generic specializations that can be used only with some specific bound generic argument,
+  /// rather than using the usual generic machinery. Sometimes useful if a generic type is only reasonably usable with some specific type.
   ///
-  /// Example:
+  /// Generating specializations takes into account Swift extensions where the generic is bound to that type, for example, a `Box<T>`
+  /// type, would automatically gain `T == Fish` specific methods in the generated Java sources if there is an `extension ... where T == Fish` declared in Swift:
+  ///
+  /// ```swift
+  /// struct Box<T> {}
+  /// extension Box where T == Fish {
+  ///   func feedFish()
+  /// }
+  /// ```
+  ///
+  /// When configured as follows:
+  ///
   /// ```json
   /// {
   ///   "specialize": {
@@ -199,10 +240,60 @@ public struct Configuration: Codable {
   ///   }
   /// }
   /// ```
+  ///
+  /// Would result in Java code with the generated `feedFish()` method on the `FishBox` Java type:
+  ///
+  /// ```java
+  /// FishBox box = ...;
+  /// box.feedFish(); // type-safe generated specialized function
+  /// ```
+  ///
+  /// You can also possible to cause such specialization to occurr by declaring a typealias in Swift sources:
+  ///
+  /// ```swift
+  /// typealias FishBox = Box<Fish>
+  /// ```
+  ///
+  /// So this configuration option is geared towards times when you do not control the sources that wrappers are being generated for.
   public var specialize: [String: SpecializationConfigEntry]?
 
   /// If set, use this JSON file as the static build configuration for jextract.
   /// This allows users to provide a custom StaticBuildConfiguration for #if resolution.
+  ///
+  /// You can generate one for a specific target triple using the Swift compiler itself:
+  ///
+  /// ```
+  /// swift frontend -print-static-build-config -target <triple> > static-build-config.json
+  /// ```
+  ///
+  /// Example:
+  ///
+  /// The configuration option is a path with a file generated like above, which will have a structure similar to this:
+  ///
+  /// ```json
+  /// {
+  ///   "attributes": [],
+  ///   "compilerVersion": {
+  ///     "components": [6, 3]
+  ///   },
+  ///   "customConditions": [
+  ///     "DEBUG"
+  ///   ],
+  ///   "endianness": "little",
+  ///   "features": [],
+  ///   "languageMode": {
+  ///     "components": [5, 10]
+  ///   },
+  ///   "targetArchitectures": [],
+  ///   "targetAtomicBitWidths": [],
+  ///   "targetEnvironments": [],
+  ///   "targetOSs": [],
+  ///   "targetObjectFileFormats": [],
+  ///   "targetPointerAuthenticationSchemes": [],
+  ///   "targetPointerBitWidth": 64,
+  ///   "targetRuntimes": []
+  /// }
+  /// ```
   public var staticBuildConfigurationFile: String?
 
   // ==== wrap-java ---------------------------------------------------------
@@ -215,14 +306,44 @@ public struct Configuration: Codable {
   }
 
   /// The Java classes that should be translated to Swift. The keys are
-  /// canonical Java class names (e.g., java.util.Vector) and the values are
-  /// the corresponding Swift names (e.g., JavaVector).
+  /// canonical Java class names (e.g., java.util.ArrayList) and the values are
+  /// the corresponding Swift names (e.g., JavaArrayList).
+  ///
+  /// Example:
+  /// ```json
+  /// {
+  ///   "classes": {
+  ///     "java.util.ArrayList": "JavaArrayList",
+  ///     "java.util.HashMap": "JavaHashMap"
+  ///   }
+  /// }
+  /// ```
   public var classes: [String: String]? = [:]
 
-  // Compile for the specified Java SE release.
+  /// Compile for the specified Java SE release.
+  ///
+  /// `JavaVersion` is an integer identifying a Java SE release, in the same
+  /// shape as `javaSourceLevel`. Supported values:
+  ///
+  /// - `17`
+  /// - `18`
+  /// - `21`
+  /// - `22`
+  /// - `24`
+  /// - `25`
   public var sourceCompatibility: JavaVersion?
 
-  // Generate class files suitable for the specified Java SE release.
+  /// Generate class files suitable for the specified Java SE release.
+  ///
+  /// `JavaVersion` is an integer identifying a Java SE release, in the same
+  /// shape as `javaSourceLevel`. Supported values:
+  ///
+  /// - `17`
+  /// - `18`
+  /// - `21`
+  /// - `22`
+  /// - `24`
+  /// - `25`
   public var targetCompatibility: JavaVersion?
 
   /// Filter input Java types by their package prefix if set
@@ -231,11 +352,12 @@ public struct Configuration: Codable {
   /// Exclude input Java types by their package prefix or exact match
   public var javaFilterExclude: [String]?
 
+  /// If set, place all generated code in this single Swift file instead of one file per class.
   public var singleSwiftFileOutput: String?
 
   // ==== dependencies ---------------------------------------------------------
 
-  // Java dependencies we need to fetch for this target.
+  /// Java dependencies we need to fetch for this target.
   public var dependencies: [JavaDependencyDescriptor]?
 
   /// Custom Maven repositories to use when resolving dependencies.
@@ -248,6 +370,18 @@ public struct Configuration: Codable {
 }
 
 /// Represents a maven-style Java dependency.
+///
+/// Encoded in JSON as a single `groupID:artifactID:version` coordinate string
+/// (Gradle-style notation), not as a keyed object.
+///
+/// Example:
+/// ```json
+/// {
+///   "dependencies": [
+///     "com.google.code.gson:gson:2.10.1"
+///   ]
+/// }
+/// ```
 public struct JavaDependencyDescriptor: Hashable, Codable {
   public var groupID: String
   public var artifactID: String
@@ -302,10 +436,22 @@ public struct JavaDependencyDescriptor: Hashable, Codable {
 /// Describes a Maven-style repository for dependency resolution.
 ///
 /// Supported types based on https://docs.gradle.org/current/userguide/supported_repository_types.html:
-/// - `maven(url:artifactUrls:)` — A custom Maven repository at the given URL
-/// - `mavenCentral` — Maven Central repository
-/// - `mavenLocal(includeGroups:)` — Local Maven cache (~/.m2/repository)
-/// - `google` — Google's Maven repository
+/// - `maven(url:artifactUrls:)` - A custom Maven repository at the given URL
+/// - `mavenCentral` - Maven Central repository
+/// - `mavenLocal(includeGroups:)` - Local Maven cache (~/.m2/repository)
+/// - `google` - Google's Maven repository
+///
+/// Example:
+/// ```json
+/// {
+///   "mavenRepositories": [
+///     { "type": "mavenCentral" },
+///     { "type": "maven", "url": "https://repo.example.com/maven2" },
+///     { "type": "mavenLocal", "includeGroups": ["com.example"] },
+///     { "type": "google" }
+///   ]
+/// }
+/// ```
 public enum MavenRepositoryDescriptor: Hashable, Codable {
   case maven(url: String, artifactUrls: [String]? = nil)
   case mavenCentral

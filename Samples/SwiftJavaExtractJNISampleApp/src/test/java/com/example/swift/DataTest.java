@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DataTest {
     @Test
     void data_echo() {
+        // snippet.dataUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             byte[] bytes = new byte[] { 1, 2, 3, 4 };
             var data = Data.fromByteArray(bytes, arena);
@@ -29,6 +30,7 @@ public class DataTest {
             var echoed = MySwiftLibrary.echoData(data, arena);
             assertArrayEquals(bytes, echoed.toByteArray());
         }
+        // snippet.end
     }
 
     @Test

@@ -21,8 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UnsafeRawBufferPointerTest {
     @Test
     void sumOfBytes() {
+        // snippet.rawBufferUsageJava
         byte[] input = new byte[] { 1, 2, 3, 4, 5 };
         assertEquals(15, MySwiftLibrary.sumOfBytes(input));
+        // snippet.end
     }
 
     @Test

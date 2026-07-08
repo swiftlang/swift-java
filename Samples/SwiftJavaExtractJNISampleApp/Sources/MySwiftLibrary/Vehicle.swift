@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.enumDefinition
 public enum Vehicle {
   case bicycle
   case car(String, trailer: String?)
@@ -61,3 +62,4 @@ public enum Vehicle {
     }
   }
 }
+// snippet.end

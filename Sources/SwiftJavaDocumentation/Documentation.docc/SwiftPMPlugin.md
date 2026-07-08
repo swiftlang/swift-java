@@ -1,4 +1,4 @@
-# SwiftJava SwiftPM Plugin
+# SwiftPM Plugin
 
 The `SwiftJavaPlugin` automates `swift-java` command line tool invocations during the build process.
 

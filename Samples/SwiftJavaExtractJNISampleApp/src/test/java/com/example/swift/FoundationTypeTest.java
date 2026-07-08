@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FoundationTypeTest {
     @Test
     void date_functions() {
+        // snippet.dateUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             var date = MySwiftLibrary.dateFromSeconds(1000.50, arena);
             assertEquals(1000.5, date.getTimeIntervalSince1970());
@@ -36,6 +37,7 @@ public class FoundationTypeTest {
             var date3 = Date.init(1000.49, arena);
             assertFalse(MySwiftLibrary.compareDates(date, date3));
         }
+        // snippet.end
     }
 
     @Test
@@ -63,8 +65,10 @@ public class FoundationTypeTest {
 
     @Test
     void echoUUID() {
+        // snippet.uuidUsageJava
         var uuid = UUID.randomUUID();
         assertEquals(uuid, MySwiftLibrary.echoUUID(uuid));
+        // snippet.end
     }
 
     @Test
@@ -75,6 +79,7 @@ public class FoundationTypeTest {
 
     @Test
     void echoURL() {
+        // snippet.foundationURLUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             var url = URL.init("http://example.com", arena);
             assertDoesNotThrow(() -> {
@@ -82,5 +87,6 @@ public class FoundationTypeTest {
                 assertEquals("http://example.com", unwrapped.getAbsoluteString());
             });
         }
+        // snippet.end
     }
 }

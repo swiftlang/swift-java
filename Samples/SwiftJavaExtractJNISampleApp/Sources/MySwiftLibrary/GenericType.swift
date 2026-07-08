@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.genericTypeDefinition
 public struct MyID<T: Hashable>: Hashable {
   public var rawValue: T
   public init(_ rawValue: T) {
@@ -21,6 +22,7 @@ public struct MyID<T: Hashable>: Hashable {
     "\(rawValue)"
   }
 }
+// snippet.end
 
 public typealias MyIntID = MyID<Int>
 

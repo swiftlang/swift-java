@@ -40,10 +40,12 @@ public class MySwiftLibraryTest {
 
     @Test
     void call_writeString_jextract() {
+        // snippet.stringUsageJava
         var string = "Hello Swift!";
         long reply = MySwiftLibrary.globalWriteString(string);
 
         assertEquals(string.length(), reply);
+        // snippet.end
     }
 
     @Test
@@ -110,6 +112,22 @@ public class MySwiftLibraryTest {
     }
 
     @Test
+    void call_throwString_throws() {
+        // snippet.throwUsageJava
+        SwiftJavaErrorException exception = assertThrows(SwiftJavaErrorException.class, () -> {
+            MySwiftLibrary.throwString("");
+        });
+        assertNotNull(exception.getMessage());
+        assertTrue(exception.getMessage().contains("swiftError"));
+        // snippet.end
+    }
+
+    @Test
+    void call_throwString_noThrow() throws SwiftJavaErrorException {
+        assertEquals("Hello!", MySwiftLibrary.throwString("Hello!"));
+    }
+
+    @Test
     void call_globalThrowingReturn_noThrow() throws SwiftJavaErrorException {
         long result = MySwiftLibrary.globalThrowingReturn(false);
         assertEquals(42, result);
@@ -148,7 +166,9 @@ public class MySwiftLibraryTest {
 
    @Test
     void call_globalCallMeBooleanSupplier_noThrow() {
-        boolean result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> { return true; });
+        // snippet.closureUsageJava
+        boolean result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> true);
         assertEquals(true, result);
+        // snippet.end
     }
 }

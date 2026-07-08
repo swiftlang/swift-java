@@ -50,10 +50,12 @@ public class MySwiftLibraryTest {
 
     @Test
     void call_writeString_jextract() {
+        // snippet.stringUsageJava
         var string = "Hello Swift!";
         long reply = MySwiftLibrary.globalWriteString(string);
 
         assertEquals(string.length(), reply);
+        // snippet.end
     }
 
     @Test

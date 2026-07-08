@@ -20,7 +20,7 @@ import org.swift.swiftkit.core.tuple.Tuple2;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Runtime coverage for Swift tuples exported via jextract FFM (see {@code ffmTuple*} in {@link MySwiftLibrary}).
+ * Runtime coverage for Swift tuples exported via jextract FFM (see {@code Tuples.swift} in the sample library).
  */
 public class FFMTupleTest {
 
@@ -29,21 +29,23 @@ public class FFMTupleTest {
     }
 
     @Test
-    void ffmTupleReturnPair_roundTrip() {
-        Tuple2<Integer, Long> result = MySwiftLibrary.ffmTupleReturnPair();
+    void returnIntPair_roundTrip() {
+        // snippet.tupleUsageJava
+        Tuple2<Integer, Long> result = MySwiftLibrary.returnIntPair();
         assertEquals(42, result.$0);
         assertEquals(43L, result.$1);
+        // snippet.end
     }
 
     @Test
-    void ffmTupleSumPair_acceptsTupleFromJava() {
-        long sum = MySwiftLibrary.ffmTupleSumPair(new Tuple2<>(5, 7L));
+    void sumIntPair_acceptsTupleFromJava() {
+        long sum = MySwiftLibrary.sumIntPair(new Tuple2<>(5, 7L));
         assertEquals(12L, sum);
     }
 
     @Test
-    void ffmTupleLabeledPair_preservesElementOrder() {
-        Tuple2<Integer, Integer> result = MySwiftLibrary.ffmTupleLabeledPair();
+    void labeledTuple_preservesElementOrder() {
+        Tuple2<Integer, Integer> result = MySwiftLibrary.labeledTuple();
         assertEquals(10, result.$0);
         assertEquals(20, result.$1);
     }

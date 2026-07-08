@@ -12,10 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.returnProtocolDefinition
 public protocol Greeter {
   func greeting() -> String
   func repeated(count: Int64) -> String
 }
+// snippet.end
 
 public struct EnglishGreeter: Greeter {
   public let name: String
@@ -49,6 +51,7 @@ public struct DanishGreeter: Greeter {
   }
 }
 
+// snippet.returnProtocolFunctions
 public func makeEnglishGreeter(name: String) -> any Greeter {
   EnglishGreeter(name: name)
 }
@@ -60,6 +63,7 @@ public func makeDanishGreeter(name: String) -> any Greeter {
 public func makeOpaqueGreeter(name: String) -> some Greeter {
   EnglishGreeter(name: name)
 }
+// snippet.end
 
 public func describeGreeter(_ greeter: any Greeter) -> String {
   greeter.greeting()

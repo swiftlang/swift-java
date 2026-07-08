@@ -50,6 +50,16 @@ public class MySwiftClassTest {
     }
 
     @Test
+    void test_MySwiftClass_sum() {
+        // snippet.classUsageJava
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            MySwiftClass c = MySwiftClass.init(20, 10, arena);
+            assertEquals(30, c.sum());
+        }
+        // snippet.end
+    }
+
+    @Test
     void test_MySwiftClass_makeIntMethod() {
         try(var arena = AllocatingSwiftArena.ofConfined()) {
             MySwiftClass o = MySwiftClass.init(12, 42, arena);
@@ -63,16 +73,16 @@ public class MySwiftClassTest {
         try(var arena = AllocatingSwiftArena.ofConfined()) {
             MySwiftClass o = MySwiftClass.init(12, 42, arena);
             var got = o.describe();
-            assertEquals("MySwiftClass(len: 12, cap: 42)", got);
+            assertEquals("MySwiftClass(x: 12, y: 42)", got);
         }
     }
 
     @Test
     @Disabled // TODO: Need var mangled names in interfaces
-    void test_MySwiftClass_property_len() {
+    void test_MySwiftClass_property_x() {
         try(var arena = AllocatingSwiftArena.ofConfined()) {
             MySwiftClass o = MySwiftClass.init(12, 42, arena);
-            var got = o.getLen();
+            var got = o.getX();
             assertEquals(12, got);
         }
     }

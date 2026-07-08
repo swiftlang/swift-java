@@ -29,7 +29,20 @@ import java.util.stream.IntStream;
 public class WithBufferTest {
 
     @Test
+    void test_sumOfBytes() {
+        // snippet.rawBufferUsageJava
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            byte[] input = new byte[] { 1, 2, 3, 4, 5 };
+            MemorySegment buffer = arena.allocateFrom(ValueLayout.JAVA_BYTE, input);
+
+            assertEquals(15, MySwiftLibrary.sumOfBytes(buffer));
+        }
+        // snippet.end
+    }
+
+    @Test
     void test_withBuffer() {
+        // snippet.withBufferUsageJava
         AtomicLong bufferSize = new AtomicLong();
         MySwiftLibrary.withBuffer((buf) -> {
             CallTraces.trace("withBuffer{$0.byteSize()}=" + buf.byteSize());
@@ -37,6 +50,7 @@ public class WithBufferTest {
         });
 
         assertEquals(124, bufferSize.get());
+        // snippet.end
     }
 
 }

@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.closureDefinition
 public func emptyClosure(closure: () -> Void) {
   closure()
 }
@@ -31,3 +32,4 @@ public func closureMultipleArguments(
 ) -> Int64 {
   closure(input1, input2)
 }
+// snippet.end

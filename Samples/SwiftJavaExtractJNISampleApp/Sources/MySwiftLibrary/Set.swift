@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.setDefinition
 public func makeStringSet() -> Set<String> {
   ["hello", "world"]
 }
@@ -25,6 +26,7 @@ public func insertIntoStringSet(set: Set<String>, element: String) -> Set<String
   copy.insert(element)
   return copy
 }
+// snippet.end
 
 public func makeIntegerSet() -> Set<Int32> {
   [1, 2, 3]

@@ -28,10 +28,12 @@ public class ThrowTest {
 
     @Test
     void throwStringActuallyThrows() {
+        // snippet.throwUsageJava
         Exception exception = assertThrows(Exception.class, () -> {
             MySwiftLibrary.throwString("");
         });
         assertNotNull(exception.getMessage());
         assertTrue(exception.getMessage().contains("swiftError"));
+        // snippet.end
     }
 }

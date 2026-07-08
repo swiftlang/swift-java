@@ -14,6 +14,7 @@
 
 import SwiftJava
 
+// snippet.rawBufferDefinition
 /// Sum all bytes in the buffer
 public func sumOfBytes(data: UnsafeRawBufferPointer) -> Int64 {
   var sum: Int64 = 0
@@ -27,3 +28,4 @@ public func sumOfBytes(data: UnsafeRawBufferPointer) -> Int64 {
 public func bufferCount(data: UnsafeRawBufferPointer) -> Int64 {
   Int64(data.count)
 }
+// snippet.end
