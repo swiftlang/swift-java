@@ -26,6 +26,7 @@ public class SwiftSetTest {
     @SuppressWarnings("SuspiciousMethodCalls")
     @Test
     void makeStringSet() {
+        // snippet.setUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             SwiftSet<String> set = MySwiftLibrary.makeStringSet(arena);
             assertEquals(2, set.size());
@@ -34,6 +35,7 @@ public class SwiftSetTest {
             assertFalse(set.contains("missing"));
             assertFalse(set.contains(99999L), "Java's Set accepts keys of different types");
         }
+        // snippet.end
     }
 
     @Test

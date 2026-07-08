@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GenericTypeTest {
     @Test
     void genericTypeValueRoundtrip() {
+        // snippet.genericTypeUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             MyID<String> stringId = MyIDs.makeStringID("Java", arena);
             assertEquals("Java", stringId.getDescription());
@@ -49,6 +50,7 @@ public class GenericTypeTest {
             assertEquals("Optional(\"Java\")", optionalStringId.getDescription());
             assertEquals("Java", MyIDs.takeOptionalStringValue(optionalStringId).get());
         }
+        // snippet.end
     }
 
     @Test

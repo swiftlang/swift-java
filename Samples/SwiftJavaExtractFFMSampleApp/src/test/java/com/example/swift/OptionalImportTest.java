@@ -25,11 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class OptionalImportTest {
     @Test
     void test_Optional_receive() {
+        // snippet.optionalUsageJava
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var origBytes = arena.allocateFrom("foobar");
             var data = Data.init(origBytes, origBytes.byteSize(), arena);
             assertEquals(0, MySwiftLibrary.globalReceiveOptional(OptionalLong.empty(), Optional.empty()));
             assertEquals(3, MySwiftLibrary.globalReceiveOptional(OptionalLong.of(12), Optional.of(data)));
         }
+        // snippet.end
     }
 }

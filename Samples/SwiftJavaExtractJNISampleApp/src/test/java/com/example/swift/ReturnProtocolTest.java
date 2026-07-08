@@ -23,10 +23,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ReturnProtocolTest {
     @Test
     void returnExistentialAndCallMethod() {
+        // snippet.returnProtocolUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             Greeter greeter = MySwiftLibrary.makeEnglishGreeter("World", arena);
             assertEquals("Hello, World!", greeter.greeting());
         }
+        // snippet.end
     }
 
     @Test

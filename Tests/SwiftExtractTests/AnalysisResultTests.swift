@@ -372,6 +372,31 @@ struct AnalysisResultSuite {
     #expect(result.extractedTypes["OnlyWhenImportable"] == nil)
   }
 
+  @Test func customOperator() throws {
+    var config = DefaultSwiftExtractConfiguration()
+    config.availableImportModules = ["MadeUpModule"]
+
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          struct Box {
+            static prefix func +++ (other: inout Box) -> Box {
+              return other
+            }
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium",
+      config: config
+    )
+
+    #expect(result.extractedTypes["AlwaysHere"] != nil)
+    #expect(result.extractedTypes["OnlyWhenImportable"] != nil)
+  }
+
   /// Adding the module to `availableImportModules` activates the
   /// `#if canImport(<module>)` clause so its declarations are extracted.
   @Test func availableImportModulesActivatesCanImportClause() throws {

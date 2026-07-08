@@ -25,11 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MySwiftStructTest {
     @Test
     void init() {
+        // snippet.structUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
             assertEquals(1337, s.getCapacity());
             assertEquals(42, s.getLen());
         }
+        // snippet.end
     }
 
     @Test

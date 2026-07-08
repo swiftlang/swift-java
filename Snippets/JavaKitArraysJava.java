@@ -1,0 +1,1 @@
+../Samples/JavaKitSampleApp/Sources/JavaKitExample/com/example/swift/HelloJavaKitArrays.java

@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.protocolDefinition
 public protocol ProtocolA {
   var constantA: Int64 { get }
   var mutable: Int64 { get set }
@@ -19,10 +20,13 @@ public protocol ProtocolA {
   func name() -> String
   func makeClass() -> MySwiftClass
 }
+// snippet.end
 
+// snippet.protocolUsage
 public func takeProtocol(_ proto1: any ProtocolA, _ proto2: some ProtocolA) -> Int64 {
   proto1.constantA + proto2.constantA
 }
+// snippet.end
 
 /// A struct conformer to `ProtocolA`, used to prove that
 /// setter dispatch through a returned existential box

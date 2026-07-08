@@ -24,11 +24,13 @@ struct ProbablyPrime: ParsableCommand {
   var certainty: Int32 = 10
 
   func run() throws {
+    // snippet.probablyPrime
     let bigInt = BigInteger(number)
     if bigInt.isProbablePrime(certainty) {
       print("\(number) is probably prime")
     } else {
       print("\(number) is definitely not prime")
     }
+    // snippet.end
   }
 }

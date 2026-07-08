@@ -34,18 +34,23 @@ which is a quick overview of all the features and approaches offered by SwiftJav
 
 ### Supported Features
 
-- <doc:SupportedFeatures>
-
+- <doc:FeaturesOverview>
+- <doc:FeaturesJextract>
+- <doc:FeaturesJavaKitMacros>
 
 ### Source Generation
 
 - <doc:SwiftJavaCommandLineTool>
+- <doc:SwiftJavaJextract>
+- <doc:SwiftJavaWrapJava>
 - <doc:SwiftPMPlugin>
+- <doc:SwiftJavaConfigFile>
 
-### Distribution
+### Troubleshooting and optimization
 
-- <doc:Distribution>
+- <doc:ReducingBinarySize>
 
 ### Android Support
 
 - <doc:Android>
+

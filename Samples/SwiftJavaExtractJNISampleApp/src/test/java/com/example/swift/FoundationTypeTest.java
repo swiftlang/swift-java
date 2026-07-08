@@ -75,6 +75,7 @@ public class FoundationTypeTest {
 
     @Test
     void echoURL() {
+        // snippet.foundationURLUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             var url = URL.init("http://example.com", arena);
             assertDoesNotThrow(() -> {
@@ -82,5 +83,6 @@ public class FoundationTypeTest {
                 assertEquals("http://example.com", unwrapped.getAbsoluteString());
             });
         }
+        // snippet.end
     }
 }

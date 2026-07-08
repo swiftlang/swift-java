@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.escapingClosureDefinition
 public class CallbackManager {
   private var callback: (() -> Void)?
   private var intCallback: ((Int64) -> Int64)?
@@ -38,6 +39,7 @@ public class CallbackManager {
     intCallback?(value)
   }
 }
+// snippet.end
 
 public class ClosureStore {
   private var closures: [() -> Void] = []
