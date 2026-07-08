@@ -3,6 +3,8 @@
 set -e
 set -x
 
+swift run generate-config-docs --check
+
 DEPENDENCY='.package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0")'
 
 if grep -q "$DEPENDENCY" Package.swift; then
