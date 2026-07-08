@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AlignmentEnumTest {
     @Test
     void rawValue() {
+        // snippet.rawRepresentableEnumUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             Optional<Alignment> invalid = Alignment.init("invalid", arena);
             assertFalse(invalid.isPresent());
@@ -38,5 +39,6 @@ public class AlignmentEnumTest {
             assertTrue(vertical.isPresent());
             assertEquals("vertical", vertical.get().getRawValue());
         }
+        // snippet.end
     }
 }

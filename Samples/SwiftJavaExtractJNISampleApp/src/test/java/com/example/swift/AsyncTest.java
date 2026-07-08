@@ -33,20 +33,25 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AsyncTest {
     @Test
     void asyncSum() throws Exception {
+        // snippet.asyncUsageJava
         Future<Long> future = MySwiftLibrary.asyncSum(10, 12);
 
         Long result = future.get();
         assertEquals(22, result);
+        // snippet.end
     }
 
     @Test
     void asyncSleep() throws Exception {
+        // snippet.asyncUsageJava
         Future<Void> future = MySwiftLibrary.asyncSleep();
         future.get();
+        // snippet.end
     }
 
     @Test
     void asyncCopy() throws Exception {
+        // snippet.asyncUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass obj = MySwiftClass.init(10, 5, arena);
             Future<MySwiftClass> future = MySwiftLibrary.asyncCopy(obj, arena);
@@ -56,6 +61,7 @@ public class AsyncTest {
             assertEquals(10, result.getX());
             assertEquals(5, result.getY());
         }
+        // snippet.end
     }
 
     @Test

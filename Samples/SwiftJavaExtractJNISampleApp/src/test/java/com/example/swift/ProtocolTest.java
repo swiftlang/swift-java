@@ -109,6 +109,7 @@ public class ProtocolTest {
 
     @Test
     void useStorage() {
+        // snippet.protocolUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             JavaStorage storage = new JavaStorage(null);
             MySwiftLibrary.saveWithStorage(StorageItem.init(10, arena), storage);
@@ -117,5 +118,6 @@ public class ProtocolTest {
             MySwiftLibrary.saveWithStorage(StorageItem.init(5, arena), storage);
             assertEquals(5, MySwiftLibrary.loadWithStorage(storage, arena).getValue());
         }
+        // snippet.end
     }
 }

@@ -19,6 +19,7 @@ enum SwiftWrappedError: Error {
   case message(String)
 }
 
+// snippet.implementation
 @JavaImplementation("com.example.swift.HelloSwift")
 extension HelloSwift: HelloSwiftNativeMethods {
   @JavaMethod
@@ -27,7 +28,9 @@ extension HelloSwift: HelloSwiftNativeMethods {
     let answer = self.sayHelloBack(i + j)
     print("Swift got back \(answer) from Java")
 
+    // snippet.staticFieldAccess
     print("We expect the above value to be the initial value, \(self.javaClass.initialValue)")
+    // snippet.end
 
     print("Updating Java field value to something different")
     self.value = 2.71828
@@ -35,12 +38,14 @@ extension HelloSwift: HelloSwiftNativeMethods {
     let newAnswer = self.sayHelloBack(17)
     print("Swift got back updated \(newAnswer) from Java")
 
+    // snippet.classDefinition
     let newHello = HelloSwift(environment: javaEnvironment)
     print("Swift created a new Java instance with the value \(newHello.value)")
 
     let name = newHello.name
     print("Hello to \(name)")
     newHello.greet("Swift 👋🏽 How's it going")
+    // snippet.end
 
     self.name = "a 🗑️-collected language"
     _ = self.sayHelloBack(42)
@@ -49,9 +54,12 @@ extension HelloSwift: HelloSwiftNativeMethods {
     let value = predicate.test(JavaInteger(3))
     print("Running a JavaPredicate from swift 3 < 10 = \(value)")
 
+    // snippet.arraysWrapper
     let strings = doublesToStrings([3.14159, 2.71828])
     print("Converting doubles to strings: \(strings)")
+    // snippet.end
 
+    // snippet.castPattern
     // Try downcasting
     if let helloSub = self.as(HelloSubclass.self) {
       print("Hello from the subclass!")
@@ -61,6 +69,7 @@ extension HelloSwift: HelloSwiftNativeMethods {
     } else {
       fatalError("Expected subclass here")
     }
+    // snippet.end
 
     // Check escaped name
     assert(self.`init`(42) == 42)
@@ -70,25 +79,34 @@ extension HelloSwift: HelloSwiftNativeMethods {
     assert(newHello.is(HelloSwift.self))
     assert(!newHello.is(HelloSubclass.self))
 
-    // Create a new instance.
+    // snippet.inheritance
+    // Create a new instance of the subclass; Swift mirrors the Java hierarchy.
     let helloSubFromSwift = HelloSubclass("Hello from Swift", environment: javaEnvironment)
     helloSubFromSwift.greetMe()
+    // snippet.end
 
+    // snippet.throwingMethods
     do {
       try throwMessage("I am an error")
     } catch {
       print("Caught Java error: \(error)")
     }
+    // snippet.end
 
-    // Make sure that the thread safe class is sendable
+    // snippet.sendableConformance
+    // Java classes annotated with @ThreadSafe surface as Sendable on the Swift side.
     let helper = ThreadSafeHelperClass(environment: javaEnvironment)
     let threadSafe: Sendable = helper
+    _ = threadSafe
+    // snippet.end
 
     checkOptionals(helper: helper)
 
     return i * j
   }
+  // snippet.end
 
+  // snippet.optionalsWrapper
   func checkOptionals(helper: ThreadSafeHelperClass) {
     let text: JavaString? = helper.textOptional
     let value: String? = helper.getValueOptional(Optional<JavaString>.none)
@@ -101,6 +119,7 @@ extension HelloSwift: HelloSwiftNativeMethods {
     print("Optional double function returned \(doubleOpt)")
     print("Optional long function returned \(longOpt)")
   }
+  // snippet.end
 
   @JavaMethod
   func throwMessageFromSwift(_ message: String) throws -> String {

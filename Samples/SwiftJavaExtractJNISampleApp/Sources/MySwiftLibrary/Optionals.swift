@@ -40,6 +40,7 @@ public func optionalInt(input: Int32?) -> Int32? {
   input
 }
 
+// snippet.optionalDefinition
 public func optionalLong(input: Int64?) -> Int64? {
   input
 }
@@ -67,6 +68,7 @@ public func optionalDate(input: Date?) -> Date? {
 public func optionalData(input: Data?) -> Data? {
   input
 }
+// snippet.end
 
 public func optionalJavaKitLong(input: JavaLong?) -> Int64? {
   if let input {

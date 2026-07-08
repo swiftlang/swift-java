@@ -36,6 +36,8 @@ public func makeUUID() -> UUID {
   UUID()
 }
 
+// snippet.foundationURLDefinition
 public func echoURL(_ url: URL) -> URL {
   url
 }
+// snippet.end

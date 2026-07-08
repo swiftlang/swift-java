@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.boxSpecialization
 public struct Box<Element>: Hashable {
   public var count: Int64
 
@@ -39,3 +40,4 @@ extension Box where Element == Fish {
 }
 
 public typealias FishBox = Box<Fish>
+// snippet.end

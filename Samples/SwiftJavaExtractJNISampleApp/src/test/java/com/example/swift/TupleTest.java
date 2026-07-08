@@ -28,9 +28,11 @@ import java.util.OptionalLong;
 public class TupleTest {
     @Test
     void returnPair() {
+        // snippet.tupleUsageJava
         Tuple2<Long, String> result = MySwiftLibrary.returnPair();
         assertEquals(42L, result.$0);
         assertEquals("hello", result.$1);
+        // snippet.end
     }
 
     @Test

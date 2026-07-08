@@ -51,11 +51,13 @@ public class MySwiftClassTest {
 
     @Test
     void test_MySwiftClass_makeIntMethod() {
+        // snippet.classUsageJava
         try(var arena = AllocatingSwiftArena.ofConfined()) {
             MySwiftClass o = MySwiftClass.init(12, 42, arena);
             var got = o.makeIntMethod();
             assertEquals(12, got);
         }
+        // snippet.end
     }
 
     @Test
