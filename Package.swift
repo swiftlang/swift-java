@@ -427,6 +427,23 @@ let package = Package(
       ]
     ),
 
+    // Dev-time tool: regenerates the "Supported configuration options" table in
+    // `Sources/SwiftJavaDocumentation/Documentation.docc/SwiftJavaConfigFile.md`
+    // straight from the doc comments on `Configuration.swift` and the enums it
+    // references, so the two never drift apart.
+    //
+    // Run manually via `swift run generate-config-docs`; CI validates freshness
+    // with `swift run generate-config-docs --check`.
+    .executableTarget(
+      name: "generate-config-docs",
+      dependencies: [
+        .product(name: "SwiftParser", package: "swift-syntax"),
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+      ],
+      path: "Sources/GenerateConfigDocs"
+    ),
+
     .plugin(
       name: "_StaticBuildConfigPlugin",
       capability: .buildTool(),
