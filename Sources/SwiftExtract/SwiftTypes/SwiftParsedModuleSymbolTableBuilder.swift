@@ -174,11 +174,37 @@ extension SwiftParsedModuleSymbolTableBuilder {
     parent: SwiftNominalTypeDeclaration
   ) {
     for member in node.members {
-      // Find any nested types within this nominal type and add them.
-      if let nominalMember = member.decl.asNominal {
-        self.handle(sourceFilePath: sourceFilePath, nominalTypeDecl: nominalMember, parent: parent)
-      } else if let typeAliasMember = member.decl.as(TypeAliasDeclSyntax.self) {
-        self.handle(sourceFilePath: sourceFilePath, typeAliasDecl: typeAliasMember, parent: parent)
+      self.handle(sourceFilePath: sourceFilePath, memberDecl: member.decl, parent: parent)
+    }
+  }
+
+  /// Add a nested type declaration to the symbol table.
+  package mutating func handle(
+    sourceFilePath: String,
+    memberDecl decl: DeclSyntax,
+    parent: SwiftNominalTypeDeclaration
+  ) {
+    if let nominalMember = decl.asNominal {
+      self.handle(sourceFilePath: sourceFilePath, nominalTypeDecl: nominalMember, parent: parent)
+    } else if let typeAliasMember = decl.as(TypeAliasDeclSyntax.self) {
+      self.handle(sourceFilePath: sourceFilePath, typeAliasDecl: typeAliasMember, parent: parent)
+    } else if let ifConfigNode = decl.as(IfConfigDeclSyntax.self) {
+      let (clause, _) = ifConfigNode.activeClause(in: buildConfig)
+      if let clause, let elements = clause.elements {
+        switch elements {
+        case .decls(let memberBlock):
+          for memberItem in memberBlock {
+            self.handle(sourceFilePath: sourceFilePath, memberDecl: memberItem.decl, parent: parent)
+          }
+        case .statements(let codeBlock):
+          for codeItem in codeBlock {
+            if let declNode = codeItem.item.as(DeclSyntax.self) {
+              self.handle(sourceFilePath: sourceFilePath, memberDecl: declNode, parent: parent)
+            }
+          }
+        default:
+          break
+        }
       }
     }
   }
