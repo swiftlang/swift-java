@@ -109,7 +109,6 @@ public class ReturnProtocolCastTest {
         }
     }
 
-    /** The downcast result is an independent, fully working Swift instance. */
     @Test
     void downcastResultIsAWorkingInstance() {
         try (var arena = SwiftArena.ofConfined()) {
