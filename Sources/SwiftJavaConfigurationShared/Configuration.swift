@@ -160,9 +160,9 @@ public struct Configuration: Codable {
   public var singleType: String?
 
   /// If set, JExtract (JNI mode) will write a linker version script to this
-  /// path, listing all generated JNI ``@_cdecl`` entry-point symbols as
+  /// path, listing all generated JNI `@_cdecl` entry-point symbols as
   /// global exports and hiding everything else with `local: *`. Pass this
-  /// file to the linker via ``-Xlinker --version-script=<path>`` to enable
+  /// file to the linker via `-Xlinker --version-script=<path>` to enable
   /// precise dead-code elimination of unused Swift code in the final shared
   /// library.
   public var linkerExportListOutput: String?
@@ -306,14 +306,44 @@ public struct Configuration: Codable {
   }
 
   /// The Java classes that should be translated to Swift. The keys are
-  /// canonical Java class names (e.g., java.util.Vector) and the values are
-  /// the corresponding Swift names (e.g., JavaVector).
+  /// canonical Java class names (e.g., java.util.ArrayList) and the values are
+  /// the corresponding Swift names (e.g., JavaArrayList).
+  ///
+  /// Example:
+  /// ```json
+  /// {
+  ///   "classes": {
+  ///     "java.util.ArrayList": "JavaArrayList",
+  ///     "java.util.HashMap": "JavaHashMap"
+  ///   }
+  /// }
+  /// ```
   public var classes: [String: String]? = [:]
 
-  // Compile for the specified Java SE release.
+  /// Compile for the specified Java SE release.
+  ///
+  /// `JavaVersion` is an integer identifying a Java SE release, in the same
+  /// shape as `javaSourceLevel`. Supported values:
+  ///
+  /// - `17`
+  /// - `18`
+  /// - `21`
+  /// - `22`
+  /// - `24`
+  /// - `25`
   public var sourceCompatibility: JavaVersion?
 
-  // Generate class files suitable for the specified Java SE release.
+  /// Generate class files suitable for the specified Java SE release.
+  ///
+  /// `JavaVersion` is an integer identifying a Java SE release, in the same
+  /// shape as `javaSourceLevel`. Supported values:
+  ///
+  /// - `17`
+  /// - `18`
+  /// - `21`
+  /// - `22`
+  /// - `24`
+  /// - `25`
   public var targetCompatibility: JavaVersion?
 
   /// Filter input Java types by their package prefix if set

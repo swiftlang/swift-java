@@ -1,6 +1,10 @@
 # Android
 
-## R8/Proguard Rules
+Hints and patterns for using swift-java on Android.
+
+## Overview
+
+### R8/Proguard Rules
 
 Since swift-java uses JNI and reflection APIs, we must tell the R8 optimizer to ignore our wrapped types,
 otherwise we will run into runtime crashes, because types are stripped from the APK/AAR.
@@ -16,7 +20,7 @@ For example, if your library is named is `org.swift.exampleapp`, then add the fo
 -keep interface org.swift.exampleapp.** { *; }
 ```
 
-## Android Core Library Desugaring
+### Android Core Library Desugaring
 
 If you are using [Core Library Desugaring](https://developer.android.com/studio/write/java8-support) in your
 Android project, you must enable the `AndroidCoreLibraryDesugaring` trait to ensure that the SwiftJava wrappers

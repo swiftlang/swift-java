@@ -2,6 +2,12 @@
 
 Orientation guide for choosing the right swift-java tool for your interop task.
 
+## Overview
+
+swift-java has two directions of interop, each with a preferred entry point.
+Start here to figure out which tool matches your task, then follow the links
+to the per-tool documentation.
+
 ### Which mode should I use?
 
 #### Calling Swift from Java

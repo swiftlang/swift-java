@@ -17,7 +17,7 @@ directly — see <doc:FeaturesJavaKitMacros>.
 
 For the full feature matrix, see <doc:FeaturesOverview>.
 
-## Workflow
+### Workflow
 
 The typical pipeline has three steps, though the SwiftPM plugin can drive all
 of them for you.
@@ -62,7 +62,7 @@ swift-java wrap-java \
   Sources/JavaSieve/swift-java.config
 ```
 
-## The SwiftPM plugin
+### The SwiftPM plugin
 
 Most projects do **not** invoke the CLI directly. The `SwiftJavaPlugin`
 build-tool plugin (see `Plugins/SwiftJavaPlugin/SwiftJavaPlugin.swift`)
@@ -83,7 +83,7 @@ Wire it up in your `Package.swift`:
 
 See <doc:SwiftPMPlugin> for the plugin's full contract.
 
-## `swift-java.config` schema (wrap-java fields)
+### `swift-java.config` schema (wrap-java fields)
 
 The full schema lives in
 `Sources/SwiftJavaConfigurationShared/Configuration.swift`. The fields
@@ -101,7 +101,7 @@ that matter for `wrap-java` are:
 
 The config file is JSON5, so `//` and `/* */` comments are permitted.
 
-## CLI flags
+### CLI flags
 
 `swift-java wrap-java --help` (from
 `Sources/SwiftJavaTool/Commands/WrapJavaCommand.swift`) exposes:
@@ -120,7 +120,7 @@ The config file is JSON5, so `//` and `/* */` comments are permitted.
 | `-o <path>` / `--output-directory <path>`       | (Inherited) Output directory.                                                               |
 | `-l <level>` / `--log-level <level>`            | (Inherited) `trace`, `debug`, `info`, `notice`, `warning`, `error`, `critical`.             |
 
-## Walkthrough: wrapping a JDK class
+### Walkthrough: wrapping a JDK class
 
 The simplest possible sample: wrap `java.math.BigInteger` and use it to test
 primality. See `Samples/JavaProbablyPrime/`.
@@ -134,7 +134,7 @@ primality. See `Samples/JavaProbablyPrime/`.
    }
 }
 
-## Walkthrough: wrapping an external JAR
+### Walkthrough: wrapping an external JAR
 
 `Samples/JavaSieve/` wraps a third-party Java library (a quadratic-sieve
 prime finder) plus `java.math.RoundingMode` for enum-constant access. The
@@ -149,7 +149,7 @@ config lists both the classpath and the target classes.
    }
 }
 
-## Walkthrough: Maven dependency
+### Walkthrough: Maven dependency
 
 `Samples/JavaDependencySampleApp/` wraps `org.apache.commons:commons-csv`
 straight from Maven Central. The config here can be near-empty because
@@ -164,7 +164,7 @@ straight from Maven Central. The config here can be near-empty because
    }
 }
 
-## Feature matrix
+### Feature matrix
 
 Legend: ✅ supported, ❌ not supported, 🟡 partial / work-in-progress.
 
@@ -187,7 +187,7 @@ Legend: ✅ supported, ❌ not supported, 🟡 partial / work-in-progress.
 | JAR-only workflow (`swift-java configure --jar` -> `wrap-java`)                  | ✅       |
 | SwiftPM plugin auto-invocation                                                   | ✅       |
 
-## See also
+### See also
 
 - <doc:FeaturesJavaKitMacros> — the underlying macro surface that `wrap-java` generates.
 - <doc:SwiftJavaCommandLineTool> — full reference for the `swift-java` CLI (all subcommands).

@@ -2,6 +2,13 @@
 
 SwiftJava tools can be configured using the `swift-java.config` file.
 
+## Overview
+
+The `swift-java.config` file lives alongside each target that needs
+swift-java code generation. It selects tool modes, sets output paths,
+and controls per-mode filters. Below: the file layout, then the full
+list of supported keys.
+
 ### The swift-java.config file
 
 You can refer to the `SwiftJavaConfigurationShared/Configuration` struct to learn about the supported options.
@@ -13,7 +20,7 @@ please refer to the options documentation for details on their behavior.
 
 The configuration is a JSON 5 file, which among other things allows `//` and `/* */` comments, so feel free to add line comments explaining rationale for some of the settings in your configuration.
 
-## Supported configuration options
+### Supported configuration options
 
 <!--   DO NOT EDIT TEXT INSIDE THE SWIFT_JAVA_CONFIG_DOCS BLOCK     -->
 <!--   Use the ./scripts/generate-config-docs.py to re-generate     -->
@@ -231,9 +238,9 @@ If set, only generate bindings for this single Swift type name
 - **Type:** `String?`
 
 If set, JExtract (JNI mode) will write a linker version script to this
-path, listing all generated JNI ``@_cdecl`` entry-point symbols as
+path, listing all generated JNI `@_cdecl` entry-point symbols as
 global exports and hiding everything else with `local: *`. Pass this
-file to the linker via ``-Xlinker --version-script=<path>`` to enable
+file to the linker via `-Xlinker --version-script=<path>` to enable
 precise dead-code elimination of unused Swift code in the final shared
 library.
 
@@ -413,8 +420,18 @@ The Java class path that should be passed along to the swift-java tool.
 - **Default:** empty dictionary (`[:]`)
 
 The Java classes that should be translated to Swift. The keys are
-canonical Java class names (e.g., java.util.Vector) and the values are
-the corresponding Swift names (e.g., JavaVector).
+canonical Java class names (e.g., java.util.ArrayList) and the values are
+the corresponding Swift names (e.g., JavaArrayList).
+
+Example:
+```json
+{
+  "classes": {
+    "java.util.ArrayList": "JavaArrayList",
+    "java.util.HashMap": "JavaHashMap"
+  }
+}
+```
 
 ---
 
@@ -424,6 +441,16 @@ the corresponding Swift names (e.g., JavaVector).
 
 Compile for the specified Java SE release.
 
+`JavaVersion` is an integer identifying a Java SE release, in the same
+shape as `javaSourceLevel`. Supported values:
+
+- `17`
+- `18`
+- `21`
+- `22`
+- `24`
+- `25`
+
 ---
 
 #### targetCompatibility
@@ -431,6 +458,16 @@ Compile for the specified Java SE release.
 - **Type:** `JavaVersion?`
 
 Generate class files suitable for the specified Java SE release.
+
+`JavaVersion` is an integer identifying a Java SE release, in the same
+shape as `javaSourceLevel`. Supported values:
+
+- `17`
+- `18`
+- `21`
+- `22`
+- `24`
+- `25`
 
 ---
 

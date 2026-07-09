@@ -2,6 +2,13 @@
 
 When using the `jextract` tool to wrap your Swift APIs as a Java library, several compiler and linker options can substantially reduce the final binary size by stripping dead code that would otherwise be retained.
 
+## Overview
+
+The compiler and linker options below trim the shipped library by stripping
+Swift symbols that JNI never calls, then dead-stripping the resulting
+unreachable code. Applied together, they can significantly reduce the final
+`.so`/`.dylib` size compared to a default release build.
+
 ### Requirements
 
 Full binary-size optimization requires **Swift 6.3 or later**. Swift 6.3 introduced the `@used` attribute, which `JExtractSwiftPlugin` attaches to every generated JNI entry point so the compiler cannot eliminate them before the linker has a chance to see them.
