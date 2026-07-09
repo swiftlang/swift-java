@@ -255,6 +255,17 @@ extension FFMSwift2JavaGenerator {
       }
 
       printFunctionDescriptorDefinition(&printer, cResultType, cParams)
+      if cParameterTypes.isEmpty && cResultType.isVoid {
+        printer.print(
+          """
+          private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Runnable.class, "run", DESC);
+          private static MemorySegment toUpcallStub(Runnable fi, Arena arena) {
+            return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
+          }
+          """
+        )
+        return
+      }
       printer.print(
         """
         private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
@@ -296,6 +307,16 @@ extension FFMSwift2JavaGenerator {
   ) {
     let cdeclDescriptor = "\(bindingDescriptorName).$\(functionType.name)"
     if functionType.isCompatibleWithC {
+      if !functionType.swiftType.isEscaping && functionType.parameters.isEmpty && functionType.swiftType.resultType.isVoid {
+        printer.print(
+          """
+          private static MemorySegment $toUpcallStub(java.lang.Runnable fi, Arena arena) {
+            return \(bindingDescriptorName).$\(functionType.name).toUpcallStub(fi, arena);
+          }
+          """
+        )
+        return
+      }
       // If the user-facing functional interface is C ABI compatible, just extend
       // the lowered function pointer parameter interface.
       printer.print(

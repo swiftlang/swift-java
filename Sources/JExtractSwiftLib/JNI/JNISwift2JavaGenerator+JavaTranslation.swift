@@ -516,17 +516,14 @@ extension JNISwift2JavaGenerator {
           conversion: .placeholder,
         )
 
-      case .function:
-        return TranslatedParameter(
-          parameter: JavaParameter(
-            name: parameterName,
-            type: .class(
-              package: javaPackage,
-              name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
-            ),
-            annotations: parameterAnnotations,
-          ),
-          conversion: .placeholder,
+      case .function(let functionType):
+        return translateFunctionParameter(
+          swiftType: swiftType,
+          functionType: functionType,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName,
+          parameterAnnotations: parameterAnnotations
         )
 
       case .opaque(let proto), .existential(let proto):
@@ -697,6 +694,52 @@ extension JNISwift2JavaGenerator {
       )
       nativeFunctionSignature.result.javaType = .void
       nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
+    }
+
+    func extractKnownJavaFunctionalInterfaceType(
+      swiftType: SwiftType,
+      functionType: SwiftFunctionType,
+      parameterName: String,
+      parameterAnnotations: [JavaAnnotation]
+    ) -> TranslatedParameter? {
+      if !functionType.isEscaping && functionType.parameters.isEmpty && functionType.resultType.isVoid {
+        return TranslatedParameter(
+          parameter: JavaParameter(
+            name: parameterName,
+            type: JavaType.javaLangRunnable,
+            annotations: parameterAnnotations,
+          ),
+          conversion: .placeholder,
+        )
+      }
+      return nil
+    }
+
+    func translateFunctionParameter(
+      swiftType: SwiftType,
+      functionType: SwiftFunctionType,
+      parameterName: String,
+      methodName: String,
+      parentName: SwiftQualifiedTypeName,
+      parameterAnnotations: [JavaAnnotation]
+    ) -> TranslatedParameter {
+      extractKnownJavaFunctionalInterfaceType(
+        swiftType: swiftType,
+        functionType: functionType,
+        parameterName: parameterName,
+        parameterAnnotations: parameterAnnotations
+      )
+        ?? TranslatedParameter(
+          parameter: JavaParameter(
+            name: parameterName,
+            type: .class(
+              package: javaPackage,
+              name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
+            ),
+            annotations: parameterAnnotations,
+          ),
+          conversion: .placeholder,
+        )
     }
 
     func translateProtocolParameter(

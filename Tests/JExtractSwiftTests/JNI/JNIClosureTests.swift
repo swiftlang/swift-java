@@ -46,12 +46,12 @@ struct JNIClosureTests {
          * public func emptyClosure(closure: () -> ())
          * }
          */
-        public static void emptyClosure(com.example.swift.SwiftModule.emptyClosure.closure closure) {
+        public static void emptyClosure(java.lang.Runnable closure) {
           SwiftModule.$emptyClosure(closure);
         }
         """,
         """
-        private static native void $emptyClosure(com.example.swift.SwiftModule.emptyClosure.closure closure);
+        private static native void $emptyClosure(java.lang.Runnable closure);
         """,
       ]
     )
@@ -66,11 +66,11 @@ struct JNIClosureTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024emptyClosure__Lcom_example_swift_SwiftModule_00024emptyClosure_00024closure_2")
-        public func Java_com_example_swift_SwiftModule__00024emptyClosure__Lcom_example_swift_SwiftModule_00024emptyClosure_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024emptyClosure__Ljava_lang_Runnable_2")
+        public func Java_com_example_swift_SwiftModule__00024emptyClosure__Ljava_lang_Runnable_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
           SwiftModule.emptyClosure(closure: {
             let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "()V")!
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "run", "()V")!
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = []
             environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
