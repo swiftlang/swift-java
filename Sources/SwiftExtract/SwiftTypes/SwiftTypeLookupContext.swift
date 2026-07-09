@@ -212,6 +212,12 @@ public class SwiftTypeLookupContext {
         return
           (try typeDeclaration(for: parentDecl, sourceFilePath: "FIXME_NO_SOURCE_FILE.swift")
           as! SwiftNominalTypeDeclaration) // FIXME: need to get the source file of the parent
+      case .extensionDecl(let extensionNode):
+        if let extendedNominal = extendedNominal(of: extensionNode) {
+          return extendedNominal
+        }
+        node = parentDecl
+        continue
       default:
         node = parentDecl
         continue

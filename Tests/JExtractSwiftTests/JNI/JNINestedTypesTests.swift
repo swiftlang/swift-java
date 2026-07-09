@@ -102,6 +102,178 @@ struct JNINestedTypesTests {
     )
   }
 
+  @Test("Import: shadowed nested type name")
+  func shadowedNestedTypeName_java() throws {
+    // A nested type whose name shadows a type of the same name in an outer
+    // scope must resolve to the innermost declaration.
+    try assertOutput(
+      input: """
+        public struct Outer {
+          public enum Kind {
+            case alpha
+            case beta
+          }
+
+          public struct Inner {
+            public enum Kind {
+              case one
+              case two
+            }
+
+            public var kind: Kind // Outer.Inner.Kind
+          }
+
+          public var kind: Kind // Outer.Kind
+          public var inner: Inner
+        }
+        """,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        // The `Inner.kind` property must reference `Outer.Inner.Kind`, not `Outer.Kind`.
+        """
+        public Outer.Inner.Kind getKind(SwiftArena swiftArena) {
+          return Outer.Inner.Kind.wrapMemoryAddressUnsafe(Outer.Inner.$getKind(this.$memoryAddress()), swiftArena);
+        """,
+        """
+        public void setKind(Outer.Inner.Kind newValue) {
+          Outer.Inner.$setKind(newValue.$memoryAddress(), this.$memoryAddress());
+        """,
+        // The outer `kind` must reference `Outer.Kind`.
+        """
+        public Outer.Kind getKind(SwiftArena swiftArena) {
+          return Outer.Kind.wrapMemoryAddressUnsafe(Outer.$getKind(this.$memoryAddress()), swiftArena);
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: shadowed nested type name inside #if")
+  func shadowedNestedTypeName_ifConfig_java() throws {
+    try assertOutput(
+      input: """
+        public struct Outer {
+          #if SOME_FLAG
+          public enum Kind {
+            case alphaX
+          }
+          #else
+          public enum Kind {
+            case alpha
+            case beta
+          }
+          #endif
+
+          public struct Inner {
+            #if SOME_FLAG
+            public enum Kind {
+              case oneX
+            }
+            #else
+            public enum Kind {
+              case one
+              case two
+            }
+            #endif
+
+            public var kind: Kind // Outer.Inner.Kind
+          }
+
+          public var kind: Kind // Outer.Kind
+          public var inner: Inner
+        }
+        """,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public Outer.Inner.Kind getKind(SwiftArena swiftArena) {
+          return Outer.Inner.Kind.wrapMemoryAddressUnsafe(Outer.Inner.$getKind(this.$memoryAddress()), swiftArena);
+        """,
+        """
+        public void setKind(Outer.Inner.Kind newValue) {
+          Outer.Inner.$setKind(newValue.$memoryAddress(), this.$memoryAddress());
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: shadowed nested type name in deeper nesting")
+  func shadowedNestedTypeName_deep_java() throws {
+    try assertOutput(
+      input: """
+        public struct DiscordChannel {
+          public struct Kind {
+            public init() {}
+          }
+
+          public struct Message {
+            public struct MessageReference {
+              public struct Kind {
+                public init() {}
+              }
+              public var kind: Kind
+            }
+          }
+        }
+        """,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        // The `MessageReference.kind` property must reference the deeply nested
+        // `DiscordChannel.Message.MessageReference.Kind`, not `DiscordChannel.Kind`.
+        """
+        public DiscordChannel.Message.MessageReference.Kind getKind(SwiftArena swiftArena) {
+        """,
+        """
+        public void setKind(DiscordChannel.Message.MessageReference.Kind newValue) {
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: shadowed nested type name declared via extension")
+  func shadowedNestedTypeName_extension_java() throws {
+    try assertOutput(
+      input: """
+        public struct Outer {
+          public enum Kind {
+            case alpha
+            case beta
+          }
+        }
+
+        extension Outer {
+          public struct Inner {
+            public enum Kind {
+              case one
+              case two
+            }
+
+            public var kind: Kind // Outer.Inner.Kind
+          }
+        }
+        """,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        // The `Inner.kind` property must reference `Outer.Inner.Kind`, not `Outer.Kind`.
+        """
+        public Outer.Inner.Kind getKind(SwiftArena swiftArena) {
+          return Outer.Inner.Kind.wrapMemoryAddressUnsafe(Outer.Inner.$getKind(this.$memoryAddress()), swiftArena);
+        """,
+        """
+        public void setKind(Outer.Inner.Kind newValue) {
+          Outer.Inner.$setKind(newValue.$memoryAddress(), this.$memoryAddress());
+        """,
+      ]
+    )
+  }
+
   @Test("Import: nested in enum")
   func nestedEnums_java() throws {
     try assertOutput(
