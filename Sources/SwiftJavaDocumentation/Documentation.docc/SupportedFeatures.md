@@ -401,7 +401,7 @@ the generated box, and composite returns are not extracted.
 > Note: Downcasting returned protocol values is currently only supported in JNI mode.
 
 A value returned as `any P` / `some P` preserves its concrete dynamic type, so it can be
-recovered — the equivalent of Swift's `as?`. Every imported protocol `interface` therefore
+recovered; This is equivalent to Swift's `as?`, of a checked `instanceof` cast in Java. Every imported protocol `interface` therefore
 exposes an `as` method:
 
 ```java
@@ -409,8 +409,8 @@ exposes an `as` method:
 <T extends JNISwiftInstance> Optional<T> as(Class<T> type); // uses the default arena
 ```
 
-`type` must be a concrete jextracted type (a `class`, `struct`, or `enum` binding — the
-`JNISwiftInstance` bound enforces this at compile time). The cast succeeds only when the
+`type` must be a concrete jextracted type.
+The cast succeeds only when the
 value's dynamic Swift type is exactly that type, in which case you receive a fresh binding
 registered in the given arena; otherwise the result is `Optional.empty()`.
 
@@ -421,7 +421,6 @@ by a concrete `EnglishGreeter`:
 try (var arena = SwiftArena.ofConfined()) {
     Greeter greeter = MySwiftLibrary.makeEnglishGreeter("World", arena);
 
-    // Recover the concrete type — its `struct`-only members become available:
     Optional<EnglishGreeter> english = greeter.as(EnglishGreeter.class, arena);
     assertEquals("World", english.orElseThrow().getName());
 
@@ -430,9 +429,9 @@ try (var arena = SwiftArena.ofConfined()) {
 }
 ```
 
-The cast returns `Optional.empty()` — rather than throwing — whenever it cannot apply: when
+The cast returns an empty optional if the cast fails, which might happen when
 the dynamic type differs, when `type` is not a concrete jextracted type (e.g. a generic type
-or another protocol), or when the receiver is not backed by a wrapped Swift value.
+or another protocol).
 
 ### Swift closures
 

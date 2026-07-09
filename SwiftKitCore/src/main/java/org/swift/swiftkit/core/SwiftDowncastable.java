@@ -25,12 +25,12 @@ import java.util.Optional;
 public interface SwiftDowncastable {
 
     /**
-     * Swift {@code as?}: attempt to recover {@code type} — a non-generic concrete
-     * jextracted Swift type — from this value.
+     * Swift {@code as?}: attempt type-cast this instance to {@code T},
+     * which must be a non-generic concrete jextracted Swift wrapper type.
      *
-     * @return the recovered instance, or {@link Optional#empty()} if this value's
-     * dynamic type is not {@code type}, if this value is not backed by a Swift value
-     * (e.g. a Java-implemented conformer), or if {@code type} is not a concrete
+     * @return the type-casted instance, or {@link Optional#empty()} if this value's
+     * dynamic type is not {@code T}, if this value is not backed by a Swift value
+     * (e.g. a Java-implemented conformer), or if {@code T} is not a concrete
      * jextracted type.
      */
     default <T extends JNISwiftInstance> Optional<T> as(Class<T> type, SwiftArena arena) {
