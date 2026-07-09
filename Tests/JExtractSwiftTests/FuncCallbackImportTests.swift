@@ -100,8 +100,8 @@ final class FuncCallbackImportTests {
               void apply();
             }
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
-            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Runnable.class, "run", DESC);
-            private static MemorySegment toUpcallStub(Runnable fi, Arena arena) {
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.lang.Runnable.class, "run", DESC);
+            private static MemorySegment toUpcallStub(java.lang.Runnable fi, Arena arena) {
               return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
             }
           }
@@ -208,8 +208,8 @@ final class FuncCallbackImportTests {
               void apply();
             }
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
-            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Runnable.class, "run", DESC);
-            private static MemorySegment toUpcallStub(Runnable fi, Arena arena) {
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.lang.Runnable.class, "run", DESC);
+            private static MemorySegment toUpcallStub(java.lang.Runnable fi, Arena arena) {
               return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
             }
           }

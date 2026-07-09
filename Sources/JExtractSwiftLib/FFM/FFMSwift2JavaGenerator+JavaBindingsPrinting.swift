@@ -258,8 +258,8 @@ extension FFMSwift2JavaGenerator {
       if cParameterTypes.isEmpty && cResultType.isVoid {
         printer.print(
           """
-          private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Runnable.class, "run", DESC);
-          private static MemorySegment toUpcallStub(Runnable fi, Arena arena) {
+          private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.lang.Runnable.class, "run", DESC);
+          private static MemorySegment toUpcallStub(java.lang.Runnable fi, Arena arena) {
             return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
           }
           """
