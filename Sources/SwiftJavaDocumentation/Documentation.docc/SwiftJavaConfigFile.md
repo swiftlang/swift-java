@@ -413,8 +413,18 @@ The Java class path that should be passed along to the swift-java tool.
 - **Default:** empty dictionary (`[:]`)
 
 The Java classes that should be translated to Swift. The keys are
-canonical Java class names (e.g., java.util.Vector) and the values are
-the corresponding Swift names (e.g., JavaVector).
+canonical Java class names (e.g., java.util.ArrayList) and the values are
+the corresponding Swift names (e.g., JavaArrayList).
+
+Example:
+```json
+{
+  "classes": {
+    "java.util.ArrayList": "JavaArrayList",
+    "java.util.HashMap": "JavaHashMap"
+  }
+}
+```
 
 ---
 

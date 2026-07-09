@@ -22,7 +22,7 @@ public enum JavaSourceLevel: Int, Comparable, Sendable {
   case jdk21 = 21
   case jdk22 = 22
   case jdk24 = 24
-  case jdk24 = 25
+  case jdk25 = 25
 
   public static var `default`: Self { .jdk22 }
 

@@ -306,14 +306,44 @@ public struct Configuration: Codable {
   }
 
   /// The Java classes that should be translated to Swift. The keys are
-  /// canonical Java class names (e.g., java.util.Vector) and the values are
-  /// the corresponding Swift names (e.g., JavaVector).
+  /// canonical Java class names (e.g., java.util.ArrayList) and the values are
+  /// the corresponding Swift names (e.g., JavaArrayList).
+  ///
+  /// Example:
+  /// ```json
+  /// {
+  ///   "classes": {
+  ///     "java.util.ArrayList": "JavaArrayList",
+  ///     "java.util.HashMap": "JavaHashMap"
+  ///   }
+  /// }
+  /// ```
   public var classes: [String: String]? = [:]
 
-  // Compile for the specified Java SE release.
+  /// Compile for the specified Java SE release.
+  ///
+  /// `JavaVersion` is an integer identifying a Java SE release, in the same
+  /// shape as ``JavaSourceLevel``. Supported values:
+  ///
+  /// - `17`
+  /// - `18`
+  /// - `21`
+  /// - `22`
+  /// - `24`
+  /// - `25`
   public var sourceCompatibility: JavaVersion?
 
-  // Generate class files suitable for the specified Java SE release.
+  /// Generate class files suitable for the specified Java SE release.
+  ///
+  /// `JavaVersion` is an integer identifying a Java SE release, in the same
+  /// shape as ``JavaSourceLevel``. Supported values:
+  ///
+  /// - `17`
+  /// - `18`
+  /// - `21`
+  /// - `22`
+  /// - `24`
+  /// - `25`
   public var targetCompatibility: JavaVersion?
 
   /// Filter input Java types by their package prefix if set
