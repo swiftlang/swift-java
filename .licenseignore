@@ -52,3 +52,4 @@ Samples/JavaDependencySampleApp/gradle
 Sources/_Subprocess/**
 Sources/_SubprocessCShims/**
 Samples/gradle
+SwiftKitCore/src/main/resources/META-INF/proguard/consumer-proguard-rules.pro
