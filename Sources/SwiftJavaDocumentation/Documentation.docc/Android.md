@@ -1,4 +1,20 @@
-# Android 
+# Android
+
+## R8/Proguard Rules
+
+Since swift-java uses JNI and reflection APIs, we must tell the R8 optimizer to ignore our wrapped types,
+otherwise we will run into runtime crashes, because types are stripped from the APK/AAR.
+
+The `SwiftKit` Java library already contains a [Proguard consumer file](https://developer.anbdroid.com/topic/performance/app-optimization/library-optimization),
+which is automatically detected by R8, so any `org.swift.swiftkit` types are already ignored.
+However, you must still provide rules for your own types.
+
+For example, if your library is named is `org.swift.exampleapp`, then add the following rules to your proguard file:
+
+```
+-keep class org.swift.exampleapp.** { *; }
+-keep interface org.swift.exampleapp.** { *; }
+```
 
 ## Android Core Library Desugaring
 
