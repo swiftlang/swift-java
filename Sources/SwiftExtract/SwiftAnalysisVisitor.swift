@@ -38,6 +38,15 @@ final class SwiftAnalysisVisitor {
   }
   private var deferredConstrainedExtensions: [DeferredConstrainedExtension] = []
 
+  private static func isOperatorFunction(_ node: FunctionDeclSyntax) -> Bool {
+    switch node.name.tokenKind {
+    case .binaryOperator, .prefixOperator, .postfixOperator:
+      return true
+    default:
+      return false
+    }
+  }
+
   func visit(inputFile: SwiftInputFile) {
     let node = inputFile.syntax
     for codeItem in node.statements {
@@ -201,11 +210,18 @@ final class SwiftAnalysisVisitor {
       return
     }
 
+    let apiKind: SwiftAPIKind =
+      if typeContext != nil && Self.isOperatorFunction(node) {
+        .operator
+      } else {
+        .function
+      }
+
     let extracted = ExtractedFunc(
       module: analyzer.swiftModuleName,
       swiftDecl: node,
       name: node.name.text.unescapedSwiftName,
-      apiKind: .function,
+      apiKind: apiKind,
       functionSignature: signature,
     )
 

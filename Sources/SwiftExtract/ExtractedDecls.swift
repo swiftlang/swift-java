@@ -25,6 +25,7 @@ public enum SwiftAPIKind: Equatable {
   case enumCase
   case subscriptGetter
   case subscriptSetter
+  case `operator`
 }
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
@@ -343,6 +344,7 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
       case .function, .initializer: ""
       case .subscriptGetter: "subscriptGetter:"
       case .subscriptSetter: "subscriptSetter:"
+      case .operator: "operator:"
       }
 
     let context =

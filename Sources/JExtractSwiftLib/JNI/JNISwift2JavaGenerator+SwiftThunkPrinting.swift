@@ -627,7 +627,7 @@ extension JNISwift2JavaGenerator {
     // Build the result
     let result: String
     switch decl.apiKind {
-    case .function, .initializer:
+    case .function, .initializer, .`operator`:
       let downcallArguments = zip(
         decl.functionSignature.parameters,
         arguments,

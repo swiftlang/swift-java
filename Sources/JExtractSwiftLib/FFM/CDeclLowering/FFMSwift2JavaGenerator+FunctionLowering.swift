@@ -1030,7 +1030,7 @@ extension LoweredFunctionSignature {
     // Build the result.
     let resultExpr: ExprSyntax
     switch apiKind {
-    case .function, .initializer:
+    case .function, .initializer, .`operator`:
       let arguments = paramExprs.enumerated()
         .map { (i, argument) -> String in
           let argExpr = original.parameters[i].convention == .inout ? "&\(argument)" : argument

@@ -175,6 +175,169 @@ struct AnalysisResultSuite {
   }
 
   // ==== -----------------------------------------------------------------------
+  // MARK: Operators
+
+  @Test func operatortest() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct Score {
+              public var value: Int
+
+              public static func + (left: Score, right: Score) -> Score {
+                Score(value: left.value + right.value)
+              }
+
+              public static func - (left: Score, right: Score) -> Score {
+                Score(value: left.value - right.value)
+              }
+
+              public static func * (left: Score, right: Score) -> Score {
+                Score(value: left.value * right.value)
+              }
+
+              public static func / (left: Score, right: Score) -> Score {
+                Score(value: left.value / right.value)
+              }
+
+              public static func % (left: Score, right: Score) -> Score {
+                Score(value: left.value % right.value)
+              }
+
+              public static func << (left: Score, right: Int) -> Score {
+                Score(value: left.value << right)
+              }
+
+              public static func >> (left: Score, right: Int) -> Score {
+                Score(value: left.value >> right)
+              }
+
+              public static func | (left: Score, right: Score) -> Score {
+                Score(value: left.value | right.value)
+              }
+
+              public static prefix func ~ (score: Score) -> Score {
+                Score(value: ~score.value)
+              }
+
+              public static prefix func - (score: Score) -> Score {
+                Score(value: -score.value)
+              }
+
+              public static func == (left: Score, right: Score) -> Bool {
+                left.value == right.value
+              }
+
+              public static func != (left: Score, right: Score) -> Bool {
+                left.value != right.value
+              }
+
+              public static func < (left: Score, right: Score) -> Bool {
+                left.value < right.value
+              }
+
+              public static func <= (left: Score, right: Score) -> Bool {
+                left.value <= right.value
+              }
+
+              public static func > (left: Score, right: Score) -> Bool {
+                left.value > right.value
+              }
+
+              public static func >= (left: Score, right: Score) -> Bool {
+                left.value >= right.value
+              }
+
+              public static func & (left: Score, right: Score) -> Score {
+                Score(value: left.value & right.value)
+              }
+
+              public static func ^ (left: Score, right: Score) -> Score {
+                Score(value: left.value ^ right.value)
+              }
+
+              public static func ?? (left: Score?, right: Score) -> Score {
+                left ?? right
+              }
+
+              public static prefix func ! (score: Score) -> Bool {
+                score.value == 0
+              }
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium",
+    )
+
+    let score = try #require(result.extractedTypes["Score"])
+    let plusOperator = try #require(score.methods.first { $0.name == "+" })
+    let minusOperator = try #require(score.methods.first { $0.name == "-" })
+    let timesOperator = try #require(score.methods.first { $0.name == "*" })
+    let dividedByOperator = try #require(score.methods.first { $0.name == "/" })
+    let remainderOperator = try #require(score.methods.first { $0.name == "%" })
+    let shiftedLeftOperator = try #require(score.methods.first { $0.name == "<<" })
+    let shiftedRightOperator = try #require(score.methods.first { $0.name == ">>" })
+    let bitwiseOrOperator = try #require(score.methods.first { $0.name == "|" })
+    let bitwiseNotOperator = try #require(score.methods.first { $0.name == "~" })
+    let negatedOperator = try #require(score.methods.first { $0.name == "-"})
+    let isEqualOperator = try #require(score.methods.first { $0.name == "==" })
+    let isNotEqualOperator = try #require(score.methods.first { $0.name == "!=" })
+    let lessThanOperator = try #require(score.methods.first { $0.name == "<" })
+    let lessThanOrEqualOperator = try #require(score.methods.first { $0.name == "<=" })
+    let greaterThanOperator = try #require(score.methods.first { $0.name == ">" })
+    let greaterThanOrEqualOperator = try #require(score.methods.first { $0.name == ">=" })
+    let bitwiseAndOperator = try #require(score.methods.first { $0.name == "&" })
+    let bitwiseXorOperator = try #require(score.methods.first { $0.name == "^" })
+    let coalescingNilOperator = try #require(score.methods.first { $0.name == "??" })
+    let logicalNotOperator = try #require(score.methods.first { $0.name == "!" })
+
+
+    #expect(plusOperator.name == "+")
+    #expect(plusOperator.apiKind == .operator)
+    #expect(minusOperator.name == "-")
+    #expect(minusOperator.apiKind == .operator)
+    #expect(timesOperator.name == "*")
+    #expect(timesOperator.apiKind == .operator)
+    #expect(dividedByOperator.name == "/")
+    #expect(dividedByOperator.apiKind == .operator)
+    #expect(remainderOperator.name == "%")
+    #expect(remainderOperator.apiKind == .operator)
+    #expect(shiftedLeftOperator.name == "<<")
+    #expect(shiftedLeftOperator.apiKind == .operator)
+    #expect(shiftedRightOperator.name == ">>")
+    #expect(shiftedRightOperator.apiKind == .operator)
+    #expect(bitwiseOrOperator.name == "|")
+    #expect(bitwiseOrOperator.apiKind == .operator)
+    #expect(bitwiseNotOperator.name == "~")
+    #expect(bitwiseNotOperator.apiKind == .operator)
+    #expect(negatedOperator.name == "-")
+    #expect(negatedOperator.apiKind == .operator)
+    #expect(isEqualOperator.name == "==")
+    #expect(isEqualOperator.apiKind == .operator)
+    #expect(isNotEqualOperator.name == "!=")
+    #expect(isNotEqualOperator.apiKind == .operator)
+    #expect(lessThanOperator.name == "<")
+    #expect(lessThanOperator.apiKind == .operator)
+    #expect(lessThanOrEqualOperator.name == "<=")
+    #expect(lessThanOrEqualOperator.apiKind == .operator)
+    #expect(greaterThanOperator.name == ">")
+    #expect(greaterThanOperator.apiKind == .operator)
+    #expect(greaterThanOrEqualOperator.name == ">=")
+    #expect(greaterThanOrEqualOperator.apiKind == .operator)
+    #expect(bitwiseAndOperator.name == "&")
+    #expect(bitwiseAndOperator.apiKind == .operator)
+    #expect(bitwiseXorOperator.name == "^")
+    #expect(bitwiseXorOperator.apiKind == .operator)
+    #expect(coalescingNilOperator.name == "??")
+    #expect(coalescingNilOperator.apiKind == .operator)
+    #expect(logicalNotOperator.name == "!")
+    #expect(logicalNotOperator.apiKind == .operator)
+  }
+
+  // ==== -----------------------------------------------------------------------
   // MARK: Effect specifiers (throws / async)
 
   @Test func effectSpecifiersAreCapturedOnFunctionSignatures() throws {
