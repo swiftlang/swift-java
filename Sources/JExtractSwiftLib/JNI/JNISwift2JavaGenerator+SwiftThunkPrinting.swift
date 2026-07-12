@@ -627,7 +627,7 @@ extension JNISwift2JavaGenerator {
     // Build the result
     let result: String
     switch decl.apiKind {
-    case .function, .initializer, .`operator`:
+    case .function, .initializer:
       let downcallArguments = zip(
         decl.functionSignature.parameters,
         arguments,
@@ -637,6 +637,16 @@ extension JNISwift2JavaGenerator {
       }
       .joined(separator: ", ")
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
+    case .`operator`:
+          let downcallArguments: String = zip(
+        decl.functionSignature.parameters,
+        arguments,
+      ).map { originalParam, argument in
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
+        return "\(label)\(argument)"
+      }
+      .joined(separator: ", ")
+      result = "\(tryClause)\(callee).\(translatedDecl.name)(\(downcallArguments))"
 
     case .enumCase:
       let downcallArguments = zip(
