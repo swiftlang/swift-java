@@ -68,7 +68,8 @@ package struct JavaIdentifierFactory {
       switch decl.apiKind {
       case .getter, .subscriptGetter: decl.javaGetterName!
       case .setter, .subscriptSetter: decl.javaSetterName!
-      case .function, .initializer, .enumCase, .`operator`: decl.name
+      case .function, .initializer, .enumCase: decl.name
+      case .operator: Self.javaOperatorName(decl.name)
       }
     var methodName = baseName + paramsSuffix(decl, baseName: baseName)
     if Self.javaKeywords.contains(methodName) {
@@ -93,6 +94,42 @@ package struct JavaIdentifierFactory {
       return labels.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined()
     }
   }
+
+  private static func javaOperatorName(_ swiftName: String) -> String {
+    if let knownName = knownOperatorNames[swiftName] {
+      return knownName
+    }
+
+    return swiftName.enumerated()
+      .map { index, character in
+        let name = knownOperatorNames[String(character)] ?? "operator"
+        return index == 0 ? name : name.firstCharacterUppercased
+      }
+      .joined()
+  }
+
+  private static let knownOperatorNames: [String: String] = [
+    "+": "plus",
+    "-": "minus",
+    "*": "times",
+    "/": "dividedBy",
+    "%": "remainder",
+    "<<": "shiftedLeft",
+    ">>": "shiftedRight",
+    "|": "bitwiseOr",
+    "~": "bitwiseNot",
+    "==": "isEqual",
+    "!=": "isNotEqual",
+    "<": "lessThan",
+    "<=": "lessThanOrEqual",
+    ">": "greaterThan",
+    ">=": "greaterThanOrEqual",
+    "&": "bitwiseAnd",
+    "^": "bitwiseXor",
+    "??": "coalescingNil",
+    "!": "logicalNot",
+    "=": "equal",
+  ]
 
   static let javaKeywords: Set<String> = [
     /// https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.9
