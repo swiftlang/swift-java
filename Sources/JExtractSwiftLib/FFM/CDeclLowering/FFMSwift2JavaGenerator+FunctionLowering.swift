@@ -1039,6 +1039,9 @@ extension LoweredFunctionSignature {
         .joined(separator: .comma)
       resultExpr = "\(callee)(\(raw: arguments))"
 
+    case .operatorPlus:
+      resultExpr = "\(paramExprs[0]) + \(paramExprs[1])"
+
     case .getter:
       assert(paramExprs.isEmpty)
       resultExpr = callee

@@ -704,6 +704,9 @@ extension JNISwift2JavaGenerator {
       .joined(separator: .comma)
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
 
+    case .operatorPlus:
+      result = "\(arguments[0]) + \(arguments[1])"
+
     case .enumCase:
       let downcallArguments = zip(
         decl.functionSignature.parameters,

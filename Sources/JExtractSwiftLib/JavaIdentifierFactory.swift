@@ -38,6 +38,7 @@ package struct JavaIdentifierFactory {
         case .getter, .subscriptGetter: method.javaGetterName!
         case .setter, .subscriptSetter: method.javaSetterName!
         case .function, .initializer, .enumCase: method.name
+        case .operatorPlus: "plus"
         }
       methodsByBaseName[baseName, default: []].append(method)
     }
@@ -69,6 +70,7 @@ package struct JavaIdentifierFactory {
       case .getter, .subscriptGetter: decl.javaGetterName!
       case .setter, .subscriptSetter: decl.javaSetterName!
       case .function, .initializer, .enumCase: decl.name
+      case .operatorPlus: "plus"
       }
     var methodName = baseName + paramsSuffix(decl, baseName: baseName)
     if Self.javaKeywords.contains(methodName) {

@@ -201,11 +201,27 @@ final class SwiftAnalysisVisitor {
       return
     }
 
+    let abiKind =
+      switch node.name.text.unescapedSwiftName {
+      case "+":
+        SwiftAPIKind.operatorPlus
+      default:
+        SwiftAPIKind.function
+      }
+
+    let name =
+      switch node.name.text.unescapedSwiftName {
+      case "+":
+        "plus"
+      default:
+        node.name.text.unescapedSwiftName
+      }
+
     let extracted = ExtractedFunc(
       module: analyzer.swiftModuleName,
       swiftDecl: node,
-      name: node.name.text.unescapedSwiftName,
-      apiKind: .function,
+      name: name,
+      apiKind: abiKind,
       functionSignature: signature,
     )
 

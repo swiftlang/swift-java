@@ -74,7 +74,14 @@ public struct JavaExtractDecider: ExtractDecider {
     // Swift operators have no Java mapping
     if let fn = decl.as(FunctionDeclSyntax.self) {
       switch fn.name.tokenKind {
-      case .binaryOperator, .prefixOperator, .postfixOperator:
+      case .binaryOperator(let symbol):
+        // Allow only supported operators
+        if symbol == "+" {
+          break
+        }
+        log.trace("Skip '\(decl.qualifiedNameForDebug)': operators are not supported on Java")
+        return false
+      case .prefixOperator, .postfixOperator:
         log.trace("Skip '\(decl.qualifiedNameForDebug)': operators are not supported on Java")
         return false
       default:

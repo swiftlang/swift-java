@@ -58,6 +58,7 @@ extension ExtractedFunc {
     switch apiKind {
     case .getter, .subscriptGetter: break
     case .setter, .subscriptSetter, .function, .initializer, .enumCase: return nil
+    case .operatorPlus: return nil
     }
 
     let returnsBoolean = self.functionSignature.result.type.asNominalTypeDeclaration?.knownTypeKind == .bool
@@ -82,6 +83,7 @@ extension ExtractedFunc {
     switch apiKind {
     case .setter, .subscriptSetter: break
     case .getter, .subscriptGetter, .function, .initializer, .enumCase: return nil
+    case .operatorPlus: return nil
     }
 
     let isBooleanSetter = self.functionSignature.parameters.first?.type.asNominalTypeDeclaration?.knownTypeKind == .bool
