@@ -1691,7 +1691,7 @@ extension JNISwift2JavaGenerator {
 
         let methodName =
           if parameters.isEmpty && nativeResult.javaType.isVoid {
-            "run"
+            KnownFunctionalInterface.runnable.method
           } else {
             "apply"
           }

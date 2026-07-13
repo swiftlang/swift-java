@@ -255,21 +255,17 @@ extension FFMSwift2JavaGenerator {
       }
 
       printFunctionDescriptorDefinition(&printer, cResultType, cParams)
-      if cParameterTypes.isEmpty && cResultType.isVoid {
-        printer.print(
-          """
-          private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.lang.Runnable.class, "run", DESC);
-          private static MemorySegment toUpcallStub(java.lang.Runnable fi, Arena arena) {
-            return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
-          }
-          """
-        )
-        return
-      }
+      let (interfaceName, methodName) =
+        if cParameterTypes.isEmpty && cResultType.isVoid {
+          (KnownFunctionalInterface.runnable.javaType.description, KnownFunctionalInterface.runnable.method)
+        } else {
+          ("Function", "apply")
+        }
+
       printer.print(
         """
-        private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
-        private static MemorySegment toUpcallStub(Function fi, Arena arena) {
+        private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(\(interfaceName).class, "\(methodName)", DESC);
+        private static MemorySegment toUpcallStub(\(interfaceName) fi, Arena arena) {
           return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
         }
         """
