@@ -13,8 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftJavaMacros
+import SwiftParser
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
 import XCTest
@@ -527,6 +529,20 @@ class JavaKitMacroTests: XCTestCase {
     )
   }
 
+  func testJavaClassSealedWithoutPermits() throws {
+    assertMacroExpansion(
+      """
+      @JavaClass(.sealed, "com.example.Foo")
+      open class Foo: JavaObject {
+      }
+      """,
+      expectedChunks: [],
+      notExpectedChunks: [
+        "public func as"
+      ]
+    )
+  }
+
   func testJavaGenericClassGenericMethodParameter() throws {
     assertMacroExpansion(
       """
@@ -576,4 +592,48 @@ class JavaKitMacroTests: XCTestCase {
       macros: Self.javaKitMacros
     )
   }
+}
+
+private func assertMacroExpansion(
+  _ source: String,
+  expectedChunks: [String],
+  notExpectedChunks: [String] = [],
+  file: StaticString = #fileID,
+  line: UInt = #line
+) {
+  let expanded = expandMacros(in: source)
+  let expandedCollapsed = expanded.replacing(" ", with: "")
+  for chunk in expectedChunks {
+    let chunkCollapsed = chunk.replacing(" ", with: "")
+    XCTAssertTrue(
+      expandedCollapsed.contains(chunkCollapsed),
+      "Expected chunk:\n\(chunk)\n\nnot found in expanded source:\n\(expanded)",
+      file: file,
+      line: line
+    )
+  }
+  for chunk in notExpectedChunks {
+    let chunkCollapsed = chunk.replacing(" ", with: "")
+    XCTAssertFalse(
+      expandedCollapsed.contains(chunkCollapsed),
+      "Unexpected chunk:\n\(chunk)\n\nfound in expanded source:\n\(expanded)",
+      file: file,
+      line: line
+    )
+  }
+}
+
+private func expandMacros(in source: String) -> String {
+  let origSourceFile = Parser.parse(source: source)
+  let context = BasicMacroExpansionContext(
+    sourceFiles: [origSourceFile: .init(moduleName: "TestModule", fullFilePath: "test.swift")]
+  )
+  let expanded = origSourceFile.expand(
+    macros: JavaKitMacroTests.javaKitMacros,
+    contextGenerator: { syntax in
+      BasicMacroExpansionContext(sharingWith: context, lexicalContext: syntax.allMacroLexicalContexts())
+    },
+    indentationWidth: .spaces(2)
+  )
+  return expanded.description
 }

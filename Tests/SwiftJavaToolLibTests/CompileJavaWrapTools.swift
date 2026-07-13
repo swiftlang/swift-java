@@ -124,17 +124,17 @@ func assertWrapJavaOutput(
     }
     javaClasses.append(javaClass)
 
-    // FIXME: deduplicate this with SwiftJava.WrapJavaCommand.runCommand !!!
-    // TODO: especially because nested classes
-    // WrapJavaCommand().<TODO>
-
     let swiftUnqualifiedName =
       classNameMappings[javaClassName]
       ?? javaClassName.javaClassNameToCanonicalName.defaultSwiftNameForJavaClass
     translator.translatedClasses[javaClassName] =
       .init(module: nil, name: swiftUnqualifiedName)
+  }
 
-    try translator.validateClassConfiguration()
+  try translator.validateClassConfiguration()
+
+  for javaClass in javaClasses {
+    // FIXME: deduplicate this with SwiftJava.WrapJavaCommand.runCommand
 
     let swiftClassDecls = try translator.translateClass(javaClass)
     let importDecls = translator.getImportDecls()

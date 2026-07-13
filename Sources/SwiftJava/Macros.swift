@@ -12,6 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+// ==== -----------------------------------------------------------------------
+// MARK: @JavaClass
+
 /// Attached macro that declares that a particular `struct` type is a wrapper around a Java class.
 ///
 /// Use this macro to describe a type that was implemented as a class in Java. The
@@ -42,8 +45,38 @@
 public macro JavaClass(
   _ fullClassName: String,
   extends: (any AnyJavaObject.Type)? = nil,
-  implements: (any AnyJavaObject.Type)?...
+  implements: (any AnyJavaObject.Type)?...,
+  permits: (any AnyJavaObject.Type)?...
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
+
+/// Variant of ``JavaClass(_:extends:implements:permits:)`` that carries Java
+/// class modifiers (e.g. `.sealed`, `.final`) as an option-set first positional
+/// argument.
+///
+/// ```swift
+/// @JavaClass(.sealed, "com.example.Shape", permits: Circle.self, Square.self)
+/// @JavaClass(.final,  "com.example.Leaf")
+/// @JavaClass([.sealed, .abstract], "com.example.Base", permits: Sub.self)
+/// ```
+@attached(
+  member,
+  names: named(fullJavaClassName),
+  named(javaHolder),
+  named(init(javaHolder:)),
+  named(JavaSuperclass),
+  named(`as`)
+)
+@attached(extension, conformances: AnyJavaObject)
+public macro JavaClass(
+  _ modifiers: JavaClassModifier,
+  _ fullClassName: String,
+  extends: (any AnyJavaObject.Type)? = nil,
+  implements: (any AnyJavaObject.Type)?...,
+  permits: (any AnyJavaObject.Type)?...
+) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
+
+// ==== -----------------------------------------------------------------------
+// MARK: @JavaRecord
 
 /// Attached macro that declares that a particular Swift type is a wrapper around a Java `record`.
 ///
@@ -82,8 +115,30 @@ public macro JavaClass(
 public macro JavaRecord(
   _ fullClassName: String,
   extends: (any AnyJavaObject.Type)? = nil,
-  implements: (any AnyJavaObject.Type)?...
+  implements: (any AnyJavaObject.Type)?...,
+  permits: (any AnyJavaObject.Type)?...
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
+
+/// Modifier-carrying variant of ``JavaRecord(_:extends:implements:permits:)``.
+@attached(
+  member,
+  names: named(fullJavaClassName),
+  named(javaHolder),
+  named(init(javaHolder:)),
+  named(JavaSuperclass),
+  named(`as`)
+)
+@attached(extension, conformances: AnyJavaObject)
+public macro JavaRecord(
+  _ modifiers: JavaClassModifier,
+  _ fullClassName: String,
+  extends: (any AnyJavaObject.Type)? = nil,
+  implements: (any AnyJavaObject.Type)?...,
+  permits: (any AnyJavaObject.Type)?...
+) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
+
+// ==== -----------------------------------------------------------------------
+// MARK: @JavaInterface
 
 /// Attached macro that declares that a particular `struct` type is a wrapper around a Java interface.
 ///
@@ -113,8 +168,31 @@ public macro JavaRecord(
   named(`as`)
 )
 @attached(extension, conformances: AnyJavaObject)
-public macro JavaInterface(_ fullClassName: String, extends: (any AnyJavaObject.Type)?...) =
-  #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
+public macro JavaInterface(
+  _ fullClassName: String,
+  extends: (any AnyJavaObject.Type)?...,
+  permits: (any AnyJavaObject.Type)?...
+) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
+
+/// Modifier-carrying variant of ``JavaInterface(_:extends:permits:)``.
+@attached(
+  member,
+  names: named(fullJavaClassName),
+  named(javaHolder),
+  named(init(javaHolder:)),
+  named(JavaSuperclass),
+  named(`as`)
+)
+@attached(extension, conformances: AnyJavaObject)
+public macro JavaInterface(
+  _ modifiers: JavaClassModifier,
+  _ fullClassName: String,
+  extends: (any AnyJavaObject.Type)?...,
+  permits: (any AnyJavaObject.Type)?...
+) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
+
+// ==== -----------------------------------------------------------------------
+// MARK: @JavaField / @JavaStaticField
 
 /// Attached macro that turns a Swift property into one that accesses a Java field on the underlying Java object.
 ///
@@ -144,6 +222,9 @@ public macro JavaField(_ javaFieldName: String? = nil, isFinal: Bool = false) =
 @attached(accessor)
 public macro JavaStaticField(_ javaFieldName: String? = nil, isFinal: Bool = false) =
   #externalMacro(module: "SwiftJavaMacros", type: "JavaFieldMacro")
+
+// ==== -----------------------------------------------------------------------
+// MARK: @JavaMethod / @JavaStaticMethod
 
 /// Attached macro that turns a Swift method into one that wraps a Java method on the underlying Java object.
 ///
@@ -207,6 +288,9 @@ public macro JavaMethod<ResultBoundType: JavaValue>(
 public macro JavaStaticMethod(_ javaMethodName: String? = nil) =
   #externalMacro(module: "SwiftJavaMacros", type: "JavaMethodMacro")
 
+// ==== -----------------------------------------------------------------------
+// MARK: @JavaImplementation
+
 /// Macro that marks extensions to specify that all of the @JavaMethod
 /// methods are implementations of Java methods spelled as `native`.
 ///
@@ -232,6 +316,9 @@ public macro JavaStaticMethod(_ javaMethodName: String? = nil) =
 @attached(peer)
 public macro JavaImplementation(_ fullClassName: String) =
   #externalMacro(module: "SwiftJavaMacros", type: "JavaImplementationMacro")
+
+// ==== -----------------------------------------------------------------------
+// MARK: @JavaExport
 
 /// Marker macro that forces a Swift declaration to be exported to Java via jextract.
 ///

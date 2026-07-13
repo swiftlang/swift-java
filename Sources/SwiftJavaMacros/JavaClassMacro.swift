@@ -31,9 +31,14 @@ extension JavaClassMacro: MemberMacro {
     }
     let swiftName = namedDecl.name.text
 
-    // Dig out the Java class name.
-    guard case .argumentList(let arguments) = node.arguments,
-      let wrapperTypeNameExpr = arguments.first?.expression,
+    // Dig out the Java class name. The class name is the first unlabeled
+    // string-literal positional argument; a leading modifier option-set
+    // (e.g. `@JavaClass(.sealed, "com.example.Foo", ...)`) can precede it.
+    guard case .argumentList(let arguments) = node.arguments else {
+      throw MacroErrors.classNameNotStringLiteral
+    }
+    let unlabeledPositional = arguments.filter { $0.label == nil }
+    guard let wrapperTypeNameExpr = unlabeledPositional.first(where: { $0.expression.is(StringLiteralExprSyntax.self) })?.expression,
       let stringLiteral = wrapperTypeNameExpr.as(StringLiteralExprSyntax.self),
       stringLiteral.segments.count == 1,
       case let .stringSegment(classNameSegment)? = stringLiteral.segments.first
@@ -57,9 +62,7 @@ extension JavaClassMacro: MemberMacro {
       isJavaLangObject = false
 
       // Dig out the "extends" argument from the attribute.
-      if let superclassArg = arguments.dropFirst().first,
-        let superclassArgLabel = superclassArg.label,
-        superclassArgLabel.text == "extends",
+      if let superclassArg = arguments.first(where: { $0.label?.text == "extends" }),
         let superclassMemberAccess = superclassArg.expression.as(MemberAccessExprSyntax.self),
         superclassMemberAccess.declName.trimmedDescription == "self",
         let superclassMemberBase = superclassMemberAccess.base

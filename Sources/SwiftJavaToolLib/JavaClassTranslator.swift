@@ -368,7 +368,6 @@ extension JavaClassTranslator {
   }
 }
 
-/// MARK: Rendering of Java class members as Swift declarations.
 extension JavaClassTranslator {
   /// Render the Swift declarations that will express this Java class in Swift.
   package func render() -> [DeclSyntax] {
@@ -393,13 +392,24 @@ extension JavaClassTranslator {
     }
     if javaClass.isSealed() {
       let kind = javaClass.isInterface() ? "sealed interface" : "sealed class"
-      let permits = javaClass.getPermittedSubclasses().compactMap { $0?.getName() }
+      let permits = javaClass.getPermittedSubclasses().compactMap { $0 }
       if permits.isEmpty {
         lines.append("/// Java `\(kind)`")
       } else {
-        lines.append("/// Java `\(kind)`, permits: \(permits.map({ "`\($0)`" }).joined(separator: ", "))")
+        let rendered: [String] = permits.map { permitted in
+          let javaName = permitted.getName()
+          if let swiftName = translator.translatedClasses[javaName]?.swiftType {
+            return "``\(swiftName)`` (`\(javaName)`)"
+          } else {
+            return "`\(javaName)`"
+          }
+        }
+        lines.append("/// Java `\(kind)`, permits: \(rendered.joined(separator: ", "))")
       }
-      log.info("Wrap Java \(kind): `\(javaClass.getName())`, permits: \(permits.map({ "`\($0)`" }).joined(separator: ", ")))")
+      let logPermitNames = permits.map { $0.getName() }
+      log.info(
+        "Wrap Java \(kind): `\(javaClass.getName())`, permits: \(logPermitNames.map({ "`\($0)`" }).joined(separator: ", ")))"
+      )
     }
     if lines.isEmpty {
       return ""
@@ -492,6 +502,25 @@ extension JavaClassTranslator {
       interfacesStr = ", \(prefix): \(swiftInterfaces.map { "\($0).self" }.joined(separator: ", "))"
     }
 
+    // Compute `sealed` and `permits` metadata for Java `sealed` types.
+    let sealedModifierPrefix: String
+    let permitsArgs: String
+    if javaClass.isSealed() {
+      sealedModifierPrefix = ".sealed, "
+      let permittedTypes = javaClass.getPermittedSubclasses().compactMap { $0 }
+      let knownSwiftNames: [String] = permittedTypes.compactMap { permitted in
+        translator.translatedClasses[permitted.getName()]?.swiftType
+      }
+      if knownSwiftNames.isEmpty {
+        permitsArgs = ""
+      } else {
+        permitsArgs = ", permits: \(knownSwiftNames.map { "\($0).self" }.joined(separator: ", "))"
+      }
+    } else {
+      sealedModifierPrefix = ""
+      permitsArgs = ""
+    }
+
     let genericParameterClause =
       if swiftGenericParameterNames.isEmpty {
         ""
@@ -519,7 +548,7 @@ extension JavaClassTranslator {
     let javaKindDocs = renderJavaKindDocc()
     var classDecl: DeclSyntax =
       """
-      \(raw: javaKindDocs)\(raw: classAvailableAttributes.render())@\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr))
+      \(raw: javaKindDocs)\(raw: classAvailableAttributes.render())@\(raw: classOrInterface)(\(raw: sealedModifierPrefix)\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr)\(raw: permitsArgs))
       \(raw: introducer) \(raw: swiftInnermostTypeName)\(raw: genericParameterClause)\(raw: inheritanceClause) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }

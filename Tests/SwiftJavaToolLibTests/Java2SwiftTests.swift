@@ -654,7 +654,7 @@ class Java2SwiftTests: XCTestCase {
       expectedChunks: [
         "import JavaNio",
         """
-        @JavaClass("java.nio.ByteBuffer")
+        @JavaClass(.sealed, "java.nio.ByteBuffer")
         open class NIOByteBuffer: NIOBuffer {
         """,
         """
