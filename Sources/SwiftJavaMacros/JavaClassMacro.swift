@@ -47,18 +47,33 @@ extension JavaClassMacro: MemberMacro {
     }
 
     // Determine whether we're exposing the Java class as a Swift class, which
-    // changes how we generate some of the members.
+    // changes how we generate some of the members. Swift enums are also
+    // supported for Java `sealed interface` types (see JavaClassTranslator):
+    // the enum's case list carries the permitted-subclass information, so
+    // the parent's macro attribute no longer needs `permits:`, breaking the
+    // mutual `@JavaInterface` macro-expansion cycle. The macro emits only
+    // `fullJavaClassName` for enums; the generator supplies `javaHolder`,
+    // `init(javaHolder:)` and per-subclass dispatch, since it (unlike the
+    // macro) knows the permitted-subclass list.
     let isSwiftClass: Bool
+    let isSwiftEnum: Bool
     let isJavaLangObject: Bool
     let specifiedSuperclass: String?
     if let classDecl = declaration.as(ClassDeclSyntax.self) {
       isSwiftClass = true
+      isSwiftEnum = false
       isJavaLangObject = classDecl.isJavaLangObject
 
       // Retrieve the superclass, if there is one.
       specifiedSuperclass = classDecl.inheritanceClause?.inheritedTypes.first?.trimmedDescription
+    } else if declaration.is(EnumDeclSyntax.self) {
+      isSwiftClass = false
+      isSwiftEnum = true
+      isJavaLangObject = false
+      specifiedSuperclass = nil
     } else {
       isSwiftClass = false
+      isSwiftEnum = false
       isJavaLangObject = false
 
       // Dig out the "extends" argument from the attribute.
@@ -107,6 +122,15 @@ extension JavaClassMacro: MemberMacro {
       }
       """
     )
+
+    // Enums (used for Java `sealed interface` wrappers) can't have stored
+    // properties, and their `javaHolder` / `init(javaHolder:)` / `_dispatch`
+    // implementations depend on the permitted-subclass list, which only the
+    // generator knows. Emit only `fullJavaClassName` here and let the
+    // generator supply the rest inside the enum body.
+    if isSwiftEnum {
+      return members
+    }
 
     // struct wrappers need a JavaSuperclass type.
     if !isSwiftClass {

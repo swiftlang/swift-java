@@ -34,7 +34,7 @@ Java `native` functions. SwiftJava simplifies the type conversions
 | Java `abstract class`                  | TODO          |
 | Java `enum`                            | ❌             |
 | Java `record` (Java 16+)               | ✅ `@JavaRecord` |
-| Java `sealed class` / `sealed interface` (Java 17+) | ✅ `.sealed` modifier + `permits:` list |
+| Java `sealed class` / `sealed interface` (Java 17+) | ✅ `.sealed` modifier; sealed interfaces are wrapped as Swift enums with a case per permitted subclass plus an `unknown` catch-all |
 | **This list is very work in progress** |               |    
 
 ### JExtract – calling Swift from Java

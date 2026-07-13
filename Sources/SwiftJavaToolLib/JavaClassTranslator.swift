@@ -392,23 +392,25 @@ extension JavaClassTranslator {
     }
     if javaClass.isSealed() {
       let kind = javaClass.isInterface() ? "sealed interface" : "sealed class"
-      let permits = javaClass.getPermittedSubclasses().compactMap { $0 }
-      if permits.isEmpty {
+      let permittedSubclasses = javaClass.getPermittedSubclasses().compactMap { $0 }
+      if permittedSubclasses.isEmpty {
         lines.append("/// Java `\(kind)`")
       } else {
-        let rendered: [String] = permits.map { permitted in
+        // One permitted subclass per line so the DocC-rendered output stays
+        // readable even for hierarchies with many alternatives.
+        lines.append("/// Java `\(kind)`, permits:")
+        for permitted in permittedSubclasses {
           let javaName = permitted.getName()
           if let swiftName = translator.translatedClasses[javaName]?.swiftType {
-            return "``\(swiftName)`` (`\(javaName)`)"
+            lines.append("/// - ``\(swiftName)`` (`\(javaName)`)")
           } else {
-            return "`\(javaName)`"
+            lines.append("/// - `\(javaName)`")
           }
         }
-        lines.append("/// Java `\(kind)`, permits: \(rendered.joined(separator: ", "))")
       }
-      let logPermitNames = permits.map { $0.getName() }
+      let logPermittedNames = permittedSubclasses.map { $0.getName() }
       log.info(
-        "Wrap Java \(kind): `\(javaClass.getName())`, permits: \(logPermitNames.map({ "`\($0)`" }).joined(separator: ", ")))"
+        "Wrap Java \(kind): `\(javaClass.getName())`, permits: \(logPermittedNames.map({ "`\($0)`" }).joined(separator: ", ")))"
       )
     }
     if lines.isEmpty {
@@ -445,8 +447,30 @@ extension JavaClassTranslator {
       }
     }
 
+    // A Java `sealed interface` is emitted as a Swift enum whose cases carry
+    // the permitted subclasses' Swift wrapper types. See
+    // `renderSealedInterfaceEnumMembers()` for the case list and the
+    // computed `javaHolder` / `init(javaHolder:)` synthesis.
+    //
+    // The interface's own instance methods are still emitted (as
+    // `@JavaMethod` funcs on the enum): the enum conforms to
+    // `AnyJavaObject` via the extension-macro branch, so the macro-supplied
+    // body's `dynamicJavaMethodCall` sees a valid `self.javaThis`. When such
+    // a method returns the enum itself, our `init(javaHolder:)` runs on the
+    // JNI result and picks the correct case via `.as(_:)` dispatch.
+    //
+    // Only take the enum route when at least one permitted subclass has a
+    // Swift wrapper: otherwise the enum has only a `unknown(JavaObject)`
+    // case, which is strictly worse than the plain struct form that still
+    // carries the Java interface's methods.
+    let renderAsSealedInterfaceEnum: Bool = {
+      guard javaClass.isSealed() && javaClass.isInterface() else { return false }
+      let permittedSubclasses = javaClass.getPermittedSubclasses().compactMap { $0 }
+      return permittedSubclasses.contains { translator.translatedClasses[$0.getName()] != nil }
+    }()
+
     // Render all of the instance methods in Swift.
-    let instanceMethods = methods.methods.sortedForEmission().compactMap { method in
+    let instanceMethods: [DeclSyntax] = methods.methods.sortedForEmission().compactMap { method in
       do {
         return try renderMethod(method, implementedInSwift: false)
       } catch {
@@ -465,8 +489,16 @@ extension JavaClassTranslator {
         DeclSyntax("public typealias \(raw: javaDecl.getName()) = \(raw: swiftName)")
       }
 
+    // For a sealed interface, the enum body carries a case per permitted
+    // Swift subclass, a computed `javaHolder`, and an `init(javaHolder:)`
+    // that dispatches via `.as(_:)` down to the concrete wrapper.
+    let sealedInterfaceEnumMembers: [DeclSyntax] =
+      renderAsSealedInterfaceEnum ? renderSealedInterfaceEnumMembers() : []
+
     // Collect all of the members of this type.
-    let members = genericParameterTypeAliases + initializers + properties + enumDecls + instanceMethods
+    let members =
+      genericParameterTypeAliases + initializers + properties + enumDecls
+      + sealedInterfaceEnumMembers + instanceMethods
 
     // Compute the "extends" clause for the superclass (of the struct
     // formulation) or the inheritance clause (for the class
@@ -502,24 +534,14 @@ extension JavaClassTranslator {
       interfacesStr = ", \(prefix): \(swiftInterfaces.map { "\($0).self" }.joined(separator: ", "))"
     }
 
-    // Compute `sealed` and `permits` metadata for Java `sealed` types.
-    let sealedModifierPrefix: String
-    let permitsArgs: String
-    if javaClass.isSealed() {
-      sealedModifierPrefix = ".sealed, "
-      let permittedTypes = javaClass.getPermittedSubclasses().compactMap { $0 }
-      let knownSwiftNames: [String] = permittedTypes.compactMap { permitted in
-        translator.translatedClasses[permitted.getName()]?.swiftType
-      }
-      if knownSwiftNames.isEmpty {
-        permitsArgs = ""
-      } else {
-        permitsArgs = ", permits: \(knownSwiftNames.map { "\($0).self" }.joined(separator: ", "))"
-      }
-    } else {
-      sealedModifierPrefix = ""
-      permitsArgs = ""
-    }
+    // Compute the `.sealed` marker for Java `sealed` types. The permitted-
+    // subclass list is no longer emitted as a `permits:` macro argument
+    // because we model the hierarchy directly in the Swift type system
+    // (sealed interfaces are wrapped as Swift enums with cases per
+    // permitted subclass; sealed classes rely on the emitted subclass
+    // decls being findable via the enclosing type's members).
+    let sealedModifierPrefix: String =
+      javaClass.isSealed() ? ".sealed, " : ""
 
     let genericParameterClause =
       if swiftGenericParameterNames.isEmpty {
@@ -539,7 +561,14 @@ extension JavaClassTranslator {
       } else {
         "JavaClass"
       }
-    let introducer = translateAsClass ? "open class" : "public struct"
+    let introducer =
+      if translateAsClass {
+        "open class"
+      } else if renderAsSealedInterfaceEnum {
+        "public enum"
+      } else {
+        "public struct"
+      }
     let classAvailableAttributes = swiftAvailableAttributes(
       from: annotations,
       runtimeInvisibleAnnotations: self.runtimeInvisibleAnnotations.classAnnotations,
@@ -548,7 +577,7 @@ extension JavaClassTranslator {
     let javaKindDocs = renderJavaKindDocc()
     var classDecl: DeclSyntax =
       """
-      \(raw: javaKindDocs)\(raw: classAvailableAttributes.render())@\(raw: classOrInterface)(\(raw: sealedModifierPrefix)\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr)\(raw: permitsArgs))
+      \(raw: javaKindDocs)\(raw: classAvailableAttributes.render())@\(raw: classOrInterface)(\(raw: sealedModifierPrefix)\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr))
       \(raw: introducer) \(raw: swiftInnermostTypeName)\(raw: genericParameterClause)\(raw: inheritanceClause) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }
@@ -567,6 +596,92 @@ extension JavaClassTranslator {
 
     // Format the class declaration.
     return classDecl.formatted(using: translator.format).cast(DeclSyntax.self)
+  }
+
+  /// Render the enum body for a Java `sealed interface` wrapper.
+  ///
+  /// Emits one case per Swift-translated permitted subclass plus a trailing
+  /// ``unknown(JavaObject)`` catch-all for Java subclasses whose Swift wrapper
+  /// has not been generated. Also emits the computed ``javaHolder`` and
+  /// ``init(javaHolder:)`` required by ``AnyJavaObject``.
+  ///
+  /// The permitted-subclass list lives in the enum's case declarations rather
+  /// than in a `permits:` macro argument. That's what breaks the mutual
+  /// `@JavaInterface` macro-expansion cycle: the parent's macro attribute no
+  /// longer names the children, and case declarations are resolved at member
+  /// lookup, well after both parent and child macros have expanded.
+  private func renderSealedInterfaceEnumMembers() -> [DeclSyntax] {
+    let permittedSubclasses = javaClass.getPermittedSubclasses().compactMap { $0 }
+
+    // Only permitted subclasses whose Swift wrapper is known can become
+    // typed enum cases. Unknown permitted subclasses are still handled at
+    // runtime by the `unknown` case.
+    struct SealedCase {
+      let caseName: String
+      let swiftType: String
+    }
+    var cases: [SealedCase] = []
+    var seenCaseNames = Set<String>()
+    for permittedSubclass in permittedSubclasses {
+      guard let swiftType = translator.translatedClasses[permittedSubclass.getName()]?.swiftType else {
+        continue
+      }
+      // Case name is the last Swift name segment, lowercased first letter.
+      let lastSegment = swiftType.split(separator: ".").last.map(String.init) ?? swiftType
+      var caseName = lastSegment
+      if let firstChar = caseName.first {
+        caseName = firstChar.lowercased() + caseName.dropFirst()
+      }
+      // Guard against name clashes if two permitted subclasses share the
+      // same simple name in different parents.
+      guard seenCaseNames.insert(caseName).inserted else {
+        continue
+      }
+      cases.append(SealedCase(caseName: caseName, swiftType: swiftType))
+    }
+
+    var members: [DeclSyntax] = []
+    for c in cases {
+      members.append("case \(raw: c.caseName)(\(raw: c.swiftType))")
+    }
+    // Catch-all for permitted subclasses whose Swift wrapper has not been
+    // generated. The wrapped `JavaObject` still reflects the real runtime
+    // class -- callers can query it via `.javaClass.getName()`.
+    members.append("case unknown(JavaObject)")
+
+    let holderArms: String =
+      (cases.map { c in
+        "case .\(c.caseName)(let v): return v.javaHolder"
+      } + ["case .unknown(let v): return v.javaHolder"]).joined(separator: "\n  ")
+    members.append(
+      """
+      public var javaHolder: JavaObjectHolder {
+        switch self {
+        \(raw: holderArms)
+        }
+      }
+      """
+    )
+
+    let initArms: String = cases.map { c in
+      """
+      if let v = raw.as(\(c.swiftType).self) {
+        self = .\(c.caseName)(v)
+        return
+      }
+      """
+    }.joined(separator: "\n  ")
+    members.append(
+      """
+      public init(javaHolder: JavaObjectHolder) {
+        let raw = JavaObject(javaHolder: javaHolder)
+        \(raw: initArms)
+        self = .unknown(raw)
+      }
+      """
+    )
+
+    return members
   }
 
   /// Render any nested classes that will not be rendered separately.

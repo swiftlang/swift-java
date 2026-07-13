@@ -2,7 +2,10 @@
 import SwiftJava
 import SwiftJavaJNICore
 
-@JavaClass("java.lang.reflect.Executable", implements: GenericDeclaration.self)
+/// Java `sealed class`, permits:
+/// - ``Constructor`` (`java.lang.reflect.Constructor`)
+/// - ``Method`` (`java.lang.reflect.Method`)
+@JavaClass(.sealed, "java.lang.reflect.Executable", implements: GenericDeclaration.self)
 open class Executable: AccessibleObject {
   /// Java method `getAnnotatedExceptionTypes`.
   ///

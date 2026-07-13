@@ -16,9 +16,15 @@
 /// ``JavaRecord``, and ``JavaInterface`` attached macros.
 ///
 /// ```swift
-/// @JavaClass(.sealed, "com.example.Shape", permits: Circle.self, Square.self)
+/// @JavaClass(.sealed, "com.example.Shape")
 /// @JavaClass(.final,  "com.example.Leaf")
 /// ```
+///
+/// Java sealed types don't carry an explicit permitted-subclass list in Swift:
+/// the generator models the hierarchy directly in the type system. Sealed
+/// interfaces become Swift enums with one case per permitted subclass; sealed
+/// classes remain Swift classes and the permitted subclasses are just the
+/// declared subclasses reachable via the enclosing type.
 public struct JavaClassModifier: OptionSet, Sendable, Hashable {
   public let rawValue: Int
 

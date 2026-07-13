@@ -45,19 +45,24 @@
 public macro JavaClass(
   _ fullClassName: String,
   extends: (any AnyJavaObject.Type)? = nil,
-  implements: (any AnyJavaObject.Type)?...,
-  permits: (any AnyJavaObject.Type)?...
+  implements: (any AnyJavaObject.Type)?...
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
 
-/// Variant of ``JavaClass(_:extends:implements:permits:)`` that carries Java
+/// Variant of ``JavaClass(_:extends:implements:)`` that carries Java
 /// class modifiers (e.g. `.sealed`, `.final`) as an option-set first positional
 /// argument.
 ///
 /// ```swift
-/// @JavaClass(.sealed, "com.example.Shape", permits: Circle.self, Square.self)
+/// @JavaClass(.sealed, "com.example.Shape")
 /// @JavaClass(.final,  "com.example.Leaf")
-/// @JavaClass([.sealed, .abstract], "com.example.Base", permits: Sub.self)
+/// @JavaClass([.sealed, .abstract], "com.example.Base")
 /// ```
+///
+/// Note: Java `sealed` types don't carry an explicit permitted-subclass list
+/// in Swift because the generator models the hierarchy directly in the type
+/// system (permitted subclasses become nested types, or enum cases when the
+/// sealed type is an interface). The `.sealed` marker is preserved for
+/// documentation and reflection-style tooling.
 @attached(
   member,
   names: named(fullJavaClassName),
@@ -71,8 +76,7 @@ public macro JavaClass(
   _ modifiers: JavaClassModifier,
   _ fullClassName: String,
   extends: (any AnyJavaObject.Type)? = nil,
-  implements: (any AnyJavaObject.Type)?...,
-  permits: (any AnyJavaObject.Type)?...
+  implements: (any AnyJavaObject.Type)?...
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
 
 // ==== -----------------------------------------------------------------------
@@ -115,11 +119,10 @@ public macro JavaClass(
 public macro JavaRecord(
   _ fullClassName: String,
   extends: (any AnyJavaObject.Type)? = nil,
-  implements: (any AnyJavaObject.Type)?...,
-  permits: (any AnyJavaObject.Type)?...
+  implements: (any AnyJavaObject.Type)?...
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
 
-/// Modifier-carrying variant of ``JavaRecord(_:extends:implements:permits:)``.
+/// Modifier-carrying variant of ``JavaRecord(_:extends:implements:)``.
 @attached(
   member,
   names: named(fullJavaClassName),
@@ -133,8 +136,7 @@ public macro JavaRecord(
   _ modifiers: JavaClassModifier,
   _ fullClassName: String,
   extends: (any AnyJavaObject.Type)? = nil,
-  implements: (any AnyJavaObject.Type)?...,
-  permits: (any AnyJavaObject.Type)?...
+  implements: (any AnyJavaObject.Type)?...
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
 
 // ==== -----------------------------------------------------------------------
@@ -170,11 +172,10 @@ public macro JavaRecord(
 @attached(extension, conformances: AnyJavaObject)
 public macro JavaInterface(
   _ fullClassName: String,
-  extends: (any AnyJavaObject.Type)?...,
-  permits: (any AnyJavaObject.Type)?...
+  extends: (any AnyJavaObject.Type)?...
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
 
-/// Modifier-carrying variant of ``JavaInterface(_:extends:permits:)``.
+/// Modifier-carrying variant of ``JavaInterface(_:extends:)``.
 @attached(
   member,
   names: named(fullJavaClassName),
@@ -187,8 +188,7 @@ public macro JavaInterface(
 public macro JavaInterface(
   _ modifiers: JavaClassModifier,
   _ fullClassName: String,
-  extends: (any AnyJavaObject.Type)?...,
-  permits: (any AnyJavaObject.Type)?...
+  extends: (any AnyJavaObject.Type)?...
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
 
 // ==== -----------------------------------------------------------------------

@@ -25,6 +25,7 @@ class JavaKitMacroTests: XCTestCase {
   static let javaKitMacros: [String: any Macro.Type] = [
     "JavaClass": JavaClassMacro.self,
     "JavaRecord": JavaClassMacro.self,
+    "JavaInterface": JavaClassMacro.self,
     "JavaMethod": JavaMethodMacro.self,
     "JavaField": JavaFieldMacro.self,
     "JavaStaticMethod": JavaMethodMacro.self,
@@ -539,6 +540,34 @@ class JavaKitMacroTests: XCTestCase {
       expectedChunks: [],
       notExpectedChunks: [
         "public func as"
+      ]
+    )
+  }
+
+  func testJavaInterfaceOnEnum() throws {
+    // A Java `sealed interface` is wrapped as a Swift enum. The macro emits
+    // only `fullJavaClassName` for enum declarations -- the case list,
+    // `javaHolder`, and `init(javaHolder:)` are supplied by the generator
+    // (which has the permitted-subclass list). The extension macro still
+    // adds `AnyJavaObject` conformance on top.
+    assertMacroExpansion(
+      """
+      @JavaInterface(.sealed, "com.example.Op")
+      public enum Op {
+        case add(Add)
+        case mul(Mul)
+      }
+      """,
+      expectedChunks: [
+        "public static var fullJavaClassName: String",
+        #""com.example.Op""#,
+      ],
+      notExpectedChunks: [
+        // Enum branch must not synthesize a stored `javaHolder` (illegal
+        // on enums) or the struct-shaped `init(javaHolder:)`.
+        "public var javaHolder: JavaObjectHolder",
+        "public required init(javaHolder: JavaObjectHolder)",
+        "public typealias JavaSuperclass",
       ]
     )
   }

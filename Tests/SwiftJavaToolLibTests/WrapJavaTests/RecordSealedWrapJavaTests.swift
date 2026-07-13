@@ -50,7 +50,7 @@ final class RecordSealedWrapJavaTests: XCTestCase {
     )
   }
 
-  func test_wrapJava_javaSealed_isMarkedInDocs_withPermits() async throws {
+  func test_wrapJava_javaSealed_isMarkedInDocs() async throws {
     let classpathURL = try await compileJava(
       """
       package com.example;
@@ -70,22 +70,30 @@ final class RecordSealedWrapJavaTests: XCTestCase {
       classpath: [classpathURL],
       expectedChunks: [
         """
-        /// Java `sealed class`, permits: ``Circle`` (`com.example.Circle`), ``Square`` (`com.example.Square`)
-        @JavaClass(.sealed, "com.example.Shape", permits: Circle.self, Square.self)
+        /// Java `sealed class`, permits:
+        /// - ``Circle`` (`com.example.Circle`)
+        /// - ``Square`` (`com.example.Square`)
+        @JavaClass(.sealed, "com.example.Shape")
         open class Shape:
         """
       ]
     )
   }
 
-  func test_wrapJava_javaSealedInterface_isMarkedInDocs_withPermits() async throws {
+  func test_wrapJava_javaSealedInterface_isTranslatedAsSwiftEnum() async throws {
     let classpathURL = try await compileJava(
       """
       package com.example;
 
-      public sealed interface Op permits Add, Mul {}
-      final class Add implements Op {}
-      final class Mul implements Op {}
+      public sealed interface Op permits Add, Mul {
+        Op combine(Op other);
+      }
+      final class Add implements Op {
+        @Override public Op combine(Op other) { return this; }
+      }
+      final class Mul implements Op {
+        @Override public Op combine(Op other) { return this; }
+      }
       """
     )
 
@@ -97,11 +105,91 @@ final class RecordSealedWrapJavaTests: XCTestCase {
       ],
       classpath: [classpathURL],
       expectedChunks: [
+        // Sealed interface becomes a Swift enum. The permitted subclasses
+        // are modelled as typed cases plus an `unknown` catch-all for any
+        // Java subclass whose Swift wrapper hasn't been generated. The
+        // interface's own methods are emitted on the enum itself,
+        // so callers can dispatch without pattern-matching first. The
+        // macro-generated body invokes `dynamicJavaMethodCall` on the
+        // enum (which conforms to `AnyJavaObject` via the extension
+        // macro) and wraps the result back into the enum via
+        // `init(javaHolder:)`.
         """
-        /// Java `sealed interface`, permits: ``Add`` (`com.example.Add`), ``Mul`` (`com.example.Mul`)
-        @JavaInterface(.sealed, "com.example.Op", permits: Add.self, Mul.self)
-        public struct Op {
+        /// Java `sealed interface`, permits:
+        /// - ``Add`` (`com.example.Add`)
+        /// - ``Mul`` (`com.example.Mul`)
+        @JavaInterface(.sealed, "com.example.Op")
+        public enum Op {
+          case add(Add)
+
+          case mul(Mul)
+
+          case unknown(JavaObject)
+
+          public var javaHolder: JavaObjectHolder {
+            switch self {
+            case .add(let v):
+              return v.javaHolder
+            case .mul(let v):
+              return v.javaHolder
+            case .unknown(let v):
+              return v.javaHolder
+            }
+          }
+
+          public init(javaHolder: JavaObjectHolder) {
+            let raw = JavaObject(javaHolder: javaHolder)
+            if let v = raw.as(Add.self) {
+              self = .add(v)
+              return
+            }
+            if let v = raw.as(Mul.self) {
+              self = .mul(v)
+              return
+            }
+            self = .unknown(raw)
+          }
+
+          /// Java method `combine`.
+          ///
+          /// ### Java method signature
+          /// ```java
+          /// public abstract com.example.Op com.example.Op.combine(com.example.Op)
+          /// ```
+          @JavaMethod
+          public func combine(_ arg0: Op?) -> Op!
+        }
+        """,
+        // The Java `Op combine(Op)` method is inherited by each permitted
+        // subclass; wrap-java re-emits it on the concrete `Add` / `Mul`
+        // wrappers too, so callers holding a concrete case can call
+        // `.combine(...)` without pattern matching.
         """
+        @JavaClass("com.example.Add", implements: Op.self)
+        open class Add: JavaObject {
+          /// Java method `combine`.
+          ///
+          /// ### Java method signature
+          /// ```java
+          /// public com.example.Op com.example.Add.combine(com.example.Op)
+          /// ```
+          @JavaMethod
+          open func combine(_ arg0: Op?) -> Op!
+        }
+        """,
+        """
+        @JavaClass("com.example.Mul", implements: Op.self)
+        open class Mul: JavaObject {
+          /// Java method `combine`.
+          ///
+          /// ### Java method signature
+          /// ```java
+          /// public com.example.Op com.example.Mul.combine(com.example.Op)
+          /// ```
+          @JavaMethod
+          open func combine(_ arg0: Op?) -> Op!
+        }
+        """,
       ]
     )
   }

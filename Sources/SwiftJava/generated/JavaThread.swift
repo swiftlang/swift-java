@@ -383,8 +383,41 @@ open class JavaThread: JavaObject {
   open override func toString() -> String
 }
 extension JavaThread {
-  @JavaInterface("java.lang.Thread$Builder")
-  public struct Builder {
+  /// Java `sealed interface`, permits:
+  /// - ``JavaThread.Builder.OfPlatform`` (`java.lang.Thread$Builder$OfPlatform`)
+  /// - ``JavaThread.Builder.OfVirtual`` (`java.lang.Thread$Builder$OfVirtual`)
+  @JavaInterface(.sealed, "java.lang.Thread$Builder")
+  public enum Builder {
+    case ofPlatform(JavaThread.Builder.OfPlatform)
+
+    case ofVirtual(JavaThread.Builder.OfVirtual)
+
+    case unknown(JavaObject)
+
+    public var javaHolder: JavaObjectHolder {
+      switch self {
+      case .ofPlatform(let v):
+        return v.javaHolder
+      case .ofVirtual(let v):
+        return v.javaHolder
+      case .unknown(let v):
+        return v.javaHolder
+      }
+    }
+
+    public init(javaHolder: JavaObjectHolder) {
+      let raw = JavaObject(javaHolder: javaHolder)
+      if let v = raw.as(JavaThread.Builder.OfPlatform.self) {
+        self = .ofPlatform(v)
+        return
+      }
+      if let v = raw.as(JavaThread.Builder.OfVirtual.self) {
+        self = .ofVirtual(v)
+        return
+      }
+      self = .unknown(raw)
+    }
+
     /// Java method `inheritInheritableThreadLocals`.
     ///
     /// ### Java method signature
@@ -423,7 +456,9 @@ extension JavaThread {
   }
 }
 extension JavaThread.Builder {
-  @JavaInterface("java.lang.Thread$Builder$OfPlatform", extends: JavaThread.Builder.self)
+  /// Java `sealed interface`, permits:
+  /// - `java.lang.ThreadBuilders$PlatformThreadBuilder`
+  @JavaInterface(.sealed, "java.lang.Thread$Builder$OfPlatform", extends: JavaThread.Builder.self)
   public struct OfPlatform {
     /// Java method `daemon`.
     ///
@@ -499,7 +534,9 @@ extension JavaThread.Builder {
   }
 }
 extension JavaThread.Builder {
-  @JavaInterface("java.lang.Thread$Builder$OfVirtual", extends: JavaThread.Builder.self)
+  /// Java `sealed interface`, permits:
+  /// - `java.lang.ThreadBuilders$VirtualThreadBuilder`
+  @JavaInterface(.sealed, "java.lang.Thread$Builder$OfVirtual", extends: JavaThread.Builder.self)
   public struct OfVirtual {
     /// Java method `inheritInheritableThreadLocals`.
     ///
