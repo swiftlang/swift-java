@@ -30,11 +30,12 @@ Java `native` functions. SwiftJava simplifies the type conversions
 |----------------------------------------|---------------|
 | Java `class`                           | ✅             |
 | Java class inheritance                 | ✅             |
+| Java methods: `static`, member           | ✅ `@JavaMethod` |
 | Java `abstract class`                  | TODO          |
 | Java `enum`                            | ❌             |
-| Java methods: `static`, member           | ✅ `@JavaMethod` |
+| Java `record` (Java 16+)               | ✅ `@JavaRecord` |
+| Java `sealed class` / `sealed interface` (Java 17+) | 🟡 recognized, but missing special handling of `permits` list |
 | **This list is very work in progress** |               |    
-
 
 ### JExtract – calling Swift from Java
 

@@ -31,7 +31,7 @@ enum GenerationMode {
   /// Determine the mode for Java class generation based on an attribute.
   init?(attribute: AttributeSyntax) {
     switch attribute.attributeName.trimmedDescription {
-    case "JavaClass", "JavaInterface":
+    case "JavaClass", "JavaInterface", "JavaRecord":
       self = .importFromJava
 
     case "ExportToJavaClass":
