@@ -81,9 +81,9 @@ public class MySwiftLibraryTest {
     void call_globalCallMeRunnable() {
         CountDownLatch countDownLatch = new CountDownLatch(3);
 
-        MySwiftLibrary.globalCallMeRunnable(new MySwiftLibrary.globalCallMeRunnable.run() {
+        MySwiftLibrary.globalCallMeRunnable(new java.lang.Runnable() {
             @Override
-            public void apply() {
+            public void run() {
                 countDownLatch.countDown();
             }
         });

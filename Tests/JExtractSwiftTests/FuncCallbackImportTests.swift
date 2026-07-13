@@ -100,16 +100,14 @@ final class FuncCallbackImportTests {
               void apply();
             }
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
-            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
-            private static MemorySegment toUpcallStub(Function fi, Arena arena) {
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.lang.Runnable.class, "run", DESC);
+            private static MemorySegment toUpcallStub(java.lang.Runnable fi, Arena arena) {
               return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
             }
           }
         }
         public static class callMe {
-          @FunctionalInterface
-          public interface callback extends swiftjava___FakeModule_callMe_callback.$callback.Function {}
-          private static MemorySegment $toUpcallStub(callback fi, Arena arena) {
+          private static MemorySegment $toUpcallStub(java.lang.Runnable fi, Arena arena) {
             return swiftjava___FakeModule_callMe_callback.$callback.toUpcallStub(fi, arena);
           }
         }
@@ -119,7 +117,7 @@ final class FuncCallbackImportTests {
          * public func callMe(callback: () -> Void)
          * }
          */
-        public static void callMe(callMe.callback callback) {
+        public static void callMe(java.lang.Runnable callback) {
           try(var arena$ = Arena.ofConfined()) {
             swiftjava___FakeModule_callMe_callback.call(callMe.$toUpcallStub(callback, arena$));
           }
@@ -210,8 +208,8 @@ final class FuncCallbackImportTests {
               void apply();
             }
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
-            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
-            private static MemorySegment toUpcallStub(Function fi, Arena arena) {
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.lang.Runnable.class, "run", DESC);
+            private static MemorySegment toUpcallStub(java.lang.Runnable fi, Arena arena) {
               return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
             }
           }
@@ -222,9 +220,7 @@ final class FuncCallbackImportTests {
           private static MemorySegment $toUpcallStub(callback fi, Arena arena) {
             return swiftjava___FakeModule_callMeMore_callback_fn.$callback.toUpcallStub(fi, arena);
           }
-          @FunctionalInterface
-          public interface fn extends swiftjava___FakeModule_callMeMore_callback_fn.$fn.Function {}
-          private static MemorySegment $toUpcallStub(fn fi, Arena arena) {
+          private static MemorySegment $toUpcallStub(java.lang.Runnable fi, Arena arena) {
             return swiftjava___FakeModule_callMeMore_callback_fn.$fn.toUpcallStub(fi, arena);
           }
         }
@@ -234,7 +230,7 @@ final class FuncCallbackImportTests {
          * public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())
          * }
          */
-        public static void callMeMore(callMeMore.callback callback, callMeMore.fn fn) {
+        public static void callMeMore(callMeMore.callback callback, java.lang.Runnable fn) {
           try(var arena$ = Arena.ofConfined()) {
             swiftjava___FakeModule_callMeMore_callback_fn.call(callMeMore.$toUpcallStub(callback, arena$), callMeMore.$toUpcallStub(fn, arena$));
           }

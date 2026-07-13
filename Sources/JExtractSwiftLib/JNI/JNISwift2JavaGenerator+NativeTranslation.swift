@@ -265,87 +265,13 @@ extension JNISwift2JavaGenerator {
           conversionCheck: nil
         )
 
-      case .function(let fn):
-
-        // @Sendable is not supported yet as "environment" is later captured inside the closure.
-        if fn.isEscaping {
-          // For escaping closures we e need to create a Swift wrapper around
-          // the passed down Java functional interface because we must keep it
-          // alive with a global ref, that will remain around for as long as the
-          // escaping closure is.
-          //
-          // Prepare the name and shapes of the Java side functional interface
-          // and Swift side @JavaInterface wrapper we'll use to implement that
-          // interface (and keep the Java object reachable).
-
-          // Name it: interface MyClass_myMethod_theClosure { ... }
-          let javaClosureInterfaceName = String.flatName(
-            prefix: "Java",
-            parent: parentName,
-            method: methodName,
-            parameter: parameterName,
-          )
-          let javaBinaryName = String.javaBinaryName(
-            package: self.javaPackage,
-            parent: parentName,
-            method: methodName,
-            qualifier: parameterName,
-          )
-          let generator = JavaInterfaceProtocolWrapperGenerator()
-          let syntheticFunction = try generator.generateSyntheticClosureFunction(
-            functionType: fn,
-            javaInterfaceName: javaClosureInterfaceName,
-            javaBinaryName: javaBinaryName,
-          )
-
-          return NativeParameter(
-            parameters: [
-              JavaParameter(
-                name: parameterName,
-                type: .class(
-                  package: javaPackage,
-                  name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
-                )
-              )
-            ],
-            conversion: .escapingClosureLowering(
-              syntheticFunction: syntheticFunction
-            ),
-            indirectConversion: nil,
-            conversionCheck: nil,
-            syntheticClosure: syntheticFunction
-          )
-        }
-
-        // Non-escaping closures use the legacy translation
-        var parameters = [NativeParameter]()
-        for (i, parameter) in fn.parameters.enumerated() {
-          let closureParamName = parameter.parameterName ?? "_\(i)"
-          let closureParameter = try translateClosureParameter(
-            parameter.type,
-            parameterName: closureParamName
-          )
-          parameters.append(closureParameter)
-        }
-
-        let result = try translateClosureResult(fn.resultType)
-
-        return NativeParameter(
-          parameters: [
-            JavaParameter(
-              name: parameterName,
-              type: .class(
-                package: javaPackage,
-                name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
-              )
-            )
-          ],
-          conversion: .closureLowering(
-            parameters: parameters,
-            result: result
-          ),
-          indirectConversion: nil,
-          conversionCheck: nil
+      case .function(let functionType):
+        return try translateFunctionParameter(
+          swiftType: type,
+          functionType: functionType,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName
         )
 
       case .opaque(let proto), .existential(let proto):
@@ -434,6 +360,125 @@ extension JNISwift2JavaGenerator {
         indirectConversion: nil,
         conversionCheck: nil
       )
+    }
+
+    func extractKnownJavaFunctionalInterfaceType(
+      functionType: SwiftFunctionType,
+      parameterName: String,
+      parameters: [JNISwift2JavaGenerator.NativeParameter],
+      result: JNISwift2JavaGenerator.NativeResult
+    ) -> NativeParameter? {
+      if !functionType.isEscaping && functionType.parameters.isEmpty && functionType.resultType.isVoid {
+        return NativeParameter(
+          parameters: [
+            JavaParameter(
+              name: parameterName,
+              type: JavaType.javaLangRunnable
+            )
+          ],
+          conversion: .closureLowering(
+            parameters: parameters,
+            result: result
+          ),
+          indirectConversion: nil,
+          conversionCheck: nil
+        )
+      }
+      return nil
+    }
+
+    func translateFunctionParameter(
+      swiftType: SwiftType,
+      functionType: SwiftFunctionType,
+      parameterName: String,
+      methodName: String,
+      parentName: SwiftQualifiedTypeName
+    ) throws -> NativeParameter {
+      // @Sendable is not supported yet as "environment" is later captured inside the closure.
+      if functionType.isEscaping {
+        // For escaping closures we e need to create a Swift wrapper around
+        // the passed down Java functional interface because we must keep it
+        // alive with a global ref, that will remain around for as long as the
+        // escaping closure is.
+        //
+        // Prepare the name and shapes of the Java side functional interface
+        // and Swift side @JavaInterface wrapper we'll use to implement that
+        // interface (and keep the Java object reachable).
+
+        // Name it: interface MyClass_myMethod_theClosure { ... }
+        let javaClosureInterfaceName = String.flatName(
+          prefix: "Java",
+          parent: parentName,
+          method: methodName,
+          parameter: parameterName,
+        )
+        let javaBinaryName = String.javaBinaryName(
+          package: self.javaPackage,
+          parent: parentName,
+          method: methodName,
+          qualifier: parameterName,
+        )
+        let generator = JavaInterfaceProtocolWrapperGenerator()
+        let syntheticFunction = try generator.generateSyntheticClosureFunction(
+          functionType: functionType,
+          javaInterfaceName: javaClosureInterfaceName,
+          javaBinaryName: javaBinaryName,
+        )
+
+        return NativeParameter(
+          parameters: [
+            JavaParameter(
+              name: parameterName,
+              type: .class(
+                package: javaPackage,
+                name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
+              )
+            )
+          ],
+          conversion: .escapingClosureLowering(
+            syntheticFunction: syntheticFunction
+          ),
+          indirectConversion: nil,
+          conversionCheck: nil,
+          syntheticClosure: syntheticFunction
+        )
+      }
+
+      // Non-escaping closures use the legacy translation
+      var parameters = [NativeParameter]()
+      for (i, parameter) in functionType.parameters.enumerated() {
+        let closureParamName = parameter.parameterName ?? "_\(i)"
+        let closureParameter = try translateClosureParameter(
+          parameter.type,
+          parameterName: closureParamName
+        )
+        parameters.append(closureParameter)
+      }
+
+      let result = try translateClosureResult(functionType.resultType)
+      return extractKnownJavaFunctionalInterfaceType(
+        functionType: functionType,
+        parameterName: parameterName,
+        parameters: parameters,
+        result: result
+      )
+        ?? NativeParameter(
+          parameters: [
+            JavaParameter(
+              name: parameterName,
+              type: .class(
+                package: javaPackage,
+                name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
+              )
+            )
+          ],
+          conversion: .closureLowering(
+            parameters: parameters,
+            result: result
+          ),
+          indirectConversion: nil,
+          conversionCheck: nil
+        )
     }
 
     func translateProtocolParameter(
@@ -1644,10 +1689,17 @@ extension JNISwift2JavaGenerator {
           $0.conversion.render(&printer, $0.parameters.first!.name)
         }
 
+        let methodName =
+          if parameters.isEmpty && nativeResult.javaType.isVoid {
+            "run"
+          } else {
+            "apply"
+          }
+
         printer.print(
           """
           let class$ = environment.interface.GetObjectClass(environment, \(placeholder))
-          let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "\(methodSignature.mangledName)")!
+          let methodID$ = environment.interface.GetMethodID(environment, class$, "\(methodName)", "\(methodSignature.mangledName)")!
           environment.interface.DeleteLocalRef(environment, class$)
           let arguments$: [jvalue] = [\(arguments.joined(separator: .comma))]
           """

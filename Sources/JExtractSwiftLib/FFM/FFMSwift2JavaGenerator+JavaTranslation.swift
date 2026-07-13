@@ -489,13 +489,11 @@ extension FFMSwift2JavaGenerator {
           genericRequirements: genericRequirements
         )
 
-      case .function:
-        return TranslatedParameter(
-          parameter: JavaParameter(
-            name: parameterName,
-            type: JavaType.class(package: nil, name: "\(methodName).\(parameterName)")
-          ),
-          conversion: .call(.placeholder, function: "\(methodName).$toUpcallStub", withArena: true)
+      case .function(let functionType):
+        return translateFunctionParameter(
+          functionType: functionType,
+          parameterName: parameterName,
+          methodName: methodName
         )
 
       case .existential, .opaque, .genericParameter:
@@ -565,6 +563,35 @@ extension FFMSwift2JavaGenerator {
       return TranslatedParameter(
         parameter: JavaParameter(name: parameterName, type: javaType),
         conversion: .commaSeparated(elementConversions)
+      )
+    }
+
+    // Extract Java known functional interface type or null if not exists
+    func extractKnownJavaFunctionalInterfaceType(
+      functionType: SwiftFunctionType,
+    ) -> JavaType? {
+      if functionType.parameters.isEmpty && functionType.resultType.isVoid {
+        JavaType.javaLangRunnable
+      } else {
+        nil
+      }
+    }
+
+    /// Translate a Swift Function parameter to the Java interface.
+    func translateFunctionParameter(
+      functionType: SwiftFunctionType,
+      parameterName: String,
+      methodName: String,
+    ) -> TranslatedParameter {
+      let parameterType =
+        extractKnownJavaFunctionalInterfaceType(functionType: functionType) ?? JavaType.class(package: nil, name: "\(methodName).\(parameterName)")
+
+      return TranslatedParameter(
+        parameter: JavaParameter(
+          name: parameterName,
+          type: parameterType
+        ),
+        conversion: .call(.placeholder, function: "\(methodName).$toUpcallStub", withArena: true)
       )
     }
 
