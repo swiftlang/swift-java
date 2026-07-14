@@ -383,6 +383,7 @@ open class JavaThread: JavaObject {
   open override func toString() -> String
 }
 extension JavaThread {
+  /// Java `sealed interface`, permits: `java.lang.Thread$Builder$OfPlatform`, `java.lang.Thread$Builder$OfVirtual`
   @JavaInterface("java.lang.Thread$Builder")
   public struct Builder {
     /// Java method `inheritInheritableThreadLocals`.
@@ -423,6 +424,7 @@ extension JavaThread {
   }
 }
 extension JavaThread.Builder {
+  /// Java `sealed interface`, permits: `java.lang.ThreadBuilders$PlatformThreadBuilder`
   @JavaInterface("java.lang.Thread$Builder$OfPlatform", extends: JavaThread.Builder.self)
   public struct OfPlatform {
     /// Java method `daemon`.
@@ -499,6 +501,7 @@ extension JavaThread.Builder {
   }
 }
 extension JavaThread.Builder {
+  /// Java `sealed interface`, permits: `java.lang.ThreadBuilders$VirtualThreadBuilder`
   @JavaInterface("java.lang.Thread$Builder$OfVirtual", extends: JavaThread.Builder.self)
   public struct OfVirtual {
     /// Java method `inheritInheritableThreadLocals`.
