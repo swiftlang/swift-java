@@ -17,6 +17,15 @@ import SwiftJavaJNICore
 enum KnownFunctionalInterface {
   case runnable
 
+  init?(_ parameters: [JavaType], _ result: JavaType) {
+    switch (parameters, result) {
+    case ([], .void):
+      self = .runnable
+    default:
+      return nil
+    }
+  }
+
   var javaType: JavaType {
     switch self {
     case .runnable: return JavaType.javaLangRunnable
