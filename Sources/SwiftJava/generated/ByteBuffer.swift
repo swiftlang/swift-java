@@ -38,6 +38,7 @@ extension JavaClass<ByteBuffer> {
   @JavaStaticMethod
   public func wrap(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
 }
+/// Java `sealed class`, permits: `java.nio.HeapByteBuffer`, `java.nio.MappedByteBuffer`
 @JavaClass("java.nio.ByteBuffer")
 open class ByteBuffer: JavaObject {
   /// Java method `alignedSlice`.
