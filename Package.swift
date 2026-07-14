@@ -11,6 +11,19 @@ if let localPath = Context.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
   swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", branch: "main")
 }
 
+// Set SWIFTJAVA_DOCC_PLUGIN_INSTALL=1 to install the docc-plugin automatically.
+// This is a workaround because swift-subprocess includes the plugin explicitly,
+// which breaks tools trying to add `swift package add-dependency` the plugin
+// to swift-java because it thinks the plugin was already added, but it is not.
+let extraDependencies: [Package.Dependency]
+if Context.environment["SWIFTJAVA_DOCC_PLUGIN_INSTALL"] == "1" {
+  extraDependencies = [
+    .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.5.0")
+  ]
+} else {
+  extraDependencies = []
+}
+
 let package = Package(
   name: "swift-java",
   platforms: [
@@ -159,7 +172,7 @@ let package = Package(
 
     // Benchmarking
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
-  ],
+  ] + extraDependencies,
   targets: [
     .target(
       name: "SwiftJavaDocumentation",
