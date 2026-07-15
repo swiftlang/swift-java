@@ -17,6 +17,8 @@ import SwiftSyntax
 /// Any extracted Swift declaration
 public protocol ExtractedSwiftDecl: AnyObject {}
 
+public enum SwiftOperatorKind { case prefix; case binary; case postfix }
+
 public enum SwiftAPIKind: Equatable {
   case function
   case initializer
@@ -25,7 +27,7 @@ public enum SwiftAPIKind: Equatable {
   case enumCase
   case subscriptGetter
   case subscriptSetter
-  case `operator`
+  case `operator`(SwiftOperatorKind)
 }
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
