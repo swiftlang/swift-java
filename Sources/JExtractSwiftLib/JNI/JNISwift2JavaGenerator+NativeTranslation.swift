@@ -1689,9 +1689,10 @@ extension JNISwift2JavaGenerator {
           $0.conversion.render(&printer, $0.parameters.first!.name)
         }
 
+
         let methodName =
-          if parameters.isEmpty && nativeResult.javaType.isVoid {
-            "run"
+          if let known = KnownJavaFunctionalInterface.find(methodSignature) {
+            known.method
           } else {
             "apply"
           }
