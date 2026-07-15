@@ -1691,7 +1691,7 @@ extension JNISwift2JavaGenerator {
 
 
         let methodName =
-          if let known = KnownFunctionalInterface(methodSignature.parameterTypes, methodSignature.resultType) {
+          if let known = KnownJavaFunctionalInterface.find(methodSignature) {
             known.method
           } else {
             "apply"

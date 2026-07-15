@@ -256,7 +256,7 @@ extension FFMSwift2JavaGenerator {
 
       printFunctionDescriptorDefinition(&printer, cResultType, cParams)
       let (interfaceName, methodName) =
-        if let known = KnownFunctionalInterface(cParameterTypes.map { $0.javaType }, cResultType.javaType) {
+        if let known = KnownJavaFunctionalInterface.find(parameters: cParameterTypes, result: cResultType) {
           (known.javaType.description, known.method)
         } else {
           ("Function", "apply")

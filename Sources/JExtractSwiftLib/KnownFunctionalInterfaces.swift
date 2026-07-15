@@ -14,27 +14,41 @@
 
 import SwiftJavaJNICore
 
-enum KnownFunctionalInterface {
-  case runnable
+/// Describes a known functional interface such as `Runnable.run()` and similar.
+struct KnownJavaFunctionalInterface: Sendable {
+  let javaType: JavaType
+  let method: String
+  let parameters: [JavaType]
+  let result: JavaType
 
-  init?(_ parameters: [JavaType], _ result: JavaType) {
-    switch (parameters, result) {
-    case ([], .void):
-      self = .runnable
-    default:
-      return nil
-    }
+  static let runnable = KnownJavaFunctionalInterface(
+    JavaType.javaLangRunnable,
+    method: "run",
+    parameters: [],
+    result: .void
+  )
+
+  static let all: [KnownJavaFunctionalInterface] = [
+    .runnable
+  ]
+
+  static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
+    all.first { $0.parameters == parameters && $0.result == result }
   }
 
-  var javaType: JavaType {
-    switch self {
-    case .runnable: return JavaType.javaLangRunnable
-    }
+  static func find(parameters: [CType], result: CType) -> KnownJavaFunctionalInterface? {
+    find(parameters: parameters.map(\.javaType), result: result.javaType)
   }
 
-  var method: String {
-    switch self {
-    case .runnable: return "run"
-    }
+  static func find(_ methodSignature: MethodSignature) -> KnownJavaFunctionalInterface? {
+    find(parameters: methodSignature.parameterTypes, result: methodSignature.resultType)
   }
+
+  init(_ javaType: JavaType, method: String, parameters: [JavaType], result: JavaType) {
+    self.javaType = javaType
+    self.method = method
+    self.parameters = parameters
+    self.result = result
+  }
+
 }
