@@ -637,17 +637,11 @@ extension JNISwift2JavaGenerator {
       }
       .joined(separator: ", ")
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
-    case .`operator`:
-          let downcallArguments: String = zip(
-        decl.functionSignature.parameters,
-        arguments,
-      ).map { originalParam, argument in
-        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
-        return "\(label)\(argument)"
+    case .binaryOperator:
+      guard arguments.count == 2 else {
+        fatalError("Binary operator must have exactly 2 arguments: \(decl)")
       }
-      .joined(separator: ", ")
-      result = "\(tryClause)\(callee).\(translatedDecl.name)(\(downcallArguments))"
-
+      result = "(\(tryClause) ((\(arguments.first!)) \(decl.name) (\(arguments.last!))))"
     case .enumCase:
       let downcallArguments = zip(
         decl.functionSignature.parameters,
