@@ -38,14 +38,14 @@ final class SwiftAnalysisVisitor {
   }
   private var deferredConstrainedExtensions: [DeferredConstrainedExtension] = []
 
-  private static func operatorKind(_ node: FunctionDeclSyntax) -> SwiftOperatorKind? {
+  private static func operatorKind(_ node: FunctionDeclSyntax) -> SwiftAPIKind? {
     switch node.name.tokenKind {
     case .binaryOperator:
-      return .binary
+      return .binaryOperator
     case .prefixOperator:
-      return .prefix
+      return .prefixOperator
     case .postfixOperator:
-      return .postfix
+      return .postfixOperator
     default:
       return nil
     }
@@ -216,7 +216,7 @@ final class SwiftAnalysisVisitor {
 
     let apiKind: SwiftAPIKind =
       if typeContext != nil && Self.operatorKind(node) != nil {
-        .operator(Self.operatorKind(node)!)
+        Self.operatorKind(node)!
       } else {
         .function
       }
