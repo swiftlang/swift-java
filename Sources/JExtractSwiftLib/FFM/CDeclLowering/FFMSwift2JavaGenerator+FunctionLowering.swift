@@ -1030,7 +1030,7 @@ extension LoweredFunctionSignature {
     // Build the result.
     let resultExpr: ExprSyntax
     switch apiKind {
-    case .function, .initializer, .`operator`:
+    case .function, .initializer:
       let arguments = paramExprs.enumerated()
         .map { (i, argument) -> String in
           let argExpr = original.parameters[i].convention == .inout ? "&\(argument)" : argument
@@ -1038,6 +1038,18 @@ extension LoweredFunctionSignature {
         }
         .joined(separator: ", ")
       resultExpr = "\(callee)(\(raw: arguments))"
+
+    case .binaryOperator:
+      assert(paramExprs.count == 2)
+      resultExpr = "\(paramExprs[0]) \(callee) \(paramExprs[1])"
+
+    case .prefixOperator:
+      assert(paramExprs.count == 1)
+      resultExpr = "\(callee)\(paramExprs[0])"
+
+    case .postfixOperator:
+      assert(paramExprs.count == 1)
+      resultExpr = "\(paramExprs[0])\(callee)"
 
     case .getter:
       assert(paramExprs.isEmpty)
