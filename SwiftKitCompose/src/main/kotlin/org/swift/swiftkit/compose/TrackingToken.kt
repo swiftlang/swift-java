@@ -31,11 +31,6 @@ class TrackingToken {
 
     /**
      * Records a read of this token in the current Compose snapshot.
-     *
-     * Called by a bridged getter so that the composable performing the read is
-     * subscribed to this token and recomposes when [invalidate] is later called.
-     * Reading outside of a composition (e.g. from a background thread) is a
-     * harmless no-op.
      */
     fun observe() {
         version.intValue
@@ -44,9 +39,6 @@ class TrackingToken {
     /**
      * Marks the tracked property as changed, scheduling recomposition of every
      * composable that previously called [observe] on this token.
-     *
-     * Called when the Swift side reports a change via
-     * [SwiftObserverCallback.onPropertyChanged].
      */
     fun invalidate() {
         version.intValue++

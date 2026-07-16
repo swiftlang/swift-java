@@ -31,17 +31,11 @@ package org.swift.swiftkit.compose
 interface SwiftObservable {
     /**
      * Begins observing the Swift model if it is not already being observed.
-     *
-     * The first call (observer count 0 → 1) subscribes to the Swift side; later
-     * calls only increment the observer count.
      */
     fun retainObserver()
 
     /**
      * Stops observing the Swift model once the last observer goes away.
-     *
-     * The final call (observer count 1 → 0) tears down the Swift-side
-     * subscription; earlier calls only decrement the observer count.
      */
     fun releaseObserver()
 }
