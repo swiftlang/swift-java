@@ -30,12 +30,11 @@ let package = Package(
     .macOS(.v13)
   ],
   products: [
-    // ==== SwiftJava (i.e. calling Java directly Swift utilities)
-    .library(
-      name: "SwiftJava",
-      type: .dynamic,
-      targets: ["SwiftJava", "SwiftJavaRuntimeSupport"]
-    ),
+    // NOTE: the dynamic "SwiftJava" product (targets: ["SwiftJava", "SwiftJavaRuntimeSupport"]) has been
+    // removed here (local edit, not upstream) because it self-conflicts under SwiftPM's duplicate-static-
+    // linkage check whenever another dynamic product (e.g. AndroidSwiftUI's SwiftAndroidApp.so) is also
+    // being built in the same graph: SwiftJavaRuntimeSupport statically depends on SwiftJava, which is
+    // also directly listed in this same dynamic product. Use "SwiftJavaStatic" instead.
 
     // EXPERIMENTAL
     //
