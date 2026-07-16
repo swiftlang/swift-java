@@ -70,7 +70,7 @@ package struct JavaIdentifierFactory {
       case .setter, .subscriptSetter: decl.javaSetterName!
       case .function, .initializer, .enumCase: decl.name
       case .binaryOperator, .prefixOperator, .postfixOperator:
-        Self.javaOperatorName(decl.name, index: decl.name.startIndex)
+        Self.javaOperatorName(decl.name)
       }
     var methodName = baseName + paramsSuffix(decl, baseName: baseName)
     if Self.javaKeywords.contains(methodName) {
@@ -96,28 +96,32 @@ package struct JavaIdentifierFactory {
     }
   }
 
-  private static func javaOperatorName(_ swiftName: String, index: String.Index) -> String {
-    guard index < swiftName.endIndex else { return "" }
+  private static func javaOperatorName(_ swiftName: String) -> String {
+    var index = swiftName.startIndex
+    var javaName = ""
 
-    let isFirstToken = index == swiftName.startIndex
-    let oneCharacterEndIndex = swiftName.index(after: index)
-    let oneCharacterToken = String(swiftName[index..<oneCharacterEndIndex])
-    var tokenEndIndex = oneCharacterEndIndex
-    var tokenName = knownOperatorNames[oneCharacterToken] ?? "operator"
+    while index < swiftName.endIndex {
+      let isFirstToken = index == swiftName.startIndex
+      let oneCharacterEndIndex = swiftName.index(after: index)
+      let oneCharacterToken = String(swiftName[index..<oneCharacterEndIndex])
+      var tokenEndIndex: String.Index = oneCharacterEndIndex
+      var tokenName = knownOperatorNames[oneCharacterToken] ?? "operator"
 
-    // Prefer a known two-character token before decl.name.startIndexfalling back to one character.
-    if oneCharacterEndIndex < swiftName.endIndex {
-      let twoCharacterEndIndex = swiftName.index(after: oneCharacterEndIndex)
-      let twoCharacterToken = String(swiftName[index..<twoCharacterEndIndex])
-      if let knownName = knownOperatorNames[twoCharacterToken] {
-        tokenEndIndex = twoCharacterEndIndex
-        tokenName = knownName
+      // Prefer a known two-character token if it exists, e.g. `==` instead of `=` + `=`.
+      if oneCharacterEndIndex < swiftName.endIndex {
+        let twoCharacterEndIndex = swiftName.index(after: oneCharacterEndIndex)
+        let twoCharacterToken = String(swiftName[index..<twoCharacterEndIndex])
+        if let knownName = knownOperatorNames[twoCharacterToken] {
+          tokenEndIndex = twoCharacterEndIndex
+          tokenName = knownName
+        }
       }
+
+      javaName += isFirstToken ? tokenName : tokenName.firstCharacterUppercased
+      index = tokenEndIndex
     }
 
-    // index = tokenEndIndex
-    let currentName = isFirstToken ? tokenName : tokenName.firstCharacterUppercased
-    return currentName + javaOperatorName(swiftName, index: tokenEndIndex)
+    return javaName
   }
 
   private static let knownOperatorNames: [String: String] = [
