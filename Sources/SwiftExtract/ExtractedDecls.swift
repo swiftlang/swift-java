@@ -346,7 +346,9 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
       case .function, .initializer: ""
       case .subscriptGetter: "subscriptGetter:"
       case .subscriptSetter: "subscriptSetter:"
-      case .operator: "operator:"
+      case .prefixOperator: "prefixOperator:"
+      case .binaryOperator: "binaryOperator:"
+      case .postfixOperator: "postfixOperator:"
       }
 
     let context =

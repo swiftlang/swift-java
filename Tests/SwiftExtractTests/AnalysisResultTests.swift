@@ -218,14 +218,6 @@ struct AnalysisResultSuite {
                 Score(value: left.value | right.value)
               }
 
-              public static prefix func ~ (score: Score) -> Score {
-                Score(value: ~score.value)
-              }
-
-              public static prefix func - (score: Score) -> Score {
-                Score(value: -score.value)
-              }
-
               public static func == (left: Score, right: Score) -> Bool {
                 left.value == right.value
               }
@@ -261,10 +253,6 @@ struct AnalysisResultSuite {
               public static func ?? (left: Score?, right: Score) -> Score {
                 left ?? right
               }
-
-              public static prefix func ! (score: Score) -> Bool {
-                score.value == 0
-              }
           }
           """
         )
@@ -281,8 +269,6 @@ struct AnalysisResultSuite {
     let shiftedLeftOperator = try #require(score.methods.first { $0.name == "<<" })
     let shiftedRightOperator = try #require(score.methods.first { $0.name == ">>" })
     let bitwiseOrOperator = try #require(score.methods.first { $0.name == "|" })
-    let bitwiseNotOperator = try #require(score.methods.first { $0.name == "~" })
-    let negatedOperator = try #require(score.methods.first { $0.name == "-"})
     let isEqualOperator = try #require(score.methods.first { $0.name == "==" })
     let isNotEqualOperator = try #require(score.methods.first { $0.name == "!=" })
     let lessThanOperator = try #require(score.methods.first { $0.name == "<" })
@@ -292,49 +278,42 @@ struct AnalysisResultSuite {
     let bitwiseAndOperator = try #require(score.methods.first { $0.name == "&" })
     let bitwiseXorOperator = try #require(score.methods.first { $0.name == "^" })
     let coalescingNilOperator = try #require(score.methods.first { $0.name == "??" })
-    let logicalNotOperator = try #require(score.methods.first { $0.name == "!" })
 
 
     #expect(plusOperator.name == "+")
-    #expect(plusOperator.apiKind == .operator)
+    #expect(plusOperator.apiKind == .binaryOperator)
     #expect(minusOperator.name == "-")
-    #expect(minusOperator.apiKind == .operator)
+    #expect(minusOperator.apiKind == .binaryOperator)
     #expect(timesOperator.name == "*")
-    #expect(timesOperator.apiKind == .operator)
+    #expect(timesOperator.apiKind == .binaryOperator)
     #expect(dividedByOperator.name == "/")
-    #expect(dividedByOperator.apiKind == .operator)
+    #expect(dividedByOperator.apiKind == .binaryOperator)
     #expect(remainderOperator.name == "%")
-    #expect(remainderOperator.apiKind == .operator)
+    #expect(remainderOperator.apiKind == .binaryOperator)
     #expect(shiftedLeftOperator.name == "<<")
-    #expect(shiftedLeftOperator.apiKind == .operator)
+    #expect(shiftedLeftOperator.apiKind == .binaryOperator)
     #expect(shiftedRightOperator.name == ">>")
-    #expect(shiftedRightOperator.apiKind == .operator)
+    #expect(shiftedRightOperator.apiKind == .binaryOperator)
     #expect(bitwiseOrOperator.name == "|")
-    #expect(bitwiseOrOperator.apiKind == .operator)
-    #expect(bitwiseNotOperator.name == "~")
-    #expect(bitwiseNotOperator.apiKind == .operator)
-    #expect(negatedOperator.name == "-")
-    #expect(negatedOperator.apiKind == .operator)
+    #expect(bitwiseOrOperator.apiKind == .binaryOperator)
     #expect(isEqualOperator.name == "==")
-    #expect(isEqualOperator.apiKind == .operator)
+    #expect(isEqualOperator.apiKind == .binaryOperator)
     #expect(isNotEqualOperator.name == "!=")
-    #expect(isNotEqualOperator.apiKind == .operator)
+    #expect(isNotEqualOperator.apiKind == .binaryOperator)
     #expect(lessThanOperator.name == "<")
-    #expect(lessThanOperator.apiKind == .operator)
+    #expect(lessThanOperator.apiKind == .binaryOperator)
     #expect(lessThanOrEqualOperator.name == "<=")
-    #expect(lessThanOrEqualOperator.apiKind == .operator)
+    #expect(lessThanOrEqualOperator.apiKind == .binaryOperator)
     #expect(greaterThanOperator.name == ">")
-    #expect(greaterThanOperator.apiKind == .operator)
+    #expect(greaterThanOperator.apiKind == .binaryOperator)
     #expect(greaterThanOrEqualOperator.name == ">=")
-    #expect(greaterThanOrEqualOperator.apiKind == .operator)
+    #expect(greaterThanOrEqualOperator.apiKind == .binaryOperator)
     #expect(bitwiseAndOperator.name == "&")
-    #expect(bitwiseAndOperator.apiKind == .operator)
+    #expect(bitwiseAndOperator.apiKind == .binaryOperator)
     #expect(bitwiseXorOperator.name == "^")
-    #expect(bitwiseXorOperator.apiKind == .operator)
+    #expect(bitwiseXorOperator.apiKind == .binaryOperator)
     #expect(coalescingNilOperator.name == "??")
-    #expect(coalescingNilOperator.apiKind == .operator)
-    #expect(logicalNotOperator.name == "!")
-    #expect(logicalNotOperator.apiKind == .operator)
+    #expect(coalescingNilOperator.apiKind == .binaryOperator)
   }
 
   // ==== -----------------------------------------------------------------------

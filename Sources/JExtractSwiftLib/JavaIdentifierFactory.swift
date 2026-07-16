@@ -37,7 +37,7 @@ package struct JavaIdentifierFactory {
         switch method.apiKind {
         case .getter, .subscriptGetter: method.javaGetterName!
         case .setter, .subscriptSetter: method.javaSetterName!
-        case .function, .initializer, .enumCase, .`operator`: method.name
+        case .function, .initializer, .enumCase, .binaryOperator, .prefixOperator, .postfixOperator: method.name
         }
       methodsByBaseName[baseName, default: []].append(method)
     }
@@ -69,7 +69,8 @@ package struct JavaIdentifierFactory {
       case .getter, .subscriptGetter: decl.javaGetterName!
       case .setter, .subscriptSetter: decl.javaSetterName!
       case .function, .initializer, .enumCase: decl.name
-      case .operator: Self.javaOperatorName(decl.name)
+      case .binaryOperator, .prefixOperator, .postfixOperator:
+        Self.javaOperatorName(decl.name, index: decl.name.startIndex)
       }
     var methodName = baseName + paramsSuffix(decl, baseName: baseName)
     if Self.javaKeywords.contains(methodName) {
@@ -95,17 +96,28 @@ package struct JavaIdentifierFactory {
     }
   }
 
-  private static func javaOperatorName(_ swiftName: String) -> String {
-    if let knownName = knownOperatorNames[swiftName] {
-      return knownName
+  private static func javaOperatorName(_ swiftName: String, index: String.Index) -> String {
+    guard index < swiftName.endIndex else { return "" }
+
+    let isFirstToken = index == swiftName.startIndex
+    let oneCharacterEndIndex = swiftName.index(after: index)
+    let oneCharacterToken = String(swiftName[index..<oneCharacterEndIndex])
+    var tokenEndIndex = oneCharacterEndIndex
+    var tokenName = knownOperatorNames[oneCharacterToken] ?? "operator"
+
+    // Prefer a known two-character token before decl.name.startIndexfalling back to one character.
+    if oneCharacterEndIndex < swiftName.endIndex {
+      let twoCharacterEndIndex = swiftName.index(after: oneCharacterEndIndex)
+      let twoCharacterToken = String(swiftName[index..<twoCharacterEndIndex])
+      if let knownName = knownOperatorNames[twoCharacterToken] {
+        tokenEndIndex = twoCharacterEndIndex
+        tokenName = knownName
+      }
     }
 
-    return swiftName.enumerated()
-      .map { index, character in
-        let name = knownOperatorNames[String(character)] ?? "operator"
-        return index == 0 ? name : name.firstCharacterUppercased
-      }
-      .joined()
+    // index = tokenEndIndex
+    let currentName = isFirstToken ? tokenName : tokenName.firstCharacterUppercased
+    return currentName + javaOperatorName(swiftName, index: tokenEndIndex)
   }
 
   private static let knownOperatorNames: [String: String] = [
