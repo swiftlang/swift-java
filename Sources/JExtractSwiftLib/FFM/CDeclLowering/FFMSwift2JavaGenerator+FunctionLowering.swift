@@ -1041,15 +1041,15 @@ extension LoweredFunctionSignature {
 
     case .binaryOperator:
       assert(paramExprs.count == 2)
-      resultExpr = "\(paramExprs[0]) \(callee) \(paramExprs[1])"
+      resultExpr = "(\(paramExprs[0]) \(callee) \(paramExprs[1]))"
 
     case .prefixOperator:
       assert(paramExprs.count == 1)
-      resultExpr = "\(callee)\(paramExprs[0])"
+      resultExpr = "(\(callee)\(paramExprs[0]))"
 
     case .postfixOperator:
       assert(paramExprs.count == 1)
-      resultExpr = "\(paramExprs[0])\(callee)"
+      resultExpr = "(\(paramExprs[0])\(callee))"
 
     case .getter:
       assert(paramExprs.isEmpty)

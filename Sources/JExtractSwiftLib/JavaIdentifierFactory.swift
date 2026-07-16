@@ -145,6 +145,9 @@ package struct JavaIdentifierFactory {
     "??": "coalescingNil",
     "!": "logicalNot",
     "=": "equal",
+    "&&": "and",
+    "||": "or",
+    ".": "dot",
   ]
 
   static let javaKeywords: Set<String> = [

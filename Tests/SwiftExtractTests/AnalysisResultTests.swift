@@ -177,7 +177,7 @@ struct AnalysisResultSuite {
   // ==== -----------------------------------------------------------------------
   // MARK: Operators
 
-  @Test func operatortest() throws {
+  @Test func operators() throws {
     let result = try analyze(
       sources: [
         (

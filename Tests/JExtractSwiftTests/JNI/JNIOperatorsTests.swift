@@ -141,7 +141,7 @@ struct JNIOperatorsTests {
         public func Java_com_example_swift_Number__00024plus__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, left: jlong, right: jlong) -> jlong {
           ...
           let result$ = UnsafeMutablePointer<Number>.allocate(capacity: 1)
-          result$.initialize(to: ( ((left$.pointee) + (right$.pointee)))
+          result$.initialize(to: (((left$.pointee) + (right$.pointee)))
           let resultBits$ = Int64(Int(bitPattern: result$))
           return resultBits$.getJNILocalRefValue(in: environment)
         }
