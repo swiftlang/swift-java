@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+infix operator +-==*
+
 public struct OperatorScore {
   public var value: Int64
 
@@ -33,5 +35,9 @@ public struct OperatorScore {
 
   public static func / (left: OperatorScore, right: OperatorScore) -> OperatorScore {
     OperatorScore(value: left.value / right.value)
+  }
+
+  public static func +-==* (left: OperatorScore, right: OperatorScore) -> String {
+    "Called +-==* in Java successfully with left: \(left.value) and right: \(right.value)"
   }
 }
