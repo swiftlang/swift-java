@@ -305,23 +305,27 @@ extension FFMSwift2JavaGenerator {
   ) {
     let cdeclDescriptor = "\(bindingDescriptorName).$\(functionType.name)"
     if functionType.isCompatibleWithC {
-      if !functionType.swiftType.isEscaping && functionType.parameters.isEmpty && functionType.swiftType.resultType.isVoid {
+      let (interfaceName, isKnownFuncInterface) =
+        if let known = KnownJavaFunctionalInterface.find(functionType) {
+          (known.javaType.description, true)
+        } else {
+          (functionType.name, false)
+        }
+
+      if !isKnownFuncInterface {
+        // If the user-facing functional interface is C ABI compatible, just extend
+        // the lowered function pointer parameter interface.
         printer.print(
           """
-          private static MemorySegment $toUpcallStub(java.lang.Runnable fi, Arena arena) {
-            return \(bindingDescriptorName).$\(functionType.name).toUpcallStub(fi, arena);
-          }
+          @FunctionalInterface
+          public interface \(interfaceName) extends \(cdeclDescriptor).Function {}
           """
         )
-        return
       }
-      // If the user-facing functional interface is C ABI compatible, just extend
-      // the lowered function pointer parameter interface.
+
       printer.print(
         """
-        @FunctionalInterface
-        public interface \(functionType.name) extends \(cdeclDescriptor).Function {}
-        private static MemorySegment $toUpcallStub(\(functionType.name) fi, Arena arena) {
+        private static MemorySegment $toUpcallStub(\(interfaceName) fi, Arena arena) {
           return \(bindingDescriptorName).$\(functionType.name).toUpcallStub(fi, arena);
         }
         """

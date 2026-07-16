@@ -55,6 +55,13 @@ struct KnownJavaFunctionalInterface: Sendable {
     return find(parameters: functionType.parameters, result: functionType.result)
   }
 
+  static func find(_ functionType: FFMSwift2JavaGenerator.TranslatedFunctionType) -> KnownJavaFunctionalInterface? {
+    if functionType.swiftType.isEscaping {
+      return nil
+    }
+    return find(parameters: functionType.parameters.map(\.parameter.type.javaType), result: functionType.result.javaResultType)
+  }
+
   init(_ javaType: JavaType, method: String, parameters: [JavaType], result: JavaType) {
     self.javaType = javaType
     self.method = method
