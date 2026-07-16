@@ -375,7 +375,7 @@ extension JNISwift2JavaGenerator {
     printer.println()
   }
 
-  private func printObservableSupport(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
+  private func printObservableSupport(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
     self.printObservableSubscriptionType(&printer, type)
 
     // $observe and $cancelObserve
@@ -431,7 +431,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printObservableSubscriptionType(_ printer: inout CodePrinter, _ type: ExtractedNominalType) {
+  private func printObservableSubscriptionType(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
     printer.print("@MainActor")
     printer.printBraceBlock("private final class \(type.observableSubscriptionTypeName)") { printer in
       printer.print(
@@ -1098,7 +1098,7 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printHeader(_ printer: inout CodePrinter) {
+  private func printHeader(_ printer: inout SwiftPrinter) {
     var imports = [
       "SwiftJava",
       "SwiftJavaJNICore",

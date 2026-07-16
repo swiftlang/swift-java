@@ -462,7 +462,7 @@ extension VariableDeclSyntax {
   ///   - minimumAccessLevel: the minimum access level being extracted
   public func supportedAccessorKinds(
     binding: PatternBindingSyntax,
-    minimumAccessLevel: AccessLevelMode
+    minimumAccessLevel: AccessLevelMode? = nil
   ) -> AccessorBlockSyntax.SupportedAccessorKinds {
     if self.bindingSpecifier.tokenKind == .keyword(.let) {
       return [.get]
@@ -474,7 +474,7 @@ extension VariableDeclSyntax {
 
     // Account for private(set) and similar modifiers
     for modifier in self.modifiers where modifier.detail?.detail.text == "set" {
-      if !minimumAccessLevel.matches(modifier) {
+      if let minimumAccessLevel, !minimumAccessLevel.matches(modifier) {
         return [.get]
       }
     }
