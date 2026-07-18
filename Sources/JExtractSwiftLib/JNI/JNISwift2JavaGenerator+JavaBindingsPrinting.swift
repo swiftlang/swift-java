@@ -792,9 +792,10 @@ extension JNISwift2JavaGenerator {
     }
 
     // If contains one function type and it's known java functional interface type, we don't need to print the whole class
-    if translated.functionTypes.count == 1, 
-       let ty = translated.functionTypes.first, 
-       KnownJavaFunctionalInterface.find(ty) != nil {
+    if translated.functionTypes.count == 1,
+      let ty = translated.functionTypes.first,
+      KnownJavaFunctionalInterface.find(ty) != nil
+    {
       return
     }
 
