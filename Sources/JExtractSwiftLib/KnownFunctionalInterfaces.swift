@@ -40,8 +40,26 @@ struct KnownJavaFunctionalInterface: Sendable {
     find(parameters: parameters.map(\.javaType), result: result.javaType)
   }
 
+  static func find(parameters: [JNISwift2JavaGenerator.TranslatedParameter], result: JNISwift2JavaGenerator.TranslatedResult) -> KnownJavaFunctionalInterface? {
+    find(parameters: parameters.map(\.parameter.type.javaType), result: result.javaType)
+  }
+
   static func find(_ methodSignature: MethodSignature) -> KnownJavaFunctionalInterface? {
     find(parameters: methodSignature.parameterTypes, result: methodSignature.resultType)
+  }
+
+  static func find(_ functionType: JNISwift2JavaGenerator.TranslatedFunctionType) -> KnownJavaFunctionalInterface? {
+    if functionType.isEscaping {
+      return nil
+    }
+    return find(parameters: functionType.parameters, result: functionType.result)
+  }
+
+  static func find(_ functionType: FFMSwift2JavaGenerator.TranslatedFunctionType) -> KnownJavaFunctionalInterface? {
+    if functionType.swiftType.isEscaping {
+      return nil
+    }
+    return find(parameters: functionType.parameters.map(\.parameter.type.javaType), result: functionType.result.javaResultType)
   }
 
   init(_ javaType: JavaType, method: String, parameters: [JavaType], result: JavaType) {

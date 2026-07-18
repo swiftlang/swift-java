@@ -791,12 +791,24 @@ extension JNISwift2JavaGenerator {
       return
     }
 
+    // If contains one function type and it's known java functional interface type, we don't need to print the whole class
+    if translated.functionTypes.count == 1,
+      let ty = translated.functionTypes.first,
+      KnownJavaFunctionalInterface.find(ty) != nil
+    {
+      return
+    }
+
     printer.printBraceBlock(
       """
       public static class \(translated.name)
       """
     ) { printer in
       for functionType in translated.functionTypes {
+        if KnownJavaFunctionalInterface.find(functionType) != nil {
+          continue
+        }
+
         printJavaBindingWrapperFunctionTypeHelper(&printer, functionType)
       }
     }

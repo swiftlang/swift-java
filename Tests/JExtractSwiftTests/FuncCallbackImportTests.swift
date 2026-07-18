@@ -95,10 +95,6 @@ final class FuncCallbackImportTests {
            * }
            */
           private static class $callback {
-            @FunctionalInterface
-            public interface Function {
-              void apply();
-            }
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
             private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.lang.Runnable.class, "run", DESC);
             private static MemorySegment toUpcallStub(java.lang.Runnable fi, Arena arena) {
@@ -203,10 +199,6 @@ final class FuncCallbackImportTests {
            * }
            */
           private static class $fn {
-            @FunctionalInterface
-            public interface Function {
-              void apply();
-            }
             private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid();
             private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.lang.Runnable.class, "run", DESC);
             private static MemorySegment toUpcallStub(java.lang.Runnable fi, Arena arena) {

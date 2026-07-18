@@ -174,29 +174,6 @@ struct JNIEscapingClosureTests {
   }
 
   @Test
-  func nonEscapingClosure_stillWorks() throws {
-    let source =
-      """
-      public func call(closure: () -> Void) {}
-      """
-
-    try assertOutput(
-      input: source,
-      .jni,
-      .java,
-      expectedChunks: [
-        """
-        /** Corresponds to the Swift closure parameter of type {@code () -> Void}. */
-        @FunctionalInterface
-        public interface closure {
-          void apply();
-        }
-        """
-      ]
-    )
-  }
-
-  @Test
   func escapingClosureWithParametersAndResult_swiftThunks() throws {
     let source =
       """

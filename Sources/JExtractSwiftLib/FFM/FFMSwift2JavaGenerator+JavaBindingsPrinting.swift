@@ -232,36 +232,38 @@ extension FFMSwift2JavaGenerator {
       private static class \(name)
       """
     ) { printer in
-      printer.print(
-        """
-        @FunctionalInterface
-        public interface Function {
-          \(cResultType.javaType) apply(\(paramDecls.joined(separator: .comma)));
+      let (interfaceName, methodName, isKnownFuncInterface) =
+        if let known = KnownJavaFunctionalInterface.find(parameters: cParameterTypes, result: cResultType) {
+          (known.javaType.description, known.method, true)
+        } else {
+          ("Function", "apply", false)
         }
-        """
-      )
 
-      if let impl {
+      if !isKnownFuncInterface {
         printer.print(
           """
-          public final static class Function$Impl implements Function {
-            \(impl.members.joinedJavaStatements(indent: 2))
-            public \(cResultType.javaType) apply(\(paramDecls.joined(separator: .comma))) {
-              \(impl.body)
-            }
+          @FunctionalInterface
+          public interface Function {
+            \(cResultType.javaType) apply(\(paramDecls.joined(separator: .comma)));
           }
           """
         )
+
+        if let impl {
+          printer.print(
+            """
+            public final static class Function$Impl implements Function {
+              \(impl.members.joinedJavaStatements(indent: 2))
+              public \(cResultType.javaType) apply(\(paramDecls.joined(separator: .comma))) {
+                \(impl.body)
+              }
+            }
+            """
+          )
+        }
       }
 
       printFunctionDescriptorDefinition(&printer, cResultType, cParams)
-      let (interfaceName, methodName) =
-        if let known = KnownJavaFunctionalInterface.find(parameters: cParameterTypes, result: cResultType) {
-          (known.javaType.description, known.method)
-        } else {
-          ("Function", "apply")
-        }
-
       printer.print(
         """
         private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(\(interfaceName).class, "\(methodName)", DESC);
@@ -303,23 +305,27 @@ extension FFMSwift2JavaGenerator {
   ) {
     let cdeclDescriptor = "\(bindingDescriptorName).$\(functionType.name)"
     if functionType.isCompatibleWithC {
-      if !functionType.swiftType.isEscaping && functionType.parameters.isEmpty && functionType.swiftType.resultType.isVoid {
+      let (interfaceName, isKnownFuncInterface) =
+        if let known = KnownJavaFunctionalInterface.find(functionType) {
+          (known.javaType.description, true)
+        } else {
+          (functionType.name, false)
+        }
+
+      if !isKnownFuncInterface {
+        // If the user-facing functional interface is C ABI compatible, just extend
+        // the lowered function pointer parameter interface.
         printer.print(
           """
-          private static MemorySegment $toUpcallStub(java.lang.Runnable fi, Arena arena) {
-            return \(bindingDescriptorName).$\(functionType.name).toUpcallStub(fi, arena);
-          }
+          @FunctionalInterface
+          public interface \(interfaceName) extends \(cdeclDescriptor).Function {}
           """
         )
-        return
       }
-      // If the user-facing functional interface is C ABI compatible, just extend
-      // the lowered function pointer parameter interface.
+
       printer.print(
         """
-        @FunctionalInterface
-        public interface \(functionType.name) extends \(cdeclDescriptor).Function {}
-        private static MemorySegment $toUpcallStub(\(functionType.name) fi, Arena arena) {
+        private static MemorySegment $toUpcallStub(\(interfaceName) fi, Arena arena) {
           return \(bindingDescriptorName).$\(functionType.name).toUpcallStub(fi, arena);
         }
         """

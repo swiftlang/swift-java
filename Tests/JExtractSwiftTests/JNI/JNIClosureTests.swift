@@ -31,15 +31,6 @@ struct JNIClosureTests {
       .java,
       expectedChunks: [
         """
-        public static class emptyClosure {
-          /** Corresponds to the Swift closure parameter of type {@code () -> ()}. */
-          @FunctionalInterface
-          public interface closure {
-            void apply();
-          }
-        }
-        """,
-        """
         /**
          * Downcall to Swift:
          * {@snippet lang=swift :
