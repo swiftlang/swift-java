@@ -366,9 +366,125 @@ extension JNISwift2JavaGenerator {
       printer.println()
     }
 
+    if config.swiftObservableBridging == .jetpackCompose, type.isObservable {
+      printObservableSupport(&printer, type)
+    }
+
     printSpecificTypeThunks(&printer, type)
     printTypeMetadataAddressThunk(&printer, type)
     printer.println()
+  }
+
+  private func printObservableSupport(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
+    self.printObservableSubscriptionType(&printer, type)
+
+    // $observe and $cancelObserve
+    let selfPointerParam = JavaParameter(name: "selfPointer", type: .long)
+    let callbackPointer = JavaParameter(name: "callback", type: .SwiftObserverCallback)
+    let parentName = type.qualifiedName
+
+    printCDecl(
+      &printer,
+      javaMethodName: "$observe",
+      parentName: type.effectiveJavaTypeName,
+      parameters: [
+        selfPointerParam,
+        callbackPointer
+      ],
+      resultType: .long,
+    ) { printer in
+      let selfVar = self.printSelfJLongToUnsafeMutablePointer(&printer, swiftParentName: parentName, selfPointerParam)
+
+      printer.print(
+        """
+        return MainActor.assumeIsolated {
+          let swiftCallback = JavaSwiftObserverCallback(javaThis: callback!, environment: environment)
+          let subscription = \(type.observableSubscriptionTypeName)(model: \(selfVar).pointee, callback: swiftCallback)
+          let unmanaged = Unmanaged.passRetained(subscription)
+          let rawPointer = unmanaged.toOpaque()
+          subscription.start()
+          return jlong(Int(bitPattern: rawPointer))
+        }
+        """
+      )
+    }
+
+    printCDecl(
+      &printer,
+      javaMethodName: "$cancelObserve",
+      parentName: type.effectiveJavaTypeName,
+      parameters: [
+        JavaParameter(name: "observerPointer", type: .long)
+      ],
+      resultType: .void,
+    ) { printer in
+      printer.print(
+        """
+        let rawPointer = UnsafeRawPointer(bitPattern: Int(observerPointer))!
+        let unmanaged = Unmanaged<\(type.observableSubscriptionTypeName)>.fromOpaque(rawPointer)
+        MainActor.assumeIsolated {
+          unmanaged.takeUnretainedValue().cancel()
+        }
+        unmanaged.release()
+        """
+      )
+    }
+  }
+
+  private func printObservableSubscriptionType(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
+    printer.print("@MainActor")
+    printer.printBraceBlock("private final class \(type.observableSubscriptionTypeName)") { printer in
+      printer.print(
+        """
+        private let model: \(type.qualifiedName)
+        private var tasks: [Task<Void, Never>] = []
+        private let callback: JavaSwiftObserverCallback
+        """
+      )
+
+      printer.printBraceBlock("init(model: \(type.qualifiedName), callback: JavaSwiftObserverCallback)") { printer in
+        printer.print(
+          """
+          self.model = model
+          self.callback = callback
+          """
+        )
+      }
+
+      printer.printBraceBlock("func start()") { printer in
+        for (id, variable) in type.observableVariables.enumerated() {
+
+          printer.print(
+            """
+            tasks.append(Task { @MainActor [weak self, model = model] in
+                // `Observations` emits the current value first.
+                // That initial element is not a change, so skip it and only forward
+                // subsequent emissions — otherwise every fresh subscription reports a
+                // spurious change, which can drive a recomposition feedback loop.
+                var isFirstValue = true
+                for await _ in Observations({ model.\(variable.name) }) {
+                  if isFirstValue { isFirstValue = false; continue }
+                  self?.signal(Int32(\(id)))
+                }
+            })
+            """
+          )
+        }
+      }
+
+      printer.printBraceBlock("func signal(_ id: Int32)") { printer in
+        printer.print("self.callback.onPropertyChanged(id)")
+      }
+
+      printer.printBraceBlock("func cancel()") { printer in
+        printer.print(
+          """
+          tasks.forEach { $0.cancel() }
+          tasks.removeAll()
+          """
+        )
+      }
+    }
   }
 
   private func printProtocolThunks(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) throws {
@@ -983,6 +1099,26 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printHeader(_ printer: inout SwiftPrinter) {
+    var imports = [
+      "SwiftJava",
+      "SwiftJavaJNICore",
+      "SwiftJavaRuntimeSupport"
+    ]
+
+    if config.swiftObservableBridging == .jetpackCompose {
+      imports.append("Observation")
+    }
+
+    func printImports(prefix: String? = nil) {
+      for swiftImport in imports {
+        if let prefix {
+          printer.print("\(prefix) import \(swiftImport)")
+        } else {
+          printer.print("import \(swiftImport)")
+        }
+      }
+    }
+
     // `public import` so the thunk file remains valid under
     // `InternalImportsByDefault` (SE-0409)
     printer.print(
@@ -990,16 +1126,12 @@ extension JNISwift2JavaGenerator {
       // Generated by swift-java
 
       #if hasFeature(InternalImportsByDefault)
-      public import SwiftJava
-      public import SwiftJavaJNICore
-      public import SwiftJavaRuntimeSupport
-      #else
-      import SwiftJava
-      import SwiftJavaJNICore
-      import SwiftJavaRuntimeSupport
-      #endif
       """
     )
+    printImports(prefix: "public")
+    printer.print("#else")
+    printImports()
+    printer.print("#endif")
 
     self.lookupContext.symbolTable.printImportedModules(&printer)
   }
@@ -1254,6 +1386,12 @@ extension SwiftNominalTypeDeclaration {
     }
 
     return "Java\(self.name)"
+  }
+}
+
+extension ExtractedNominalType {
+  var observableSubscriptionTypeName: String {
+    "_\(self.swiftNominal.flatName)Subscription"
   }
 }
 

@@ -83,6 +83,15 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
     !genericParameterNames.isEmpty && genericParameterNames.allSatisfy { genericArguments.keys.contains($0) }
   }
 
+  public var isObservable: Bool {
+    self.swiftNominal.asSwiftNominalType.isObservable
+  }
+
+  /// Variables that are observable if the parent is observable
+  public var observableVariables: [ExtractedFunc] {
+    self.variables.filter { $0.isCandiateForObservation }
+  }
+
   public init(swiftNominal: SwiftNominalTypeDeclaration, lookupContext: SwiftTypeLookupContext) throws {
     self.swiftNominal = swiftNominal
     self.specializationBaseType = nil
@@ -408,6 +417,18 @@ extension ExtractedFunc: Hashable {
   }
   public static func == (lhs: ExtractedFunc, rhs: ExtractedFunc) -> Bool {
     lhs === rhs
+  }
+}
+
+extension ExtractedFunc {
+  package var isCandiateForObservation: Bool {
+    guard let asVariableSyntax = self.swiftDecl.as(VariableDeclSyntax.self) else { return false }
+    guard let binding = asVariableSyntax.bindings.first else {
+      return false
+    }
+    let supportedAccessorKinds = asVariableSyntax.supportedAccessorKinds(binding: binding)
+    let isObservationIgnored = asVariableSyntax.attributes.contains(where: { $0.isSwiftObservationIgnored })
+    return self.apiKind == .getter && !self.isStatic && !isObservationIgnored && supportedAccessorKinds.contains(.set)
   }
 }
 

@@ -401,6 +401,10 @@ extension JNISwift2JavaGenerator {
 
       printer.println()
 
+      if config.swiftObservableBridging == .jetpackCompose, decl.isObservable {
+        printObservableSupport(&printer, decl)
+      }
+
       if decl.swiftNominal.kind == .enum {
         printEnumHelpers(&printer, decl)
         printer.println()
@@ -474,6 +478,95 @@ extension JNISwift2JavaGenerator {
         """
       )
     }
+  }
+
+  private func printObservableSupport(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) {
+    printer.print(
+      """
+      /** Pointer to the "Subscription" type that is observing changes to this object */
+      private long observerPointer;
+      
+      /** The count of how many are observing changes to this object */
+      private int observerCount;
+      """
+    )
+
+    for variable in decl.observableVariables {
+      printer.print(
+        """
+        /** Tracks Compose reads of {@code \(variable.name)}, so reading it inside a composable recomposes when Swift reports it changed. */
+        """
+      )
+      printer.print("private final TrackingToken \(variable.observableTrackerName) = new TrackingToken();")
+    }
+
+    printer.println()
+
+    printer.print(
+      """
+      /**
+       * Begins observing this Swift model on the first observer.
+       * <p>
+       * Reference counted: only the transition from 0 to 1 observers subscribes to
+       * the Swift side via {@link #$observe(long, SwiftObserverCallback)}.
+       * <p>
+       * Driven by {@code rememberSwiftObservable} from a Compose composition; expected
+       * to be called on the main thread.
+       */
+      @Override
+      public void retainObserver() {
+        if (observerCount++ == 0) {
+          observerPointer = $observe(selfPointer, this);
+        }
+      }
+
+      /**
+       * Stops observing this Swift model once the last observer goes away.
+       * <p>
+       * Reference counted: only the transition from 1 to 0 observers tears down the
+       * Swift-side subscription via {@link #$cancelObserve(long)}.
+       * <p>
+       * Driven by {@code rememberSwiftObservable} from a Compose composition; expected
+       * to be called on the main thread.
+       */
+      @Override
+      public void releaseObserver() {
+        if (--observerCount == 0) {
+          $cancelObserve(observerPointer);
+          observerPointer = 0;
+        }
+      }
+      """
+    )
+
+    printer.println()
+
+    printer.print(
+      """
+      /**
+       * Invoked from Swift on the main thread when an observed property changes.
+       * <p>
+       * Dispatches on the generator-assigned property {@code id} to invalidate the
+       * matching {@link TrackingToken}, recomposing composables that read it.
+       */
+      """
+    )
+    printer.printBraceBlock("@Override public void onPropertyChanged(int id)") { printer in
+      printer.printBraceBlock("switch (id)") { printer in
+        for (id, variable) in decl.observableVariables.enumerated() {
+          printer.print("case \(id) -> \(variable.observableTrackerName).invalidate();")
+        }
+      }
+    }
+
+    printer.println()
+
+    printer.print(
+      """
+      private static native long $observe(long selfPointer, SwiftObserverCallback cb);
+      private static native void $cancelObserve(long observerPointer);
+      """
+    )
   }
 
   /// Prints the `wrapMemoryAddressUnsafe` factory pair shared by every `JNISwiftInstance`.
@@ -573,6 +666,11 @@ extension JNISwift2JavaGenerator {
     for i in JNISwift2JavaGenerator.defaultJavaImports {
       printer.print("import \(i);")
     }
+
+    if config.swiftObservableBridging == .jetpackCompose {
+      printer.print("import org.swift.swiftkit.compose.*;")
+    }
+
     printer.print("")
   }
 
@@ -590,6 +688,11 @@ extension JNISwift2JavaGenerator {
     }
     modifiers.append("final")
     var implements = ["JNISwiftInstance"]
+
+    if config.swiftObservableBridging == .jetpackCompose, decl.isObservable {
+      implements += ["SwiftObservable", "SwiftObserverCallback"]
+    }
+
     implements += decl.inheritedTypes
       .compactMap(\.asNominalTypeDeclaration)
       .filter { $0.kind == .protocol }
@@ -950,10 +1053,21 @@ extension JNISwift2JavaGenerator {
       printer.print("\(signature);")
     } else {
       printer.printBraceBlock(signature) { printer in
+        if let importedFunc {
+          printObservableTriggerIfNeeded(&printer, importedFunc)
+        }
         printDowncall(&printer, translatedDecl)
       }
 
       printNativeFunction(&printer, translatedDecl)
+    }
+  }
+
+  private func printObservableTriggerIfNeeded(_ printer: inout JavaPrinter, _ importedFunc: ExtractedFunc) {
+    guard let parentNominalType = importedFunc.parentType?.asNominalType, parentNominalType.isObservable else { return }
+
+    if config.swiftObservableBridging == .jetpackCompose, importedFunc.isCandiateForObservation {
+      printer.print("\(importedFunc.observableTrackerName).observe();")
     }
   }
 
