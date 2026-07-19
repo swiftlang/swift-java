@@ -58,7 +58,7 @@ extension FFMSwift2JavaGenerator {
        */
       public static \(typeName) fromByteBuffer(java.nio.ByteBuffer buffer, AllocatingSwiftArena arena) {
         Objects.requireNonNull(buffer, "buffer cannot be null");
-        return Data.init(buffer.array(), arena);
+        return \(typeName).init(buffer.array(), arena);
       }
       """
     )
