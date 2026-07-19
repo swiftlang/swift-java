@@ -47,7 +47,21 @@ extension FFMSwift2JavaGenerator {
       """
     )
 
-    // TODO: Implement a fromByteBuffer as well
+    printer.print(
+      """
+      /**
+       * Creates a new Swift {@link \(typeName)} instance from a {@link ByteBuffer}.
+       *
+       * @param buffer The ByteBuffer to copy byte from it into the \(typeName)
+       * @param arena The arena for memory management
+       * @return A new \(typeName) instance containing a copy of the bytes
+       */
+      public static \(typeName) fromByteBuffer(java.nio.ByteBuffer buffer, AllocatingSwiftArena arena) {
+        Objects.requireNonNull(buffer, "buffer cannot be null");
+        return Data.init(buffer.array(), arena);
+      }
+      """
+    )
 
     // Print the descriptor class for copyBytes native call using the shared helper
     let copyBytesCFunc = CFunction(
