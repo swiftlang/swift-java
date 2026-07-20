@@ -99,6 +99,7 @@ public class VehicleEnumTest {
 
     @Test
     void getAsCar() {
+        // snippet.enumUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.car("BMW", Optional.empty(), arena);
             Vehicle.Case.Car car = vehicle.getAsCar().orElseThrow();
@@ -108,6 +109,7 @@ public class VehicleEnumTest {
             car = vehicle.getAsCar().orElseThrow();
             assertEquals("Long trailer", car.trailer().orElseThrow());
         }
+        // snippet.end
     }
 
     @Test

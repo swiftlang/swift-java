@@ -28,6 +28,25 @@ import java.util.stream.IntStream;
 public class FFMArraysTest {
 
     @Test
+    void test_getArray() {
+        // snippet.primitiveArraysUsage
+        byte[] javaBytes = MySwiftLibrary.getArray(); // automatically converted [UInt8] to byte[]
+        assertArrayEquals(new byte[]{1, 2, 3}, javaBytes);
+        // snippet.end
+    }
+
+    @Test
+    void test_sumAllByteArrayElements_arrayCopy() {
+        byte[] bytes = new byte[124];
+        Arrays.fill(bytes, (byte) 1);
+
+        var swiftSideSum = MySwiftLibrary.sumAllByteArrayElements(bytes);
+
+        int javaSideSum = IntStream.range(0, bytes.length).map(i -> bytes[i]).sum();
+        assertEquals(javaSideSum, swiftSideSum);
+    }
+
+    @Test
     void test_sumAllByteArrayElements_throughMemorySegment() {
         byte[] bytes =  new byte[124];
         Arrays.fill(bytes, (byte) 1);
@@ -44,24 +63,5 @@ public class FFMArraysTest {
             int javaSideSum = IntStream.range(0, bytes.length).map(i -> bytes[i]).sum();
             assertEquals(javaSideSum, swiftSideSum);
         }
-    }
-
-    @Test
-    void test_sumAllByteArrayElements_arrayCopy() {
-        byte[] bytes =  new byte[124];
-        Arrays.fill(bytes, (byte) 1);
-
-        var swiftSideSum = MySwiftLibrary.sumAllByteArrayElements(bytes);
-
-        int javaSideSum = IntStream.range(0, bytes.length).map(i -> bytes[i]).sum();
-        assertEquals(javaSideSum, swiftSideSum);
-    }
-
-    @Test
-    void test_getArray() {
-        AtomicLong bufferSize = new AtomicLong();
-        byte[] javaBytes = MySwiftLibrary.getArray(); // automatically converted [UInt8] to byte[]
-
-        assertArrayEquals(new byte[]{1, 2, 3}, javaBytes);
     }
 }

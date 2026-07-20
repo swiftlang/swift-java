@@ -24,6 +24,7 @@ public class MySwiftStructTest {
 
     @Test
     void create_struct() {
+        // snippet.structUsageJava
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             long cap = 12;
             long len = 34;
@@ -32,6 +33,7 @@ public class MySwiftStructTest {
             assertEquals(cap, struct.getCapacity());
             assertEquals(len, struct.getLength());
         }
+        // snippet.end
     }
 
     @Test

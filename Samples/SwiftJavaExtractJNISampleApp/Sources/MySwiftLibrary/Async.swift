@@ -14,6 +14,7 @@
 
 import SwiftJava
 
+// snippet.asyncDefinition
 public func asyncSum(i1: Int64, i2: Int64) async -> Int64 {
   i1 + i2
 }
@@ -21,6 +22,7 @@ public func asyncSum(i1: Int64, i2: Int64) async -> Int64 {
 public func asyncSleep() async throws {
   try await Task.sleep(for: .milliseconds(500))
 }
+// snippet.end
 
 public func asyncCopy(myClass: MySwiftClass) async throws -> MySwiftClass {
   let new = MySwiftClass(x: myClass.x, y: myClass.y)

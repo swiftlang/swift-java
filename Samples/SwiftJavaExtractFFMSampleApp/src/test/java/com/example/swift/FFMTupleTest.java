@@ -30,9 +30,11 @@ public class FFMTupleTest {
 
     @Test
     void ffmTupleReturnPair_roundTrip() {
+        // snippet.tupleUsageJava
         Tuple2<Integer, Long> result = MySwiftLibrary.ffmTupleReturnPair();
         assertEquals(42, result.$0);
         assertEquals(43L, result.$1);
+        // snippet.end
     }
 
     @Test

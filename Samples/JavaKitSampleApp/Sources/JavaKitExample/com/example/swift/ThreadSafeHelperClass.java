@@ -19,6 +19,7 @@ import java.util.OptionalLong;
 import java.util.OptionalInt;
 import java.util.OptionalDouble;
 
+// snippet.threadSafeHelper
 @ThreadSafe
 public class ThreadSafeHelperClass {
     public ThreadSafeHelperClass() { }
@@ -53,3 +54,4 @@ public class ThreadSafeHelperClass {
         return OptionalLong.of(value.getAsInt());
     }
 }
+// snippet.end

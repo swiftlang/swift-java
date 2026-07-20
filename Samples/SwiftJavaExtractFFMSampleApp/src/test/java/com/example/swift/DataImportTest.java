@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DataImportTest {
     @Test
     void test_Data_receiveAndReturn() {
+        // snippet.dataUsageJava
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             var origBytes = arena.allocateFrom("foobar");
             var origDat = Data.init(origBytes, origBytes.byteSize(), arena);
@@ -37,6 +38,7 @@ public class DataImportTest {
                 assertEquals("foobar", str);
             });
         }
+        // snippet.end
     }
 
     @Test

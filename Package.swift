@@ -11,12 +11,15 @@ if let localPath = Context.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
   swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", branch: "main")
 }
 
-// Set SWIFTJAVA_DOCC_PLUGIN_INSTALL=1 to install the docc-plugin automatically.
+// Set SWIFTJAVA_DOCC_PLUGIN_INSTALL=1 to install the docc-plugin automatically,
+// or DOCC_PLUGIN_PATH=<path> to point at a local checkout.
 // This is a workaround because swift-subprocess includes the plugin explicitly,
 // which breaks tools trying to add `swift package add-dependency` the plugin
 // to swift-java because it thinks the plugin was already added, but it is not.
 let extraDependencies: [Package.Dependency]
-if Context.environment["SWIFTJAVA_DOCC_PLUGIN_INSTALL"] == "1" {
+if let localPath = Context.environment["DOCC_PLUGIN_PATH"] {
+  extraDependencies = [.package(path: localPath)]
+} else if Context.environment["SWIFTJAVA_DOCC_PLUGIN_INSTALL"] == "1" {
   extraDependencies = [
     .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.5.0")
   ]
@@ -427,6 +430,23 @@ let package = Package(
         .product(name: "Subprocess", package: "swift-subprocess"),
         .product(name: "SwiftIfConfig", package: "swift-syntax"),
       ]
+    ),
+
+    // Dev-time tool: regenerates the "Supported configuration options" table in
+    // `Sources/SwiftJavaDocumentation/Documentation.docc/SwiftJavaConfigFile.md`
+    // straight from the doc comments on `Configuration.swift` and the enums it
+    // references, so the two never drift apart.
+    //
+    // Run manually via `swift run generate-config-docs`; CI validates freshness
+    // with `swift run generate-config-docs --check`.
+    .executableTarget(
+      name: "generate-config-docs",
+      dependencies: [
+        .product(name: "SwiftParser", package: "swift-syntax"),
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+      ],
+      path: "Sources/GenerateConfigDocs"
     ),
 
     .plugin(

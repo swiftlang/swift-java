@@ -23,22 +23,28 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ClosuresTest {
     @Test
     void emptyClosure() {
+        // snippet.closureUsageJava
         AtomicBoolean closureCalled = new AtomicBoolean(false);
         MySwiftLibrary.emptyClosure(() -> {
             closureCalled.set(true);
         });
         assertTrue(closureCalled.get());
+        // snippet.end
     }
 
     @Test
     void closureWithInt() {
+        // snippet.closureUsageJava
         long result = MySwiftLibrary.closureWithInt(10, (value) -> value * 2);
         assertEquals(20, result);
+        // snippet.end
     }
 
     @Test
     void closureMultipleArguments() {
+        // snippet.closureUsageJava
         long result = MySwiftLibrary.closureMultipleArguments(5, 10, (a, b) -> a + b);
         assertEquals(15, result);
+        // snippet.end
     }
 }

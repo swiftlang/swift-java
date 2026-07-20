@@ -14,6 +14,7 @@
 
 import SwiftJava
 
+// snippet.classDefinition
 public class MySwiftClass {
   public let x: Int64
   public let y: Int64
@@ -61,6 +62,7 @@ public class MySwiftClass {
     self.y = 5
   }
 
+  // snippet.throwingInitDefinition
   convenience public init(throwing: Bool) throws {
     if throwing {
       throw MySwiftError.swiftError
@@ -68,6 +70,7 @@ public class MySwiftClass {
       self.init()
     }
   }
+  // snippet.end
 
   deinit {
   }
@@ -100,6 +103,7 @@ public class MySwiftClass {
     self.x + other.longValue()
   }
 }
+// snippet.end
 
 extension MySwiftClass: CustomStringConvertible {
   public var description: String {

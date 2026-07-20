@@ -14,9 +14,11 @@
 
 import SwiftJava
 
+// snippet.throwingFunction
 public func throwString(input: String) throws -> String {
   if input.isEmpty {
     throw MySwiftError.swiftError
   }
   return input
 }
+// snippet.end

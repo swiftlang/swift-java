@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.structDefinition
 public struct MySwiftStruct {
   private var cap: Int64
   public var len: Int64
@@ -66,3 +67,4 @@ public struct MySwiftStruct {
     false
   }
 }
+// snippet.end

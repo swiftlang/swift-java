@@ -1,4 +1,4 @@
-# swift-java command line tool
+# swift-java
 
 The `swift-java` command line tool offers multiple ways to interact your Java interoperability enabled projects.
 
@@ -255,13 +255,3 @@ public final class SomeModule ... {
 }
 ```
 
-### The swift-java.config file
-
-Many of the tools–as well as SwiftPM plugin's–behaviors can be configured using the `swift-java.config` file.
-
-You can refer to the `SwiftJavaConfigurationShared/Configuration` struct to learn about the supported options.
-
-Configuration from the config files may be overriden or augmented by explicit command line parameters,
-please refer to the options documentation for details on their behavior.
-
-> Note: **Comments in configuration**: The configuration is a JSON 5 file, which among other things allows `//` and `/* */` comments, so feel free to add line comments explaining rationale for some of the settings in youf configuration.
