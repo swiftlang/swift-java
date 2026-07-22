@@ -1,6 +1,10 @@
 # ``SwiftJavaDocumentation``
 
-The SwiftJava project enables interoperability between Swift and Java.
+@Metadata {
+    @DisplayName("Swift Java Documentation")
+}
+
+The Swift-Java project enables interoperability between Swift and Java.
 
 ## Overview
 
@@ -36,15 +40,11 @@ which is a quick overview of all the features and approaches offered by SwiftJav
 
 - <doc:SupportedFeatures>
 
-
 ### Source Generation
 
 - <doc:SwiftJavaCommandLineTool>
 - <doc:SwiftPMPlugin>
 
-### Distribution
-
-- <doc:Distribution>
 
 ### Android Support
 
