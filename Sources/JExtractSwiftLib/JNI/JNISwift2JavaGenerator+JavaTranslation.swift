@@ -696,25 +696,6 @@ extension JNISwift2JavaGenerator {
       nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
     }
 
-    func extractKnownJavaFunctionalInterfaceType(
-      swiftType: SwiftType,
-      functionType: SwiftFunctionType,
-      parameterName: String,
-      parameterAnnotations: [JavaAnnotation]
-    ) -> TranslatedParameter? {
-      if !functionType.isEscaping && functionType.parameters.isEmpty && functionType.resultType.isVoid {
-        return TranslatedParameter(
-          parameter: JavaParameter(
-            name: parameterName,
-            type: JavaType.javaLangRunnable,
-            annotations: parameterAnnotations,
-          ),
-          conversion: .placeholder,
-        )
-      }
-      return nil
-    }
-
     func translateFunctionParameter(
       swiftType: SwiftType,
       functionType: SwiftFunctionType,
@@ -723,23 +704,24 @@ extension JNISwift2JavaGenerator {
       parentName: SwiftQualifiedTypeName,
       parameterAnnotations: [JavaAnnotation]
     ) -> TranslatedParameter {
-      extractKnownJavaFunctionalInterfaceType(
-        swiftType: swiftType,
-        functionType: functionType,
-        parameterName: parameterName,
-        parameterAnnotations: parameterAnnotations
+      let interfacejavaType =
+        if let known = KnownJavaFunctionalInterface.find(functionType) {
+          known.javaType
+        } else {
+          JavaType.class(
+            package: javaPackage,
+            name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
+          )
+        }
+
+      return TranslatedParameter(
+        parameter: JavaParameter(
+          name: parameterName,
+          type: interfacejavaType,
+          annotations: parameterAnnotations,
+        ),
+        conversion: .placeholder,
       )
-        ?? TranslatedParameter(
-          parameter: JavaParameter(
-            name: parameterName,
-            type: .class(
-              package: javaPackage,
-              name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
-            ),
-            annotations: parameterAnnotations,
-          ),
-          conversion: .placeholder,
-        )
     }
 
     func translateProtocolParameter(

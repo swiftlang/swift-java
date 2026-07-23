@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaJNICore
 
 /// Describes a known functional interface such as `Runnable.run()` and similar.
@@ -46,6 +47,21 @@ struct KnownJavaFunctionalInterface: Sendable {
 
   static func find(_ methodSignature: MethodSignature) -> KnownJavaFunctionalInterface? {
     find(parameters: methodSignature.parameterTypes, result: methodSignature.resultType)
+  }
+
+  static func find(_ functionType: SwiftFunctionType) -> KnownJavaFunctionalInterface? {
+    if functionType.isEscaping {
+      return nil
+    }
+
+    let parameters = functionType.parameters
+    let result = functionType.resultType
+    return switch (parameters, result) {
+    case ([], _) where result.isVoid:
+      runnable
+    default:
+      nil
+    }
   }
 
   static func find(_ functionType: JNISwift2JavaGenerator.TranslatedFunctionType) -> KnownJavaFunctionalInterface? {
