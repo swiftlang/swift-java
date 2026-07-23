@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 
 import java.lang.foreign.ValueLayout;
+import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -86,6 +87,16 @@ public class DataImportTest {
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             byte[] original = new byte[] { 1, 2, 3, 4, 5 };
             var data = Data.fromByteArray(original, arena);
+            assertEquals(5, data.getCount());
+        }
+    }
+
+    @Test
+    void test_Data_fromByteBuffer() {
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            byte[] original = new byte[] { 1, 2, 3, 4, 5 };
+            ByteBuffer buffer = ByteBuffer.wrap(original);
+            var data = Data.fromByteBuffer(buffer, arena);
             assertEquals(5, data.getCount());
         }
     }
