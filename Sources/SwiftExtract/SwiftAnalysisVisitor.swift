@@ -38,6 +38,19 @@ final class SwiftAnalysisVisitor {
   }
   private var deferredConstrainedExtensions: [DeferredConstrainedExtension] = []
 
+  private static func operatorKind(_ node: FunctionDeclSyntax) -> SwiftAPIKind? {
+    switch node.name.tokenKind {
+    case .binaryOperator:
+      return .binaryOperator
+    case .prefixOperator:
+      return .prefixOperator
+    case .postfixOperator:
+      return .postfixOperator
+    default:
+      return nil
+    }
+  }
+
   func visit(inputFile: SwiftInputFile) {
     let node = inputFile.syntax
     for codeItem in node.statements {
@@ -201,11 +214,18 @@ final class SwiftAnalysisVisitor {
       return
     }
 
+    let apiKind: SwiftAPIKind =
+      if typeContext != nil && Self.operatorKind(node) != nil {
+        Self.operatorKind(node)!
+      } else {
+        .function
+      }
+
     let extracted = ExtractedFunc(
       module: analyzer.swiftModuleName,
       swiftDecl: node,
       name: node.name.text.unescapedSwiftName,
-      apiKind: .function,
+      apiKind: apiKind,
       functionSignature: signature,
     )
 
