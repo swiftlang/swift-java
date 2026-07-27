@@ -76,5 +76,141 @@ struct JNIJavaKitTests {
         """
       ]
     )
+  @Test
+  func functionReturn_javaBindings() throws {
+    try assertOutput(
+      input: "public func function() -> JavaLong",
+      .jni,
+      .java,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func function() -> JavaLong
+         * }
+         */
+        public static java.lang.Long function() {
+          return SwiftModule.$function();
+        }
+        """,
+        """
+        private static native java.lang.Long $function();
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func functionReturn_swiftThunks() throws {
+    try assertOutput(
+      input: "public func function() -> JavaLong",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024function")
+        public func Java_com_example_swift_SwiftModule__00024function(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
+          let result$ = SwiftModule.function()
+          return result$.getJNIValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func functionReturnOptional_javaBindings() throws {
+    try assertOutput(
+      input: "public func function() -> JavaLong?",
+      .jni,
+      .java,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func function() -> JavaLong?
+         * }
+         */
+        public static java.lang.Long function() {
+          return SwiftModule.$function();
+        }
+        """,
+        """
+        private static native java.lang.Long $function();
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func functionReturnOptional_swiftThunks() throws {
+    try assertOutput(
+      input: "public func function() -> JavaLong?",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024function")
+        public func Java_com_example_swift_SwiftModule__00024function(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
+          let result$ = SwiftModule.function()
+          return result$.getJNIValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func functionReturnArray_javaBindings() throws {
+    try assertOutput(
+      input: "public func function() -> [JavaLong]",
+      .jni,
+      .java,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func function() -> [JavaLong]
+         * }
+         */
+        public static java.lang.Long[] function() {
+          return SwiftModule.$function();
+        }
+        """,
+        """
+        private static native java.lang.Long[] $function();
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func functionReturnArray_swiftThunks() throws {
+    try assertOutput(
+      input: "public func function() -> [JavaLong]",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024function")
+        public func Java_com_example_swift_SwiftModule__00024function(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobjectArray? {
+          let result$ = SwiftModule.function()
+          return result$.getJNIValue(in: environment)
+        }
+        """
+      ]
+    )
   }
 }

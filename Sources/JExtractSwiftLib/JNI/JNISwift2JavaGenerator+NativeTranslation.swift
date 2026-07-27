@@ -697,9 +697,17 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        guard !nominalType.isSwiftJavaWrapper else {
-          // TODO: Should be the same as above
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+
+          let optionalSwiftType = knownTypes.optionalSugar(swiftType)
+          return NativeResult(
+            javaType: javaType,
+            conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: optionalSwiftType)),
+            outParameters: []
+          )
         }
 
       case .tuple:
@@ -871,7 +879,14 @@ extension JNISwift2JavaGenerator {
         }
 
         if nominalType.isSwiftJavaWrapper {
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+          return NativeResult(
+            javaType: javaType,
+            conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: swiftType)),
+            outParameters: []
+          )
         }
 
         if nominalType.nominalTypeDecl.isGeneric {
@@ -1015,8 +1030,17 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(known: .array(elementType))
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(elementType)
+          }
+
+          let arraySwiftType = knownTypes.arraySugar(elementType)
+          return NativeResult(
+            javaType: .array(javaType),
+            conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: arraySwiftType)),
+            outParameters: []
+          )
         }
 
         // Assume JExtract imported class

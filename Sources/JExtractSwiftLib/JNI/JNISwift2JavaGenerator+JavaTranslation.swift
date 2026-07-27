@@ -964,7 +964,16 @@ extension JNISwift2JavaGenerator {
         }
 
         if nominalType.isSwiftJavaWrapper {
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+          return TranslatedResult(
+            javaType: javaType,
+            nativeJavaType: javaType,
+            annotations: resultAnnotations,
+            outParameters: [],
+            conversion: .placeholder
+          )
         }
 
         let javaType = JavaType.class(
@@ -1339,8 +1348,17 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+          return TranslatedResult(
+            javaType: javaType,
+            nativeJavaType: javaType,
+            annotations: annotations,
+            outParameters: [],
+            conversion: .placeholder
+          )
         }
 
       case .tuple:
@@ -1502,8 +1520,18 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(elementType)
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(elementType)
+          }
+
+          return TranslatedResult(
+            javaType: .array(javaType),
+            nativeJavaType: .array(javaType),
+            annotations: annotations,
+            outParameters: [],
+            conversion: .placeholder
+          )
         }
 
         let javaType = try translateGenericTypeParameter(
