@@ -362,31 +362,6 @@ extension JNISwift2JavaGenerator {
       )
     }
 
-    func extractKnownJavaFunctionalInterfaceType(
-      functionType: SwiftFunctionType,
-      parameterName: String,
-      parameters: [JNISwift2JavaGenerator.NativeParameter],
-      result: JNISwift2JavaGenerator.NativeResult
-    ) -> NativeParameter? {
-      if !functionType.isEscaping && functionType.parameters.isEmpty && functionType.resultType.isVoid {
-        return NativeParameter(
-          parameters: [
-            JavaParameter(
-              name: parameterName,
-              type: JavaType.javaLangRunnable
-            )
-          ],
-          conversion: .closureLowering(
-            parameters: parameters,
-            result: result
-          ),
-          indirectConversion: nil,
-          conversionCheck: nil
-        )
-      }
-      return nil
-    }
-
     func translateFunctionParameter(
       swiftType: SwiftType,
       functionType: SwiftFunctionType,
@@ -456,29 +431,30 @@ extension JNISwift2JavaGenerator {
       }
 
       let result = try translateClosureResult(functionType.resultType)
-      return extractKnownJavaFunctionalInterfaceType(
-        functionType: functionType,
-        parameterName: parameterName,
-        parameters: parameters,
-        result: result
+      let interfaceJavaType =
+        if let known = KnownJavaFunctionalInterface.find(functionType) {
+          known.javaType
+        } else {
+          JavaType.class(
+            package: javaPackage,
+            name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
+          )
+        }
+
+      return NativeParameter(
+        parameters: [
+          JavaParameter(
+            name: parameterName,
+            type: interfaceJavaType
+          )
+        ],
+        conversion: .closureLowering(
+          parameters: parameters,
+          result: result
+        ),
+        indirectConversion: nil,
+        conversionCheck: nil
       )
-        ?? NativeParameter(
-          parameters: [
-            JavaParameter(
-              name: parameterName,
-              type: .class(
-                package: javaPackage,
-                name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
-              )
-            )
-          ],
-          conversion: .closureLowering(
-            parameters: parameters,
-            result: result
-          ),
-          indirectConversion: nil,
-          conversionCheck: nil
-        )
     }
 
     func translateProtocolParameter(
