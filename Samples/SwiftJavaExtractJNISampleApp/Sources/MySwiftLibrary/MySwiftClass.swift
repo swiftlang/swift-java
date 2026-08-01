@@ -99,6 +99,10 @@ public class MySwiftClass {
   public func addXWithJavaLong(_ other: JavaLong) -> Int64 {
     self.x + other.longValue()
   }
+
+  public func returnXAsJavaLong() -> JavaLong {
+    JavaLong(self.x)
+  }
 }
 
 extension MySwiftClass: CustomStringConvertible {
