@@ -649,6 +649,7 @@ extension JNISwift2JavaGenerator {
 
       switch swiftType {
       case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           if let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
             javaType.implementsJavaValue
@@ -702,10 +703,9 @@ extension JNISwift2JavaGenerator {
             throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
           }
 
-          let optionalSwiftType = knownTypes.optionalSugar(swiftType)
           return NativeResult(
             javaType: javaType,
-            conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: optionalSwiftType)),
+            conversion: .getJNIValue(.placeholder),
             outParameters: []
           )
         }
@@ -820,6 +820,7 @@ extension JNISwift2JavaGenerator {
     ) throws -> NativeResult {
       switch swiftType {
       case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
         if let knownType = nominalType.asKnownType {
           switch knownType {
           case .optional(let wrapped):
@@ -884,7 +885,7 @@ extension JNISwift2JavaGenerator {
           }
           return NativeResult(
             javaType: javaType,
-            conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: swiftType)),
+            conversion: .getJNIValue(.placeholder),
             outParameters: []
           )
         }
@@ -1016,6 +1017,7 @@ extension JNISwift2JavaGenerator {
         )
 
       case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
             javaType.implementsJavaValue
@@ -1035,10 +1037,9 @@ extension JNISwift2JavaGenerator {
             throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(elementType)
           }
 
-          let arraySwiftType = knownTypes.arraySugar(elementType)
           return NativeResult(
             javaType: .array(javaType),
-            conversion: .getJNIValue(.allocateSwiftValue(.placeholder, name: resultName, swiftType: arraySwiftType)),
+            conversion: .getJNIValue(.placeholder),
             outParameters: []
           )
         }

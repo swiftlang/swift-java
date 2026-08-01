@@ -17,8 +17,7 @@ import Testing
 
 @Suite
 struct JNIJavaKitTests {
-  let source =
-    """
+  let source = """
     public func function(javaLong: JavaLong, javaInteger: JavaInteger, int: Int64) {}
     """
 
@@ -76,6 +75,8 @@ struct JNIJavaKitTests {
         """
       ]
     )
+  }
+
   @Test
   func functionReturn_javaBindings() throws {
     try assertOutput(
@@ -112,10 +113,9 @@ struct JNIJavaKitTests {
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024function")
-        public func Java_com_example_swift_SwiftModule__00024function(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
-          let result$ = SwiftModule.function()
-          return result$.getJNIValue(in: environment)
+        @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
+        public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
+          return SwiftModule.function().getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -158,10 +158,9 @@ struct JNIJavaKitTests {
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024function")
-        public func Java_com_example_swift_SwiftModule__00024function(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
-          let result$ = SwiftModule.function()
-          return result$.getJNIValue(in: environment)
+        @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
+        public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
+          return SwiftModule.function().getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -204,10 +203,9 @@ struct JNIJavaKitTests {
       javaClassLookupTable: classLookupTable,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024function")
-        public func Java_com_example_swift_SwiftModule__00024function(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobjectArray? {
-          let result$ = SwiftModule.function()
-          return result$.getJNIValue(in: environment)
+        @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
+        public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobjectArray? {
+          return SwiftModule.function().getJNILocalRefValue(in: environment)
         }
         """
       ]
