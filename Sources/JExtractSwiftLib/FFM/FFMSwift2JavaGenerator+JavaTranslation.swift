@@ -566,17 +566,6 @@ extension FFMSwift2JavaGenerator {
       )
     }
 
-    // Extract Java known functional interface type or null if not exists
-    func extractKnownJavaFunctionalInterfaceType(
-      functionType: SwiftFunctionType,
-    ) -> JavaType? {
-      if functionType.parameters.isEmpty && functionType.resultType.isVoid {
-        JavaType.javaLangRunnable
-      } else {
-        nil
-      }
-    }
-
     /// Translate a Swift Function parameter to the Java interface.
     func translateFunctionParameter(
       functionType: SwiftFunctionType,
@@ -584,7 +573,11 @@ extension FFMSwift2JavaGenerator {
       methodName: String,
     ) -> TranslatedParameter {
       let parameterType =
-        extractKnownJavaFunctionalInterfaceType(functionType: functionType) ?? JavaType.class(package: nil, name: "\(methodName).\(parameterName)")
+        if let known = KnownJavaFunctionalInterface.find(functionType) {
+          known.javaType
+        } else {
+          JavaType.class(package: nil, name: "\(methodName).\(parameterName)")
+        }
 
       return TranslatedParameter(
         parameter: JavaParameter(
