@@ -41,4 +41,10 @@ public class ClosuresTest {
         long result = MySwiftLibrary.closureMultipleArguments(5, 10, (a, b) -> a + b);
         assertEquals(15, result);
     }
+
+    @Test
+    void globalCallMeBooleanSupplier() {
+        boolean result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> true);
+        assertEquals(true, result);
+    }
 }

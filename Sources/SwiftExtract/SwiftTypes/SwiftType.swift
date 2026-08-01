@@ -98,6 +98,13 @@ public enum SwiftType: Equatable {
     }
   }
 
+  public var isBoolean: Bool {
+    if case let .nominal(nominal) = self {
+      return nominal.nominalTypeDecl.knownTypeKind == .bool
+    }
+    return false
+  }
+
   /// Whether this is a pointer type. I.e 'Unsafe[Mutable][Raw]Pointer'
   public var isPointer: Bool {
     switch self {

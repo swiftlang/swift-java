@@ -48,6 +48,10 @@ public func globalCallMeRunnable(run: () -> Void) {
   run()
 }
 
+public func globalCallMeBooleanSupplier(run: () -> Bool) -> Bool {
+  return run()
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }
