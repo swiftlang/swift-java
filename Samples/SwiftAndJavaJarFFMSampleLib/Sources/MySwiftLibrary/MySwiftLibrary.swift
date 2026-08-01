@@ -37,7 +37,7 @@ public func globalCallMeRunnable(run: () -> Void) {
 }
 
 public func globalCallMeBooleanSupplier(run: () -> Bool) -> Bool {
-  return run()
+  run()
 }
 
 // ==== Internal helpers

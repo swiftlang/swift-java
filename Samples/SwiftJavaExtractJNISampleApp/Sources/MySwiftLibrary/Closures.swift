@@ -21,7 +21,7 @@ public func closureWithInt(input: Int64, closure: (Int64) -> Int64) -> Int64 {
 }
 
 public func globalCallMeBooleanSupplier(run: () -> Bool) -> Bool {
-  return run()
+  run()
 }
 
 public func closureMultipleArguments(
