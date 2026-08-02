@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public typealias JavaFullyQualifiedTypeName = String
+import SwiftJavaConfigurationShared
 
 package struct SwiftTypeName: Hashable, CustomStringConvertible {
   package let swiftModule: String?

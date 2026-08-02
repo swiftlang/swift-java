@@ -261,7 +261,9 @@ extension JavaMethodMacro: BodyMacro {
       ? "try" : "try!"
 
     let objectCreation: [CodeBlockItemSyntax]
-    if context.lexicalContext.first?.is(ClassDeclSyntax.self) ?? false {
+    if (context.lexicalContext.first?.is(ClassDeclSyntax.self) ?? false)
+      || initDecl.modifiers.contains(where: { $0.name.tokenKind == .keyword(.convenience) })
+    {
       objectCreation = [
         "let javaThis = \(raw: tryKeyword) Self.dynamicJavaNewObjectInstance(in: _environment\(raw: arguments))\n",
         "self.init(javaThis: javaThis, environment: _environment)\n",

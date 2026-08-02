@@ -28,6 +28,8 @@ import Foundation
 
 public typealias JavaVersion = Int
 
+public typealias JavaFullyQualifiedTypeName = String
+
 /// Configuration for the SwiftJava tools and plugins, provided on a per-target basis.
 public struct Configuration: Codable {
 
@@ -218,6 +220,10 @@ public struct Configuration: Codable {
   /// canonical Java class names (e.g., java.util.Vector) and the values are
   /// the corresponding Swift names (e.g., JavaVector).
   public var classes: [String: String]? = [:]
+
+  /// Foreign classes this module should generate extensions for, each carrying
+  ///  whichever of that class's members this module is the one able to express.
+  public var extendForeignClasses: [JavaFullyQualifiedTypeName]? = nil
 
   // Compile for the specified Java SE release.
   public var sourceCompatibility: JavaVersion?

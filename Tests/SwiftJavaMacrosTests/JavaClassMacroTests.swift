@@ -29,6 +29,32 @@ class JavaKitMacroTests: XCTestCase {
     "JavaStaticField": JavaFieldMacro.self,
   ]
 
+  func testJavaClassConvenienceInitializerInExtension() throws {
+    assertMacroExpansion(
+      """
+        extension HelloWorld {
+          @JavaMethod
+          @_nonoverride public convenience init(_ value: Int32, environment: JNIEnvironment? = nil)
+        }
+      """,
+      expandedSource: """
+
+          extension HelloWorld {
+            @_nonoverride public convenience init(_ value: Int32, environment: JNIEnvironment? = nil) {
+                let _environment = if let environment {
+                    environment
+                } else {
+                    try! JavaVirtualMachine.shared().environment()
+                }
+                let javaThis = try! Self.dynamicJavaNewObjectInstance(in: _environment, arguments: value.self)
+                self.init(javaThis: javaThis, environment: _environment)
+            }
+          }
+        """,
+      macros: Self.javaKitMacros
+    )
+  }
+
   func testJavaStaticMethodFailure() throws {
     assertMacroExpansion(
       """
