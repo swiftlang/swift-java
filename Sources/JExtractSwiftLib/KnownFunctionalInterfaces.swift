@@ -30,7 +30,7 @@ struct KnownJavaFunctionalInterface: Sendable {
   )
 
   static let booleanSupplier = KnownJavaFunctionalInterface(
-    JavaType.javaFunctionBooleanSupplier,
+    JavaType.javaUtilFunctionBooleanSupplier,
     method: "getAsBoolean",
     parameters: [],
     result: .boolean

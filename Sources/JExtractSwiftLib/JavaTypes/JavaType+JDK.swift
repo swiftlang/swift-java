@@ -31,7 +31,7 @@ extension JavaType {
   }
 
   /// The description of the type java.util.function.BooleanSupplier.
-  static var javaFunctionBooleanSupplier: JavaType {
+  static var javaUtilFunctionBooleanSupplier: JavaType {
     .class(package: "java.util.function", name: "BooleanSupplier")
   }
 
