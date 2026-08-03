@@ -36,6 +36,10 @@ public func globalCallMeRunnable(run: () -> Void) {
   run()
 }
 
+public func globalCallMeBooleanSupplier(run: () -> Bool) -> Bool {
+  run()
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
