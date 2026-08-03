@@ -54,4 +54,9 @@ public class MySwiftLibraryTest {
         assertEquals(0, countDownLatch.getCount());
     }
 
+    @Test
+    void call_globalCallMeBooleanSupplier_noThrow() {
+        boolean result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> { return true; });
+        assertEquals(true, result);
+    }
 }

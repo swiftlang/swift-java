@@ -20,6 +20,7 @@ struct JNIClosureTests {
   let source =
     """
     public func emptyClosure(closure: () -> ()) {}
+    public func closureBoolSupplier(closure: () -> Bool) {}
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
 
@@ -49,6 +50,31 @@ struct JNIClosureTests {
   }
 
   @Test
+  func closureBoolSupplier_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureBoolSupplier(closure: () -> Bool)
+         * }
+         */
+        public static void closureBoolSupplier(java.util.function.BooleanSupplier closure) {
+          SwiftModule.$closureBoolSupplier(closure);
+        }
+        """,
+        """
+        private static native void $closureBoolSupplier(java.util.function.BooleanSupplier closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
   func emptyClosure_swiftThunks() throws {
     try assertOutput(
       input: source,
@@ -65,6 +91,31 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = []
             environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureBoolSupplier_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureBoolSupplier__Ljava_util_function_BooleanSupplier_2")
+        public func Java_com_example_swift_SwiftModule__00024closureBoolSupplier__Ljava_util_function_BooleanSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureBoolSupplier(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsBoolean", "()Z")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = []
+            return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }

@@ -73,8 +73,6 @@ public class MySwiftLibraryTest {
         assertEquals("", result);
     }
 
-
-
     @Test
     @Disabled("Upcalls not yet implemented in new scheme")
     @SuppressWarnings({"Convert2Lambda", "Convert2MethodRef"})
@@ -148,4 +146,9 @@ public class MySwiftLibraryTest {
         );
     }
 
+   @Test
+    void call_globalCallMeBooleanSupplier_noThrow() {
+        boolean result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> { return true; });
+        assertEquals(true, result);
+    }
 }

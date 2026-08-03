@@ -29,8 +29,16 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .void
   )
 
+  static let booleanSupplier = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionBooleanSupplier,
+    method: "getAsBoolean",
+    parameters: [],
+    result: .boolean
+  )
+
   static let all: [KnownJavaFunctionalInterface] = [
-    .runnable
+    .runnable,
+    .booleanSupplier,
   ]
 
   static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
@@ -59,6 +67,8 @@ struct KnownJavaFunctionalInterface: Sendable {
     return switch (parameters, result) {
     case ([], _) where result.isVoid:
       runnable
+    case ([], _) where result.isBoolean:
+      booleanSupplier
     default:
       nil
     }
