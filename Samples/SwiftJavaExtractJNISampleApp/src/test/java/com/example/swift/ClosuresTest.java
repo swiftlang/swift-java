@@ -47,4 +47,10 @@ public class ClosuresTest {
         boolean result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> true);
         assertEquals(true, result);
     }
+
+    @Test
+    void globalCallMeDoubleSupplier() {
+        double result = MySwiftLibrary.globalCallMeDoubleSupplier(() -> 2.0);
+        assertEquals(2.0, result);
+    }
 }

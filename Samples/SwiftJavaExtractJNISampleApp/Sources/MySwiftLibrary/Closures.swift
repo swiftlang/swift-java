@@ -24,6 +24,10 @@ public func globalCallMeBooleanSupplier(run: () -> Bool) -> Bool {
   run()
 }
 
+public func globalCallMeDoubleSupplier(run: () -> Double) -> Double {
+  run()
+}
+
 public func closureMultipleArguments(
   input1: Int64,
   input2: Int64,

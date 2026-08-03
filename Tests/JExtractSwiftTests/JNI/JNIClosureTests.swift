@@ -21,6 +21,7 @@ struct JNIClosureTests {
     """
     public func emptyClosure(closure: () -> ()) {}
     public func closureBoolSupplier(closure: () -> Bool) {}
+    public func closureDoubleSupplier(closure: () -> Double) {}
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
 
@@ -75,6 +76,31 @@ struct JNIClosureTests {
   }
 
   @Test
+  func closureDoubleSupplier_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureDoubleSupplier(closure: () -> Double)
+         * }
+         */
+        public static void closureDoubleSupplier(java.util.function.DoubleSupplier closure) {
+          SwiftModule.$closureDoubleSupplier(closure);
+        }
+        """,
+        """
+        private static native void $closureDoubleSupplier(java.util.function.DoubleSupplier closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
   func emptyClosure_swiftThunks() throws {
     try assertOutput(
       input: source,
@@ -116,6 +142,31 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = []
             return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureDoubleSupplier_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleSupplier__Ljava_util_function_DoubleSupplier_2")
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleSupplier__Ljava_util_function_DoubleSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureDoubleSupplier(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsDouble", "()D")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = []
+            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }

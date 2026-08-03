@@ -35,6 +35,7 @@ final class FuncCallbackImportTests {
 
     public func callMe(callback: () -> Void)
     public func callMeBoolSupplier(callback: () -> Bool)
+    public func callMeDoubleSupplier(callback: () -> Double)
     public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())
     public func withBuffer(body: (UnsafeRawBufferPointer) -> Int)
     """
@@ -203,6 +204,92 @@ final class FuncCallbackImportTests {
         public static void callMeBoolSupplier(java.util.function.BooleanSupplier callback) {
           try(var arena$ = Arena.ofConfined()) {
             swiftjava___FakeModule_callMeBoolSupplier_callback.call(callMeBoolSupplier.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+    )
+  }
+
+  @Test("Import: public func callMeDoubleSupplier(callback: () -> Double)")
+  func func_callMeDoubleSupplierFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeDoubleSupplier" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expected:
+        """
+        // ==== --------------------------------------------------
+        // callMeDoubleSupplier
+        /**
+         * {@snippet lang=c :
+         * void swiftjava___FakeModule_callMeDoubleSupplier_callback(double (*callback)(void))
+         * }
+         */
+        private static class swiftjava___FakeModule_callMeDoubleSupplier_callback {
+          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            /* callback: */SwiftValueLayout.SWIFT_POINTER
+          );
+          private static final MemorySegment ADDR =
+            __FakeModule.findOrThrow("swiftjava___FakeModule_callMeDoubleSupplier_callback");
+          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+          public static void call(java.lang.foreign.MemorySegment callback) {
+            try {
+              if (CallTraces.TRACE_DOWNCALLS) {
+                CallTraces.traceDowncall(callback);
+              }
+              HANDLE.invokeExact(callback);
+            } catch (Throwable ex$) {
+              throw new AssertionError("should not reach here", ex$);
+            }
+          }
+          /**
+           * {snippet lang=c :
+           * double (*)(void)
+           * }
+           */
+          private static class $callback {
+            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
+              /* -> */SwiftValueLayout.SWIFT_DOUBLE
+            );
+            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.util.function.DoubleSupplier.class, "getAsDouble", DESC);
+            private static MemorySegment toUpcallStub(java.util.function.DoubleSupplier fi, Arena arena) {
+              return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
+            }
+          }
+        }
+        public static class callMeDoubleSupplier {
+          private static MemorySegment $toUpcallStub(java.util.function.DoubleSupplier fi, Arena arena) {
+            return swiftjava___FakeModule_callMeDoubleSupplier_callback.$callback.toUpcallStub(fi, arena);
+          }
+        }
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeDoubleSupplier(callback: () -> Double)
+         * }
+         */
+        public static void callMeDoubleSupplier(java.util.function.DoubleSupplier callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeDoubleSupplier_callback.call(callMeDoubleSupplier.$toUpcallStub(callback, arena$));
           }
         }
         """
