@@ -681,7 +681,7 @@ extension JNISwift2JavaGenerator {
 
           return NativeResult(
             javaType: javaType,
-            conversion: .getJNIValue(.asOptional(.placeholder)),
+            conversion: .getJNIValue(.placeholder),
             outParameters: []
           )
         }
@@ -861,7 +861,7 @@ extension JNISwift2JavaGenerator {
           }
           return NativeResult(
             javaType: javaType,
-            conversion: .getJNIValue(.asOptional(.placeholder)),
+            conversion: .getJNIValue(.placeholder),
             outParameters: []
           )
         }
@@ -1015,7 +1015,7 @@ extension JNISwift2JavaGenerator {
 
           return NativeResult(
             javaType: .array(javaType),
-            conversion: .getJNIValue(.asOptional(.placeholder)),
+            conversion: .getJNIValue(.placeholder),
             outParameters: []
           )
         }
@@ -1422,8 +1422,6 @@ extension JNISwift2JavaGenerator {
     indirect case member(NativeSwiftConversionStep, member: String)
 
     indirect case optionalMap(NativeSwiftConversionStep)
-
-    indirect case asOptional(NativeSwiftConversionStep)
 
     indirect case unwrapOptional(NativeSwiftConversionStep, name: String, fatalErrorMessage: String)
 
@@ -1912,10 +1910,6 @@ extension JNISwift2JavaGenerator {
           printer.print("return \(inner)")
         }
         return printer.finalize()
-
-      case .asOptional(let inner):
-        let inner = inner.render(&printer, placeholder)
-        return "(\(inner) as Optional)"
 
       case .unwrapOptional(let inner, let name, let fatalErrorMessage):
         let unwrappedName = "\(name)_unwrapped$"

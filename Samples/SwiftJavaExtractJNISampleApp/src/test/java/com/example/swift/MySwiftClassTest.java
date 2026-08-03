@@ -175,6 +175,26 @@ public class MySwiftClassTest {
     }
 
     @Test
+    void returnXAsOptionalJavaLong() {
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            Long javaLong = c1.returnXAsOptionalJavaLong();
+            assertEquals(20L, javaLong);
+        }
+    }
+
+    @Test
+    void returnXYAsJavaLongs() {
+        try (var arena = SwiftArena.ofConfined()) {
+            MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
+            Long[] longs = c1.returnXYAsJavaLongs();
+            assertEquals(2, longs.length);
+            assertEquals(20L, longs[0]);
+            assertEquals(10L, longs[1]);
+        }
+    }
+
+    @Test
     void getAsyncVariable() throws Exception {
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c1 = MySwiftClass.init(20, 10, arena);
