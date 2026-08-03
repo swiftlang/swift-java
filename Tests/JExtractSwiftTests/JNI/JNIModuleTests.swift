@@ -326,4 +326,26 @@ struct JNIModuleTests {
       ]
     )
   }
+
+  @Test
+  func skipsVariadicParameter() throws {
+    let input = """
+      public func helloWorld()
+      public func sum(_ xs: Int64...) -> Int64 { xs.reduce(0, +) }
+      """
+    
+    try assertOutput(
+      input: input,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        public static void helloWorld()
+        """
+      ],
+      notExpectedChunks: [
+        "sum"
+      ]
+    )
+  }
 }

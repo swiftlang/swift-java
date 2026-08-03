@@ -276,6 +276,10 @@ extension JNISwift2JavaGenerator {
       methodName: String,
       parentName: SwiftQualifiedTypeName,
     ) throws -> TranslatedFunctionSignature {
+      if functionSignature.hasVariadicParams {
+        throw JavaTranslationError.unsupportedVariadicParameter
+      }
+
       let parameters = try translateParameters(
         functionSignature.parameters.map { ($0.parameterName, $0.type) },
         methodName: methodName,
@@ -2191,6 +2195,9 @@ extension JNISwift2JavaGenerator {
 
     // FIXME: Remove once we support protocol variables
     case protocolVariablesNotSupported
+    
+    /// Variadic parameters (e.g. `Int...`) are not supported due to Swift limitations with array splatting.
+    case unsupportedVariadicParameter
 
     case protocolStaticRequirementsNotSupported
 
