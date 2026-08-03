@@ -642,4 +642,44 @@ struct JNIProtocolTests {
       ]
     )
   }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Unextracted protocols must not reach the `implements` clause
+
+  @Test
+  func excludedProtocolIsOmittedFromImplementsClause() throws {
+    let source = """
+      public protocol VisibleProtocol {
+        public func visibleMethod()
+      }
+
+      public protocol HiddenProtocol {
+        public func hiddenMethod()
+      }
+
+      public class Conformer: VisibleProtocol, HiddenProtocol {
+        public func visibleMethod() {}
+        public func hiddenMethod() {}
+      }
+      """
+
+    var filtered = config
+    filtered.swiftFilterExclude = ["HiddenProtocol"]
+
+    try assertOutput(
+      input: source,
+      config: filtered,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public final class Conformer implements JNISwiftInstance, VisibleProtocol {
+        """
+      ],
+      notExpectedChunks: [
+        "HiddenProtocol"
+      ]
+    )
+  }
 }
