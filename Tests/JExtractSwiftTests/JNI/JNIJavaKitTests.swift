@@ -17,8 +17,7 @@ import Testing
 
 @Suite
 struct JNIJavaKitTests {
-  let source =
-    """
+  let source = """
     public func function(javaLong: JavaLong, javaInteger: JavaInteger, int: Int64) {}
     """
 
@@ -72,6 +71,141 @@ struct JNIJavaKitTests {
             fatalError("javaInteger was null in call to \\(#function), but Swift requires non-optional!")
           }
           SwiftModule.function(javaLong: JavaLong(javaThis: javaLong_unwrapped$, environment: environment), javaInteger: JavaInteger(javaThis: javaInteger_unwrapped$, environment: environment), int: Int64(fromJNI: int, in: environment))
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func functionReturn_javaBindings() throws {
+    try assertOutput(
+      input: "public func function() -> JavaLong",
+      .jni,
+      .java,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func function() -> JavaLong
+         * }
+         */
+        public static java.lang.Long function() {
+          return SwiftModule.$function();
+        }
+        """,
+        """
+        private static native java.lang.Long $function();
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func functionReturn_swiftThunks() throws {
+    try assertOutput(
+      input: "public func function() -> JavaLong",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
+        public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
+          return (SwiftModule.function() as Optional).getJNILocalRefValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func functionReturnOptional_javaBindings() throws {
+    try assertOutput(
+      input: "public func function() -> JavaLong?",
+      .jni,
+      .java,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func function() -> JavaLong?
+         * }
+         */
+        public static java.lang.Long function() {
+          return SwiftModule.$function();
+        }
+        """,
+        """
+        private static native java.lang.Long $function();
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func functionReturnOptional_swiftThunks() throws {
+    try assertOutput(
+      input: "public func function() -> JavaLong?",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
+        public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
+          return (SwiftModule.function() as Optional).getJNILocalRefValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func functionReturnArray_javaBindings() throws {
+    try assertOutput(
+      input: "public func function() -> [JavaLong]",
+      .jni,
+      .java,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func function() -> [JavaLong]
+         * }
+         */
+        public static java.lang.Long[] function() {
+          return SwiftModule.$function();
+        }
+        """,
+        """
+        private static native java.lang.Long[] $function();
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func functionReturnArray_swiftThunks() throws {
+    try assertOutput(
+      input: "public func function() -> [JavaLong]",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
+        public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobjectArray? {
+          return (SwiftModule.function() as Optional).getJNILocalRefValue(in: environment)
         }
         """
       ]
