@@ -28,7 +28,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   let logger: Logger
   let config: Configuration
-  var analysis: AnalysisResult
+  let analysis: AnalysisResult
   let swiftModuleName: String
   let javaPackage: String
   let swiftOutputDirectory: String
@@ -120,31 +120,32 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       self.expectedOutputSwiftFileNames = []
     }
 
+    // Expand variadic functions into N overloads
+    var expandedAnalysis = analysis
+    let maxOverloads = config.effectiveMaxVariadicOverloads
+    expandedAnalysis.extractedGlobalFuncs = expandedAnalysis.extractedGlobalFuncs.flatMap { 
+      $0.expandingVariadicOverloads(maxOverloads: maxOverloads) 
+    }
+    
+    for type in expandedAnalysis.extractedTypes.values {
+      type.methods = type.methods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
+      type.initializers = type.initializers.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
+    }
+    
+    // Every extracted protocol that also gets a plain Java `interface`
+    // generated for it is eligible to be boxed as an existential.
+    self.existentialProtocolBoxes = expandedAnalysis.extractedTypes.values
+      .filter { $0.swiftNominal.kind == .protocol }
+      .sorted { $0.swiftNominal.qualifiedName < $1.swiftNominal.qualifiedName }
+    
     if config.enableJavaCallbacks ?? false {
       // We translate all the protocol wrappers
       // as we need them to know what protocols we can allow the user to implement themselves
       // in Java.
-      self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(self.analysis.extractedTypes.values))
-    }
-
-    // Every extracted protocol that also gets a plain Java `interface`
-    // generated for it is eligible to be boxed as an existential.
-    self.existentialProtocolBoxes = self.analysis.extractedTypes.values
-      .filter { $0.swiftNominal.kind == .protocol }
-      .sorted { $0.swiftNominal.qualifiedName < $1.swiftNominal.qualifiedName }
-      
-    // Expand variadic functions into N overloads
-    let maxOverloads = config.effectiveMaxVariadicOverloads
-    self.analysis.extractedGlobalFuncs = self.analysis.extractedGlobalFuncs.flatMap { 
-      $0.expandingVariadicOverloads(maxOverloads: maxOverloads) 
+      self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(expandedAnalysis.extractedTypes.values))
     }
     
-    var expandedTypes = self.analysis.extractedTypes
-    for (name, type) in expandedTypes {
-      type.methods = type.methods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
-      type.initializers = type.initializers.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
-    }
-    self.analysis.extractedTypes = expandedTypes
+    self.analysis = expandedAnalysis
   }
 
   func generate() throws {
