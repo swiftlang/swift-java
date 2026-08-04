@@ -40,6 +40,10 @@ public func globalCallMeBooleanSupplier(run: () -> Bool) -> Bool {
   run()
 }
 
+public func globalCallMeDoubleSupplier(run: () -> Double) -> Double {
+  run()
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

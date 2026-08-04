@@ -107,6 +107,31 @@ func assertOutput(
     }
   }
 
+  assertOutput(
+    output,
+    dump: dump,
+    expectedChunks: expectedChunks,
+    notExpectedChunks: notExpectedChunks,
+    detectChunkByInitialLines: _detectChunkByInitialLines,
+    fileID: fileID,
+    filePath: filePath,
+    line: line,
+    column: column
+  )
+}
+
+/// Asserts that `output` contains each of `expectedChunks` and that it contains none of `notExpectedChunks`.
+func assertOutput(
+  _ output: String,
+  dump: Bool = false,
+  expectedChunks: [String],
+  notExpectedChunks: [String] = [],
+  detectChunkByInitialLines _detectChunkByInitialLines: Int = 4,
+  fileID: String = #fileID,
+  filePath: String = #filePath,
+  line: Int = #line,
+  column: Int = #column
+) {
   let sourceLocation = SourceLocation(fileID: fileID, filePath: filePath, line: line, column: column)
   for notExpectedChunk in notExpectedChunks {
     let outputNotContainsNotExpectedChunk = !output.contains(notExpectedChunk)
@@ -114,7 +139,7 @@ func assertOutput(
       outputNotContainsNotExpectedChunk,
       """
       \("error: Output must not contain not expected chunk!".red)
-      ==== Not Expected output -----------------------------------------------  
+      ==== Not Expected output -----------------------------------------------
       \(notExpectedChunk.yellow)
       ==== Got output ----------------------------------------------------
       \(output)
@@ -161,7 +186,7 @@ func assertOutput(
         outputContainsExpectedChunk,
         """
         \("error: Output did not contain expected chunk!".red)
-        ==== Expected output -----------------------------------------------  
+        ==== Expected output -----------------------------------------------
         \(expectedChunk.yellow)
         ==== Got output ----------------------------------------------------
         \(output)
