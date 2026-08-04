@@ -235,52 +235,8 @@ final class FuncCallbackImportTests {
 
     assertOutput(
       output,
-      expected:
+      expectedChunks: [
         """
-        // ==== --------------------------------------------------
-        // callMeDoubleSupplier
-        /**
-         * {@snippet lang=c :
-         * void swiftjava___FakeModule_callMeDoubleSupplier_callback(double (*callback)(void))
-         * }
-         */
-        private static class swiftjava___FakeModule_callMeDoubleSupplier_callback {
-          private static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            /* callback: */SwiftValueLayout.SWIFT_POINTER
-          );
-          private static final MemorySegment ADDR =
-            __FakeModule.findOrThrow("swiftjava___FakeModule_callMeDoubleSupplier_callback");
-          private static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-          public static void call(java.lang.foreign.MemorySegment callback) {
-            try {
-              if (CallTraces.TRACE_DOWNCALLS) {
-                CallTraces.traceDowncall(callback);
-              }
-              HANDLE.invokeExact(callback);
-            } catch (Throwable ex$) {
-              throw new AssertionError("should not reach here", ex$);
-            }
-          }
-          /**
-           * {snippet lang=c :
-           * double (*)(void)
-           * }
-           */
-          private static class $callback {
-            private static final FunctionDescriptor DESC = FunctionDescriptor.of(
-              /* -> */SwiftValueLayout.SWIFT_DOUBLE
-            );
-            private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(java.util.function.DoubleSupplier.class, "getAsDouble", DESC);
-            private static MemorySegment toUpcallStub(java.util.function.DoubleSupplier fi, Arena arena) {
-              return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
-            }
-          }
-        }
-        public static class callMeDoubleSupplier {
-          private static MemorySegment $toUpcallStub(java.util.function.DoubleSupplier fi, Arena arena) {
-            return swiftjava___FakeModule_callMeDoubleSupplier_callback.$callback.toUpcallStub(fi, arena);
-          }
-        }
         /**
          * Downcall to Swift:
          * {@snippet lang=swift :
@@ -293,6 +249,7 @@ final class FuncCallbackImportTests {
           }
         }
         """
+      ]
     )
   }
 
