@@ -28,7 +28,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   let logger: Logger
   let config: Configuration
-  let analysis: AnalysisResult
+  var analysis: AnalysisResult
   let swiftModuleName: String
   let javaPackage: String
   let swiftOutputDirectory: String
@@ -132,6 +132,19 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     self.existentialProtocolBoxes = self.analysis.extractedTypes.values
       .filter { $0.swiftNominal.kind == .protocol }
       .sorted { $0.swiftNominal.qualifiedName < $1.swiftNominal.qualifiedName }
+      
+    // Expand variadic functions into N overloads
+    let maxOverloads = config.effectiveMaxVariadicOverloads
+    self.analysis.extractedGlobalFuncs = self.analysis.extractedGlobalFuncs.flatMap { 
+      $0.expandingVariadicOverloads(maxOverloads: maxOverloads) 
+    }
+    
+    var expandedTypes = self.analysis.extractedTypes
+    for (name, type) in expandedTypes {
+      type.methods = type.methods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
+      type.initializers = type.initializers.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
+    }
+    self.analysis.extractedTypes = expandedTypes
   }
 
   func generate() throws {

@@ -73,6 +73,14 @@ public struct Configuration: Codable {
   /// The directory where generated Java files should be written. Generally used with jextract mode.
   public var outputJavaDirectory: String?
 
+  /// Maximum number of overloads to generate for a function with a variadic parameter.
+  /// When a variadic parameter `T...` is encountered, the generator will produce
+  /// `0` to `maxVariadicOverloads` distinct overloads instead of failing.
+  public var maxVariadicOverloads: Int?
+  public var effectiveMaxVariadicOverloads: Int {
+    maxVariadicOverloads ?? 3
+  }
+
   /// Determine `jextract` source generation mode, using JNI or FFM.
   public var mode: JExtractGenerationMode?
 

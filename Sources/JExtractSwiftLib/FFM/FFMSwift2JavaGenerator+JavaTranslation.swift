@@ -294,9 +294,6 @@ extension FFMSwift2JavaGenerator {
       methodName: String
     ) throws -> TranslatedFunctionSignature {
       let swiftSignature = loweredFunctionSignature.original
-      if swiftSignature.hasVariadicParams {
-        throw JavaTranslationError.unsupportedVariadicParameter
-      }
 
       // 'self'
       let selfParameter: TranslatedParameter?
@@ -1112,7 +1109,4 @@ enum JavaTranslationError: Error {
   case inoutNotSupported(SwiftType, file: String = #file, line: Int = #line)
   case unhandledType(SwiftType, file: String = #file, line: Int = #line)
   case unhandledType(known: SwiftKnownType, file: String = #file, line: Int = #line)
-  
-  /// Variadic parameters (e.g. `Int...`) are not supported due to Swift limitations with array splatting.
-  case unsupportedVariadicParameter
 }

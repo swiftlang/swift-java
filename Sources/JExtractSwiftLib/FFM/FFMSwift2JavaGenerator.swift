@@ -24,7 +24,7 @@ import struct Foundation.URL
 package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   let log: Logger
   let config: Configuration
-  let analysis: AnalysisResult
+  var analysis: AnalysisResult
   let swiftModuleName: String
   let javaPackage: String
   let swiftOutputDirectory: String
@@ -116,6 +116,19 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     } else {
       self.expectedOutputSwiftFileNames = []
     }
+    
+    // Expand variadic functions into N overloads
+    let maxOverloads = config.effectiveMaxVariadicOverloads
+    self.analysis.extractedGlobalFuncs = self.analysis.extractedGlobalFuncs.flatMap { 
+      $0.expandingVariadicOverloads(maxOverloads: maxOverloads) 
+    }
+    
+    var expandedTypes = self.analysis.extractedTypes
+    for (name, type) in expandedTypes {
+      type.methods = type.methods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
+      type.initializers = type.initializers.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
+    }
+    self.analysis.extractedTypes = expandedTypes
   }
 
   func generate() throws {
