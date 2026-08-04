@@ -78,7 +78,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   ) {
     self.config = config
     self.logger = Logger(label: "jni-generator", logLevel: translator.log.logLevel)
-    self.analysis = translator.result
+    let analysis = translator.result
     self.swiftModuleName = translator.swiftModuleName
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
@@ -131,6 +131,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       type.methods = type.methods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
       type.initializers = type.initializers.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
     }
+    self.analysis = expandedAnalysis
     
     // Every extracted protocol that also gets a plain Java `interface`
     // generated for it is eligible to be boxed as an existential.
@@ -144,8 +145,6 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       // in Java.
       self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(expandedAnalysis.extractedTypes.values))
     }
-    
-    self.analysis = expandedAnalysis
   }
 
   func generate() throws {

@@ -77,7 +77,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   ) {
     self.log = Logger(label: "ffm-generator", logLevel: translator.log.logLevel)
     self.config = config
-    self.analysis = translator.result
+    let analysis = translator.result
     self.swiftModuleName = translator.swiftModuleName
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
