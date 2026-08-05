@@ -335,7 +335,7 @@ struct JNIModuleTests {
       """
     
     var config = Configuration()
-    config.maxVariadicOverloads = 2
+    config.maxVariadicOverloads = 3
     
     try assertOutput(
       input: input,
