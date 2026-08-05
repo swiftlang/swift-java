@@ -341,7 +341,7 @@ FishBox box = ...;
 box.feedFish(); // type-safe generated specialized function
 ```
 
-You can also possible to cause such specialization to occurr by declaring a typealias in Swift sources:
+It is also possible to cause such specialization to occur by declaring a typealias in Swift sources:
 
 ```swift
 typealias FishBox = Box<Fish>

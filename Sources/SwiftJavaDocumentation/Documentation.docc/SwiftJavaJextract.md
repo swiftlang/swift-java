@@ -20,6 +20,10 @@ The outline of the approach is:
 You can then use the Swift library from Java by calling the generated methods
 and initializers.
 
+You can always use the command line `--help` to get additional guidance about the tool and available options:
+
+@Snippet(path: "Snippets/SwiftJavaCLIHelp", slice: "jextractHelp")
+
 For the set of Swift language features that can be extracted, and what each one
 looks like on the Java side, see <doc:FeaturesJextract>.
 

@@ -40,6 +40,9 @@ done
 echo "Regenerating swift-java.config option docs from Configuration.swift..."
 swift run generate-config-docs
 
+echo "Preparing help and usage output snippets..."
+scripts/generate-cli-help-snippets.sh
+
 # Opt in to the swift-docc-plugin dependency declared in Package.swift.
 # Set DOCC_PLUGIN_PATH=<path> instead to use a local swift-docc-plugin checkout.
 export SWIFTJAVA_DOCC_PLUGIN_INSTALL=1

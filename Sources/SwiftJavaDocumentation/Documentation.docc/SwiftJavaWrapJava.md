@@ -17,6 +17,10 @@ directly - see <doc:FeaturesJavaKitMacros>.
 
 For an orientation on which interop tool fits your task, see <doc:FeaturesOverview>.
 
+You can always use the command line `--help` to get additional guidance about the tool and available options:
+
+@Snippet(path: "Snippets/SwiftJavaCLIHelp", slice: "wrapJavaHelp")
+
 ### Workflow
 
 The typical pipeline has three steps, though the SwiftPM plugin can drive all

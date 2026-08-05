@@ -1,30 +1,14 @@
 # swift-java
 
-The `swift-java` command line tool offers multiple ways to interact your Java interoperability enabled projects.
+The `swift-java` command line tool offers multiple ways to interact with your Java interoperability enabled projects.
 
 ## Overview
 
-The `swift-java` command line tool offers multiple modes which you can use to prepare your Swift and Java code to interact with eachother.
+The `swift-java` command line tool offers multiple modes which you can use to prepare your Swift and Java code to interact with each other.
 
-The following sections will explain the modes in depth. When in doubt, you can always use the command line `--help` to get additional 
-guidance about the tool and available options:
+When in doubt, you can always use the command line `--help` to get additional guidance about the tool and available options:
 
-```bash
-> swift-java --help
-
-USAGE: swift-java <subcommand>
-
-OPTIONS:
-  -h, --help              Show help information.
-
-SUBCOMMANDS:
-  configure               Configure and emit a swift-java.config file based on an input dependency or jar file
-  resolve                 Resolve dependencies and write the resulting swift-java.classpath file
-  wrap-java               Wrap Java classes with corresponding Swift bindings.
-  jextract                Wrap Swift functions and types with Java bindings, making them available to be called from Java
-
-  See 'swift-java help <subcommand>' for detailed help.
-```
+@Snippet(path: "Snippets/SwiftJavaCLIHelp", slice: "mainHelp")
 
 ### Expose Java classes to Swift: swift-java wrap-java 
 
@@ -37,37 +21,7 @@ swift-java help wrap-java
 
 to produce help output like the following:
 
-```
-USAGE: swift-java wrap-java [--output-directory <output-directory>] [--input-swift <input-swift>] [--log-level <log-level>] [--cp <cp> ...] [--filter-java-package <filter-java-package>] --swift-module <swift-module> [--depends-on <depends-on> ...] [--swift-native-implementation <swift-native-implementation> ...] [--cache-directory <cache-directory>] [--swift-match-package-directory-structure <swift-match-package-directory-structure>] <input>
-
-ARGUMENTS:
-  <input>                 Path to .jar file whose Java classes should be wrapped using Swift bindings
-
-OPTIONS:
-  -o, --output-directory <output-directory>
-                          The directory in which to output generated SwiftJava configuration files.
-  --input-swift <input-swift>
-                          Directory containing Swift files which should be extracted into Java bindings. Also known as 'jextract' mode. Must be paired with --output-java and --output-swift.
-  -l, --log-level <log-level>
-                          Configure the level of logs that should be printed (values: trace, debug, info, notice, warning, error, critical; default: log level)
-  --cp, --classpath <cp>  Class search path of directories and zip/jar files from which Java classes can be loaded.
-  -f, --filter-java-package <filter-java-package>
-                          While scanning a classpath, inspect only types included in this package
-  --swift-module <swift-module>
-                          The name of the Swift module into which the resulting Swift types will be generated.
-  --depends-on <depends-on>
-                          A swift-java configuration file for a given Swift module name on which this module depends,
-                          e.g., JavaKitJar=Sources/JavaKitJar/swift-java.config. There should be one of these options
-                          for each Swift module that this module depends on (transitively) that contains wrapped Java sources.
-  --swift-native-implementation <swift-native-implementation>
-                          The names of Java classes whose declared native methods will be implemented in Swift.
-  --cache-directory <cache-directory>
-                          Cache directory for intermediate results and other outputs between runs
-  --swift-match-package-directory-structure <swift-match-package-directory-structure>
-                          Match java package directory structure with generated Swift files (default: false)
-  -h, --help              Show help information.
-
-```
+@Snippet(path: "Snippets/SwiftJavaCLIHelp", slice: "wrapJavaHelp")
 
 For example, the `JavaKitJar` library is generated with this command line:
 

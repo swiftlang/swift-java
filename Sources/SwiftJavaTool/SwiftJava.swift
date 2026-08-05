@@ -50,7 +50,9 @@ struct SwiftJava: AsyncParsableCommand {
         try command.run()
       }
     } catch {
-      print("Invocation: \(CommandLine.arguments.joined(separator: " "))")
+      if Self.exitCode(for: error) != .success {
+        print("Invocation: \(CommandLine.arguments.joined(separator: " "))")
+      }
       exit(withError: error)
     }
   }

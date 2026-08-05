@@ -295,7 +295,7 @@ Because of Java's type erasure, generic parameters used in method
 signatures need a `typeErasedResult:` hint on `@JavaMethod` so the macro can
 generate the right JNI signature.
 
-TODO: shoe example here
+TODO: show example here
 
 ### Method overloading
 
