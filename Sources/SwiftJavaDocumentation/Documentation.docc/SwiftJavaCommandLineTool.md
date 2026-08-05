@@ -12,10 +12,9 @@ When in doubt, you can always use the command line `--help` to get additional gu
 
 ### Expose Java classes to Swift: swift-java wrap-java 
 
-The `swift-java` is a Swift program that uses Java's runtime reflection facilities to translate the requested Java classes into their Swift projections. The output is a number of Swift source files, each of which corresponds to a
-single Java class. The `swift-java` can be executed like this:
+`swift-java` uses Java's runtime reflection facilities to translate the requested Java classes into their Swift projections. The output is a number of Swift source files, one per Java class. You can see its help with:
 
-```
+```bash
 swift-java help wrap-java
 ```
 
@@ -23,20 +22,26 @@ to produce help output like the following:
 
 @Snippet(path: "Snippets/SwiftJavaCLIHelp", slice: "wrapJavaHelp")
 
-For example, the `JavaKitJar` library is generated with this command line:
+For example, the `JavaUtilJar` module in this repository is generated with this command line:
 
-```swift
-swift-java wrap-java --swift-module JavaKitJar --depends-on SwiftJNI=Sources/SwiftJNI/swift-java.config -o Sources/JavaKitJar/generated Sources/JavaKitJar/swift-java.config
+```bash
+swift-java wrap-java \
+  --swift-module JavaStdlib/JavaUtilJar \
+  -o Sources/JavaStdlib/JavaUtilJar/generated \
+  --config Sources/JavaStdlib/JavaUtilJar/swift-java.config \
+  --depends-on SwiftJava=Sources/SwiftJava/swift-java.config \
+  --depends-on JavaUtil=Sources/JavaStdlib/JavaUtil/swift-java.config
 ```
 
-The `--swift-module JavaKitJar` parameter describes the name of the Swift module in which the code will be generated. 
+See `scripts/wrap-java-generate.sh` for the full set of invocations used to regenerate the bundled Java standard library bindings.
 
-The `--depends-on` option is followed by the swift-java configuration files for any library on which this Swift library depends. Each `--depends-on` option is of the form `<swift library name>=<swift-java.config path>`, and tells swift-java which other Java classes have already been translated to Swift. For example, if your Java class uses `java.net.URL`, then you should include
-`JavaKitNetwork`'s configuration file as a dependency here.
+The `--swift-module` parameter is the name of the Swift module the code is generated into.
 
-The `-o` option specifies the output directory. Typically, this will be `Sources/<module name>/generated` or similar to keep the generated Swift files separate from any hand-written ones. To see the output on the terminal rather than writing files to disk, pass `-` for this option.
+Each `--depends-on` option takes `<swift module name>=<swift-java.config path>` and tells swift-java which other Java classes have already been translated to Swift. For example, if your Java class uses `java.net.URL`, include `JavaNet`'s configuration file as a dependency here.
 
-Finally, the command line should contain the `swift-java.config` file containing the list of classes that should be translated into Swift and their corresponding Swift type names. The tool will output a single `.swift` file for each class, along with warnings for any public API that cannot be translated into Swift. The most common warnings are due to missing Swift projections for Java classes. For example, here we have not translated (or provided the translation manifests for) the Java classes
+The `-o` option specifies the output directory. Typically this is `Sources/<module name>/generated` or similar, to keep the generated Swift files separate from hand-written ones. To see the output on the terminal rather than writing files to disk, pass `-` for this option.
+
+The `--config` option points at the `swift-java.config` file listing the classes to translate and their corresponding Swift type names. The tool outputs a single `.swift` file for each class, along with warnings for any public API that cannot be translated into Swift. The most common warnings are due to missing Swift projections for Java classes. For example, here we have not translated (or provided the translation manifests for) the Java classes
 `java.util.zip.ZipOutputStream` and `java.io.OutputStream`:
 
 ```
@@ -45,6 +50,8 @@ warning: Unable to translate 'java.util.jar.JarOutputStream' constructor: Java c
 warning: Unable to translate 'java.util.jar.JarInputStream' method 'transferTo': Java class 'java.io.OutputStream' has not been translated into Swift
 ```
 
-The result of such warnings is that certain information won't be statically available in Swift, e.g., the superclass won't be known (so we will assume it is `JavaObject`), or the specified constructors or methods won't be translated. If you don't need these APIs, the warnings can be safely ignored. The APIs can still be called dynamically via JNI.
+Such warnings mean that some information won't be statically available in Swift: the superclass won't be known (so it is assumed to be `JavaObject`), or the affected constructors and methods won't be translated. If you don't need those APIs, the warnings can be safely ignored. The APIs can still be called dynamically via JNI.
 
-The `--jar` option changes the operation of `swift-java`. Instead of wrapping Java classes in Swift, it scans the given input Jar file to find all public classes and outputs a configuration file `swift-java.config` mapping all of the Java classes in the Jar file to Swift types. The `--jar` mode is expected to be used to help import a Java library into Swift wholesale, after which swift-java should invoked again given the generated configuration file.
+### Scan a Jar file: swift-java configure --jar
+
+`swift-java configure --jar` scans the given input Jar file for all public classes and writes a `swift-java.config` file mapping every Java class in the Jar to a Swift type. Use it to import an entire Java jar's API surface, and then invoke `swift-java wrap-java` with the generated configuration file to produce the Swift wrappers.

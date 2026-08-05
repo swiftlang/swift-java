@@ -157,10 +157,11 @@ OPTIONS:
                           A swift-java configuration file for a given Swift
                           module name on which this module depends,
                           e.g.,
-                          JavaKitJar=Sources/JavaKitJar/swift-java.config.
-                          There should be one of these options
-                          for each Swift module that this module depends on
-                          (transitively) that contains wrapped Java sources.
+                          JavaUtil=Sources/JavaStdlib/JavaUtil/swift-java.config.
+                          There should be one of these
+                          options for each Swift module that this module
+                          depends on (transitively) that contains
+                          wrapped Java sources.
   --swift-native-implementation <swift-native-implementation>
                           The names of Java classes whose declared native
                           methods will be implemented in Swift.

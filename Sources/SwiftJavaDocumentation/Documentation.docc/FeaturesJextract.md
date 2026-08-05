@@ -84,7 +84,7 @@ on Java 16+ reach the same values with
 
 ### RawRepresentable enums
 
-JExtract supports extracting enums that conform to `RawRepresentable`,
+jextract supports extracting enums that conform to `RawRepresentable`,
 giving access to an optional initializer and the `rawValue` property.
 
 @TabNavigator {
@@ -185,8 +185,8 @@ Asynchronous functions are imported as Future-type returning Java functions.
 
 There are two modes of extracting them, configurable using the `asyncFuncMode` setting in `swift-java.config`, or using the equivalent `--async-func-mode` command line option:
 
-- **completable-future (default)**: `async` functions return `java.util.concurrent.CompletableFuture`
-- **future**: For legacy platforms (e.g. Android 23 and below) where `CompletableFuture` is not available, `async` functions return `java.util.concurrent.Future`. 
+- **`completableFuture` (default)**: `async` functions return `java.util.concurrent.CompletableFuture`
+- **`legacyFuture`**: for platforms (e.g. Android 23 and below) where `CompletableFuture` is not available, `async` functions return `java.util.concurrent.Future`
 
 @TabNavigator {
    @Tab("Swift") {
@@ -220,8 +220,8 @@ This relies on the Kotlin `kotlinx-coroutines-jdk8` library which adds the `awai
 
 ### Collections
 
-Swift's collection types cross the boundary either by copying (arrays) or by
-handing Java a wrapper that points at the live Swift value (dictionaries, sets).
+Arrays are copied across the boundary. Dictionaries and sets are handed to Java as
+a wrapper over the live Swift value.
 
 #### Arrays
 
@@ -259,13 +259,15 @@ arrays (`[[UInt8]]`, `[[String]]`) are supported in JNI mode.
 #### InlineArray
 
 Fixed-size inline arrays (Swift's `InlineArray<N, T>`, sugar `[N of T]`) are
-recognized by jextract in JNI mode and imported with an equivalent Java surface.
+recognized when parsing Swift sources, but are not yet extracted in either mode.
+Declarations using them are skipped.
 
 #### Dictionaries
 
 Swift dictionaries (`[Key: Value]`) are imported using the `SwiftDictionaryMap<Key, Value>`
-Java wrapper type. This wrapper refers to the actual Swift dictionary on the Swift heap
-and does not copy it. Use `SwiftDictionaryMap::toJava` to explicitly copy into a Java `Map`.
+Java wrapper type. Creating the wrapper does not copy the dictionary; it implements
+`java.util.Map` by making a JNI downcall into the Swift value for each operation.
+Use `SwiftDictionaryMap::toJavaMap` to copy into a `java.util.Map` on the Java heap.
 
 @TabNavigator {
    @Tab("Swift") {
@@ -282,8 +284,8 @@ and does not copy it. Use `SwiftDictionaryMap::toJava` to explicitly copy into a
 #### Sets
 
 Swift sets (`Set<Element>`) are imported using the `SwiftSet<Element>` Java wrapper.
-Like dictionaries, the wrapper points at the Swift value on the Swift heap and does not
-copy it.  Use `SwiftSet::toJava` to explicitly copy into a Java `Set`.
+Like dictionaries, creating the wrapper does not copy, and each operation is a JNI
+downcall. Use `SwiftSet::toJavaSet` to copy into a `java.util.Set` on the Java heap.
 
 @TabNavigator {
    @Tab("Swift") {
@@ -299,13 +301,12 @@ copy it.  Use `SwiftSet::toJava` to explicitly copy into a Java `Set`.
 
 ### Bytes and buffers
 
-Raw bytes are the most common thing to hand across the language boundary, and
-SwiftJava offers several shapes for it depending on whether you want a copy or a
-view of the memory.
+There are several ways to pass raw bytes, differing in whether the bytes are
+copied or viewed in place.
 
 #### Byte arrays
 
-`[UInt8]` maps to Java's `byte[]` in both modes by copying. 
+`[UInt8]` maps to Java's `byte[]` in both modes by copying.
 
 Note that Java's `byte` is signed, so a Swift `UInt8` of `200` reads as `-56` on the Java side;
 see <doc:FeaturesJextract#Primitive-and-unsigned-types>.
@@ -386,11 +387,13 @@ type itself see <doc:FeaturesJextract#Data>.
 
 #### Java MemorySegment (FFM only)
 
-`Data.toMemorySegment(arena)` hands back the bytes as a `java.lang.foreign.MemorySegment`,
-which the JVM reads directly without copying.
+`Data.toMemorySegment(arena)` copies the bytes into memory allocated in the given
+arena and returns it as a `java.lang.foreign.MemorySegment`. This is one copy, and
+the JVM then reads that native memory without a second copy onto the Java heap.
+To read the bytes without copying at all, use `withUnsafeBytes` (see below).
 
 > Important: `MemorySegment` is part of the Foreign Function & Memory API
-> ([JEP 454](https://openjdk.org/jeps/454)) and requires JDK 25+. It is available
+> ([JEP 454](https://openjdk.org/jeps/454)), final since JDK 22. It is available
 > in FFM mode only; there is no `MemorySegment` equivalent in JNI mode.
 
 @Snippet(path: "Snippets/DataJavaFFM", slice: "memorySegmentUsageJava")
@@ -559,7 +562,7 @@ the existential from that value.
    }
 }
 
-Using the returned value works just like using any other imported interface: its
+Using the returned value works like using any other imported interface: its
 requirements are callable through the box, it can be passed back into functions that
 accept the protocol (including generic and opaque parameters), and refined protocols
 expose both their own and their inherited requirements.
@@ -570,7 +573,7 @@ expose both their own and their inherited requirements.
 ### Foundation types
 
 A handful of Foundation value types are recognized by name and bridged to a
-matching Java representation rather than being treated as opaque Swift values.
+matching Java representation, rather than being treated as opaque Swift values.
 
 #### Data
 

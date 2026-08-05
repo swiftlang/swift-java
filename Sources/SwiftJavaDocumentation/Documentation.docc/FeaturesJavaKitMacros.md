@@ -5,14 +5,12 @@ Detailed feature documentation for calling Java from Swift using JavaKit macros
 
 ## Overview
 
-JavaKit macros let you *hand-write* Swift declarations that mirror Java classes,
-methods, and fields. This is the direct, one-off approach: pick a Java API,
-declare a matching Swift shape, and the macros produce all the JNI plumbing.
+JavaKit macros let you hand-write Swift declarations that mirror Java classes,
+methods, and fields; the macros generate the JNI calls.
 
-Use this approach when you want fine control over what surfaces on the Swift
-side, or when you're implementing Java `native` methods in Swift. If you
-instead want *automatic* bulk wrapping of an entire classpath or JAR, reach
-for the source generator described in <doc:SwiftJavaWrapJava>.
+Use them when you want control over exactly what surfaces on the Swift side, or when
+you're implementing Java `native` methods in Swift. To wrap an entire classpath or
+JAR instead, use the source generator described in <doc:SwiftJavaWrapJava>.
 
 For an orientation on which interop tool fits your task, see <doc:FeaturesOverview>.
 
@@ -68,8 +66,8 @@ Method names in Swift match the Java method verbatim by default. Use
 
 ### Java static methods: @JavaStaticMethod
 
-Static methods live in an `extension` on the class's `JavaClass<T>` metatype.
-This keeps instance dispatch and static dispatch cleanly separated.
+Static methods live in an `extension` on the class's `JavaClass<T>` metatype,
+keeping instance and static dispatch separate.
 
 ```swift
 extension JavaClass<MyClass> {
@@ -142,10 +140,14 @@ and `NewObject` call.
 
 ### Throwing methods
 
-A Swift method declared `@JavaMethod ... throws` corresponds to a Java method
-whose signature includes `throws Exception`. 
+A Swift method declared `@JavaMethod ... throws` corresponds to a Java method whose
+signature includes `throws`.
 
-When the Java side throws, the exception is caught by the generated bridge and re-thrown as a Swift error.
+When the Java side throws, the generated bridge clears the pending JNI exception and
+rethrows it as a Swift `Throwable`, which conforms to `Error`. Catch it as
+`Throwable` to reach the underlying Java object (`getMessage()`,
+`printStackTrace(_:)`, `.as(IOException.self)`, ...), or as a plain `error` if you
+only need the description.
 
 @TabNavigator {
    @Tab("Swift") {
@@ -153,7 +155,15 @@ When the Java side throws, the exception is caught by the generated bridge and r
    }
 }
 
-TODO: way more docs about how we map errors
+> Important: if you omit `throws` on a Swift declaration whose Java method can throw,
+> a Java exception becomes a `fatalError` with the Java stack trace attached, because
+> there is nowhere to propagate it to. Declare `throws` whenever the Java signature
+> can throw.
+
+In the other direction, a Swift error thrown out of a `@JavaImplementation` method
+is converted to a Java exception: if the error is itself a wrapped Java `Throwable`
+it is rethrown as-is, otherwise a `java.lang.Exception` carrying the error's
+description is thrown.
 
 ### Type casting: .as(T.self)
 
@@ -181,9 +191,9 @@ itself as an instance of a subclass:
 
 ### Arrays
 
-Swift `[T]` maps to Java `T[]` for both parameters and return values. This
-works out of the box for the primitive types (`Int8`/`byte`, `Int32`/`int`,
-`Int64`/`long`, `Double`/`double`) and for object types like `String`.
+Swift `[T]` maps to Java `T[]` for both parameters and return values, for the
+primitive types (`Int8`/`byte`, `Int32`/`int`, `Int64`/`long`, `Double`/`double`,
+...) as well as object types like `String`.
 
 Once the array method is declared on the Swift wrapper, calling it looks
 exactly like calling any Swift function that takes/returns `[T]`:
@@ -199,13 +209,15 @@ exactly like calling any Swift function that takes/returns `[T]`:
 
 ### Optionals and nullability
 
-Swift `Optional<T>` maps to Java `Optional<T>` when the Swift type is
-`JavaString?` (a nullable JavaKit-wrapped object). Nullable primitives use
-`OptionalLong` / `OptionalInt` / `OptionalDouble`. Passing `nil` on the Swift
-side surfaces as `Optional.empty()` on the Java side.
+Java's `Optional<T>`, `OptionalInt`, `OptionalLong` and `OptionalDouble` are wrapped
+as JavaKit object types (`JavaOptional<T>`, `JavaOptionalInt`, ...) like any other
+Java class. On top of that, `wrap-java` emits a second accessor with an `Optional`
+suffix that uses a native Swift optional instead, so a Java
+`Optional<String> getText()` yields both `getText() -> JavaOptional<JavaString>!`
+and `getTextOptional() -> JavaString?`. The same applies to fields: an
+`Optional<String> text` field yields `text` and `textOptional`.
 
-The wrapper's optional-typed methods and fields are used like any other
-Swift optional:
+Prefer the `Optional`-suffixed accessors; they are what the sample below uses:
 
 @TabNavigator {
    @Tab("Swift") {
@@ -215,6 +227,10 @@ Swift optional:
       @Snippet(path: "Snippets/JavaKitOptionalsJava", slice: "threadSafeHelper")
    }
 }
+
+Note that this is separate from Java's implicit reference nullability, which is
+covered under Primitive type mapping below: every wrapped Java object type is
+projected into Swift as an optional.
 
 ### Primitive type mapping
 
@@ -289,13 +305,28 @@ Constructing a subclass from Swift mirrors the Java constructor call:
 
 ### Generic type parameters
 
-Generic Java types like `java.util.ArrayList<E>` are wrapped as generic Swift classes. 
+Generic Java types like `java.util.ArrayList<E>` are wrapped as generic Swift classes.
 
-Because of Java's type erasure, generic parameters used in method
-signatures need a `typeErasedResult:` hint on `@JavaMethod` so the macro can
-generate the right JNI signature.
+Because of Java's type erasure, a generic parameter used in a method signature needs
+a `typeErasedResult:` hint on `@JavaMethod` so the macro can generate the right JNI
+signature. The hint spells the Swift return type as written, and the macro uses the
+erased type (`java.lang.Object`) for the actual JNI call:
 
-TODO: show example here
+```swift
+@JavaClass("java.util.Stack")
+open class Stack<Stack_E: AnyJavaObject>: JavaObject {
+  public typealias E = Stack_E
+
+  // public synchronized E java.util.Stack.pop()
+  @JavaMethod(typeErasedResult: "E!")
+  open func pop() -> E!
+}
+```
+
+Note the `Stack_E` parameter name plus an `E` typealias: `wrap-java` prefixes type
+parameters with the class name to avoid collisions, then restores the Java spelling
+via the typealias. See `Sources/JavaStdlib/JavaUtil/generated/Stack.swift` for the
+full generated type.
 
 ### Method overloading
 
@@ -304,22 +335,20 @@ overloads with the same name - the macro-generated JNI signature disambiguates
 which overload to invoke. See `Sources/JavaStdlib/JavaUtil/generated/ArrayList.swift`
 for realistic examples (multiple `add(...)` overloads).
 
-### Annotating thread-safety with Swift's Sendable
+### Thread-safety and Sendable
 
-If you know a Java class is thread-safe (typically because it's annotated with
-your project's own `@ThreadSafe` marker, or because its API is stateless), you
-can declare its Swift wrapper `@unchecked Sendable` so it can be shared across
-Swift concurrency isolation boundaries.
+`wrap-java` recognizes thread-safety annotations on the Java class and emits the
+matching Swift conformance. Matching is by simple name, so the annotation may come
+from `javax.annotation.concurrent`, `net.jcip.annotations`, or your own project:
 
-```swift
-@JavaClass("com.example.swift.ThreadSafeHelperClass")
-open class ThreadSafeHelperClass: JavaObject, @unchecked Sendable {
-  @JavaMethod
-  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
-}
-```
+| Java annotation  | Generated Swift                                        |
+|------------------|--------------------------------------------------------|
+| `@ThreadSafe`    | `extension X: @unchecked Swift.Sendable { }`            |
+| `@Immutable`     | `extension X: @unchecked Swift.Sendable { }`            |
+| `@NotThreadSafe` | `@available(unavailable, *) extension X: Swift.Sendable { }` |
 
-Once declared, the wrapped instance flows freely across isolation boundaries:
+So an annotated Java class flows across Swift concurrency isolation boundaries
+without any extra work on your side:
 
 @TabNavigator {
    @Tab("Swift") {
@@ -333,4 +362,13 @@ Once declared, the wrapped instance flows freely across isolation boundaries:
    }
 }
 
-TODO: note what annotations we automatically handle
+When you hand-write a wrapper, or the Java class carries no such annotation but you
+know it is thread-safe, declare the conformance yourself:
+
+```swift
+@JavaClass("com.example.swift.ThreadSafeHelperClass")
+open class ThreadSafeHelperClass: JavaObject, @unchecked Sendable {
+  @JavaMethod
+  @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
+}
+```

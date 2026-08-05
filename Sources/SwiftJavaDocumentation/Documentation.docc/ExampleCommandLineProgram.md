@@ -7,17 +7,19 @@ Build a Java command-line program whose entry point is implemented in Swift.
 > Note: The instructions here work, but we are still smoothing out the
 > interoperability story.
 
-All JavaKit-based applications start execution within the Java Virtual Machine.
-This example walks through the four pieces you need: a Java class that loads a
-native Swift library and declares a `native` entry point, a SwiftPM dynamic
-library product, the Swift implementation of that entry point, and the command
-line invocation that ties them together.
+In this example the program starts in the JVM: a Java class declares a `native`
+method, and Swift provides its implementation. This walks through the four pieces
+you need: the Java class that loads a native Swift library and declares the `native`
+entry point, a SwiftPM dynamic library product, the Swift implementation of that
+entry point, and the command line invocation that ties them together.
+
+(If instead you want a Swift executable that starts a JVM to call Java APIs, see
+`Samples/JavaProbablyPrime` and <doc:FeaturesJavaKitMacros>.)
 
 ### 1. Create a Java class to wrap the Swift library
 
-First, define a Java class that loads your native Swift library and provides a
-`native` entry point to get into the Swift code. Here is a minimal Java class
-that has all of the program's logic written in Swift, including `main`:
+First, define a Java class that loads your native Swift library and declares a
+`native` entry point into the Swift code:
 
 ```java
 package org.swift.javakit;
@@ -27,7 +29,11 @@ public class HelloSwiftMain {
         System.loadLibrary("HelloSwift");
     }
 
-    public native static void main(String[] args);
+    public static native String runSwiftMain(String[] args);
+
+    public static void main(String[] args) {
+        System.out.println(runSwiftMain(args));
+    }
 }
 ```
 
@@ -67,23 +73,39 @@ with an associated target that depends on `SwiftJava`:
 
 ### 3. Implement the native Java method in Swift
 
-Now, in the `HelloSwift` Swift library, define a `struct` that provides the
-`main` method for the Java class you already defined:
+Implementations of `native` methods live in an `@JavaImplementation` extension of the
+Swift wrapper for the Java class. Declare the wrapper with `@JavaClass`, list the
+`native` methods in a `NativeMethods` protocol, and mark each implementation with
+`@JavaMethod`. A `static native` method is implemented by a `static func` that takes
+an `environment: JNIEnvironment` parameter:
 
 ```swift
 import SwiftJava
 
+@JavaClass("org.swift.javakit.HelloSwiftMain")
+open class HelloSwiftMain: JavaObject {
+}
+
+protocol HelloSwiftMainNativeMethods {
+  static func runSwiftMain(_ args: [String], environment: JNIEnvironment) -> String
+}
+
 @JavaImplementation("org.swift.javakit.HelloSwiftMain")
-struct HelloSwiftMain {
-  @JavaStaticMethod
-  static func main(arguments: [String], environment: JNIEnvironment? = nil) {
-    print("Command line arguments are: \(arguments)")
+extension HelloSwiftMain: HelloSwiftMainNativeMethods {
+  @JavaMethod
+  static func runSwiftMain(_ args: [String], environment: JNIEnvironment) -> String {
+    "Command line arguments are: \(args)"
   }
 }
 ```
 
+> Important: use `@JavaMethod static func` here, not `@JavaStaticMethod`.
+> `@JavaStaticMethod` declares a Java static method that Swift *calls*;
+> `@JavaImplementation` + `@JavaMethod` *provides* the implementation of a Java
+> `native` method.
+
 Build this library with `swift build`, then find the directory containing the
-resulting shared library (`HelloSwift.dylib`, `HelloSwift.so`, or
+resulting shared library (`libHelloSwift.dylib`, `libHelloSwift.so`, or
 `HelloSwift.dll`, depending on platform). It is usually in `.build/debug/`.
 
 ### 4. Putting it all together
@@ -100,31 +122,26 @@ This prints the command-line arguments `-v` and `argument` as seen by Swift.
 
 ### Bonus: Swift argument parser
 
-The easiest way to build a command-line program in Swift is with the
+The easiest way to process the arguments Java hands you is the
 [Swift argument parser library](https://github.com/apple/swift-argument-parser).
-You can extend the `HelloSwiftMain` type to conform to `ParsableCommand` and use
-the Swift argument parser to process the arguments provided by Java:
+Declare a `ParsableCommand` and parse into it from the native method's
+implementation:
 
-```swift
-import ArgumentParser
-import SwiftJava
-
-@JavaClass("org.swift.javakit.HelloSwiftMain")
-struct HelloSwiftMain: ParsableCommand {
-  @Option(name: .shortAndLong, help: "Enable verbose output")
-  var verbose: Bool = false
-
-  @JavaImplementation
-  static func main(arguments: [String], environment: JNIEnvironment? = nil) {
-    let command = Self.parseOrExit(arguments)
-    command.run(environment: environment)
-  }
-
-  func run(environment: JNIEnvironment? = nil) {
-    print("Verbose = \(verbose)")
-  }
+@TabNavigator {
+   @Tab("Swift") {
+      @Snippet(path: "Snippets/ArgumentParserMainSwift.swift", slice: "argumentParserImplementation")
+   }
+   @Tab("Java") {
+      @Snippet(path: "Snippets/ArgumentParserMainJava", slice: "argumentParserMain")
+   }
 }
-```
+
+Note that the command is a separate `ParsableCommand` type rather than the
+`@JavaClass` wrapper itself: the wrapper is a class backed by a Java instance,
+so it cannot also satisfy `ParsableCommand`'s value semantics.
+
+`Samples/JavaKitSampleApp` contains this example, along with runtime tests that
+call the Java entry point and check the parsed result.
 
 ## See Also
 
