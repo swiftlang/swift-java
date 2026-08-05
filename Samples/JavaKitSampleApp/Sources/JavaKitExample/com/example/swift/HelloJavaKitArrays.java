@@ -14,6 +14,7 @@
 
 package com.example.swift;
 
+// snippet.arrays
 public class HelloJavaKitArrays {
 
     public byte[] getFixedBytes() {
@@ -57,3 +58,4 @@ public class HelloJavaKitArrays {
         return new String[] { "hello", "world", "from", "java" };
     }
 }
+// snippet.end

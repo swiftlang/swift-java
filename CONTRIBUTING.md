@@ -12,7 +12,7 @@ Please ensure to specify the following:
 * Commit hash
 * Contextual information (e.g. what you were trying to achieve with swift-java)
 * Simplest possible steps to reproduce
-  * More complex the steps are, lower the priority will be.
+  * The more complex the steps, the lower the priority.
   * A pull request with failing test case is preferred, but it's just fine to paste the test case into the issue description.
 * Anything that might be relevant in your opinion, such as:
   * Swift version or the output of `swift --version`
@@ -24,7 +24,7 @@ Please ensure to specify the following:
 Commit hash: b17a8a9f0f814c01a56977680cb68d8a779c951f
 
 Context:
-While testing my application that uses with swift-openapi-generator, I noticed that ...
+While testing my application that uses swift-java, I noticed that ...
 
 Steps to reproduce:
 1. ...
@@ -78,7 +78,7 @@ reflected in your working directory:
 % act --bind workflow_call -j soundness --input format_check_enabled=true
 ```
 
-If you'd like `act` to always run with certain flags, these can be be placed in
+If you'd like `act` to always run with certain flags, these can be placed in
 an `.actrc` file either in the current working directory or your home
 directory, for example:
 
@@ -88,20 +88,23 @@ directory, for example:
 --action-offline-mode
 ```
 
-For frequent contributors, we recommend adding the script as a [git pre-push hook](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks), which you can do via executing the following command in the project root directory: 
+For frequent contributors, we recommend running the soundness checks before pushing. You can wire that up as a [git pre-push hook](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks):
 
 ```bash
-cat << EOF > .git/hooks/pre-push
-
-if [[ -f "scripts/soundness.sh" ]]; then
-  scripts/soundness.sh
-fi
+cat << 'EOF' > .git/hooks/pre-push
+#!/bin/sh
+exec act workflow_call -j soundness --input format_check_enabled=true --input shell_check_enabled=true
 EOF
+chmod +x .git/hooks/pre-push
 ```
 
-Which makes the script execute, and only allow the `git push` to complete if the check has passed.
+This only allows the `git push` to complete if the checks pass.
 
-In the case of formatting issues, you can then `git add` the formatting changes, and attempt the push again. 
+In the case of formatting issues, `git add` the formatting changes and attempt the push again.
+
+### Regenerating generated docs
+
+Some documentation is generated from source and checked in, so CI can catch it drifting out of date. If you changed `Configuration.swift` or a CLI command's flags/help text, run `scripts/generate-docs.sh` and commit the generated changes.
 
 ## How to contribute your work
 

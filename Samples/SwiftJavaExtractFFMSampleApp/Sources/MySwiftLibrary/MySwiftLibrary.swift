@@ -68,25 +68,14 @@ public func globalReceiveReturnData(data: Data) -> Data {
   Data(data)
 }
 
+// snippet.rawBufferDefinition
 public func withBuffer(body: (UnsafeRawBufferPointer) -> Void) {
   body(globalBuffer)
 }
+// snippet.end
 
 public func getArray() -> [UInt8] {
   [1, 2, 3]
-}
-
-// Tuple round-trips for jextract FFM (see `FFMTupleTest` in the sample app).
-public func ffmTupleReturnPair() -> (Int32, Int64) {
-  (42, 43)
-}
-
-public func ffmTupleSumPair(_ arg: (Int32, Int64)) -> Int64 {
-  Int64(arg.0) + arg.1
-}
-
-public func ffmTupleLabeledPair() -> (x: Int32, y: Int32) {
-  (x: 10, y: 20)
 }
 
 public func sumAllByteArrayElements(actuallyAnArray: UnsafeRawPointer, count: Int) -> Int {

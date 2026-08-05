@@ -43,6 +43,7 @@ public class MySwiftClassTest {
 
     @Test
     void init_throwing() {
+        // snippet.throwingInitUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             Exception exception = assertThrows(Exception.class, () -> MySwiftClass.init(true, arena));
             assertEquals("swiftError", exception.getMessage());
@@ -50,14 +51,17 @@ public class MySwiftClassTest {
             MySwiftClass c = assertDoesNotThrow(() -> MySwiftClass.init(false, arena));
             assertNotNull(c);
         }
+        // snippet.end
     }
 
     @Test
     void sum() {
+        // snippet.classUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertEquals(30, c.sum());
         }
+        // snippet.end
     }
 
     @Test
@@ -117,6 +121,7 @@ public class MySwiftClassTest {
 
     @Test
     void mutableDividedByTwo() {
+        // snippet.computedPropertiesUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertEquals(0, c.getMutableDividedByTwo());
@@ -125,6 +130,7 @@ public class MySwiftClassTest {
             c.setMutableDividedByTwo(5);
             assertEquals(10, c.getMutable());
         }
+        // snippet.end
     }
 
     @Test
@@ -200,6 +206,7 @@ public class MySwiftClassTest {
 
     @Test
     void privateSetCounter_getterOnly() throws Exception {
+        // snippet.privateSetUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);
             assertEquals(7, c.getPrivateSetCounter());
@@ -209,5 +216,6 @@ public class MySwiftClassTest {
         Method getter = MySwiftClass.class.getMethod("getPrivateSetCounter");
         assertNotNull(getter);
         assertThrows(NoSuchMethodException.class, () -> MySwiftClass.class.getMethod("setPrivateSetCounter", long.class));
+        // snippet.end
     }
 }

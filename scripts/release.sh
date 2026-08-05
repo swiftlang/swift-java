@@ -97,6 +97,28 @@ if [[ "$LOCAL_SHA" != "$REMOTE_SHA" ]]; then
 fi
 
 # ==== -----------------------------------------------------------------------
+# MARK: Verify generated config docs are up to date
+
+# Regenerate the "Supported configuration options" section of
+# SwiftJavaConfigFile.md from Configuration.swift. If this produces any working-
+# tree changes, the checked-in docs are stale and the release must not proceed
+# until the regenerated file is committed.
+info "Regenerating swift-java.config option docs..."
+if ! xcrun swift run --package-path "$REPO_ROOT" generate-config-docs; then
+  error "Failed to run generate-config-docs. Please investigate before releasing."
+fi
+
+if [[ -n "$(git -C "$REPO_ROOT" status --porcelain)" ]]; then
+  echo ""
+  git -C "$REPO_ROOT" status --short
+  echo ""
+  error "Generated config docs are stale (see files listed above).
+       Please commit the regenerated docs and re-run the release script:
+         git add -A && git commit -m 'Regenerate config docs'"
+fi
+info "Generated config docs are up to date."
+
+# ==== -----------------------------------------------------------------------
 # MARK: Determine latest swift-java-jni-core release
 
 info "Fetching latest swift-java-jni-core release tag..."

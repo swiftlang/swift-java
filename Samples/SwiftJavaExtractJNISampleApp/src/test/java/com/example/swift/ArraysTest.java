@@ -25,15 +25,35 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ArraysTest {
     @Test
-    void booleanArray() {
-        boolean[] input = new boolean[] { true, false, false, true };
-        assertArrayEquals(input, MySwiftLibrary.booleanArray(input));
+    void byteArray() {
+        // snippet.primitiveArraysUsage
+        byte[] input = new byte[] { 10, 20, 30, 40 };
+        assertArrayEquals(input, MySwiftLibrary.byteArray(input));
+        // snippet.end
     }
 
     @Test
-    void byteArray() {
-        byte[] input = new byte[] { 10, 20, 30, 40 };
-        assertArrayEquals(input, MySwiftLibrary.byteArray(input));
+    void intArray() {
+        int[] input = new int[] { 10, 20, 30, 40 };
+        assertArrayEquals(input, MySwiftLibrary.intArray(input));
+    }
+
+    @Test
+    void doubleArray() {
+        double[] input = new double[] { 10, 20, 30, 40 };
+        assertArrayEquals(input, MySwiftLibrary.doubleArray(input));
+    }
+
+    @Test
+    void stringArray() {
+        String[] input = new String[] { "hey", "there", "my", "friend" };
+        assertArrayEquals(input, MySwiftLibrary.stringArray(input));
+    }
+
+    @Test
+    void booleanArray() {
+        boolean[] input = new boolean[] { true, false, false, true };
+        assertArrayEquals(input, MySwiftLibrary.booleanArray(input));
     }
 
     @Test
@@ -66,21 +86,9 @@ public class ArraysTest {
     }
 
     @Test
-    void intArray() {
-        int[] input = new int[] { 10, 20, 30, 40 };
-        assertArrayEquals(input, MySwiftLibrary.intArray(input));
-    }
-
-    @Test
     void longArray() {
         long[] input = new long[] { 10, 20, 30, 40 };
         assertArrayEquals(input, MySwiftLibrary.longArray(input));
-    }
-
-    @Test
-    void stringArray() {
-        String[] input = new String[] { "hey", "there", "my", "friend" };
-        assertArrayEquals(input, MySwiftLibrary.stringArray(input));
     }
 
     @Test
@@ -90,21 +98,22 @@ public class ArraysTest {
     }
 
     @Test
-    void doubleArray() {
-        double[] input = new double[] { 10, 20, 30, 40 };
-        assertArrayEquals(input, MySwiftLibrary.doubleArray(input));
-    }
-
-    @Test
     void objectArray() {
+        // snippet.customTypeArraysUsage
         try (var arena = SwiftArena.ofConfined()) {
-            MySwiftClass[] input = new MySwiftClass[]{MySwiftClass.init(arena), MySwiftClass.init(arena), MySwiftClass.init(arena) };
+            MySwiftClass[] input = new MySwiftClass[]{
+                MySwiftClass.init(arena),
+                MySwiftClass.init(arena),
+                MySwiftClass.init(arena)
+            };
             assertEquals(3, MySwiftLibrary.objectArray(input, arena).length);
         }
+        // snippet.end
     }
 
     @Test
     void nestedByteArray() {
+        // snippet.nestedArraysUsage
         byte[][] input = new byte[][] {
             { 1, 2, 3 },
             { 4, 5 },
@@ -115,6 +124,7 @@ public class ArraysTest {
         assertArrayEquals(input[0], result[0]);
         assertArrayEquals(input[1], result[1]);
         assertArrayEquals(input[2], result[2]);
+        // snippet.end
     }
 
     @Test

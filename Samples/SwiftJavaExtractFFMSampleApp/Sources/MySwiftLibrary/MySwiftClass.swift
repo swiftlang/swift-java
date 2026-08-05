@@ -15,12 +15,19 @@
 public class MySwiftClass {
 
   public let byte: UInt8 = 0
-  public var len: Int
-  public var cap: Int
+  public var x: Int
+  public var y: Int
 
-  public init(len: Int, cap: Int) {
-    self.len = len
-    self.cap = cap
+  // Mirrors `MySwiftClass` in the JNI sample app, so that documentation can
+  // show one Swift example alongside its usage in both jextract modes
+  public init(x: Int, y: Int) {
+    self.x = x
+    self.y = y
+  }
+
+  public init() {
+    self.x = 10
+    self.y = 5
   }
 
   deinit {
@@ -28,8 +35,12 @@ public class MySwiftClass {
 
   public var counter: Int32 = 0
 
-  public static func factory(len: Int, cap: Int) -> MySwiftClass {
-    MySwiftClass(len: len, cap: cap)
+  public static func factory(x: Int, y: Int) -> MySwiftClass {
+    MySwiftClass(x: x, y: y)
+  }
+
+  public func sum() -> Int {
+    x + y
   }
 
   public func voidMethod() {
@@ -47,7 +58,7 @@ public class MySwiftClass {
   }
 
   public func describe() -> String {
-    "MySwiftClass(len: \(len), cap: \(cap))"
+    "MySwiftClass(x: \(x), y: \(y))"
   }
 
   public func makeRandomIntMethod() -> Int {

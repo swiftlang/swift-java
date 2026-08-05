@@ -54,12 +54,16 @@ public class MySwiftStructTest {
 
     @Test
     void increaseCap() {
+        // snippet.structUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
+            assertEquals(1337, s.getCapacity());
+
             long newCap = s.increaseCap(10);
             assertEquals(1347, newCap);
             assertEquals(1347, s.getCapacity());
         }
+        // snippet.end
     }
 
     @Test
@@ -75,6 +79,7 @@ public class MySwiftStructTest {
 
     @Test
     void testSubscriptWithParams() {
+        // snippet.subscriptUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftStruct s = MySwiftStruct.init(1337, 42, arena);
             long currentValue = s.getSubscript(1);
@@ -82,5 +87,6 @@ public class MySwiftStructTest {
             assertEquals(20, currentValue);
             assertEquals(66, s.getSubscriptArrayValue(1));
         }
+        // snippet.end
     }
 }

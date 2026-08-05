@@ -43,9 +43,11 @@ public func globalMakeInt() -> Int64 {
   42
 }
 
+// snippet.stringFunction
 public func globalWriteString(string: String) -> Int64 {
   Int64(string.count)
 }
+// snippet.end
 
 public func globalTakeIntInt(i: Int64, j: Int64) {
   p("i:\(i), j:\(j)")

@@ -12,6 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.tupleDefinition
+public func returnIntPair() -> (Int32, Int64) {
+  (42, 43)
+}
+
+public func sumIntPair(pair: (Int32, Int64)) -> Int64 {
+  Int64(pair.0) + pair.1
+}
+// snippet.end
+
+// snippet.stringTupleDefinition
 public func returnPair() -> (Int64, String) {
   (42, "hello")
 }
@@ -23,6 +34,7 @@ public func takePair(pair: (Int64, String)) -> String {
 public func labeledTuple() -> (x: Int32, y: Int32) {
   (x: 10, y: 20)
 }
+// snippet.end
 
 public func echoSingleTuple(input: (String)) -> (String) {
   input

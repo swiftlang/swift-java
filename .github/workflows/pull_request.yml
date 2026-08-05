@@ -38,6 +38,8 @@ jobs:
         jdk_vendor: ['corretto']
     steps:
       - uses: actions/checkout@v7
+      - name: Mark workspace as safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Prepare CI Environment
         uses: ./.github/actions/prepare_env
       - name: Cache .build

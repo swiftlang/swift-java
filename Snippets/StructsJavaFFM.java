@@ -1,0 +1,1 @@
+../Samples/SwiftJavaExtractFFMSampleApp/src/test/java/org/swift/swiftkitffm/MySwiftStructTest.java

@@ -26,6 +26,7 @@ public class SwiftDictionaryMapTest {
     @SuppressWarnings("SuspiciousMethodCalls")
     @Test
     void makeStringToLongDictionary() {
+        // snippet.dictionaryUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             SwiftDictionaryMap<String, Long> dict = MySwiftLibrary.makeStringToLongDictionary(arena);
             assertEquals(2, dict.size());
@@ -37,6 +38,7 @@ public class SwiftDictionaryMapTest {
             assertNull(dict.get(99999L), "Java's Map accepts keys of different types");
             assertFalse(dict.containsKey(99999L), "Java's Map accepts keys of different types");
         }
+        // snippet.end
     }
 
     @Test

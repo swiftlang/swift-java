@@ -17,6 +17,7 @@ import SwiftJava
 
 let jvm = try JavaVirtualMachine.shared()
 
+// snippet.sieveUsage
 do {
   let sieveClass = try JavaClass<SieveOfEratosthenes>(environment: jvm.environment())
   for prime in sieveClass.findPrimes(100)! {
@@ -27,3 +28,4 @@ do {
 } catch {
   print("Failure: \(error)")
 }
+// snippet.end
