@@ -283,7 +283,7 @@ and does not copy it. Use `SwiftDictionaryMap::toJava` to explicitly copy into a
 
 Swift sets (`Set<Element>`) are imported using the `SwiftSet<Element>` Java wrapper.
 Like dictionaries, the wrapper points at the Swift value on the Swift heap and does not
-copy elements until explicitly requested.
+copy it.  Use `SwiftSet::toJava` to explicitly copy into a Java `Set`.
 
 @TabNavigator {
    @Tab("Swift") {
@@ -300,13 +300,14 @@ copy elements until explicitly requested.
 ### Bytes and buffers
 
 Raw bytes are the most common thing to hand across the language boundary, and
-jextract offers several shapes for it depending on whether you want a copy or a
+SwiftJava offers several shapes for it depending on whether you want a copy or a
 view of the memory.
 
 #### Byte arrays
 
-`[UInt8]` maps to Java's `byte[]` in both modes, by copying. Note that Java's
-`byte` is signed, so a Swift `UInt8` of `200` reads as `-56` on the Java side;
+`[UInt8]` maps to Java's `byte[]` in both modes by copying. 
+
+Note that Java's `byte` is signed, so a Swift `UInt8` of `200` reads as `-56` on the Java side;
 see <doc:FeaturesJextract#Primitive-and-unsigned-types>.
 
 @TabNavigator {
@@ -321,8 +322,7 @@ see <doc:FeaturesJextract#Primitive-and-unsigned-types>.
    }
 }
 
-Nested byte arrays (`[[UInt8]]`) are supported in JNI mode; see
-<doc:FeaturesJextract#Arrays>.
+Nested byte arrays (`[[UInt8]]`) are also supported in JNI mode.
 
 #### Raw byte buffers
 
@@ -332,12 +332,12 @@ with the buffer surfacing differently on the Java side.
 In JNI mode it is a plain `byte[]`. jextract obtains the array's elements for the
 duration of the call (via JNI's `GetByteArrayElements`) and hands Swift a buffer
 over them; whether that memory is the array itself or a copy is up to the JVM.
+
 In FFM mode it is a `MemorySegment`, which Swift reads in place without any copy.
 In both modes the buffer is only valid for the duration of the call, so the Swift
 side must not store it.
 
-`UnsafeMutableRawBufferPointer` is supported the same way, and in JNI mode writes
-made by Swift are committed back to the Java array when the call returns.
+`UnsafeMutableRawBufferPointer` is supported the same way:
 
 @TabNavigator {
    @Tab("Swift") {
@@ -351,8 +351,7 @@ made by Swift are committed back to the Java array when the call returns.
    }
 }
 
-In FFM mode a Swift closure parameter taking a buffer also hands the segment
-straight to the Java lambda:
+It is also possible to write closures which accept a buffer from the Swift side, like this:
 
 @TabNavigator {
    @Tab("Swift") {
@@ -368,20 +367,27 @@ straight to the Java lambda:
 In FFM mode the generated `Data` wrapper converts to and from
 `java.nio.ByteBuffer`. Bringing bytes in:
 
-@Snippet(path: "Snippets/DataJavaFFM", slice: "byteBufferUsageJava")
+@TabNavigator {
+   @Tab("Java (FFM)") {
+      @Snippet(path: "Snippets/DataJavaFFM", slice: "byteBufferUsageJava")
+   }
+}
 
 and getting them back out:
 
-@Snippet(path: "Snippets/DataJavaFFM", slice: "byteBufferToUsageJava")
+@TabNavigator {
+   @Tab("Java (FFM)") {
+      @Snippet(path: "Snippets/DataJavaFFM", slice: "byteBufferToUsageJava")
+   }
+}
 
 In JNI mode, `Data.toByteArray()` is the way to copy bytes out. For the `Data`
 type itself see <doc:FeaturesJextract#Data>.
 
-#### MemorySegment
+#### Java MemorySegment (FFM only)
 
-`toMemorySegment(arena)` hands back the bytes as a `java.lang.foreign.MemorySegment`,
-which the JVM reads directly without copying. Use `withUnsafeBytes` when you only
-need to read the bytes and do not want to materialize anything at all.
+`Data.toMemorySegment(arena)` hands back the bytes as a `java.lang.foreign.MemorySegment`,
+which the JVM reads directly without copying.
 
 > Important: `MemorySegment` is part of the Foreign Function & Memory API
 > ([JEP 454](https://openjdk.org/jeps/454)) and requires JDK 25+. It is available
@@ -427,6 +433,28 @@ like `typealias FishBox = Box<Fish>` and performs _specialization_ - exposing a 
 
 `FishBox` carries the constrained extension's `describeFish()` in addition to
 `Box`'s own members, and unlike the generic `Box` it has no Java type parameter.
+
+#### Specializing via swift-java.config
+
+The `typealias` above works when you control the Swift source being wrapped. If
+you don't, for example you are running jextract against a dependency you can't
+edit, the same specialization can be requested from `swift-java.config` using the
+`specialize` key, without touching the Swift source at all:
+
+```json
+{
+  "specialize": {
+    "FishBox": {
+      "base": "Box",
+      "typeArgs": {"Element": "Fish"}
+    }
+  }
+}
+```
+
+This produces the same `FishBox` Java class, with the same constrained
+extension members applied, as the `typealias FishBox = Box<Fish>` approach.
+See <doc:SwiftJavaConfigFile#specialize> for the full field reference.
 
 ### Tuples
 

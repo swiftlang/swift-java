@@ -103,6 +103,10 @@ Which makes the script execute, and only allow the `git push` to complete if the
 
 In the case of formatting issues, you can then `git add` the formatting changes, and attempt the push again. 
 
+### Regenerating generated docs
+
+Some documentation is generated from source and checked in, so CI can catch it drifting out of date. If you changed `Configuration.swift` or a CLI command's flags/help text, run `scripts/generate-docs.sh` and commit the generated changes.
+
 ## How to contribute your work
 
 Please open a pull request at https://github.com/swiftlang/swift-java. Make sure the CI passes, and then wait for code review.
