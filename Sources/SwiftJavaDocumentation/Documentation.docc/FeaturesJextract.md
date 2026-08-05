@@ -181,13 +181,12 @@ supported in JNI mode but not yet in FFM mode.
 
 ### Async functions
 
-Asynchronous functions in Swift are extracted using different modes:
+Asynchronous functions are imported as Future-type returning Java functions.
+
+There are two modes of extracting them, configurable using the `asyncFuncMode` setting in `swift-java.config`, or using the equivalent `--async-func-mode` command line option:
 
 - **completable-future (default)**: `async` functions return `java.util.concurrent.CompletableFuture`
-- **future**: For legacy platforms (e.g. Android 23 and below) where `CompletableFuture` is not available, `async` functions return `java.util.concurrent.Future`. Enable with `--async-func-mode future` or the `asyncFuncMode` config value.
-
-The Java snippet below holds the result in a `Future`, which the default
-`CompletableFuture` return type satisfies.
+- **future**: For legacy platforms (e.g. Android 23 and below) where `CompletableFuture` is not available, `async` functions return `java.util.concurrent.Future`. 
 
 @TabNavigator {
    @Tab("Swift") {
@@ -200,6 +199,24 @@ The Java snippet below holds the result in a `Future`, which the default
       @Snippet(path: "Snippets/NotSupportedYetJavaFFM", slice: "notSupportedYet")
    }
 }
+
+#### Asynchronous functions and Kotlin async/await
+
+Because Kotlin offers extension `suspending fun` methods on Future types, it is possible to `.await()`
+on such Swift extracted `async` function in Kotlin, like so:
+
+```kotlin
+import com.example.swift.MySwiftLibrary
+import kotlinx.coroutines.future.await
+
+suspend fun useAsyncSum() {
+  // MySwiftLibrary.asyncSum returns a java.util.concurrent.CompletableFuture<Long>
+  val result: Long = MySwiftLibrary.asyncSum(10, 12).await()
+  println("result = $result")
+}
+```
+
+This relies on the Kotlin `kotlinx-coroutines-jdk8` library which adds the `await()` extension function on `java.util.concurrent.CompletableFuture`.
 
 ### Collections
 
@@ -243,7 +260,6 @@ arrays (`[[UInt8]]`, `[[String]]`) are supported in JNI mode.
 
 Fixed-size inline arrays (Swift's `InlineArray<N, T>`, sugar `[N of T]`) are
 recognized by jextract in JNI mode and imported with an equivalent Java surface.
-Not yet supported in FFM mode.
 
 #### Dictionaries
 

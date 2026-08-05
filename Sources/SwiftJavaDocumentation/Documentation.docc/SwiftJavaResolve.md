@@ -11,6 +11,12 @@ Download Java dependencies for use in Swift builds.
 Classpath files are picked up by `swift-java` commands which search for `*.swift-java.classpath` files
 to create a classpath for Java operations, e.g. `wrap-java` uses such assembled classpath during wrapping Java classes for Swift.
 
+You can always use the command line `--help` to get additional guidance about the tool and available options:
+
+@Snippet(path: "Snippets/SwiftJavaCLIHelp", slice: "resolveHelp")
+
+### Example
+
 You can use `swift-java resolve` explicitly on the command line:
 
 ```bash
@@ -19,10 +25,6 @@ swift-java resolve \
   -o .build/plugins/outputs/JavaCommonsCSV \
   "org.apache.commons:commons-csv:1.10.0"
 ```
-
-You can always use the command line `--help` to get additional guidance about the tool and available options:
-
-@Snippet(path: "Snippets/SwiftJavaCLIHelp", slice: "resolveHelp")
 
 Or, include dependency identifiers in gradle format: `<groupID>:<artifactID>:<version>`
 in `swift-java.config` configuration files, like so:
