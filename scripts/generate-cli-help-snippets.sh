@@ -14,7 +14,7 @@
 ##===----------------------------------------------------------------------===##
 ##
 ## Captures the live --help output of the swift-java CLI and writes it to
-## Snippets/SwiftJavaCLIHelp.sh, sliced per subcommand so the DocC pages can
+## Snippets/SwiftJavaCLIHelp.txt, sliced per subcommand so the DocC pages can
 ## embed the *actual* --help/USAGE text via @Snippet instead of a pasted copy
 ## that can drift out of sync with the tool.
 ##
@@ -25,7 +25,7 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
-OUTPUT_FILE="Snippets/SwiftJavaCLIHelp.sh"
+OUTPUT_FILE="Snippets/SwiftJavaCLIHelp.txt"
 
 echo "Building swift-java..."
 swift build --product swift-java

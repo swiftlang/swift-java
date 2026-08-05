@@ -6,8 +6,8 @@ set -x
 swift run generate-config-docs --check
 
 ./scripts/generate-cli-help-snippets.sh
-if ! git diff --exit-code -- Snippets/SwiftJavaCLIHelp.sh; then
-  echo "::error::Snippets/SwiftJavaCLIHelp.sh is out of date with the swift-java CLI's --help output (likely a command's flags or abstract text changed). Run scripts/generate-cli-help-snippets.sh and commit the result."
+if ! git diff --exit-code -- Snippets/SwiftJavaCLIHelp.txt; then
+  echo "::error::Snippets/SwiftJavaCLIHelp.txt is out of date with the swift-java CLI's --help output (likely a command's flags or abstract text changed). Run scripts/generate-cli-help-snippets.sh and commit the result."
   exit 1
 fi
 
