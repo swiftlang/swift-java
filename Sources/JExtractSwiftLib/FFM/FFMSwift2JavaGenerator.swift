@@ -119,15 +119,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     
     // Expand variadic functions into N overloads
     var expandedAnalysis = analysis
-    let maxOverloads = config.effectiveMaxVariadicOverloads
-    expandedAnalysis.extractedGlobalFuncs = expandedAnalysis.extractedGlobalFuncs.flatMap { 
-      $0.expandingVariadicOverloads(maxOverloads: maxOverloads) 
-    }
-    
-    for type in expandedAnalysis.extractedTypes.values {
-      type.methods = type.methods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
-      type.initializers = type.initializers.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
-    }
+    expandedAnalysis.expandVariadicOverloads(maxOverloads: config.effectiveMaxVariadicOverloads)
     self.analysis = expandedAnalysis
   }
 

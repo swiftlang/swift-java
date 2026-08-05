@@ -122,15 +122,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
     // Expand variadic functions into N overloads
     var expandedAnalysis = analysis
-    let maxOverloads = config.effectiveMaxVariadicOverloads
-    expandedAnalysis.extractedGlobalFuncs = expandedAnalysis.extractedGlobalFuncs.flatMap { 
-      $0.expandingVariadicOverloads(maxOverloads: maxOverloads) 
-    }
-    
-    for type in expandedAnalysis.extractedTypes.values {
-      type.methods = type.methods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
-      type.initializers = type.initializers.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
-    }
+    expandedAnalysis.expandVariadicOverloads(maxOverloads: config.effectiveMaxVariadicOverloads)
     self.analysis = expandedAnalysis
     
     // Every extracted protocol that also gets a plain Java `interface`
@@ -139,7 +131,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       .filter { $0.swiftNominal.kind == .protocol }
       .sorted { $0.swiftNominal.qualifiedName < $1.swiftNominal.qualifiedName }
     
-    if config.enableJavaCallbacks ?? false {
+    if config.effectiveEnableJavaCallbacks {
       // We translate all the protocol wrappers
       // as we need them to know what protocols we can allow the user to implement themselves
       // in Java.
