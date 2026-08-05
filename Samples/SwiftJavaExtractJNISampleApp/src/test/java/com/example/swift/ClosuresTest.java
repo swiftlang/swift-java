@@ -55,6 +55,12 @@ public class ClosuresTest {
     }
 
     @Test
+    void globalCallMeIntSupplier() {
+        int result = MySwiftLibrary.globalCallMeIntSupplier(() -> 2);
+        assertEquals(2, result);
+    }
+
+    @Test
     void globalCallMeDoubleSupplier() {
         double result = MySwiftLibrary.globalCallMeDoubleSupplier(() -> 2.0);
         assertEquals(2.0, result);

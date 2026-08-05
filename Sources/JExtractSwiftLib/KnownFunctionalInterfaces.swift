@@ -36,6 +36,13 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .boolean
   )
 
+  static let intSupplier = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionIntSupplier,
+    method: "getAsInt",
+    parameters: [],
+    result: .int
+  )
+
   static let doubleSupplier = KnownJavaFunctionalInterface(
     JavaType.javaUtilFunctionDoubleSupplier,
     method: "getAsDouble",
@@ -46,6 +53,7 @@ struct KnownJavaFunctionalInterface: Sendable {
   static let all: [KnownJavaFunctionalInterface] = [
     .runnable,
     .booleanSupplier,
+    .intSupplier,
     .doubleSupplier,
   ]
 
@@ -77,6 +85,8 @@ struct KnownJavaFunctionalInterface: Sendable {
       runnable
     case ([], _) where result.isBoolean:
       booleanSupplier
+    case ([], _) where result.isInt32:
+      intSupplier
     case ([], _) where result.isDouble:
       doubleSupplier
     default:

@@ -35,6 +35,7 @@ final class FuncCallbackImportTests {
 
     public func callMe(callback: () -> Void)
     public func callMeBoolSupplier(callback: () -> Bool)
+    public func callMeIntSupplier(callback: () -> Int32)
     public func callMeDoubleSupplier(callback: () -> Double)
     public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())
     public func withBuffer(body: (UnsafeRawBufferPointer) -> Int)
@@ -207,6 +208,49 @@ final class FuncCallbackImportTests {
           }
         }
         """
+    )
+  }
+
+  @Test("Import: public func callMeIntSupplier(callback: () -> Int32)")
+  func func_callMeIntSupplierFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeIntSupplier" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeIntSupplier(callback: () -> Int32)
+         * }
+         */
+        public static void callMeIntSupplier(java.util.function.IntSupplier callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeIntSupplier_callback.call(callMeIntSupplier.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
     )
   }
 

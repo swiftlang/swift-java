@@ -21,6 +21,7 @@ struct JNIClosureTests {
     """
     public func emptyClosure(closure: () -> ()) {}
     public func closureBoolSupplier(closure: () -> Bool) {}
+    public func closureIntSupplier(closure: () -> Int32) {}
     public func closureDoubleSupplier(closure: () -> Double) {}
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
@@ -70,6 +71,31 @@ struct JNIClosureTests {
         """,
         """
         private static native void $closureBoolSupplier(java.util.function.BooleanSupplier closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func closureIntSupplier_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureIntSupplier(closure: () -> Int32)
+         * }
+         */
+        public static void closureIntSupplier(java.util.function.IntSupplier closure) {
+          SwiftModule.$closureIntSupplier(closure);
+        }
+        """,
+        """
+        private static native void $closureIntSupplier(java.util.function.IntSupplier closure);
         """,
       ]
     )
@@ -142,6 +168,31 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = []
             return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureIntSupplier_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntSupplier__Ljava_util_function_IntSupplier_2")
+        public func Java_com_example_swift_SwiftModule__00024closureIntSupplier__Ljava_util_function_IntSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureIntSupplier(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsInt", "()I")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = []
+            return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
