@@ -429,7 +429,7 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
         expandedParams.append(
           SwiftParameter(
             convention: variadicParam.convention,
-            argumentLabel: name,
+            argumentLabel: (i == 0) ? variadicParam.argumentLabel : nil,
             parameterName: name, // We use the same name so the call site matches `callee.sum(arg0, arg1)`
             type: variadicParam.type,
             isVariadic: false
