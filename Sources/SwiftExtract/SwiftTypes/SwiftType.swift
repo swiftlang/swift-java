@@ -140,6 +140,17 @@ public enum SwiftType: Equatable {
     }
   }
 
+  public var isInt32: Bool {
+    switch self {
+    case .nominal(let nominal):
+      switch nominal.nominalTypeDecl.knownTypeKind {
+      case .int32, .uint32: true
+      default: false
+      }
+    default: false
+    }
+  }
+
   public var isUnsignedInteger: Bool {
     switch self {
     case .nominal(let nominal):

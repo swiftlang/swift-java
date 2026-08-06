@@ -40,6 +40,10 @@ public func globalCallMeBooleanSupplier(run: () -> Bool) -> Bool {
   run()
 }
 
+public func globalCallMeIntSupplier(run: () -> Int32) -> Int32 {
+  run()
+}
+
 public func globalCallMeDoubleSupplier(run: () -> Double) -> Double {
   run()
 }

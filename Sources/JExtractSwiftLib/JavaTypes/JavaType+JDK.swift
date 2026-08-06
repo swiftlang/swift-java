@@ -35,6 +35,11 @@ extension JavaType {
     .class(package: "java.util.function", name: "BooleanSupplier")
   }
 
+  /// The description of the type java.util.function.IntSupplier.
+  static var javaUtilFunctionIntSupplier: JavaType {
+    .class(package: "java.util.function", name: "IntSupplier")
+  }
+
   /// The description of the type java.util.function.DoubleSupplier.
   static var javaUtilFunctionDoubleSupplier: JavaType {
     .class(package: "java.util.function", name: "DoubleSupplier")

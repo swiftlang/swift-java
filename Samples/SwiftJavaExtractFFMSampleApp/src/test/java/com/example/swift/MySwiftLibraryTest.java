@@ -173,6 +173,12 @@ public class MySwiftLibraryTest {
     }
 
     @Test
+    void call_globalCallMeIntSupplier_noThrow() {
+        int result = MySwiftLibrary.globalCallMeIntSupplier(() -> { return 2; });
+        assertEquals(2, result);
+    }
+
+    @Test
     void call_globalCallMeDoubleSupplier_noThrow() {
         double result = MySwiftLibrary.globalCallMeDoubleSupplier(() -> { return 2.0; });
         assertEquals(2.0, result);
