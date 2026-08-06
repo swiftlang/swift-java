@@ -2,6 +2,7 @@
 
 @Metadata {
     @DisplayName("Swift Java Documentation")
+    @TitleHeading("Interoperability")
 }
 
 The Swift-Java project enables interoperability between Swift and Java.
