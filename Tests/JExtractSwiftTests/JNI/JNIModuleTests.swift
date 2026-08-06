@@ -333,10 +333,10 @@ struct JNIModuleTests {
       public func helloWorld()
       public func sum(_ xs: Int64...) -> Int64 { xs.reduce(0, +) }
       """
-    
+
     var config = Configuration()
     config.maxVariadicOverloads = 3
-    
+
     try assertOutput(
       input: input,
       config: config,
