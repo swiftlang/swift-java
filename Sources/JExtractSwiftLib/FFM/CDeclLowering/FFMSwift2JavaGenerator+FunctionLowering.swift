@@ -1020,8 +1020,16 @@ extension LoweredFunctionSignature {
       if let selfExpr {
         switch apiKind {
         // Don't bother to create explicit ${Self}.init expression.
-        case .initializer, .subscriptGetter, .subscriptSetter: selfExpr
-        default: ExprSyntax(MemberAccessExprSyntax(base: selfExpr, name: .identifier(swiftAPIName)))
+        case .initializer, .subscriptGetter, .subscriptSetter:
+          selfExpr
+        case .prefixOperator:
+          ExprSyntax(DeclReferenceExprSyntax(baseName: .prefixOperator(swiftAPIName)))
+        case .binaryOperator:
+          ExprSyntax(DeclReferenceExprSyntax(baseName: .binaryOperator(swiftAPIName)))
+        case .postfixOperator:
+          ExprSyntax(DeclReferenceExprSyntax(baseName: .postfixOperator(swiftAPIName)))
+        default:
+          ExprSyntax(MemberAccessExprSyntax(base: selfExpr, name: .identifier(swiftAPIName)))
         }
       } else {
         ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(swiftAPIName)))
