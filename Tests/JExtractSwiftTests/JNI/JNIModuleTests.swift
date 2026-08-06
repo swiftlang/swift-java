@@ -357,7 +357,7 @@ struct JNIModuleTests {
         """,
         """
         public static long sum(long arg0, long arg1, long arg2)
-        """
+        """,
       ],
       notExpectedChunks: [
         "sum(long arg0, long arg1, long arg2, long arg3)"
