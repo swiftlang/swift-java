@@ -89,7 +89,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     if config.effectiveWriteEmptyFiles {
       self.expectedOutputSwiftFileNames = Set(
         translator.inputs.compactMap { (input) -> String? in
-          guard let fileName = input.path.split(whereSeparator: { $0 == "/" || $0 == "\\" }).last else {
+          guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
             return nil
           }
           if fileName.hasSuffix(".swift") {
@@ -102,7 +102,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
       )
       // Also include filtered-out files so SwiftPM gets the empty outputs it expects
       for path in translator.filteredOutPaths {
-        guard let fileName = path.split(whereSeparator: { $0 == "/" || $0 == "\\" }).last else {
+        guard let fileName = path.split(separator: PATH_SEPARATOR).last else {
           continue
         }
         if fileName.hasSuffix(".swift") {

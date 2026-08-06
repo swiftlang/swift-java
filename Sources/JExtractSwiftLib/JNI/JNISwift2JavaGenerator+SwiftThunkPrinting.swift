@@ -698,7 +698,7 @@ extension JNISwift2JavaGenerator {
         decl.functionSignature.parameters,
         arguments,
       ).map { originalParam, argument in
-        let label = originalParam.argumentLabel.flatMap { $0 == "_" ? nil : "\($0): " } ?? ""
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
       .joined(separator: .comma)
@@ -709,7 +709,7 @@ extension JNISwift2JavaGenerator {
         decl.functionSignature.parameters,
         arguments,
       ).map { originalParam, argument in
-        let label = originalParam.argumentLabel.flatMap { $0 == "_" ? nil : "\($0): " } ?? ""
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
 
@@ -730,7 +730,7 @@ extension JNISwift2JavaGenerator {
         decl.functionSignature.parameters,
         arguments,
       ).map { originalParam, argument in
-        let label = originalParam.argumentLabel.flatMap { $0 == "_" ? nil : "\($0): " } ?? ""
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
       .joined(separator: .comma)
@@ -746,7 +746,7 @@ extension JNISwift2JavaGenerator {
       let indexArgs = arguments.dropLast()
 
       let parameters = zip(indexParams, indexArgs).map { originalParam, argument in
-        let label = originalParam.argumentLabel.flatMap { $0 == "_" ? nil : "\($0): " } ?? ""
+        let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
       .joined(separator: .comma)
