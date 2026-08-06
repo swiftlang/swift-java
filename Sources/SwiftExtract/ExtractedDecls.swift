@@ -411,18 +411,18 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
     }
 
     var overloads: [ExtractedFunc] = []
-    
+
     // Find the index of the variadic parameter. Swift only allows one.
     guard let variadicIndex = functionSignature.parameters.firstIndex(where: \.isVariadic) else {
       return [self]
     }
-    
+
     let variadicParam = functionSignature.parameters[variadicIndex]
-    
+
     for count in 0...maxOverloads {
       var newParameters = functionSignature.parameters
       newParameters.remove(at: variadicIndex)
-      
+
       var expandedParams: [SwiftParameter] = []
       for i in 0..<count {
         let name = "arg\(i)"
@@ -436,12 +436,12 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
           )
         )
       }
-      
+
       newParameters.insert(contentsOf: expandedParams, at: variadicIndex)
-      
+
       var newSignature = functionSignature
       newSignature.parameters = newParameters
-      
+
       overloads.append(
         ExtractedFunc(
           module: module,
@@ -452,7 +452,7 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
         )
       )
     }
-    
+
     return overloads
   }
 }

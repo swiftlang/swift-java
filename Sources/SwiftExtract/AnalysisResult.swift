@@ -31,10 +31,10 @@ public struct AnalysisResult {
 
   /// Expands variadic functions into distinct overloads.
   public mutating func expandVariadicOverloads(maxOverloads: Int) {
-    self.extractedGlobalFuncs = self.extractedGlobalFuncs.flatMap { 
-      $0.expandingVariadicOverloads(maxOverloads: maxOverloads) 
+    self.extractedGlobalFuncs = self.extractedGlobalFuncs.flatMap {
+      $0.expandingVariadicOverloads(maxOverloads: maxOverloads)
     }
-    
+
     for type in self.extractedTypes.values {
       type.methods = type.methods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
       type.initializers = type.initializers.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }

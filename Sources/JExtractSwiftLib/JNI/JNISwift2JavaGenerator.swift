@@ -124,13 +124,13 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     var expandedAnalysis = analysis
     expandedAnalysis.expandVariadicOverloads(maxOverloads: config.effectiveMaxVariadicOverloads)
     self.analysis = expandedAnalysis
-    
+
     // Every extracted protocol that also gets a plain Java `interface`
     // generated for it is eligible to be boxed as an existential.
     self.existentialProtocolBoxes = expandedAnalysis.extractedTypes.values
       .filter { $0.swiftNominal.kind == .protocol }
       .sorted { $0.swiftNominal.qualifiedName < $1.swiftNominal.qualifiedName }
-    
+
     if config.effectiveEnableJavaCallbacks {
       // We translate all the protocol wrappers
       // as we need them to know what protocols we can allow the user to implement themselves

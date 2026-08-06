@@ -139,8 +139,8 @@ String concat(s0: String, s1: String) -> String
 String concat(s0: String, s1: String, s2: String) -> String
 ```
 
-The reason for this is that Swift cannot "splat" an array into a `...` 
-parameter, therefore we cannot transfer an arbitrary amount of varargs 
+The reason for this is that Swift cannot "splat" an array into a `...`
+parameter, therefore we cannot transfer an arbitrary amount of varargs
 parameters over the native boundary.
 
 ---
@@ -378,7 +378,6 @@ So this configuration option is geared towards times when you do not control the
 
 **`SpecializationConfigEntry`:**
 
-
 Configuration entry for specializing a generic type into a concrete Java class.
 The dictionary key is the Java-facing name; this entry provides the base type
 and type argument mapping.
@@ -561,7 +560,6 @@ Custom Maven repositories to use when resolving dependencies.
 If not set, defaults to mavenCentral().
 
 **`MavenRepositoryDescriptor`:**
-
 
 Describes a Maven-style repository for dependency resolution.
 

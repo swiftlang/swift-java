@@ -89,8 +89,8 @@ public struct Configuration: Codable {
   /// String concat(s0: String, s1: String, s2: String) -> String
   /// ```
   ///
-  /// The reason for this is that Swift cannot "splat" an array into a `...` 
-  /// parameter, therefore we cannot transfer an arbitrary amount of varargs 
+  /// The reason for this is that Swift cannot "splat" an array into a `...`
+  /// parameter, therefore we cannot transfer an arbitrary amount of varargs
   /// parameters over the native boundary.
   public var maxVariadicOverloads: Int?
   public var effectiveMaxVariadicOverloads: Int {

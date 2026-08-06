@@ -116,7 +116,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     } else {
       self.expectedOutputSwiftFileNames = []
     }
-    
+
     // Expand variadic functions into N overloads
     var expandedAnalysis = analysis
     expandedAnalysis.expandVariadicOverloads(maxOverloads: config.effectiveMaxVariadicOverloads)
