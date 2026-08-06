@@ -56,6 +56,10 @@ public func globalCallMeIntSupplier(run: () -> Int32) -> Int32 {
   run()
 }
 
+public func globalCallMeLongSupplier(run: () -> Int64) -> Int64 {
+  run()
+}
+
 public func globalCallMeDoubleSupplier(run: () -> Double) -> Double {
   run()
 }

@@ -67,6 +67,12 @@ public class MySwiftLibraryTest {
     }
 
     @Test
+    void call_globalCallMeLongSupplier_noThrow() {
+        long result = MySwiftLibrary.globalCallMeLongSupplier(() -> { return 1L; });
+        assertEquals(1L, result);
+    }
+
+    @Test
     void call_globalCallMeDoubleSupplier_noThrow() {
         double result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> { return 2.0; });
         assertEquals(2.0, result);

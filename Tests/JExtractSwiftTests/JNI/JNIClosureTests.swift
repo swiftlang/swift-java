@@ -22,6 +22,7 @@ struct JNIClosureTests {
     public func emptyClosure(closure: () -> ()) {}
     public func closureBoolSupplier(closure: () -> Bool) {}
     public func closureIntSupplier(closure: () -> Int32) {}
+    public func closureLongSupplier(closure: () -> Int64) {}
     public func closureDoubleSupplier(closure: () -> Double) {}
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
@@ -96,6 +97,31 @@ struct JNIClosureTests {
         """,
         """
         private static native void $closureIntSupplier(java.util.function.IntSupplier closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func closureLongSupplier_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureLongSupplier(closure: () -> Int64)
+         * }
+         */
+        public static void closureLongSupplier(java.util.function.LongSupplier closure) {
+          SwiftModule.$closureLongSupplier(closure);
+        }
+        """,
+        """
+        private static native void $closureLongSupplier(java.util.function.LongSupplier closure);
         """,
       ]
     )
@@ -193,6 +219,31 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = []
             return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureLongSupplier_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongSupplier__Ljava_util_function_LongSupplier_2")
+        public func Java_com_example_swift_SwiftModule__00024closureLongSupplier__Ljava_util_function_LongSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureLongSupplier(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsLong", "()J")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = []
+            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
