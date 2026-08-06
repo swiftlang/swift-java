@@ -378,8 +378,7 @@ So this configuration option is geared towards times when you do not control the
 
 **`SpecializationConfigEntry`:**
 
-==== -----------------------------------------------------------------------
-MARK: SpecializationConfigEntry
+
 Configuration entry for specializing a generic type into a concrete Java class.
 The dictionary key is the Java-facing name; this entry provides the base type
 and type argument mapping.
@@ -563,8 +562,7 @@ If not set, defaults to mavenCentral().
 
 **`MavenRepositoryDescriptor`:**
 
-==== -----------------------------------------------------------------------
-MARK: MavenRepositoryDescriptor
+
 Describes a Maven-style repository for dependency resolution.
 
 Supported types based on https://docs.gradle.org/current/userguide/supported_repository_types.html:
