@@ -74,7 +74,10 @@ struct CompileJavaTool {
   static func compileJava(_ sourceText: String) async throws -> Foundation.URL {
     // Java requires public class files to be named after the class
     let sourceFile: Foundation.URL
-    if let match = sourceText.range(of: #"public\s+class\s+(\w+)"#, options: .regularExpression) {
+    // Allow arbitrary modifiers between `public` and the decl introducer keyword.
+    // The `-` is allowed because `non-sealed`.
+    let publicTypeRegex = #"public\s+(?:[\w-]+\s+)*(?:class|record|interface|enum)\s+(\w+)"#
+    if let match = sourceText.range(of: publicTypeRegex, options: .regularExpression) {
       let classNameRange = sourceText[match]
       let className = classNameRange.split(separator: " ").last.map(String.init) ?? "tmp_\(UUID().uuidString)"
       let dir = FileManager.default.temporaryDirectory

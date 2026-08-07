@@ -385,6 +385,28 @@ extension JavaClassTranslator {
     return allDecls
   }
 
+  /// Render additional documentation about the Java type, e.g. if it was a `sealed` type, etc.
+  private func renderJavaKindDocc() -> String {
+    var lines: [String] = []
+    if javaClass.isRecord() {
+      lines.append("/// Java record: `\(javaClass.getName())`")
+    }
+    if javaClass.isSealed() {
+      let kind = javaClass.isInterface() ? "sealed interface" : "sealed class"
+      let permits = javaClass.getPermittedSubclasses().compactMap { $0?.getName() }
+      if permits.isEmpty {
+        lines.append("/// Java `\(kind)`")
+      } else {
+        lines.append("/// Java `\(kind)`, permits: \(permits.map({ "`\($0)`" }).joined(separator: ", "))")
+      }
+      log.info("Wrap Java \(kind): `\(javaClass.getName())`, permits: \(permits.map({ "`\($0)`" }).joined(separator: ", ")))")
+    }
+    if lines.isEmpty {
+      return ""
+    }
+    return lines.joined(separator: "\n") + "\n"
+  }
+
   /// Render the declaration for the main part of the Java class, which
   /// includes the constructors, non-static fields, and non-static methods.
   private func renderPrimaryType() -> DeclSyntax {
@@ -478,16 +500,26 @@ extension JavaClassTranslator {
       }
 
     // Emit the struct declaration describing the java class.
-    let classOrInterface: String = isInterface ? "JavaInterface" : "JavaClass"
+    // Records are wrapped like classes today, but tagged with @JavaRecord so the
+    // "was a record" signal survives into the generated Swift and downstream tools.
+    let classOrInterface: String =
+      if isInterface {
+        "JavaInterface"
+      } else if javaClass.isRecord() {
+        "JavaRecord"
+      } else {
+        "JavaClass"
+      }
     let introducer = translateAsClass ? "open class" : "public struct"
     let classAvailableAttributes = swiftAvailableAttributes(
       from: annotations,
       runtimeInvisibleAnnotations: self.runtimeInvisibleAnnotations.classAnnotations,
       javaClass: javaClass
     )
+    let javaKindDocs = renderJavaKindDocc()
     var classDecl: DeclSyntax =
       """
-      \(raw: classAvailableAttributes.render())@\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr))
+      \(raw: javaKindDocs)\(raw: classAvailableAttributes.render())@\(raw: classOrInterface)(\(literal: javaClass.getName())\(raw: extendsClause)\(raw: interfacesStr))
       \(raw: introducer) \(raw: swiftInnermostTypeName)\(raw: genericParameterClause)\(raw: inheritanceClause) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }

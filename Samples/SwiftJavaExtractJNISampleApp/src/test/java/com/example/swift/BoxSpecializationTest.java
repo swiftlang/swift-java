@@ -64,6 +64,8 @@ public class BoxSpecializationTest {
 
     @Test
     void callFishBoxStaticMethod() {
+        // snippet.specializationUsageJava
         assertEquals("Fish", FishBox.describeElement());
+        // snippet.end
     }
 }

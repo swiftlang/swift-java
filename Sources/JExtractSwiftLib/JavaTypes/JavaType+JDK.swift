@@ -30,6 +30,21 @@ extension JavaType {
     .class(package: "java.lang", name: "Runnable")
   }
 
+  /// The description of the type java.util.function.BooleanSupplier.
+  static var javaUtilFunctionBooleanSupplier: JavaType {
+    .class(package: "java.util.function", name: "BooleanSupplier")
+  }
+
+  /// The description of the type java.util.function.IntSupplier.
+  static var javaUtilFunctionIntSupplier: JavaType {
+    .class(package: "java.util.function", name: "IntSupplier")
+  }
+
+  /// The description of the type java.util.function.DoubleSupplier.
+  static var javaUtilFunctionDoubleSupplier: JavaType {
+    .class(package: "java.util.function", name: "DoubleSupplier")
+  }
+
   /// The description of the type java.lang.Class.
   static var javaLangClass: JavaType {
     .class(package: "java.lang", name: "Class")

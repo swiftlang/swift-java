@@ -85,11 +85,13 @@ extension JNISwift2JavaGenerator {
   }
 
   /// Represents a synthetic protocol-like translation for escaping closures.
-  /// This allows closures to use the same conversion infrastructure as protocols,
-  /// providing support for optionals, arrays, custom types, async, etc.
-  struct SyntheticClosureFunction {
-    /// The wrap-java interface name (e.g., "JavaMyClass.setCallback.callback")
-    let wrapJavaInterfaceName: String
+  struct SyntheticEscapingClosureFunctionType {
+    /// The name of the Java functional interface to be generated.
+    let javaInterfaceName: String
+
+    /// Java binary name of the corresponding `@FunctionalInterface`.
+    /// E.g. `com.example.swift.CallbackManager$setCallback$callback`.
+    let javaBinaryName: String
 
     /// Conversion steps for each parameter
     let parameterConversions: [UpcallConversionStep]
@@ -142,8 +144,9 @@ extension JNISwift2JavaGenerator {
     /// allowing it to use the same conversion infrastructure for optionals, arrays, etc.
     func generateSyntheticClosureFunction(
       functionType: SwiftFunctionType,
-      wrapJavaInterfaceName: String
-    ) throws -> SyntheticClosureFunction {
+      javaInterfaceName: String,
+      javaBinaryName: String,
+    ) throws -> SyntheticEscapingClosureFunctionType {
       let parameterConversions = try functionType.parameters.enumerated().map { idx, param in
         try self.translateParameter(
           parameterName: param.parameterName ?? "_\(idx)",
@@ -156,8 +159,9 @@ extension JNISwift2JavaGenerator {
         methodName: "apply"
       )
 
-      return SyntheticClosureFunction(
-        wrapJavaInterfaceName: wrapJavaInterfaceName,
+      return SyntheticEscapingClosureFunctionType(
+        javaInterfaceName: javaInterfaceName,
+        javaBinaryName: javaBinaryName,
         parameterConversions: parameterConversions,
         resultConversion: resultConversion,
         functionType: functionType

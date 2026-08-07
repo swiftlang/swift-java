@@ -29,8 +29,7 @@ extension JNISwift2JavaGenerator {
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
       protocolWrappers: self.interfaceProtocolWrappers,
       logger: self.logger,
-      javaIdentifiers: self.currentJavaIdentifiers,
-      extractedTypes: self.analysis.extractedTypes,
+      javaIdentifiers: self.currentJavaIdentifiers
     )
   }
 
@@ -72,7 +71,6 @@ extension JNISwift2JavaGenerator {
         protocolWrappers: self.interfaceProtocolWrappers,
         logger: self.logger,
         javaIdentifiers: self.currentJavaIdentifiers,
-        extractedTypes: self.analysis.extractedTypes,
       )
       translated = try translation.translate(enumCase: decl)
     } catch {
@@ -94,7 +92,6 @@ extension JNISwift2JavaGenerator {
     let protocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
     var javaIdentifiers: JavaIdentifierFactory
-    let extractedTypes: [SwiftTypeName: ExtractedNominalType]
 
     func translate(enumCase: ExtractedEnumCase) throws -> TranslatedEnumCase {
       let methodName = "" // TODO: Used for closures, replace with better name?
@@ -114,7 +111,7 @@ extension JNISwift2JavaGenerator {
 
       let associatedValueTypes = enumCase.parameters.map { param in
         param.type.description
-      }.joined(separator: ", ")
+      }.joined(separator: .comma)
       let javaCaseClassName = enumCase.name.firstCharacterUppercased
       let resultType = knownTypes.optionalSugar(
         .tuple(
@@ -194,11 +191,24 @@ extension JNISwift2JavaGenerator {
 
         switch param.type {
         case .function(let funcTy):
-          let translatedClosure = try translateFunctionType(
+          var translatedClosure = try translateFunctionType(
             name: parameterName,
             swiftType: funcTy,
             parentName: parentName,
           )
+          // Lift the escaping-closure spec off the matching `NativeParameter`
+          // onto the `TranslatedFunctionType`. This keeps the wrap-java
+          // emission colocated with the decl it belongs to, so the thunk
+          // printer can emit the `@JavaInterface` Swift struct alongside
+          // the cdecl thunk that references it - no generator-level
+          // sink/dict/pre-pass required. `NativeParameter` runs 1:1 with
+          // the Swift parameters here (a Swift param can lower to multiple
+          // *JavaParameter*s but stays one `NativeParameter`), so indexing
+          // by `idx` is correct.
+          if idx < nativeFunctionSignature.parameters.count {
+            translatedClosure.syntheticClosureType =
+              nativeFunctionSignature.parameters[idx].syntheticClosure
+          }
           funcTypes.append(translatedClosure)
         default:
           break
@@ -368,7 +378,9 @@ extension JNISwift2JavaGenerator {
         return nil
       }
       let isGeneric = selfParameter.selfType.asNominalTypeDeclaration?.isGeneric == true
-      guard isGeneric else {
+      let isProtocol = selfParameter.selfType.asNominalType?.isProtocol == true
+
+      guard isGeneric || isProtocol else {
         return nil
       }
 
@@ -504,14 +516,14 @@ extension JNISwift2JavaGenerator {
           conversion: .placeholder,
         )
 
-      case .function:
-        return TranslatedParameter(
-          parameter: JavaParameter(
-            name: parameterName,
-            type: .class(package: javaPackage, name: "\(parentName.fullName).\(methodName).\(parameterName)"),
-            annotations: parameterAnnotations,
-          ),
-          conversion: .placeholder,
+      case .function(let functionType):
+        return translateFunctionParameter(
+          swiftType: swiftType,
+          functionType: functionType,
+          parameterName: parameterName,
+          methodName: methodName,
+          parentName: parentName,
+          parameterAnnotations: parameterAnnotations
         )
 
       case .opaque(let proto), .existential(let proto):
@@ -684,6 +696,34 @@ extension JNISwift2JavaGenerator {
       nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
     }
 
+    func translateFunctionParameter(
+      swiftType: SwiftType,
+      functionType: SwiftFunctionType,
+      parameterName: String,
+      methodName: String,
+      parentName: SwiftQualifiedTypeName,
+      parameterAnnotations: [JavaAnnotation]
+    ) -> TranslatedParameter {
+      let interfacejavaType =
+        if let known = KnownJavaFunctionalInterface.find(functionType) {
+          known.javaType
+        } else {
+          JavaType.class(
+            package: javaPackage,
+            name: String.javaQualifiedName(parentName.fullName, methodName, parameterName)
+          )
+        }
+
+      return TranslatedParameter(
+        parameter: JavaParameter(
+          name: parameterName,
+          type: interfacejavaType,
+          annotations: parameterAnnotations,
+        ),
+        conversion: .placeholder,
+      )
+    }
+
     func translateProtocolParameter(
       protocolType: SwiftType,
       parameterName: String,
@@ -841,6 +881,7 @@ extension JNISwift2JavaGenerator {
 
       switch swiftType {
       case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
         if let knownType = nominalType.asKnownType {
           switch knownType {
           case .optional(let wrapped):
@@ -906,7 +947,16 @@ extension JNISwift2JavaGenerator {
         }
 
         if nominalType.isSwiftJavaWrapper {
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+          return TranslatedResult(
+            javaType: javaType,
+            nativeJavaType: javaType,
+            annotations: resultAnnotations,
+            outParameters: [],
+            conversion: .placeholder
+          )
         }
 
         let javaType = JavaType.class(
@@ -967,7 +1017,35 @@ extension JNISwift2JavaGenerator {
           genericRequirements: genericRequirements,
         )
 
-      case .metatype, .tuple, .function, .existential, .opaque, .genericParameter, .composite, .inlineArray:
+      case .opaque(let proto), .existential(let proto):
+        guard case .nominal(let protoNominalType) = proto, protoNominalType.isProtocol else {
+          throw JavaTranslationError.cannotReturnNonExtractedProtocol(proto)
+        }
+
+        let interfaceJavaType = JavaType.class(
+          package: moduleJavaPackages[protoNominalType.nominalTypeDecl.moduleName],
+          name: protoNominalType.nominalTypeDecl.qualifiedName,
+        )
+        let boxJavaType = JavaType.class(
+          package: moduleJavaPackages[protoNominalType.nominalTypeDecl.moduleName],
+          name: protoNominalType.nominalTypeDecl.javaExistentialBoxName,
+        )
+
+        return TranslatedResult(
+          javaType: interfaceJavaType,
+          nativeJavaType: .void,
+          annotations: resultAnnotations,
+          outParameters: [.init(name: resultName, type: ._OutSwiftGenericInstance, allocation: .new)],
+          conversion: .wrapMemoryAddressUnsafe(
+            .commaSeparated([
+              .member(.constant(resultName), field: "selfPointer"),
+              .member(.constant(resultName), field: "selfTypePointer"),
+            ]),
+            boxJavaType
+          )
+        )
+
+      case .metatype, .tuple, .function, .genericParameter, .composite, .inlineArray:
         throw JavaTranslationError.unsupportedSwiftType(swiftType)
       }
     }
@@ -1206,6 +1284,7 @@ extension JNISwift2JavaGenerator {
 
       switch swiftType {
       case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           if let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
             javaType.implementsJavaValue
@@ -1253,8 +1332,17 @@ extension JNISwift2JavaGenerator {
           }
         }
 
-        guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(swiftType)
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(swiftType)
+          }
+          return TranslatedResult(
+            javaType: javaType,
+            nativeJavaType: javaType,
+            annotations: parameterAnnotations,
+            outParameters: [],
+            conversion: .placeholder
+          )
         }
 
       case .tuple:
@@ -1402,6 +1490,7 @@ extension JNISwift2JavaGenerator {
         )
 
       case .nominal(let nominalType):
+        let nominalTypeName = nominalType.nominalTypeDecl.qualifiedName
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
             throw JavaTranslationError.unsupportedSwiftType(elementType)
@@ -1416,8 +1505,18 @@ extension JNISwift2JavaGenerator {
           )
         }
 
-        guard !nominalType.isSwiftJavaWrapper else {
-          throw JavaTranslationError.unsupportedSwiftType(elementType)
+        if nominalType.isSwiftJavaWrapper {
+          guard let javaType = nominalTypeName.parseJavaClassFromSwiftJavaName(in: self.javaClassLookupTable) else {
+            throw JavaTranslationError.wrappedJavaClassTranslationNotProvided(elementType)
+          }
+
+          return TranslatedResult(
+            javaType: .array(javaType),
+            nativeJavaType: .array(javaType),
+            annotations: annotations,
+            outParameters: [],
+            conversion: .placeholder
+          )
         }
 
         let javaType = try translateGenericTypeParameter(
@@ -1705,6 +1804,17 @@ extension JNISwift2JavaGenerator {
     var parameters: [TranslatedParameter]
     var result: TranslatedResult
     var swiftType: SwiftFunctionType
+
+    var isEscaping: Bool { swiftType.isEscaping }
+
+    /// Represents this `TranslatedFunctionType` if we need to create a synthetic protocol
+    /// to handle the cross-language call to the function (closure).
+    ///
+    /// E.g. if the function type we're in is `@escaping` we need to create an
+    /// interface on the Java side to represent it, and a Swift side wrapper to
+    /// retain/wrap it, that will be then called into from the escaping Swift-side
+    /// closure we forward to the downcall target.
+    var syntheticClosureType: SyntheticEscapingClosureFunctionType?
   }
 
   /// Describes how to convert values between Java types and the native Java function
@@ -1830,7 +1940,7 @@ extension JNISwift2JavaGenerator {
         return "\(placeholder)_\(component)"
 
       case .commaSeparated(let list):
-        return list.map({ $0.render(&printer, placeholder) }).joined(separator: ", ")
+        return list.map({ $0.render(&printer, placeholder) }).joined(separator: .comma)
 
       case .valueMemoryAddress:
         return "\(placeholder).$memoryAddress()"
@@ -1850,7 +1960,7 @@ extension JNISwift2JavaGenerator {
         }
         let genericClause =
           if !typeParameters.isEmpty {
-            "<\(typeParameters.map(\.description).joined(separator: ", "))>"
+            "<\(typeParameters.map(\.description).joined(separator: .comma))>"
           } else {
             ""
           }
@@ -1870,7 +1980,7 @@ extension JNISwift2JavaGenerator {
       case .method(let inner, let methodName, let arguments):
         let inner = inner.render(&printer, placeholder)
         let args = arguments.map { $0.render(&printer, placeholder) }
-        let argsStr = args.joined(separator: ", ")
+        let argsStr = args.joined(separator: .comma)
         return "\(inner).\(methodName)(\(argsStr))"
 
       case .member(let inner, let fieldName):
@@ -1917,7 +2027,7 @@ extension JNISwift2JavaGenerator {
       case .subscriptOf(let inner, let arguments):
         let inner = inner.render(&printer, placeholder)
         let arguments = arguments.map { $0.render(&printer, placeholder) }
-        return "\(inner)[\(arguments.joined(separator: ", "))]"
+        return "\(inner)[\(arguments.joined(separator: .comma))]"
 
       case .aggregate(let variable, let steps):
         precondition(!steps.isEmpty, "Aggregate must contain steps")
@@ -1951,7 +2061,7 @@ extension JNISwift2JavaGenerator {
 
       case .lambda(let args, let body):
         var printer = JavaPrinter()
-        printer.printBraceBlock("(\(args.joined(separator: ", "))) ->") { printer in
+        printer.printBraceBlock("(\(args.joined(separator: .comma))) ->") { printer in
           let body = body.render(&printer, placeholder)
           if !body.isEmpty {
             printer.print("return \(body);")
@@ -1976,7 +2086,7 @@ extension JNISwift2JavaGenerator {
           let converted = element.elementConversion.render(&printer, "\(element.outParamName)[0]")
           args.append(converted)
         }
-        return "new \(tupleClassName)(\(args.joined(separator: ", ")))"
+        return "new \(tupleClassName)(\(args.joined(separator: .comma)))"
 
       case .placeToVar(let inner, let name, let type):
         let inner = inner.render(&printer, placeholder)
@@ -2087,6 +2197,10 @@ extension JNISwift2JavaGenerator {
     /// We cannot generate interface wrappers for
     /// protocols that we unable to be jextracted.
     case protocolWasNotExtracted
+
+    /// Returning `any P` / `some P` is only supported when `P` is a single
+    /// jextracted protocol.
+    case cannotReturnNonExtractedProtocol(SwiftType)
 
     /// Dictionary type requires exactly two generic type arguments (key and value).
     case dictionaryRequiresKeyAndValueTypes(SwiftType)

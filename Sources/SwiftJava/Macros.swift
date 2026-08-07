@@ -45,6 +45,46 @@ public macro JavaClass(
   implements: (any AnyJavaObject.Type)?...
 ) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
 
+/// Attached macro that declares that a particular Swift type is a wrapper around a Java `record`.
+///
+/// This behaves identically to ``JavaClass`` today (records are wrapped as
+/// classes on the Swift side, exposing the canonical constructor and the
+/// component accessor methods)
+///
+/// Usage:
+///
+/// ```swift
+/// @JavaRecord("com.example.Point")
+/// open class Point: JavaObject {
+///   @JavaMethod
+///   @_nonoverride public convenience init(_ x: Int32, _ y: Int32, environment: JNIEnvironment? = nil)
+///
+///   @JavaMethod open func x() -> Int32
+///   @JavaMethod open func y() -> Int32
+/// }
+/// ```
+///
+/// Would correspond to a Java record like this:
+/// ```java
+/// package com.example;
+///
+/// public record Point(int x, int y) {}
+/// ```
+@attached(
+  member,
+  names: named(fullJavaClassName),
+  named(javaHolder),
+  named(init(javaHolder:)),
+  named(JavaSuperclass),
+  named(`as`)
+)
+@attached(extension, conformances: AnyJavaObject)
+public macro JavaRecord(
+  _ fullClassName: String,
+  extends: (any AnyJavaObject.Type)? = nil,
+  implements: (any AnyJavaObject.Type)?...
+) = #externalMacro(module: "SwiftJavaMacros", type: "JavaClassMacro")
+
 /// Attached macro that declares that a particular `struct` type is a wrapper around a Java interface.
 ///
 /// Use this macro to describe a type that was implemented as an

@@ -135,7 +135,7 @@ enum ConversionStep: Equatable {
 
       // FIXME: Should be able to use structured initializers here instead
       // of splatting out text.
-      let renderedArgumentList = renderedArguments.joined(separator: ", ")
+      let renderedArgumentList = renderedArguments.joined(separator: .comma)
       return "\(raw: type.description)(\(raw: renderedArgumentList))"
 
     case .tuplify(let elements):
@@ -145,7 +145,7 @@ enum ConversionStep: Equatable {
 
       // FIXME: Should be able to use structured initializers here instead
       // of splatting out text.
-      let renderedElementList = renderedElements.joined(separator: ", ")
+      let renderedElementList = renderedElements.joined(separator: .comma)
       return "(\(raw: renderedElementList))"
 
     case .populatePointer(name: let pointer, assumingType: let type, to: let step):
@@ -185,7 +185,7 @@ enum ConversionStep: Equatable {
       }
 
       // FIXME: Should be able to use structured initializers here instead of splatting out text.
-      let renderedArgumentList = renderedArguments.joined(separator: ", ")
+      let renderedArgumentList = renderedArguments.joined(separator: .comma)
 
       let methodApply: String =
         if let methodName {
@@ -240,7 +240,7 @@ enum ConversionStep: Equatable {
       }
 
       // Call the lowered closure with lowered parameters.
-      let loweredResult = "\(placeholder)(\(args.map(\.description).joined(separator: ", ")))"
+      let loweredResult = "\(placeholder)(\(args.map(\.description).joined(separator: .comma)))"
 
       // Raise the lowered result.
       let result = resultStep.asExprSyntax(placeholder: loweredResult.description, bodyItems: &body)
@@ -249,7 +249,7 @@ enum ConversionStep: Equatable {
       // Construct the closure expression.
       var closure = ExprSyntax(
         """
-        { (\(raw: params.joined(separator: ", "))) in
+        { (\(raw: params.joined(separator: .comma))) in
           }
         """
       ).cast(ClosureExprSyntax.self)

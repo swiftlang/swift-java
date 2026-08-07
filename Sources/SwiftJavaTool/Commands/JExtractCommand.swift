@@ -92,7 +92,7 @@ extension SwiftJava {
     @Flag(
       inversion: .prefixedNo,
       help:
-        "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the SwiftPM Sandbox (!). This feature is onl supported in 'jni' mode.",
+        "By enabling this mode, JExtract will generate Java code that allows you to implement Swift protocols using Java classes. This feature requires disabling the SwiftPM Sandbox (!). This feature is only supported in 'jni' mode.",
     )
     var enableJavaCallbacks: Bool?
 

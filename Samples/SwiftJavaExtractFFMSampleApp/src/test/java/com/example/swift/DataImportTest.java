@@ -18,10 +18,40 @@ import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
 
 import java.lang.foreign.ValueLayout;
+import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DataImportTest {
+    @Test
+    void data_echo() {
+        // snippet.dataUsageJava
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            byte[] bytes = new byte[] { 1, 2, 3, 4 };
+            var data = Data.fromByteArray(bytes, arena);
+
+            var echoed = MySwiftLibrary.echoData(data, arena);
+            assertArrayEquals(bytes, echoed.toByteArray());
+        }
+        // snippet.end
+    }
+
+    @Test
+    void data_withUnsafeBytes() {
+        // snippet.withUnsafeBytesUsageJava
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            byte[] bytes = new byte[] { 1, 2, 3, 4 };
+            var data = Data.fromByteArray(bytes, arena);
+
+            var echoed = MySwiftLibrary.echoData(data, arena);
+            echoed.withUnsafeBytes((segment) -> {
+                assertEquals(4, segment.byteSize());
+                assertEquals(1, segment.get(ValueLayout.JAVA_BYTE, 0));
+            });
+        }
+        // snippet.end
+    }
+
     @Test
     void test_Data_receiveAndReturn() {
         try (var arena = AllocatingSwiftArena.ofConfined()) {
@@ -91,7 +121,20 @@ public class DataImportTest {
     }
 
     @Test
+    void test_Data_fromByteBuffer() {
+        // snippet.byteBufferUsageJava
+        try (var arena = AllocatingSwiftArena.ofConfined()) {
+            byte[] original = new byte[] { 1, 2, 3, 4, 5 };
+            ByteBuffer buffer = ByteBuffer.wrap(original);
+            var data = Data.fromByteBuffer(buffer, arena);
+            assertEquals(5, data.getCount());
+        }
+        // snippet.end
+    }
+
+    @Test
     void test_Data_toMemorySegment() {
+        // snippet.memorySegmentUsageJava
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             byte[] original = new byte[] { 10, 20, 30, 40 };
             var data = Data.fromByteArray(original, arena);
@@ -102,10 +145,12 @@ public class DataImportTest {
                 assertEquals(original[i], segment.get(ValueLayout.JAVA_BYTE, i));
             }
         }
+        // snippet.end
     }
 
     @Test
     void test_Data_toByteBuffer() {
+        // snippet.byteBufferToUsageJava
         try (var arena = AllocatingSwiftArena.ofConfined()) {
             byte[] original = new byte[] { 10, 20, 30, 40 };
             var data = Data.fromByteArray(original, arena);
@@ -116,6 +161,7 @@ public class DataImportTest {
                 assertEquals(original[i], buffer.get(i));
             }
         }
+        // snippet.end
     }
 
     @Test

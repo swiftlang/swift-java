@@ -196,7 +196,7 @@ extension JavaType {
         }
       let genericClause: String =
         if !typeParameters.isEmpty {
-          "<\(typeParameters.map(\.boxedName).joined(separator: ", "))>"
+          "<\(typeParameters.map(\.boxedName).joined(separator: .comma))>"
         } else {
           ""
         }

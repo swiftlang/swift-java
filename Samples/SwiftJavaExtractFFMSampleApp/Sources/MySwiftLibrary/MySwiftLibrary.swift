@@ -48,6 +48,18 @@ public func globalCallMeRunnable(run: () -> Void) {
   run()
 }
 
+public func globalCallMeBooleanSupplier(run: () -> Bool) -> Bool {
+  run()
+}
+
+public func globalCallMeIntSupplier(run: () -> Int32) -> Int32 {
+  run()
+}
+
+public func globalCallMeDoubleSupplier(run: () -> Double) -> Double {
+  run()
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }
@@ -60,25 +72,14 @@ public func globalReceiveReturnData(data: Data) -> Data {
   Data(data)
 }
 
+// snippet.rawBufferDefinition
 public func withBuffer(body: (UnsafeRawBufferPointer) -> Void) {
   body(globalBuffer)
 }
+// snippet.end
 
 public func getArray() -> [UInt8] {
   [1, 2, 3]
-}
-
-// Tuple round-trips for jextract FFM (see `FFMTupleTest` in the sample app).
-public func ffmTupleReturnPair() -> (Int32, Int64) {
-  (42, 43)
-}
-
-public func ffmTupleSumPair(_ arg: (Int32, Int64)) -> Int64 {
-  Int64(arg.0) + arg.1
-}
-
-public func ffmTupleLabeledPair() -> (x: Int32, y: Int32) {
-  (x: 10, y: 20)
 }
 
 public func sumAllByteArrayElements(actuallyAnArray: UnsafeRawPointer, count: Int) -> Int {

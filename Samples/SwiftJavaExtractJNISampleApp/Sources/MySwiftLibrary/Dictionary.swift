@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+// snippet.dictionaryDefinition
 public func makeStringToLongDictionary() -> [String: Int64] {
   [
     "hello": 1,
@@ -22,6 +23,7 @@ public func makeStringToLongDictionary() -> [String: Int64] {
 public func stringToLongDictionary(dict: [String: Int64]) -> [String: Int64] {
   dict
 }
+// snippet.end
 
 public func insertIntoStringToLongDictionary(dict: [String: Int64], key: String, value: Int64) -> [String: Int64] {
   var copy = dict

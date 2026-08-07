@@ -21,6 +21,7 @@ public class MySwiftClass {
   public let byte: UInt8 = 0
   public let constant: Int64 = 100
   public var mutable: Int64 = 0
+  // snippet.computedProperties
   public var product: Int64 {
     x * y
   }
@@ -37,6 +38,7 @@ public class MySwiftClass {
       mutable = newValue * 2
     }
   }
+  // snippet.end
   public let warm: Bool = false
   public var getAsync: Int64 {
     get async {
@@ -46,11 +48,14 @@ public class MySwiftClass {
 
   /// `public private(set)` should expose only a getter to Java; the setter
   /// is unreachable so swift-java must not emit a setter thunk for it
+  // snippet.privateSetProperty
   public private(set) var privateSetCounter: Int64 = 7
+  // snippet.end
 
   public static func method() {
   }
 
+  // snippet.initializers
   public init(x: Int64, y: Int64) {
     self.x = x
     self.y = y
@@ -60,7 +65,9 @@ public class MySwiftClass {
     self.x = 10
     self.y = 5
   }
+  // snippet.end
 
+  // snippet.throwingInitDefinition
   convenience public init(throwing: Bool) throws {
     if throwing {
       throw MySwiftError.swiftError
@@ -68,6 +75,7 @@ public class MySwiftClass {
       self.init()
     }
   }
+  // snippet.end
 
   deinit {
   }
@@ -98,6 +106,10 @@ public class MySwiftClass {
 
   public func addXWithJavaLong(_ other: JavaLong) -> Int64 {
     self.x + other.longValue()
+  }
+
+  public func returnXAsJavaLong() -> JavaLong {
+    JavaLong(self.x)
   }
 }
 

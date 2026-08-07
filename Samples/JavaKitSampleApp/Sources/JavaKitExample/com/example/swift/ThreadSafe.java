@@ -17,6 +17,8 @@ package com.example.swift;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+// snippet.threadSafe
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ThreadSafe {
 }
+// snippet.end

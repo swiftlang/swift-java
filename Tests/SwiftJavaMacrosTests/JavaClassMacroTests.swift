@@ -22,6 +22,7 @@ import XCTest
 class JavaKitMacroTests: XCTestCase {
   static let javaKitMacros: [String: any Macro.Type] = [
     "JavaClass": JavaClassMacro.self,
+    "JavaRecord": JavaClassMacro.self,
     "JavaMethod": JavaMethodMacro.self,
     "JavaField": JavaFieldMacro.self,
     "JavaStaticMethod": JavaMethodMacro.self,
@@ -464,6 +465,64 @@ class JavaKitMacroTests: XCTestCase {
           }
         }
         """#,
+      macros: Self.javaKitMacros
+    )
+  }
+
+  func testJavaRecord() throws {
+    assertMacroExpansion(
+      """
+        @JavaRecord("com.example.Point")
+        open class Point: JavaObject {
+          @JavaMethod
+          @_nonoverride public convenience init(_ x: Int32, _ y: Int32, environment: JNIEnvironment? = nil)
+
+          @JavaMethod
+          open func x() -> Int32
+        }
+      """,
+      expandedSource: """
+
+          open class Point: JavaObject {
+            @_nonoverride public convenience init(_ x: Int32, _ y: Int32, environment: JNIEnvironment? = nil) {
+                let _environment = if let environment {
+                    environment
+                } else {
+                    try! JavaVirtualMachine.shared().environment()
+                }
+                let javaThis = try! Self.dynamicJavaNewObjectInstance(in: _environment, arguments: x.self, y.self)
+                self.init(javaThis: javaThis, environment: _environment)
+            }
+            open func x() -> Int32 {
+                return {
+                  do {
+                    return try dynamicJavaMethodCall(methodName: "x", resultType: Int32.self)
+                  } catch {
+                    if let throwable = error as? Throwable {
+                  let sw = StringWriter()
+                  let pw = PrintWriter(sw)
+                  throwable.printStackTrace(pw)
+                  fatalError("Java call threw unhandled exception: \\(error)\\n\\(sw.toString())")
+                    }
+                    fatalError("Java call threw unhandled exception: \\(error)")
+                  }
+                }()
+            }
+
+              /// The full Java class name for this Swift type.
+              open override class var fullJavaClassName: String {
+                #if os(Android) && AndroidCoreLibraryDesugaring
+                  AndroidSupport.androidDesugarClassNameConversion(for: "com.example.Point")
+                #else
+                  "com.example.Point"
+                #endif
+              }
+
+              public required init(javaHolder: JavaObjectHolder) {
+                  super.init(javaHolder: javaHolder)
+              }
+          }
+        """,
       macros: Self.javaKitMacros
     )
   }

@@ -136,8 +136,8 @@ extension FFMSwift2JavaGenerator {
       params.append("\(annotationsStr)\(param.type.javaType) \(name)")
       args.append(name)
     }
-    let paramsStr = params.joined(separator: ", ")
-    let argsStr = args.joined(separator: ", ")
+    let paramsStr = params.joined(separator: .comma)
+    let argsStr = args.joined(separator: .comma)
 
     printer.print(
       """
@@ -232,33 +232,42 @@ extension FFMSwift2JavaGenerator {
       private static class \(name)
       """
     ) { printer in
-      printer.print(
-        """
-        @FunctionalInterface
-        public interface Function {
-          \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", ")));
+      let (interfaceName, methodName, isKnownFuncInterface) =
+        if let known = KnownJavaFunctionalInterface.find(parameters: cParameterTypes, result: cResultType) {
+          (known.javaType.description, known.method, true)
+        } else {
+          ("Function", "apply", false)
         }
-        """
-      )
 
-      if let impl {
+      if !isKnownFuncInterface {
         printer.print(
           """
-          public final static class Function$Impl implements Function {
-            \(impl.members.joinedJavaStatements(indent: 2))
-            public \(cResultType.javaType) apply(\(paramDecls.joined(separator: ", "))) {
-              \(impl.body)
-            }
+          @FunctionalInterface
+          public interface Function {
+            \(cResultType.javaType) apply(\(paramDecls.joined(separator: .comma)));
           }
           """
         )
+
+        if let impl {
+          printer.print(
+            """
+            public final static class Function$Impl implements Function {
+              \(impl.members.joinedJavaStatements(indent: 2))
+              public \(cResultType.javaType) apply(\(paramDecls.joined(separator: .comma))) {
+                \(impl.body)
+              }
+            }
+            """
+          )
+        }
       }
 
       printFunctionDescriptorDefinition(&printer, cResultType, cParams)
       printer.print(
         """
-        private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(Function.class, "apply", DESC);
-        private static MemorySegment toUpcallStub(Function fi, Arena arena) {
+        private static final MethodHandle HANDLE = SwiftRuntime.upcallHandle(\(interfaceName).class, "\(methodName)", DESC);
+        private static MemorySegment toUpcallStub(\(interfaceName) fi, Arena arena) {
           return Linker.nativeLinker().upcallStub(HANDLE.bindTo(fi), DESC, arena);
         }
         """
@@ -267,8 +276,6 @@ extension FFMSwift2JavaGenerator {
   }
 
   /// Print the helper type container for a user-facing Java API.
-  ///
-  /// * User-facing functional interfaces.
   func printJavaBindingWrapperHelperClass(
     _ printer: inout JavaPrinter,
     _ decl: ExtractedFunc,
@@ -298,13 +305,27 @@ extension FFMSwift2JavaGenerator {
   ) {
     let cdeclDescriptor = "\(bindingDescriptorName).$\(functionType.name)"
     if functionType.isCompatibleWithC {
-      // If the user-facing functional interface is C ABI compatible, just extend
-      // the lowered function pointer parameter interface.
+      let (interfaceName, isKnownFuncInterface) =
+        if let known = KnownJavaFunctionalInterface.find(functionType) {
+          (known.javaType.description, true)
+        } else {
+          (functionType.name, false)
+        }
+
+      if !isKnownFuncInterface {
+        // If the user-facing functional interface is C ABI compatible, just extend
+        // the lowered function pointer parameter interface.
+        printer.print(
+          """
+          @FunctionalInterface
+          public interface \(interfaceName) extends \(cdeclDescriptor).Function {}
+          """
+        )
+      }
+
       printer.print(
         """
-        @FunctionalInterface
-        public interface \(functionType.name) extends \(cdeclDescriptor).Function {}
-        private static MemorySegment $toUpcallStub(\(functionType.name) fi, Arena arena) {
+        private static MemorySegment $toUpcallStub(\(interfaceName) fi, Arena arena) {
           return \(bindingDescriptorName).$\(functionType.name).toUpcallStub(fi, arena);
         }
         """
@@ -319,7 +340,7 @@ extension FFMSwift2JavaGenerator {
         """
         @FunctionalInterface
         public interface \(functionType.name) {
-          \(functionType.result.javaResultType) apply(\(apiParams.joined(separator: ", ")));
+          \(functionType.result.javaResultType) apply(\(apiParams.joined(separator: .comma)));
         }
         """
       )
@@ -333,7 +354,7 @@ extension FFMSwift2JavaGenerator {
       ) { printer in
         printer.print(
           """
-          return \(cdeclDescriptor).toUpcallStub((\(cdeclParams.joined(separator: ", "))) -> {
+          return \(cdeclDescriptor).toUpcallStub((\(cdeclParams.joined(separator: .comma))) -> {
           """
         )
         printer.indent()
@@ -343,7 +364,7 @@ extension FFMSwift2JavaGenerator {
           convertedArgs.append(arg)
         }
 
-        let call = "fi.apply(\(convertedArgs.joined(separator: ", ")))"
+        let call = "fi.apply(\(convertedArgs.joined(separator: .comma)))"
         let result = functionType.result.conversion.render(&printer, call)
         if functionType.result.javaResultType == .void {
           printer.print("\(result);")
@@ -394,7 +415,7 @@ extension FFMSwift2JavaGenerator {
     if translatedSignature.canThrowSwiftIntegerOverflowException {
       throwsClauses.append(JavaType.swiftIntegerOverflowException.className!)
     }
-    let throwsClause = throwsClauses.isEmpty ? "" : " throws \(throwsClauses.joined(separator: ", "))"
+    let throwsClause = throwsClauses.isEmpty ? "" : " throws \(throwsClauses.joined(separator: .comma))"
 
     TranslatedDocumentation.printDocumentation(
       importedFunc: decl,
@@ -404,7 +425,7 @@ extension FFMSwift2JavaGenerator {
     )
     printer.printBraceBlock(
       """
-      \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: ", ")))\(throwsClause)
+      \(annotationsStr)\(modifiers) \(returnTy) \(methodName)(\(paramDecls.joined(separator: .comma)))\(throwsClause)
       """
     ) { printer in
       if case .instance = decl.functionSignature.selfParameter {
@@ -516,7 +537,7 @@ extension FFMSwift2JavaGenerator {
     }
 
     //=== Part 3: Downcall.
-    let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: ", ")))"
+    let downCall = "\(thunkName).call(\(downCallArguments.joined(separator: .comma)))"
 
     /// Helper to emit the error check after a downcall
     func printErrorCheck(_ printer: inout JavaPrinter) {
@@ -813,7 +834,7 @@ extension FFMSwift2JavaGenerator.JavaConversionStep {
           placeholderForDowncall: placeholderForDowncall,
         )
       }
-      return "\(tupleClassName)(\(args.joined(separator: ", ")))"
+      return "\(tupleClassName)(\(args.joined(separator: .comma)))"
     }
   }
 }

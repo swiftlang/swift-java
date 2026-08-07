@@ -26,31 +26,33 @@ public class EscapingClosuresTest {
     
     @Test
     void testCallbackManager_singleCallback() {
+        // snippet.escapingClosureUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             CallbackManager manager = CallbackManager.init(arena);
-            
+
             AtomicBoolean wasCalled = new AtomicBoolean(false);
-            
+
             // Create an escaping closure (no try-with-resources needed - cleanup is automatic via Swift ARC)
             CallbackManager.setCallback.callback callback = () -> {
                 wasCalled.set(true);
             };
-            
+
             // Set the callback
             manager.setCallback(callback);
-            
+
             // Trigger it
             manager.triggerCallback();
             assertTrue(wasCalled.get(), "Callback should have been called");
-            
+
             // Trigger again to ensure it's still stored
             wasCalled.set(false);
             manager.triggerCallback();
             assertTrue(wasCalled.get(), "Callback should be called multiple times");
-            
+
             // Clear the callback - this releases the closure on Swift side, triggering GlobalRef cleanup
             manager.clearCallback();
         }
+        // snippet.end
     }
     
     @Test

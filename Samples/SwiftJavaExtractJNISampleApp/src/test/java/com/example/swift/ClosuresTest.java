@@ -32,13 +32,37 @@ public class ClosuresTest {
 
     @Test
     void closureWithInt() {
+        // snippet.closureWithIntUsageJava
         long result = MySwiftLibrary.closureWithInt(10, (value) -> value * 2);
         assertEquals(20, result);
+        // snippet.end
     }
 
     @Test
     void closureMultipleArguments() {
+        // snippet.closureMultipleArgumentsUsageJava
         long result = MySwiftLibrary.closureMultipleArguments(5, 10, (a, b) -> a + b);
         assertEquals(15, result);
+        // snippet.end
+    }
+
+    @Test
+    void globalCallMeBooleanSupplier() {
+        // snippet.closureUsageJava
+        boolean result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> true);
+        assertEquals(true, result);
+        // snippet.end
+    }
+
+    @Test
+    void globalCallMeIntSupplier() {
+        int result = MySwiftLibrary.globalCallMeIntSupplier(() -> 2);
+        assertEquals(2, result);
+    }
+
+    @Test
+    void globalCallMeDoubleSupplier() {
+        double result = MySwiftLibrary.globalCallMeDoubleSupplier(() -> 2.0);
+        assertEquals(2.0, result);
     }
 }

@@ -7,9 +7,9 @@ This project contains tools and libraries that facilitate **Swift & Java Interop
 
 ## Introduction
 
-If you'd like to check out a quick introduction to Swift & Java interoperability, you may be interested in this presentation from WWDC25: [WWDC25: Explore Swift and Java interoperability](https://www.youtube.com/watch?v=QSHO-GUGidA).
+For a quick introduction to Swift & Java interoperability, see the WWDC25 session [Explore Swift and Java interoperability](https://www.youtube.com/watch?v=QSHO-GUGidA).
 
-While we work on more quickstarts and documentation, please refer to the Sample projects located in [Samples/](Samples/) that showcase the various ways you can use swift-java in your Swift or Java projects.
+While we work on more quickstarts and documentation, refer to the sample projects in [Samples/](Samples/), which showcase the various ways to use swift-java in Swift or Java projects.
 
 ## Dependencies
 
@@ -42,18 +42,17 @@ sdk install java 25.0.1-amzn
 
 ## Self-publish supporting Java libraries
 
-Swift-java relies on supporting libraries that are under active development and not yet published to Maven Central. To use the project, you'll need to self-publish these libraries locally so your Java project can depend on them.
+swift-java relies on supporting libraries that are under active development and not yet published to Maven Central. To use the project, you'll need to self-publish these libraries locally so your Java project can depend on them.
 
-To publish the libraries to your local maven repository (`$HOME/.m2`), you can run:
+To publish the libraries to your local maven repository (`$HOME/.m2`), run this in `swift-java/`:
 
-```
-// in swift-java/
+```bash
 ./gradlew publishToMavenLocal
 ```
 
-To consume these libraries in your Java project built using Gradle, you can then include the local repository in the repositories to resolve dependencies from:
+To consume these libraries in your Java project built using Gradle, include the local repository in the repositories to resolve dependencies from:
 
-```
+```kotlin
 repositories {
     mavenLocal()
     mavenCentral()
@@ -62,44 +61,45 @@ repositories {
 
 We anticipate simplifying this in the future.
 
-## SwiftJava macros
+## SwiftJava macros: calling Java from Swift
 
-SwiftJava is a Swift library offering macros which simplify writing JNI code "by hand" but also calling Java code from Swift.
+SwiftJava is a Swift library offering macros which simplify writing JNI code "by hand", and calling Java code from Swift.
 
-It is possible to generate Swift bindings to Java libraries using SwiftJava by using the `swift-java wrap-java` command.
+You can also generate Swift bindings to Java libraries with the `swift-java wrap-java` command.
 
 Required language/runtime versions:
-- **JDK 17+**, any recent JDK installation should be sufficient, as only general reflection and JNI APIs are used by this integratio
+- **JDK 17+**, any recent JDK installation should be sufficient, as only general reflection and JNI APIs are used by this integration
 - **Swift 6.2.x**, because the library uses modern Swift macros
 
-**swift-java jextract** 
+## swift-java jextract: calling Swift from Java
 
-Is a source generator which will **generate Java bindings to existing Swift libraries**. 
-Its inputs are Swift sources or packages, and outputs are generated Swift and Java code necessary to call these functions efficiently from Java.
+`jextract` is a source generator which **generates Java bindings to existing Swift libraries**.
+Its inputs are Swift sources or packages, and its outputs are the generated Swift and Java code needed to call those functions efficiently from Java.
 
-## swift-java jextract --mode=ffm (default)
+It has two modes, `ffm` and `jni`.
 
-This mode provides the most flexibility and performance, and allows to decrease the amount of data being copied between Swift and Java.
-This does require the use of the relatively recent [JEP-454: Foreign Function & Memory API](https://openjdk.org/jeps/454), which is only available since JDK22, and will become part of JDK LTS releases with JDK 25 (depending on your JDK vendor).
+### swift-java jextract --mode=ffm (default)
+
+This mode offers the most flexibility and performance, and can reduce the amount of data copied between Swift and Java.
+It requires [JEP-454: Foreign Function & Memory API](https://openjdk.org/jeps/454), which is final since JDK 22.
 
 This is the primary way we envision calling Swift code from server-side Java libraries and applications.
 
 Required language/runtime versions:
 - **Swift 6.2**, because of dependence on rich swift interface files
 - **JDK 25+**
-  - We are validating the implementation using the currently supported non-LTE release, which at present means JDK-25.
+  - We validate the implementation against the currently supported non-LTS release, which at present means JDK 25.
 
-## swift-java jextract --mode=jni
+### swift-java jextract --mode=jni
 
-In this mode, the generated sources will use the legacy JNI approach to calling native code.
+In this mode the generated sources use JNI to call native code.
 
-This mode is more limited in some performance and flexibility that it can offer, however it is the most compatible, since even very old JVM's as well as even Android systems can be supported by this mode.
-We recommend this mode when FFM is not available, or wide ranging deployment compatibility is your priority. When performance is paramaunt, we recommend the FFM mode instead.
+This mode offers less performance and flexibility than FFM, but it is the most compatible: it works on older JVMs as well as on Android.
+Use it when FFM is not available, or when wide deployment compatibility is your priority. When performance is paramount, prefer FFM.
 
 Required language/runtime versions:
-- **Swift 6.2**, because of dependence on rich swift interface files  
-- **Java 7+**, including 
-
+- **Swift 6.2**, because of dependence on rich swift interface files
+- **JDK 17+**; the generated Java sources target the `javaSourceLevel` setting, which supports 17 through 25 (default 22)
 
 ## Development and Testing
 
@@ -107,20 +107,20 @@ This project contains multiple builds, living side by side together.
 
 You will need to have:
 - Swift (6.2.x+)
-- Java (25+ for FFM, even though we support lower JDK targets)
+- Java (25+ to build this project, even though the published libraries target lower JDK versions)
 - Gradle (installed by "Gradle wrapper" automatically when you run gradle through `./gradlew`)
 
 ### Preparing your environment
 
-Install **Swift**, the easiest way to do this is to use **Swiftly**: [swift.org/install/](https://www.swift.org/install/).
-This should automatically install a recent Swift, but you can always make sure by running:
+Install **Swift**; the easiest way is [Swiftly](https://www.swift.org/install/).
+This installs a recent Swift, but you can pin the version explicitly:
 
 ```bash
 swiftly install 6.2 --use
 ```
 
-Install a recent enough Java distribution. We validate this project using Corretto so you can choose to use that as well,
-however any recent enough Java distribution should work correctly. You can use sdkman to install Java:
+Install a recent enough Java distribution. We validate this project using Corretto, so you may want to use that as well,
+though any recent enough distribution should work. You can use sdkman to install Java:
 
 ```bash
 # Install sdkman from: https://sdkman.io
@@ -142,8 +142,7 @@ export JAVA_HOME="$(sdk home java current)"
 
 ### Testing your changes 
 
-Many tests, including source generation tests, are written in Swift and you can execute them all by running the 
-swift package manager test command:
+Many tests, including source generation tests, are written in Swift. Run them all with:
 
 ```bash
 > swift test
@@ -151,43 +150,43 @@ swift package manager test command:
 
 When adding tests in `Tests/...` targets, you can run these tests (or filter a specific test using `swift test --filter type-or-method-name`).
 
-Some tests are implemented in Java and therefore need to be executed using Gradle.
-Please always use the gradle wrapper (`./gradlew`) to make sure to use the appropriate Gradle version
+Some tests are implemented in Java and need to be executed using Gradle.
+Always use the Gradle wrapper (`./gradlew`) so the correct Gradle version is used:
 
 ```bash
 > ./gradlew test
 ```
 
-> Tip: A lot of the **runtime tests** for code relying on `jextract` are **located in sample apps**, 
-> so if you need to runtime test any code relying on source generation steps of jextract, consider adding the tests
-> to an appropriate Sample. These tests are also executed in CI (which you can check in the `ci-validate.sh` script 
-> contained in every sample repository).
+> Tip: Many of the **runtime tests** for code relying on `jextract` are **located in sample apps**,
+> so if you need to runtime test code that depends on jextract's source generation, consider adding the tests
+> to an appropriate Sample. These tests also run in CI; see the `ci-validate.sh` script in each sample
+> that has one.
 
 ### Sample apps & tests
 
 Sample apps are located in the `Samples/` directory, and they showcase full "roundtrip" usage of the library and/or tools.
 
-Samples are build by default by Gradle. Building samples can be skipped by appending the flag `-PskipSamples=true` to a gradle command.
+Samples are built by default by Gradle. Building samples can be skipped by appending the flag `-PskipSamples=true` to a gradle command.
 
-#### SwiftJava (Swift -> Java)
+#### SwiftJava (calling Java from Swift)
 
-To run a simple app showcasing a Swift process calling into a Java library you can run: 
+To run a simple app showcasing a Swift process calling into a Java library:
 
 ```bash
-cd Samples/SwiftJavaExtractFFMSampleApp
-./ci-validate.sh # which is just `swift build` and a `java -cp ...` invocation of the compiled program
+cd Samples/JavaProbablyPrime
+./ci-validate.sh # which is just a `swift run JavaProbablyPrime 1337`
 ```
 
-#### jextract (Java -> Swift)
+#### jextract (calling Swift from Java)
 
-To run a simple example app showcasing the jextract (Java calling Swift) approach you can:
+To run a simple example app showcasing a Java program calling into Swift:
 
 ```bash
 ./gradlew Samples:SwiftJavaExtractFFMSampleApp:run
 ```
 
-This will also generate the necessary sources (by invoking jextract, extracting the `Sources/ExampleSwiftLibrary`) 
-and generating Java sources in `src/generated/java`.
+This also generates the necessary sources (by invoking jextract on `Sources/MySwiftLibrary`)
+and the Java sources in `src/generated/java`.
 
 #### Other sample apps
 
@@ -197,7 +196,7 @@ Please refer to the [Samples](Samples) directory for more sample apps which show
 
 You can run Swift [ordo-one/package-benchmark](https://github.com/ordo-one/package-benchmark) and OpenJDK [JMH](https://github.com/openjdk/jmh) benchmarks in this project.
 
-Swift benchmarks are located under `Benchmarks/` and JMH benchmarks are currently part of the SwiftKit sample project: `Samples/SwiftJavaExtractFFMSampleApp/src/jmh` because they depend on generated sources from the sample.
+Swift benchmarks are located under `Benchmarks/`. JMH benchmarks live in `Samples/SwiftJavaExtractFFMSampleApp/src/jmh`, because they depend on sources generated by that sample.
 
 ### Swift benchmarks
 
@@ -217,7 +216,7 @@ cd Samples/SwiftJavaExtractFFMSampleApp
 ./gradlew jmh
 ```
 
-Please read documentation of both performance testing tools and understand that results must be interpreted and not just taken at face value. Benchmarking is tricky and environment sensitive task, so please be careful when constructing and reading benchmarks and their results. If in doubt, please reach out on the forums.
+Please read the documentation of both performance testing tools, and note that results must be interpreted rather than taken at face value. Benchmarking is tricky and environment sensitive, so be careful when constructing and reading benchmarks and their results. If in doubt, reach out on the forums.
 
 ## User Guide
 
@@ -241,6 +240,6 @@ xcrun docc preview Sources/SwiftJavaDocumentation/Documentation.docc
 
 ## Project Status
 
-**This project is under active development. We welcome feedback about any issues you encounter.** 
+**This project is under active development. We welcome feedback about any issues you encounter.**
 
-There is no guarantee about API stability until the project reaches a 1.0 release.
+There is no guarantee of API stability until the project reaches a 1.0 release.

@@ -96,7 +96,7 @@ extension JNISwift2JavaGenerator {
           .map(\.value)
           .sorted(by: { $0.qualifiedName < $1.qualifiedName })
 
-        let inputFileName = "\(group.key)".split(separator: "/").last ?? "__Unknown.swift"
+        let inputFileName = "\(group.key)".split { $0 == "/" || $0 == "\\" }.last ?? "__Unknown.swift"
         let filename = "\(inputFileName)".replacing(/\.swift(interface)?/, with: "+SwiftJava.swift")
 
         for ty in extractedTypesForThisFile {
@@ -185,7 +185,7 @@ extension JNISwift2JavaGenerator {
     let inheritedWrappers = self.inheritedProtocols(of: translatedWrapper.importedType).compactMap { self.interfaceProtocolWrappers[$0] }
     let inheritedTypes = [translatedWrapper.swiftName] + inheritedWrappers.map(\.wrapperName)
 
-    printer.printBraceBlock("protocol \(translatedWrapper.wrapperName): \(inheritedTypes.joined(separator: ", "))") { printer in
+    printer.printBraceBlock("protocol \(translatedWrapper.wrapperName): \(inheritedTypes.joined(separator: .comma))") { printer in
       printer.print(
         "var \(translatedWrapper.javaInterfaceVariableName): \(translatedWrapper.javaInterfaceName) { get }"
       )
@@ -260,7 +260,7 @@ extension JNISwift2JavaGenerator {
 
         let tryClause = function.originalFunctionSignature.isThrowing ? "try " : ""
         let javaUpcall =
-          "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: ", ")))"
+          "\(tryClause)\(wrapper.javaInterfaceVariableName).\(function.swiftFunctionName)(\(upcallArguments.joined(separator: .comma)))"
 
         let result = function.resultConversion.render(&printer, javaUpcall)
         printer.print("\(returnStmt)\(result)")
@@ -372,11 +372,36 @@ extension JNISwift2JavaGenerator {
   }
 
   private func printProtocolThunks(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) throws {
-    guard let protocolWrapper = self.interfaceProtocolWrappers[type] else {
-      return
+    if let protocolWrapper = self.interfaceProtocolWrappers[type] {
+      try printSwiftInterfaceWrapper(&printer, protocolWrapper)
     }
 
-    try printSwiftInterfaceWrapper(&printer, protocolWrapper)
+    // Independent of `interfaceProtocolWrappers`/`enableJavaCallbacks` — this
+    // is the opposite direction (Swift-implements / Java-receives a
+    // downcall), so it must not be gated on the upcall machinery.
+    if self.existentialProtocolBoxes.contains(type) {
+      printExistentialBoxDispatchThunks(&printer, type)
+    }
+  }
+
+  /// Prints one `@_cdecl` dispatch thunk per requirement of a protocol
+  /// that's returned as `any P` / `some P` from at least one extracted
+  /// function (including requirements inherited from refined protocols).
+  private func printExistentialBoxDispatchThunks(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
+    let boxParentName = SwiftQualifiedTypeName(type.swiftNominal.javaExistentialBoxName)
+
+    for method in self.allProtocolRequirementMethods(of: type) {
+      guard var translated = try? self.javaTranslator.translate(method) else {
+        self.logger.debug("Failed to translate protocol requirement for existential box dispatch thunk: \(method)")
+        continue
+      }
+      translated.parentName = boxParentName
+
+      printCDecl(&printer, translated) { printer in
+        self.printFunctionDowncall(&printer, method)
+      }
+      printer.println()
+    }
   }
 
   private func printEnumRawDiscriminator(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
@@ -425,11 +450,11 @@ extension JNISwift2JavaGenerator {
       printer.printBraceBlock("extension \(enumType.effectiveSwiftTypeName)") { printer in
         let associatedValueTypes = enumCase.original.parameters.map { param in
           param.type.description
-        }.joined(separator: ", ")
+        }.joined(separator: .comma)
         printer.printBraceBlock("fileprivate func getAs\(enumCase.name)() -> (\(associatedValueTypes))?") { printer in
           let params = enumCase.original.parameters.enumerated().map { i, param in
             param.name ?? "_\(i)"
-          }.joined(separator: ", ")
+          }.joined(separator: .comma)
           printer.printIfBlock("case let .\(enumCase.original.name)(\(params)) = self") { printer in
             printer.print("return (\(params))")
           }
@@ -450,7 +475,7 @@ extension JNISwift2JavaGenerator {
       return
     }
 
-    printSwiftFunctionHelperClasses(&printer, decl)
+    printAllSwiftFunctionHelperClasses(&printer, decl)
 
     printCDecl(
       &printer,
@@ -464,7 +489,22 @@ extension JNISwift2JavaGenerator {
     }
   }
 
-  private func printSwiftFunctionHelperClasses(
+  private func printAllSwiftFunctionHelperClasses(
+    _ printer: inout SwiftPrinter,
+    _ decl: ExtractedFunc,
+  ) {
+    // Emit the `@JavaInterface` Swift wrappers for any `@escaping` closure parameters.
+    if let translatedDecl = translatedDecl(for: decl) {
+      printEscapingClosureSwiftFunctionHelperClasses(&printer, translatedDecl)
+    }
+
+    // Emit the `@JavaInterface` Swift wrappers any existential / protocol parameters.
+    printProtocolParameterSwiftFunctionHelperClasses(&printer, decl)
+  }
+
+  /// Emits Swift wrapper types for any parameter type that is a protocol
+  /// (or a `some`/`any`/generic constraint bound to protocols).
+  private func printProtocolParameterSwiftFunctionHelperClasses(
     _ printer: inout SwiftPrinter,
     _ decl: ExtractedFunc,
   ) {
@@ -524,7 +564,7 @@ extension JNISwift2JavaGenerator {
         parameterName: parameterName,
         parentName: decl.parentType?.asNominalType?.nominalTypeDecl.qualifiedTypeName ?? SwiftQualifiedTypeName(swiftModuleName),
       )
-      let implementingProtocols = protocolWrappers.map(\.wrapperName).joined(separator: ", ")
+      let implementingProtocols = protocolWrappers.map(\.wrapperName).joined(separator: .comma)
 
       printer.printBraceBlock("final class \(swiftClassName): \(implementingProtocols)") { printer in
         let variables: [(String, String)] = protocolWrappers.map { wrapper in
@@ -534,7 +574,7 @@ extension JNISwift2JavaGenerator {
           printer.print("let \(name): \(type)")
         }
         printer.println()
-        let initializerParameters = variables.map { "\($0): \($1)" }.joined(separator: ", ")
+        let initializerParameters = variables.map { "\($0): \($1)" }.joined(separator: .comma)
 
         printer.printBraceBlock("init(\(initializerParameters))") { printer in
           for (name, _) in variables {
@@ -610,6 +650,32 @@ extension JNISwift2JavaGenerator {
       printer.print("#endif")
     }
 
+    // A setter accessor dispatched on a protocol `self`
+    // cannot reuse the generic callee/result machinery below:
+    // nativeSignature.selfParameter's conversion
+    // (`extractSwiftProtocolValue`) reconstructs `self` by loading the
+    // concrete value out of the existential's storage into a let.
+    // Even if it were mutable, mutating a loaded
+    // existential only mutates a copy for value types. Instead, open the
+    // existential, mutate it, and store the mutated existential back into
+    // the original storage.
+    if decl.apiKind == .setter,
+      case .instance = decl.functionSignature.selfParameter,
+      let protocolType = decl.functionSignature.selfParameter?.selfType.asNominalType,
+      protocolType.isProtocol
+    {
+      guard let newValueArgument = arguments.first else {
+        fatalError("Setter did not contain newValue parameter: \(decl)")
+      }
+      printExistentialBoxSetterDowncall(
+        &printer,
+        decl,
+        protocolType: protocolType,
+        newValueArgument: newValueArgument,
+      )
+      return
+    }
+
     // Callee
     let callee: String =
       switch decl.functionSignature.selfParameter {
@@ -635,7 +701,7 @@ extension JNISwift2JavaGenerator {
         let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
-      .joined(separator: ", ")
+      .joined(separator: .comma)
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
     case .binaryOperator:
       precondition(arguments.count == 2, "Binary operator must have exactly 2 arguments: \(decl)")
@@ -655,7 +721,7 @@ extension JNISwift2JavaGenerator {
         return "\(label)\(argument)"
       }
 
-      let associatedValues = !downcallArguments.isEmpty ? "(\(downcallArguments.joined(separator: ", ")))" : ""
+      let associatedValues = !downcallArguments.isEmpty ? "(\(downcallArguments.joined(separator: .comma)))" : ""
       result = "\(callee).\(decl.name)\(associatedValues)"
 
     case .getter:
@@ -675,7 +741,7 @@ extension JNISwift2JavaGenerator {
         let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
-      .joined(separator: ", ")
+      .joined(separator: .comma)
       result = "\(callee)[\(parameters)]"
     case .subscriptSetter:
       guard let newValueArgument = arguments.last else {
@@ -691,7 +757,7 @@ extension JNISwift2JavaGenerator {
         let label = originalParam.argumentLabel.map { "\($0): " } ?? ""
         return "\(label)\(argument)"
       }
-      .joined(separator: ", ")
+      .joined(separator: .comma)
       result = "\(callee)[\(parameters)] = \(newValueArgument)"
     }
 
@@ -728,6 +794,48 @@ extension JNISwift2JavaGenerator {
 
   private func dummyReturn(for nativeSignature: NativeFunctionSignature) -> String {
     "return \(nativeSignature.result.javaType.swiftJniPlaceholderExpr)"
+  }
+
+  /// Prints the body of an existential box's setter thunk.
+  private func printExistentialBoxSetterDowncall(
+    _ printer: inout SwiftPrinter,
+    _ decl: ExtractedFunc,
+    protocolType: SwiftNominalType,
+    newValueArgument: String,
+  ) {
+    // We need to do a "load-mutate-store" flow, because
+    // the underlying type could be a struct, so we cannot mutate that in place.
+
+    let existentialType = SwiftKitPrinting.renderExistentialType([protocolType])
+    let selfName = "selfPointer"
+
+    printer.print(
+      """
+      guard let \(selfName)TypeMetadataPointer$ = UnsafeRawPointer(bitPattern: Int(Int64(fromJNI: selfTypePointer, in: environment))) else {
+        fatalError("selfTypePointer memory address was null")
+      }
+      let \(selfName)DynamicType$: Any.Type = unsafeBitCast(\(selfName)TypeMetadataPointer$, to: Any.Type.self)
+      guard let \(selfName)RawPointer$ = UnsafeMutableRawPointer(bitPattern: Int(Int64(fromJNI: \(selfName), in: environment))) else {
+        fatalError("\(selfName) memory address was null")
+      }
+      #if hasFeature(ImplicitOpenExistentials)
+      var \(selfName)Existential$: \(existentialType) = \(selfName)RawPointer$.load(as: \(selfName)DynamicType$) as! \(existentialType)
+      \(selfName)Existential$.\(decl.name) = \(newValueArgument)
+      func \(selfName)DoStore$<Ty>(_ value: Ty) {
+        \(selfName)RawPointer$.assumingMemoryBound(to: Ty.self).pointee = value
+      }
+      \(selfName)DoStore$(\(selfName)Existential$)
+      #else
+      func \(selfName)DoSet$<Ty>(_ ty: Ty.Type) {
+        let typed$ = \(selfName)RawPointer$.assumingMemoryBound(to: Ty.self)
+        var existential$: \(existentialType) = typed$.pointee as! \(existentialType)
+        existential$.\(decl.name) = \(newValueArgument)
+        typed$.pointee = existential$ as! Ty
+      }
+      _openExistential(\(selfName)DynamicType$, do: \(selfName)DoSet$)
+      #endif
+      """
+    )
   }
 
   private func printCDecl(
@@ -769,13 +877,12 @@ extension JNISwift2JavaGenerator {
       signature += parameter.type.jniTypeSignature
     }
 
-    let cName =
-      "Java_"
-      + self.javaPackage.replacingOccurrences(of: ".", with: "_")
-      + "_\(parentName.jniEscapedName.escapedJNIIdentifier)_"
-      + javaMethodName.escapedJNIIdentifier
-      + "__"
-      + jniSignature.escapedJNIIdentifier
+    let cName = String.jniSymbolName(
+      package: self.javaPackage,
+      parent: parentName,
+      method: javaMethodName,
+      signature: jniSignature,
+    )
 
     self.generatedCDeclSymbolNames.append(cName)
 
@@ -800,7 +907,7 @@ extension JNISwift2JavaGenerator {
       @diagnose(DeprecatedDeclaration, as: ignored)
       #endif
       @_cdecl("\(cName)")
-      public func \(cName)(\(thunkParameters.joined(separator: ", ")))\(thunkReturnType)
+      public func \(cName)(\(thunkParameters.joined(separator: .comma)))\(thunkReturnType)
       """
     ) { printer in
       body(&printer)
@@ -859,7 +966,7 @@ extension JNISwift2JavaGenerator {
       if type.genericParameterNames.isEmpty {
         type.effectiveSwiftTypeName
       } else {
-        "\(type.baseTypeName)<\(type.swiftNominal.genericParameters.map(\.packExpansionName).joined(separator: ", "))>"
+        "\(type.baseTypeName)<\(type.swiftNominal.genericParameters.map(\.packExpansionName).joined(separator: .comma))>"
       }
     let parentProtocol = isEffectivelyGeneric ? "JextractedGenericTypeBridge" : "JextractedTypeBridge"
 
@@ -1016,7 +1123,7 @@ extension JNISwift2JavaGenerator {
       + parameters.map { javaParameter in
         "\(javaParameter.name): \(javaParameter.name)"
       }
-    let call = "openerType.\(decl.openerMethodName)(\(openerArguments.joined(separator: ", ")))"
+    let call = "openerType.\(decl.openerMethodName)(\(openerArguments.joined(separator: .comma)))"
 
     if !decl.functionSignature.result.type.isVoid {
       printer.print("return \(call)")
@@ -1055,7 +1162,7 @@ extension JNISwift2JavaGenerator {
         ] + translatedParameters
       let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""
 
-      let signature = #"static func \#(decl.openerMethodName)(\#(thunkParameters.joined(separator: ", ")))\#(thunkReturnType)"#
+      let signature = #"static func \#(decl.openerMethodName)(\#(thunkParameters.joined(separator: .comma)))\#(thunkReturnType)"#
       if !skipMethodBody {
         printer.printBraceBlock(signature) { printer in
           printFunctionDowncall(&printer, decl)
@@ -1141,6 +1248,12 @@ extension SwiftNominalTypeDeclaration {
 
   var javaInterfaceVariableName: String {
     "_\(javaInterfaceName.firstCharacterLowercased)Interface"
+  }
+
+  /// The name of the generated Java class that boxes a value returned as
+  /// `any P` / `some P` from a Swift function.
+  var javaExistentialBoxName: String {
+    "\(safeProtocolName)Box"
   }
 
   var generatedJavaClassMacroName: String {

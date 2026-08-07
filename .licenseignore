@@ -45,6 +45,7 @@ gradlew.bat
 **/gradlew.bat
 **/ci-validate.sh
 **/DO_NOT_EDIT.txt
+Snippets/__DO_NOT_EDIT_SYMLINK_ONLY__
 Plugins/**/_PluginsShared
 Plugins/**/0_PLEASE_SYMLINK*
 Plugins/PluginsShared/JavaKitConfigurationShared
@@ -52,3 +53,4 @@ Samples/JavaDependencySampleApp/gradle
 Sources/_Subprocess/**
 Sources/_SubprocessCShims/**
 Samples/gradle
+SwiftKitCore/src/main/resources/META-INF/proguard/consumer-proguard-rules.pro

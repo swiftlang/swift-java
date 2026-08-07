@@ -16,6 +16,7 @@ package com.example.swift;
 
 import java.util.function.Predicate;
 
+// snippet.helloClass
 public class HelloSwift {
     public double value;
     public static double initialValue = 3.14159;
@@ -71,3 +72,4 @@ public class HelloSwift {
         throw new Exception(message);
     }
 }
+// snippet.end

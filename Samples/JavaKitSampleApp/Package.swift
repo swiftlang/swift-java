@@ -22,7 +22,8 @@ let package = Package(
   ],
 
   dependencies: [
-    .package(name: "swift-java", path: "../../")
+    .package(name: "swift-java", path: "../../"),
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
   ],
 
   targets: [
@@ -32,6 +33,7 @@ let package = Package(
         .product(name: "SwiftJava", package: "swift-java"),
         .product(name: "JavaUtilFunction", package: "swift-java"),
         .product(name: "JavaUtilJar", package: "swift-java"),
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
       ],
       swiftSettings: [
         .swiftLanguageMode(.v5)
