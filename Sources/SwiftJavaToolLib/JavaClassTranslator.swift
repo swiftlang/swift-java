@@ -559,7 +559,7 @@ extension JavaClassTranslator {
 
   /// Render the extension of JavaClass that collects all of the static
   /// fields and methods.
-  package func renderStaticMemberExtension(asForeignExtension: Bool = false) -> DeclSyntax? {
+  package func renderStaticMemberExtension(asCrossModuleExtension: Bool = false) -> DeclSyntax? {
     // Determine the where clause we need for static methods.
     let staticMemberWhereClause: String
     if !javaTypeParameters.isEmpty {
@@ -576,7 +576,7 @@ extension JavaClassTranslator {
     // Render static fields.
     let properties = staticFields.sortedForEmission().compactMap { field -> DeclSyntax? in
       // Translate each static field.
-      guard !asForeignExtension || referencesCurrentModule(field) else {
+      guard !asCrossModuleExtension || referencesCurrentModule(field) else {
         return nil
       }
       do {
@@ -590,7 +590,7 @@ extension JavaClassTranslator {
     // Render static methods.
     let methods = staticMethods.methods.sortedForEmission().compactMap { method -> DeclSyntax? in
       // Translate each static method.
-      guard !asForeignExtension || referencesCurrentModule(method) else {
+      guard !asCrossModuleExtension || referencesCurrentModule(method) else {
         return nil
       }
       do {
@@ -658,22 +658,22 @@ extension JavaClassTranslator {
     referencesCurrentModule([field.getType()])
   }
 
-  package func renderForeignExtension() -> [DeclSyntax] {
-    guard let foreignSwiftName: String = translator.translatedClasses[javaClass.getName()]?.swiftType else {
+  package func renderCrossModuleExtension() -> [DeclSyntax] {
+    guard let extendedSwiftName: String = translator.translatedClasses[javaClass.getName()]?.swiftType else {
       return []
     }
 
     var decls: [DeclSyntax] = []
-    if let staticExtension = renderStaticMemberExtension(asForeignExtension: true) {
+    if let staticExtension = renderStaticMemberExtension(asCrossModuleExtension: true) {
       decls.append(staticExtension)
     }
-    if let instanceExtension = renderForeignInstanceExtension(of: foreignSwiftName) {
+    if let instanceExtension = renderCrossModuleInstanceExtension(of: extendedSwiftName) {
       decls.append(instanceExtension)
     }
     return decls
   }
 
-  private func renderForeignInstanceExtension(of foreignSwiftName: String) -> DeclSyntax? {
+  private func renderCrossModuleInstanceExtension(of extendedSwiftName: String) -> DeclSyntax? {
     let initializers: [DeclSyntax] = constructors.sortedForEmission().compactMap { constructor -> DeclSyntax? in
       guard referencesCurrentModule(constructor) else {
         return nil
@@ -691,7 +691,7 @@ extension JavaClassTranslator {
         return nil
       }
       do {
-        return try renderMethod(method, implementedInSwift: false, asForeignExtensionMember: true)
+        return try renderMethod(method, implementedInSwift: false, asCrossModuleExtensionMember: true)
       } catch {
         translator.logUntranslated(
           "Unable to translate '\(javaClass.getName())' method '\(method.getName())': \(error)"
@@ -707,7 +707,7 @@ extension JavaClassTranslator {
 
     let extDecl: DeclSyntax =
       """
-      extension \(raw: foreignSwiftName) {
+      extension \(raw: extendedSwiftName) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }
       """
@@ -1041,7 +1041,7 @@ extension JavaClassTranslator {
     implementedInSwift: Bool,
     genericParameters: [String] = [],
     whereClause: String = "",
-    asForeignExtensionMember: Bool = false
+    asCrossModuleExtensionMember: Bool = false
   ) throws -> DeclSyntax {
     // Map the generic params on the method.
     let allGenericParameters = collectMethodGenericParameters(genericParameters: genericParameters, method: javaMethod)
@@ -1151,11 +1151,11 @@ extension JavaClassTranslator {
     let accessModifier =
       implementedInSwift
       ? ""
-      : (asForeignExtensionMember || javaMethod.isStatic || !translateAsClass)
+      : (asCrossModuleExtensionMember || javaMethod.isStatic || !translateAsClass)
         ? "public "
         : "open "
     let overrideOpt =
-      (!asForeignExtensionMember && translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
+      (!asCrossModuleExtensionMember && translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
       ? "override "
       : ""
 

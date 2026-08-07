@@ -341,49 +341,49 @@ extension SwiftJava.WrapJavaCommand {
 
     //Generate extensions of wrapper types that are owned by a module other than
     //the one being currently generated.
-    for foreignClassName in config.extendForeignClasses ?? [] {
-      try writeForeignExtension(
-        of: foreignClassName,
+    for extendedClassName in config.extendClasses ?? [] {
+      try writeCrossModuleExtension(
+        of: extendedClassName,
         translator: translator,
         classLoader: classLoader
       )
     }
   }
 
-  private mutating func writeForeignExtension(
-    of foreignClassName: JavaFullyQualifiedTypeName,
+  private mutating func writeCrossModuleExtension(
+    of extendedClassName: JavaFullyQualifiedTypeName,
     translator: JavaTranslator,
     classLoader: ClassLoader
   ) throws {
-    guard let owner = translator.translatedClasses[foreignClassName] else {
-      log.warning("Cannot extend foreign class '\(foreignClassName)': not known to any module.")
+    guard let owner = translator.translatedClasses[extendedClassName] else {
+      log.warning("Cannot extend class '\(extendedClassName)': not known to any module.")
       return
     }
     guard let ownerModule = owner.swiftModule, ownerModule != effectiveSwiftModule else {
-      log.warning("Cannot extend foreign class '\(foreignClassName)': it is owned by this module ('\(effectiveSwiftModule)').")
+      log.warning("Cannot extend class '\(extendedClassName)': it is owned by this module ('\(effectiveSwiftModule)').")
       return
     }
-    guard let foreignClass = try classLoader.loadClass(foreignClassName) else {
-      log.warning("Could not load foreign Java class '\(foreignClassName)', skipping extension.")
+    guard let extendedClass = try classLoader.loadClass(extendedClassName) else {
+      log.warning("Could not load Java class '\(extendedClassName)', skipping extension.")
       return
     }
 
     translator.startNewFile()
-    let extensionDecls = try translator.translateClassAsForeignExtension(foreignClass)
+    let extensionDecls = try translator.translateClassAsCrossModuleExtension(extendedClass)
     guard !extensionDecls.isEmpty else {
-      log.info("No members to add in extension of foreign class '\(foreignClassName)'; skipping.")
+      log.info("No members to add in extension of class '\(extendedClassName)'; skipping.")
       return
     }
 
     let swiftFileName =
-      try translator.getSwiftTypeName(foreignClass, preferValueTypes: false)
+      try translator.getSwiftTypeName(extendedClass, preferValueTypes: false)
       .swiftName.replacing(".", with: "+") + "+Extensions.swift"
     try writeGeneratedSwiftFile(
       decls: extensionDecls,
       translator: translator,
       outputDirectory: self.actualOutputDirectory,
       fileName: swiftFileName,
-      description: "Java class '\(foreignClassName)' extension"
+      description: "Java class '\(extendedClassName)' extension"
     )
   }
 

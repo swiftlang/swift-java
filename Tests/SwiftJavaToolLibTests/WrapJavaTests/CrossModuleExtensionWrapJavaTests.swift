@@ -21,10 +21,10 @@ import XCTest
 
 @testable import SwiftJavaToolLib
 
-final class ForeignExtensionWrapJavaTests: XCTestCase {
+final class CrossModuleExtensionWrapJavaTests: XCTestCase {
 
 
-  func test_wrapJava_generatesExtensionOfForeignJavaClass() async throws {
+  func test_wrapJava_generatesCrossModuleExtensionOfJavaClass() async throws {
     let classpathURL = try await compileJava("class Foo {}")
 
     let jvm = try JavaVirtualMachine.shared(replace: false)
@@ -55,7 +55,7 @@ final class ForeignExtensionWrapJavaTests: XCTestCase {
     let loaded = try classLoader.loadClass("java.lang.Class")
     let javaLangClass = try XCTUnwrap(loaded, "Could not load java.lang.Class")
 
-    let decls = try translator.translateClassAsForeignExtension(javaLangClass)
+    let decls = try translator.translateClassAsCrossModuleExtension(javaLangClass)
     let output = decls.map { $0.description }.joined(separator: "\n")
     let compact = output.replacing(" ", with: "")
 
@@ -80,12 +80,12 @@ final class ForeignExtensionWrapJavaTests: XCTestCase {
     )
     XCTAssertFalse(
       compact.contains("funcgetName("),
-      "Did not expect getName() (references only String, a foreign-module type):\n\(output)"
+      "Did not expect getName() (references only String, a type owned by another module):\n\(output)"
     )
   }
 
 
-  func test_wrapJava_foreignExtensionOnlyIncludesCurrentModuleMembers() async throws {
+  func test_wrapJava_crossModuleExtensionOnlyIncludesCurrentModuleMembers() async throws {
     let classpathURL = try await compileJava(
       """
       package com.example;
@@ -127,7 +127,7 @@ final class ForeignExtensionWrapJavaTests: XCTestCase {
     )
     let palette = try XCTUnwrap(try classLoader.loadClass("com.example.Palette"))
 
-    let decls = try translator.translateClassAsForeignExtension(palette)
+    let decls = try translator.translateClassAsCrossModuleExtension(palette)
     let output = decls.map { $0.description }.joined(separator: "\n")
     let compact = output.replacing(" ", with: "")
 
@@ -145,15 +145,15 @@ final class ForeignExtensionWrapJavaTests: XCTestCase {
     )
     XCTAssertFalse(
       compact.contains("funcdescribe("),
-      "Did not expect describe() (returns only String, a foreign type):\n\(output)"
+      "Did not expect describe() (returns only String, a type owned by another module):\n\(output)"
     )
     XCTAssertFalse(
       compact.contains("funccopy("),
-      "Did not expect copy() (returns only Palette, a foreign type):\n\(output)"
+      "Did not expect copy() (returns only Palette, a type owned by another module):\n\(output)"
     )
   }
 
-  func test_wrapJava_foreignExtensionIncludesConstructorsAndStaticMembers() async throws {
+  func test_wrapJava_crossModuleExtensionIncludesConstructorsAndStaticMembers() async throws {
     let classpathURL = try await compileJava(
       """
       package com.example;
@@ -199,7 +199,7 @@ final class ForeignExtensionWrapJavaTests: XCTestCase {
     )
     let palette = try XCTUnwrap(try classLoader.loadClass("com.example.Palette"))
 
-    let decls = try translator.translateClassAsForeignExtension(palette)
+    let decls = try translator.translateClassAsCrossModuleExtension(palette)
     let all = decls.map { $0.description }.joined(separator: "\n")
 
     XCTAssertEqual(decls.count, 2, "Expected a static and an instance extension, got:\n\(all)")

@@ -221,9 +221,10 @@ public struct Configuration: Codable {
   /// the corresponding Swift names (e.g., JavaVector).
   public var classes: [String: String]? = [:]
 
-  /// Foreign classes this module should generate extensions for, each carrying
-  ///  whichever of that class's members this module is the one able to express.
-  public var extendForeignClasses: [JavaFullyQualifiedTypeName]? = nil
+  /// Java classes whose Swift wrapper type is owned by another module, but which
+  /// this module should generate an extension of.
+
+  public var extendClasses: [JavaFullyQualifiedTypeName]? = nil
 
   // Compile for the specified Java SE release.
   public var sourceCompatibility: JavaVersion?

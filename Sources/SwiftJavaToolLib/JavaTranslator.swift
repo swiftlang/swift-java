@@ -381,8 +381,8 @@ extension JavaTranslator {
     try JavaClassTranslator(javaClass: javaClass, translator: self).render()
   }
 
-  package func translateClassAsForeignExtension(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
-    try JavaClassTranslator(javaClass: javaClass, translator: self).renderForeignExtension()
+  package func translateClassAsCrossModuleExtension(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
+    try JavaClassTranslator(javaClass: javaClass, translator: self).renderCrossModuleExtension()
   }
 }
 
