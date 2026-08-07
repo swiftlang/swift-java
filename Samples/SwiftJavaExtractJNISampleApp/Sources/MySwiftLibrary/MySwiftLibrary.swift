@@ -78,6 +78,10 @@ public func globalOverloaded(_ c: Int) -> Int {
   c + 3
 }
 
+public func globalConcatStrings(_ strings: String...) -> String {
+  strings.joined()
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

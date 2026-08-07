@@ -97,4 +97,12 @@ public class MySwiftLibraryTest {
             assertEquals(42, result);
         }
     }
+
+    @Test
+    void variadicOverloads() {
+        assertEquals("", MySwiftLibrary.globalConcatStrings());
+        assertEquals("a", MySwiftLibrary.globalConcatStrings("a"));
+        assertEquals("ab", MySwiftLibrary.globalConcatStrings("a", "b"));
+        assertEquals("abc", MySwiftLibrary.globalConcatStrings("a", "b", "c"));
+    }
 }

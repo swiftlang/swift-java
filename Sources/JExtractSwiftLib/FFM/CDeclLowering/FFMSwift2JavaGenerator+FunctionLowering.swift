@@ -1034,7 +1034,9 @@ extension LoweredFunctionSignature {
       let arguments = paramExprs.enumerated()
         .map { (i, argument) -> String in
           let argExpr = original.parameters[i].convention == .inout ? "&\(argument)" : argument
-          return LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argExpr).description
+          let labelStr = original.parameters[i].argumentLabel
+          let label = labelStr == "_" ? nil : labelStr
+          return LabeledExprSyntax(label: label, expression: argExpr).description
         }
         .joined(separator: .comma)
       resultExpr = "\(callee)(\(raw: arguments))"
@@ -1054,7 +1056,9 @@ extension LoweredFunctionSignature {
     case .subscriptGetter:
       let parameters = paramExprs.enumerated()
         .map { (i, argument) -> String in
-          LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argument).description
+          let labelStr = original.parameters[i].argumentLabel
+          let label = labelStr == "_" ? nil : labelStr
+          return LabeledExprSyntax(label: label, expression: argument).description
         }
         .joined(separator: .comma)
       resultExpr = "\(callee)[\(raw: parameters)]"
@@ -1066,7 +1070,9 @@ extension LoweredFunctionSignature {
 
       let parameters = argumentsWithoutNewValue.enumerated()
         .map { (i, argument) -> String in
-          LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argument).description
+          let labelStr = original.parameters[i].argumentLabel
+          let label = labelStr == "_" ? nil : labelStr
+          return LabeledExprSyntax(label: label, expression: argument).description
         }
         .joined(separator: .comma)
       resultExpr = "\(callee)[\(raw: parameters)] = \(newValueArgument)"

@@ -77,7 +77,7 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
   ) {
     self.log = Logger(label: "ffm-generator", logLevel: translator.log.logLevel)
     self.config = config
-    self.analysis = translator.result
+    let analysis = translator.result
     self.swiftModuleName = translator.swiftModuleName
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
@@ -116,6 +116,11 @@ package class FFMSwift2JavaGenerator: Swift2JavaGenerator {
     } else {
       self.expectedOutputSwiftFileNames = []
     }
+
+    // Expand variadic functions into N overloads
+    var expandedAnalysis = analysis
+    expandedAnalysis.expandVariadicOverloads(maxOverloads: config.effectiveMaxVariadicOverloads)
+    self.analysis = expandedAnalysis
   }
 
   func generate() throws {

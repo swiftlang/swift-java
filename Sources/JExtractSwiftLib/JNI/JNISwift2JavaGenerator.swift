@@ -78,7 +78,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   ) {
     self.config = config
     self.logger = Logger(label: "jni-generator", logLevel: translator.log.logLevel)
-    self.analysis = translator.result
+    let analysis = translator.result
     self.swiftModuleName = translator.swiftModuleName
     self.javaPackage = javaPackage
     self.swiftOutputDirectory = swiftOutputDirectory
@@ -92,7 +92,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     if config.effectiveWriteEmptyFiles {
       self.expectedOutputSwiftFileNames = Set(
         translator.inputs.compactMap { (input) -> String? in
-          guard let fileName = input.path.split(separator: PATH_SEPARATOR).last else {
+          guard let fileName = input.path.split(whereSeparator: { $0 == "/" || $0 == "\\" }).last else {
             return nil
           }
           if fileName.hasSuffix(".swift") {
@@ -105,7 +105,7 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       )
       // Also include filtered-out files so SwiftPM gets the empty outputs it expects
       for path in translator.filteredOutPaths {
-        guard let fileName = path.split(separator: PATH_SEPARATOR).last else {
+        guard let fileName = path.split(whereSeparator: { $0 == "/" || $0 == "\\" }).last else {
           continue
         }
         if fileName.hasSuffix(".swift") {
@@ -120,18 +120,23 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       self.expectedOutputSwiftFileNames = []
     }
 
-    if config.enableJavaCallbacks ?? false {
-      // We translate all the protocol wrappers
-      // as we need them to know what protocols we can allow the user to implement themselves
-      // in Java.
-      self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(self.analysis.extractedTypes.values))
-    }
+    // Expand variadic functions into N overloads
+    var expandedAnalysis = analysis
+    expandedAnalysis.expandVariadicOverloads(maxOverloads: config.effectiveMaxVariadicOverloads)
+    self.analysis = expandedAnalysis
 
     // Every extracted protocol that also gets a plain Java `interface`
     // generated for it is eligible to be boxed as an existential.
-    self.existentialProtocolBoxes = self.analysis.extractedTypes.values
+    self.existentialProtocolBoxes = expandedAnalysis.extractedTypes.values
       .filter { $0.swiftNominal.kind == .protocol }
       .sorted { $0.swiftNominal.qualifiedName < $1.swiftNominal.qualifiedName }
+
+    if config.effectiveEnableJavaCallbacks {
+      // We translate all the protocol wrappers
+      // as we need them to know what protocols we can allow the user to implement themselves
+      // in Java.
+      self.interfaceProtocolWrappers = self.generateInterfaceWrappers(Array(expandedAnalysis.extractedTypes.values))
+    }
   }
 
   func generate() throws {

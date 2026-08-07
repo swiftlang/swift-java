@@ -73,6 +73,30 @@ public struct Configuration: Codable {
   /// The directory where generated Java files should be written. Generally used with jextract mode.
   public var outputJavaDirectory: String?
 
+  /// Maximum number of overloads to generate for a function with a variadic parameter.
+  /// When a variadic parameter `T...` is encountered, the generator will produce
+  /// up to `maxVariadicOverloads` distinct overloads instead of failing.
+  ///
+  /// Example:
+  /// ```swift
+  /// func concat(s: String...) -> String
+  /// ```
+  /// results in:
+  /// ```java
+  /// // Java
+  /// String concat() -> String
+  /// String concat(s0: String, s1: String) -> String
+  /// String concat(s0: String, s1: String, s2: String) -> String
+  /// ```
+  ///
+  /// The reason for this is that Swift cannot "splat" an array into a `...`
+  /// parameter, therefore we cannot transfer an arbitrary amount of varargs
+  /// parameters over the native boundary.
+  public var maxVariadicOverloads: Int?
+  public var effectiveMaxVariadicOverloads: Int {
+    maxVariadicOverloads ?? 3
+  }
+
   /// Determine `jextract` source generation mode, using JNI or FFM.
   public var mode: JExtractGenerationMode?
 
