@@ -37,7 +37,7 @@ package struct JavaIdentifierFactory {
         switch method.apiKind {
         case .getter, .subscriptGetter: method.javaGetterName!
         case .setter, .subscriptSetter: method.javaSetterName!
-        case .function, .initializer, .enumCase: method.name
+        case .function, .initializer, .enumCase, .binaryOperator, .prefixOperator, .postfixOperator: method.name
         }
       methodsByBaseName[baseName, default: []].append(method)
     }
@@ -69,6 +69,8 @@ package struct JavaIdentifierFactory {
       case .getter, .subscriptGetter: decl.javaGetterName!
       case .setter, .subscriptSetter: decl.javaSetterName!
       case .function, .initializer, .enumCase: decl.name
+      case .binaryOperator, .prefixOperator, .postfixOperator:
+        Self.javaOperatorName(decl.name)
       }
     var methodName = baseName + paramsSuffix(decl, baseName: baseName)
     if Self.javaKeywords.contains(methodName) {
@@ -93,6 +95,60 @@ package struct JavaIdentifierFactory {
       return labels.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined()
     }
   }
+
+  private static func javaOperatorName(_ swiftName: String) -> String {
+    var index = swiftName.startIndex
+    var javaName = ""
+
+    while index < swiftName.endIndex {
+      let isFirstToken = index == swiftName.startIndex
+      let oneCharacterEndIndex = swiftName.index(after: index)
+      let oneCharacterToken = String(swiftName[index..<oneCharacterEndIndex])
+      var tokenEndIndex: String.Index = oneCharacterEndIndex
+      var tokenName = knownOperatorNames[oneCharacterToken] ?? "operator"
+
+      // Prefer a known two-character token if it exists, e.g. `==` instead of `=` + `=`.
+      if oneCharacterEndIndex < swiftName.endIndex {
+        let twoCharacterEndIndex = swiftName.index(after: oneCharacterEndIndex)
+        let twoCharacterToken = String(swiftName[index..<twoCharacterEndIndex])
+        if let knownName = knownOperatorNames[twoCharacterToken] {
+          tokenEndIndex = twoCharacterEndIndex
+          tokenName = knownName
+        }
+      }
+
+      javaName += isFirstToken ? tokenName : tokenName.firstCharacterUppercased
+      index = tokenEndIndex
+    }
+
+    return javaName
+  }
+
+  private static let knownOperatorNames: [String: String] = [
+    "+": "plus",
+    "-": "minus",
+    "*": "times",
+    "/": "dividedBy",
+    "%": "remainder",
+    "<<": "shiftedLeft",
+    ">>": "shiftedRight",
+    "|": "bitwiseOr",
+    "~": "bitwiseNot",
+    "==": "isEqual",
+    "!=": "isNotEqual",
+    "<": "lessThan",
+    "<=": "lessThanOrEqual",
+    ">": "greaterThan",
+    ">=": "greaterThanOrEqual",
+    "&": "bitwiseAnd",
+    "^": "bitwiseXor",
+    "??": "coalescingNil",
+    "!": "logicalNot",
+    "=": "equal",
+    "&&": "and",
+    "||": "or",
+    ".": "dot",
+  ]
 
   static let javaKeywords: Set<String> = [
     /// https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.9

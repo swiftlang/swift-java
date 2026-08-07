@@ -1020,8 +1020,16 @@ extension LoweredFunctionSignature {
       if let selfExpr {
         switch apiKind {
         // Don't bother to create explicit ${Self}.init expression.
-        case .initializer, .subscriptGetter, .subscriptSetter: selfExpr
-        default: ExprSyntax(MemberAccessExprSyntax(base: selfExpr, name: .identifier(swiftAPIName)))
+        case .initializer, .subscriptGetter, .subscriptSetter:
+          selfExpr
+        case .prefixOperator:
+          ExprSyntax(DeclReferenceExprSyntax(baseName: .prefixOperator(swiftAPIName)))
+        case .binaryOperator:
+          ExprSyntax(DeclReferenceExprSyntax(baseName: .binaryOperator(swiftAPIName)))
+        case .postfixOperator:
+          ExprSyntax(DeclReferenceExprSyntax(baseName: .postfixOperator(swiftAPIName)))
+        default:
+          ExprSyntax(MemberAccessExprSyntax(base: selfExpr, name: .identifier(swiftAPIName)))
         }
       } else {
         ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(swiftAPIName)))
@@ -1040,6 +1048,18 @@ extension LoweredFunctionSignature {
         }
         .joined(separator: .comma)
       resultExpr = "\(callee)(\(raw: arguments))"
+
+    case .binaryOperator:
+      assert(paramExprs.count == 2)
+      resultExpr = "(\(paramExprs[0]) \(callee) \(paramExprs[1]))"
+
+    case .prefixOperator:
+      assert(paramExprs.count == 1)
+      resultExpr = "(\(callee)\(paramExprs[0]))"
+
+    case .postfixOperator:
+      assert(paramExprs.count == 1)
+      resultExpr = "(\(paramExprs[0])\(callee))"
 
     case .getter:
       assert(paramExprs.isEmpty)

@@ -703,7 +703,15 @@ extension JNISwift2JavaGenerator {
       }
       .joined(separator: .comma)
       result = "\(tryClause)\(callee).\(decl.name)(\(downcallArguments))"
-
+    case .binaryOperator:
+      precondition(arguments.count == 2, "Binary operator must have exactly 2 arguments: \(decl)")
+      result = "(\(tryClause)((\(arguments.first!)) \(decl.name) (\(arguments.last!))))"
+    case .prefixOperator:
+      precondition(arguments.count == 1, "Prefix operator must have exactly 1 argument: \(decl)")
+      result = "(\(tryClause)(\(decl.name) (\(arguments.first!))))"
+    case .postfixOperator:
+      precondition(arguments.count == 1, "Postfix operator must have exactly 1 argument: \(decl)")
+      result = "(\(tryClause)((\(arguments.first!)) \(decl.name)))"
     case .enumCase:
       let downcallArguments = zip(
         decl.functionSignature.parameters,
