@@ -19,7 +19,7 @@ if let localPath = Context.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
 let extraDependencies: [Package.Dependency]
 if let localPath = Context.environment["DOCC_PLUGIN_PATH"] {
   extraDependencies = [.package(path: localPath)]
-} else if Context.environment["SWIFTJAVA_DOCC_PLUGIN_INSTALL"] == "1" {
+} else if Context.environment["SWIFTJAVA_DOCC_PLUGIN_INSTALL"] == "1" || Context.environment["SPI_GENERATE_DOCS"] == "1" {
   extraDependencies = [
     .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.5.0")
   ]
