@@ -61,6 +61,12 @@ public class ClosuresTest {
     }
 
     @Test
+    void globalCallMeLongSupplier() {
+        long result = MySwiftLibrary.globalCallMeLongSupplier(() -> 2L);
+        assertEquals(2L, result);
+    }
+
+    @Test
     void globalCallMeDoubleSupplier() {
         double result = MySwiftLibrary.globalCallMeDoubleSupplier(() -> 2.0);
         assertEquals(2.0, result);

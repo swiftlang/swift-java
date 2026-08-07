@@ -43,6 +43,13 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .int
   )
 
+  static let longSupplier = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionLongSupplier,
+    method: "getAsLong",
+    parameters: [],
+    result: .long
+  )
+
   static let doubleSupplier = KnownJavaFunctionalInterface(
     JavaType.javaUtilFunctionDoubleSupplier,
     method: "getAsDouble",
@@ -54,6 +61,7 @@ struct KnownJavaFunctionalInterface: Sendable {
     .runnable,
     .booleanSupplier,
     .intSupplier,
+    .longSupplier,
     .doubleSupplier,
   ]
 
@@ -87,6 +95,8 @@ struct KnownJavaFunctionalInterface: Sendable {
       booleanSupplier
     case ([], _) where result.isInt32:
       intSupplier
+    case ([], _) where result.isInt64:
+      longSupplier
     case ([], _) where result.isDouble:
       doubleSupplier
     default:

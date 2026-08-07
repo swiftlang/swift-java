@@ -40,6 +40,11 @@ extension JavaType {
     .class(package: "java.util.function", name: "IntSupplier")
   }
 
+  /// The description of the type java.util.function.LongSupplier.
+  static var javaUtilFunctionLongSupplier: JavaType {
+    .class(package: "java.util.function", name: "LongSupplier")
+  }
+
   /// The description of the type java.util.function.DoubleSupplier.
   static var javaUtilFunctionDoubleSupplier: JavaType {
     .class(package: "java.util.function", name: "DoubleSupplier")
