@@ -129,6 +129,8 @@ private let foundationEssentialsSourceFile: SourceFileSyntax = """
     public init(timeIntervalSince1970: Double)
   }
 
+  public typealias TimeInterval = Double
+
   public struct UUID {}
 
   public struct URL {
