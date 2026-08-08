@@ -189,4 +189,9 @@ public class MySwiftLibraryTest {
         double result = MySwiftLibrary.globalCallMeDoubleSupplier(() -> { return 2.0; });
         assertEquals(2.0, result);
     }
+
+    @Test
+    void call_globalCallMeIntConsumer_noThrow() {
+        MySwiftLibrary.globalCallMeIntConsumer((int a) -> { });
+    }
 }
