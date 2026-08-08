@@ -14,11 +14,25 @@
 
 import SwiftJava
 
-public func booleanArray(array: [Bool]) -> [Bool] {
+// snippet.primitiveArrays
+public func byteArray(array: [UInt8]) -> [UInt8] {
   array
 }
 
-public func byteArray(array: [UInt8]) -> [UInt8] {
+public func intArray(array: [Int32]) -> [Int32] {
+  array
+}
+
+public func doubleArray(array: [Double]) -> [Double] {
+  array
+}
+
+public func stringArray(array: [String]) -> [String] {
+  array
+}
+// snippet.end
+
+public func booleanArray(array: [Bool]) -> [Bool] {
   array
 }
 
@@ -34,10 +48,6 @@ public func shortArray(array: [Int16]) -> [Int16] {
   array
 }
 
-public func intArray(array: [Int32]) -> [Int32] {
-  array
-}
-
 public func longArray(array: [Int64]) -> [Int64] {
   array
 }
@@ -46,14 +56,7 @@ public func floatArray(array: [Float]) -> [Float] {
   array
 }
 
-public func doubleArray(array: [Double]) -> [Double] {
-  array
-}
-
-public func stringArray(array: [String]) -> [String] {
-  array
-}
-
+// snippet.customTypeArrays
 public func objectArray(array: [MySwiftClass]) -> [MySwiftClass] {
   array
 }
@@ -62,10 +65,11 @@ public func nestedByteArray(array: [[UInt8]]) -> [[UInt8]] {
   array
 }
 
-public func nestedLongArray(array: [[Int64]]) -> [[Int64]] {
+public func nestedStringArray(array: [[String]]) -> [[String]] {
   array
 }
+// snippet.end
 
-public func nestedStringArray(array: [[String]]) -> [[String]] {
+public func nestedLongArray(array: [[Int64]]) -> [[Int64]] {
   array
 }

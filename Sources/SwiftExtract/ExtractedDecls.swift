@@ -25,6 +25,9 @@ public enum SwiftAPIKind: Equatable {
   case enumCase
   case subscriptGetter
   case subscriptSetter
+  case prefixOperator
+  case binaryOperator
+  case postfixOperator
 }
 
 /// Describes a Swift nominal type (e.g., a class, struct, enum) that has been
@@ -343,6 +346,9 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
       case .function, .initializer: ""
       case .subscriptGetter: "subscriptGetter:"
       case .subscriptSetter: "subscriptSetter:"
+      case .prefixOperator: "prefixOperator:"
+      case .binaryOperator: "binaryOperator:"
+      case .postfixOperator: "postfixOperator:"
       }
 
     let context =
@@ -399,6 +405,61 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
       apiKind: apiKind,
       functionSignature: functionSignature
     )
+  }
+
+  /// Expands this function into `maxOverloads + 1` functions if it contains a variadic parameter.
+  /// Replaces the variadic parameter `T...` with `N` discrete parameters (`arg0: T`, `arg1: T`, etc.)
+  /// for `N` in `0...maxOverloads`.
+  /// Returns `[self]` if the function has no variadic parameters.
+  public func expandingVariadicOverloads(maxOverloads: Int) -> [ExtractedFunc] {
+    guard functionSignature.hasVariadicParams else {
+      return [self]
+    }
+
+    var overloads: [ExtractedFunc] = []
+
+    // Find the index of the variadic parameter. Swift only allows one.
+    guard let variadicIndex = functionSignature.parameters.firstIndex(where: \.isVariadic) else {
+      return [self]
+    }
+
+    let variadicParam = functionSignature.parameters[variadicIndex]
+
+    for count in 0...maxOverloads {
+      var newParameters = functionSignature.parameters
+      newParameters.remove(at: variadicIndex)
+
+      var expandedParams: [SwiftParameter] = []
+      for i in 0..<count {
+        let name = "arg\(i)"
+        expandedParams.append(
+          SwiftParameter(
+            convention: variadicParam.convention,
+            argumentLabel: (i == 0) ? variadicParam.argumentLabel : nil,
+            parameterName: name, // We use the same name so the call site matches `callee.sum(arg0, arg1)`
+            type: variadicParam.type,
+            isVariadic: false
+          )
+        )
+      }
+
+      newParameters.insert(contentsOf: expandedParams, at: variadicIndex)
+
+      var newSignature = functionSignature
+      newSignature.parameters = newParameters
+
+      overloads.append(
+        ExtractedFunc(
+          module: module,
+          swiftDecl: swiftDecl,
+          name: name,
+          apiKind: apiKind,
+          functionSignature: newSignature
+        )
+      )
+    }
+
+    return overloads
   }
 }
 

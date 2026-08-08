@@ -57,7 +57,7 @@ extension ExtractedFunc {
   package var javaGetterName: String? {
     switch apiKind {
     case .getter, .subscriptGetter: break
-    case .setter, .subscriptSetter, .function, .initializer, .enumCase: return nil
+    case .setter, .subscriptSetter, .function, .initializer, .enumCase, .binaryOperator, .prefixOperator, .postfixOperator: return nil
     }
 
     let returnsBoolean = self.functionSignature.result.type.asNominalTypeDeclaration?.knownTypeKind == .bool
@@ -81,7 +81,7 @@ extension ExtractedFunc {
   package var javaSetterName: String? {
     switch apiKind {
     case .setter, .subscriptSetter: break
-    case .getter, .subscriptGetter, .function, .initializer, .enumCase: return nil
+    case .getter, .subscriptGetter, .function, .initializer, .enumCase, .binaryOperator, .prefixOperator, .postfixOperator: return nil
     }
 
     let isBooleanSetter = self.functionSignature.parameters.first?.type.asNominalTypeDeclaration?.knownTypeKind == .bool

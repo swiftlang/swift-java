@@ -28,6 +28,7 @@ print("Start Sample app...")
 // TODO: locating the classpath is more complex, need to account for dependencies of our module
 let swiftJavaClasspath = findSwiftJavaClasspaths() // scans for .classpath files
 
+// snippet.dependencyUsage
 // 1) Start a JVM with appropriate classpath
 let jvm = try JavaVirtualMachine.shared(classpath: swiftJavaClasspath)
 
@@ -50,5 +51,6 @@ for record in try CSVFormatClass.RFC4180.parse(reader)!.getRecords()! {
     print("Field: \(field)")
   }
 }
+// snippet.end
 
 print("Done.")

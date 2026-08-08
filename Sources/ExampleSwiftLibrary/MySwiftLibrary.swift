@@ -43,6 +43,22 @@ public func globalCallMeRunnable(run: () -> Void) {
   run()
 }
 
+public func globalCallMeBooleanSupplier(run: () -> Bool) -> Bool {
+  run()
+}
+
+public func globalCallMeIntSupplier(run: () -> Int32) -> Int32 {
+  run()
+}
+
+public func globalCallMeLongSupplier(run: () -> Int64) -> Int64 {
+  run()
+}
+
+public func globalCallMeDoubleSupplier(run: () -> Double) -> Double {
+  run()
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }

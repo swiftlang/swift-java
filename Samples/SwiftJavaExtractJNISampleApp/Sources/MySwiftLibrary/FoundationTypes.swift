@@ -20,6 +20,7 @@ import FoundationEssentials
 import Foundation
 #endif
 
+// snippet.dateDefinition
 public func compareDates(date1: Date, date2: Date) -> Bool {
   date1 == date2
 }
@@ -27,7 +28,9 @@ public func compareDates(date1: Date, date2: Date) -> Bool {
 public func dateFromSeconds(_ seconds: Double) -> Date {
   Date(timeIntervalSince1970: seconds)
 }
+// snippet.end
 
+// snippet.uuidDefinition
 public func echoUUID(_ uuid: UUID) -> UUID {
   uuid
 }
@@ -35,7 +38,10 @@ public func echoUUID(_ uuid: UUID) -> UUID {
 public func makeUUID() -> UUID {
   UUID()
 }
+// snippet.end
 
+// snippet.foundationURLDefinition
 public func echoURL(_ url: URL) -> URL {
   url
 }
+// snippet.end

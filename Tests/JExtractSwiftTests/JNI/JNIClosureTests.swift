@@ -20,6 +20,10 @@ struct JNIClosureTests {
   let source =
     """
     public func emptyClosure(closure: () -> ()) {}
+    public func closureBoolSupplier(closure: () -> Bool) {}
+    public func closureIntSupplier(closure: () -> Int32) {}
+    public func closureLongSupplier(closure: () -> Int64) {}
+    public func closureDoubleSupplier(closure: () -> Double) {}
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
 
@@ -49,6 +53,106 @@ struct JNIClosureTests {
   }
 
   @Test
+  func closureBoolSupplier_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureBoolSupplier(closure: () -> Bool)
+         * }
+         */
+        public static void closureBoolSupplier(java.util.function.BooleanSupplier closure) {
+          SwiftModule.$closureBoolSupplier(closure);
+        }
+        """,
+        """
+        private static native void $closureBoolSupplier(java.util.function.BooleanSupplier closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func closureIntSupplier_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureIntSupplier(closure: () -> Int32)
+         * }
+         */
+        public static void closureIntSupplier(java.util.function.IntSupplier closure) {
+          SwiftModule.$closureIntSupplier(closure);
+        }
+        """,
+        """
+        private static native void $closureIntSupplier(java.util.function.IntSupplier closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func closureLongSupplier_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureLongSupplier(closure: () -> Int64)
+         * }
+         */
+        public static void closureLongSupplier(java.util.function.LongSupplier closure) {
+          SwiftModule.$closureLongSupplier(closure);
+        }
+        """,
+        """
+        private static native void $closureLongSupplier(java.util.function.LongSupplier closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func closureDoubleSupplier_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureDoubleSupplier(closure: () -> Double)
+         * }
+         */
+        public static void closureDoubleSupplier(java.util.function.DoubleSupplier closure) {
+          SwiftModule.$closureDoubleSupplier(closure);
+        }
+        """,
+        """
+        private static native void $closureDoubleSupplier(java.util.function.DoubleSupplier closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
   func emptyClosure_swiftThunks() throws {
     try assertOutput(
       input: source,
@@ -65,6 +169,106 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = []
             environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureBoolSupplier_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureBoolSupplier__Ljava_util_function_BooleanSupplier_2")
+        public func Java_com_example_swift_SwiftModule__00024closureBoolSupplier__Ljava_util_function_BooleanSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureBoolSupplier(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsBoolean", "()Z")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = []
+            return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureIntSupplier_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntSupplier__Ljava_util_function_IntSupplier_2")
+        public func Java_com_example_swift_SwiftModule__00024closureIntSupplier__Ljava_util_function_IntSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureIntSupplier(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsInt", "()I")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = []
+            return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureLongSupplier_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongSupplier__Ljava_util_function_LongSupplier_2")
+        public func Java_com_example_swift_SwiftModule__00024closureLongSupplier__Ljava_util_function_LongSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureLongSupplier(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsLong", "()J")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = []
+            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureDoubleSupplier_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleSupplier__Ljava_util_function_DoubleSupplier_2")
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleSupplier__Ljava_util_function_DoubleSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureDoubleSupplier(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsDouble", "()D")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = []
+            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }

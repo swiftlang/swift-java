@@ -33,6 +33,7 @@ public struct MySwiftStruct {
     }
   }
 
+  // snippet.memberFunctions
   public func getCapacity() -> Int64 {
     self.cap
   }
@@ -42,6 +43,7 @@ public struct MySwiftStruct {
     self.cap += value
     return self.cap
   }
+  // snippet.end
 
   public func getSubscriptValue() -> Int64 {
     self.subscriptValue
@@ -51,6 +53,7 @@ public struct MySwiftStruct {
     self.subscriptArray[Int(index)]
   }
 
+  // snippet.subscriptDefinition
   public subscript() -> Int64 {
     get { subscriptValue }
     set { subscriptValue = newValue }
@@ -60,6 +63,7 @@ public struct MySwiftStruct {
     get { subscriptArray[Int(index)] }
     set { subscriptArray[Int(index)] = newValue }
   }
+  // snippet.end
 
   // operator functions are ignored.
   public static func == (lhs: MySwiftStruct, rhs: MySwiftStruct) -> Bool {

@@ -1020,8 +1020,16 @@ extension LoweredFunctionSignature {
       if let selfExpr {
         switch apiKind {
         // Don't bother to create explicit ${Self}.init expression.
-        case .initializer, .subscriptGetter, .subscriptSetter: selfExpr
-        default: ExprSyntax(MemberAccessExprSyntax(base: selfExpr, name: .identifier(swiftAPIName)))
+        case .initializer, .subscriptGetter, .subscriptSetter:
+          selfExpr
+        case .prefixOperator:
+          ExprSyntax(DeclReferenceExprSyntax(baseName: .prefixOperator(swiftAPIName)))
+        case .binaryOperator:
+          ExprSyntax(DeclReferenceExprSyntax(baseName: .binaryOperator(swiftAPIName)))
+        case .postfixOperator:
+          ExprSyntax(DeclReferenceExprSyntax(baseName: .postfixOperator(swiftAPIName)))
+        default:
+          ExprSyntax(MemberAccessExprSyntax(base: selfExpr, name: .identifier(swiftAPIName)))
         }
       } else {
         ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(swiftAPIName)))
@@ -1034,10 +1042,24 @@ extension LoweredFunctionSignature {
       let arguments = paramExprs.enumerated()
         .map { (i, argument) -> String in
           let argExpr = original.parameters[i].convention == .inout ? "&\(argument)" : argument
-          return LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argExpr).description
+          let labelStr = original.parameters[i].argumentLabel
+          let label = labelStr == "_" ? nil : labelStr
+          return LabeledExprSyntax(label: label, expression: argExpr).description
         }
         .joined(separator: .comma)
       resultExpr = "\(callee)(\(raw: arguments))"
+
+    case .binaryOperator:
+      assert(paramExprs.count == 2)
+      resultExpr = "(\(paramExprs[0]) \(callee) \(paramExprs[1]))"
+
+    case .prefixOperator:
+      assert(paramExprs.count == 1)
+      resultExpr = "(\(callee)\(paramExprs[0]))"
+
+    case .postfixOperator:
+      assert(paramExprs.count == 1)
+      resultExpr = "(\(paramExprs[0])\(callee))"
 
     case .getter:
       assert(paramExprs.isEmpty)
@@ -1054,7 +1076,9 @@ extension LoweredFunctionSignature {
     case .subscriptGetter:
       let parameters = paramExprs.enumerated()
         .map { (i, argument) -> String in
-          LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argument).description
+          let labelStr = original.parameters[i].argumentLabel
+          let label = labelStr == "_" ? nil : labelStr
+          return LabeledExprSyntax(label: label, expression: argument).description
         }
         .joined(separator: .comma)
       resultExpr = "\(callee)[\(raw: parameters)]"
@@ -1066,7 +1090,9 @@ extension LoweredFunctionSignature {
 
       let parameters = argumentsWithoutNewValue.enumerated()
         .map { (i, argument) -> String in
-          LabeledExprSyntax(label: original.parameters[i].argumentLabel, expression: argument).description
+          let labelStr = original.parameters[i].argumentLabel
+          let label = labelStr == "_" ? nil : labelStr
+          return LabeledExprSyntax(label: label, expression: argument).description
         }
         .joined(separator: .comma)
       resultExpr = "\(callee)[\(raw: parameters)] = \(newValueArgument)"

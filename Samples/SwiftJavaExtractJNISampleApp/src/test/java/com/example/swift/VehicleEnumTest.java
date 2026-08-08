@@ -99,6 +99,7 @@ public class VehicleEnumTest {
 
     @Test
     void getAsCar() {
+        // snippet.enumUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.car("BMW", Optional.empty(), arena);
             Vehicle.Case.Car car = vehicle.getAsCar().orElseThrow();
@@ -108,6 +109,7 @@ public class VehicleEnumTest {
             car = vehicle.getAsCar().orElseThrow();
             assertEquals("Long trailer", car.trailer().orElseThrow());
         }
+        // snippet.end
     }
 
     @Test
@@ -162,10 +164,12 @@ public class VehicleEnumTest {
     @Test
     void getDiscriminator() {
         try (var arena = SwiftArena.ofConfined()) {
+            // snippet.enumDiscriminatorUsageJava
             assertEquals(Vehicle.Discriminator.BICYCLE, Vehicle.bicycle(arena).getDiscriminator());
             assertEquals(Vehicle.Discriminator.CAR, Vehicle.car("BMW", Optional.empty(), arena).getDiscriminator());
             assertEquals(Vehicle.Discriminator.MOTORBIKE, Vehicle.motorbike("Yamaha", 750, OptionalInt.empty(), arena).getDiscriminator());
             assertEquals(Vehicle.Discriminator.TRANSFORMER, Vehicle.transformer(Vehicle.bicycle(arena), Vehicle.bicycle(arena), arena).getDiscriminator());
+            // snippet.end
         }
     }
 
@@ -180,6 +184,7 @@ public class VehicleEnumTest {
 
     @Test
     void switchGetCase() {
+        // snippet.enumSwitchUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             Vehicle vehicle = Vehicle.car("BMW", Optional.empty(), arena);
             switch (vehicle.getCase(arena)) {
@@ -200,6 +205,7 @@ public class VehicleEnumTest {
                     break;
             }
         }
+        // snippet.end
     }
 
 }

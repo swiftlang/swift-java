@@ -73,7 +73,7 @@ if bigInt.isProbablePrime(10) {
 }
 ```
 
-Swift ensures that the Java garbage collector will keep the object alive until `bigInt` (and any copies of it) are been destroyed. 
+Swift keeps a reference that stops the Java garbage collector from reclaiming the object until `bigInt` (and any copies of it) are destroyed.
 
 ### Creating a Java Virtual Machine instance from Swift
 
@@ -99,8 +99,8 @@ let bigInt = BigInteger(veryBigNumber, environment: jniEnvironment)
 
 Java libraries are often distributed as Jar files. The `swift-java` tool can inspect a Jar file to create a `swift-java.config` file that will wrap all of the public classes for use in Swift. Following the example in `swift-java/Samples/JavaSieve`, we will wrap a small [Java library for computing prime numbers](https://github.com/gazman-sdk/quadratic-sieve-Java) for use in Swift. Assuming we have a Jar file `QuadraticSieve-1.0.jar` in the package directory, run the following command:
 
-```swift
-swift-java configure --swift-module JavaSieve --jar QuadraticSieve-1.0.jar 
+```bash
+swift-java configure --jar --swift-module JavaSieve --cp QuadraticSieve-1.0.jar
 ```
 
 The resulting configuration file will look something like this:
@@ -142,7 +142,7 @@ As with the previous `JavaProbablyPrime` sample, the `JavaSieve` target in `Pack
 
 If you inspect the build output, there are a number of warnings that look like this:
 
-```swift
+```
 warning: Unable to translate 'com.gazman.quadratic_sieve.QuadraticSieve' method 'generateN': Java class 'java.math.BigInteger' has not been translated into Swift
 ```
 
@@ -160,7 +160,7 @@ These warnings mean that some of the APIs in the Java library aren't available i
         ),
 ```
 
-Then define a a swift-java configuration file in `Sources/JavaMath/swift-java.config` to bring in the types we need:
+Then define a swift-java configuration file in `Sources/JavaMath/swift-java.config` to bring in the types we need:
 
 ```json
 {
@@ -200,7 +200,8 @@ let primes = sieveClass.findPrimes(100) // returns a List<JavaInteger>?
 Putting it all together, we can define a main program in `Sources/JavaSieve/main.swift` that looks like this:
 
 ```swift
-import SwiftJNI
+import JavaMath
+import SwiftJava
 
 let jvm = try JavaVirtualMachine.shared(classpath: ["QuadraticSieve-1.0.jar"])
 do {
@@ -217,19 +218,19 @@ Note that we are passing the Jar file in the `classpath` argument when initializ
 
 ### Downcasting
 
-All Java classes available in Swift provide `is` and `as` methods to check whether an object dynamically matches another type. The `is` operation is the equivalent of Java's `instanceof` and Swift's `is` operator, and will checking whether a given object is of the specified type, e.g.,
+All Java classes available in Swift provide `is` and `as` methods to check whether an object dynamically matches another type. The `is` operation is the equivalent of Java's `instanceof` and Swift's `is` operator, and checks whether a given object is of the specified type, e.g.,
 
 ```swift
-if myObject.is(URL.self) {
-  // myObject is a Java URL.
+if myObject.is(JavaURL.self) {
+  // myObject is a java.net.URL
 }
 ```
 
 Often, one also wants to cast to that type. The `as` method returns an optional of the specified type, so it works well with `if let`:
 
 ```swift
-if let url = myObject.as(URL.self) {
-  // okay, url is a Java URL
+if let url = myObject.as(JavaURL.self) {
+  // okay, url is a java.net.URL
 }
 ```
 
@@ -253,10 +254,10 @@ public class HelloSwift {
 
 On the Swift side, the Java class needs to be exposed to Swift through `swift-java.config`, e.g.,:
 
-```swift
+```json
 {
   "classes" : {
-    "org.swift.swiftjava.example.HelloSwift" : "Hello",
+    "org.swift.swiftjava.example.HelloSwift" : "Hello"
   }
 }
 ```
@@ -278,9 +279,9 @@ Java native methods that throw any checked exception should be marked as `throws
 
 The Swift implementations of Java `native` constructors and static methods require an additional Swift parameter `environment: JNIEnvironment? = nil`, which will receive the JNI environment in which the function is being executed. In case of nil, the `JavaVirtualMachine.shared().environment()` value will be used.
 
-## SwiftJava: Using Java libraries from Swift
+## Reference: how Java maps into Swift
 
-This section describes how Java libraries and mapped into Swift and their use from Swift.
+This section describes how Java libraries are mapped into Swift, and how to use them from Swift.
 
 ### Translation from Java classes into Swift
 
@@ -312,12 +313,12 @@ open class JarFile: ZipFile {
 }
 ```
 
-The `JavaClass` macro provides information about the Java class itself: it's canonical name (here, `java.util.jar.Jarfile`), the type it extends as a metatype of a Java class projected into Swift (here `ZipFile`, for `java.util.zip.ZipFile`) which will be `JavaObject` if omitted, and an optional list of interfaces it implements (as metatypes for Java interfaces projected into Swift). This is the equivalent to the Java class declaration:
+The `JavaClass` macro provides information about the Java class itself: its canonical name (here, `java.util.jar.JarFile`), the type it extends as a metatype of a Java class projected into Swift (here `ZipFile`, for `java.util.zip.ZipFile`) which will be `JavaObject` if omitted, and an optional list of interfaces it implements (as metatypes for Java interfaces projected into Swift). This is the equivalent to the Java class declaration:
 
 ```java
 package java.util.jar
 
-public class JarFile extends java.util.zip.ZipFile implements java.lang.AutoClosable { ... }
+public class JarFile extends java.util.zip.ZipFile implements java.lang.AutoCloseable { ... }
 ```
 
 Each of the public Java constructors, methods, and fields in the Java class will have a corresponding Swift declaration. Java constructors are written as Swift initializers, e.g.,
@@ -330,7 +331,7 @@ Each of the public Java constructors, methods, and fields in the Java class will
 corresponds to the Java constructor:
 
 ```java
-public JarFile(String arg0, bool arg1)
+public JarFile(String arg0, boolean arg1)
 ```
 
 The `environment` parameter is the pointer to the JNI environment (`JNIEnv*` in C) in which the underlying Java object lives. It is available to all methods that are written in or exposed to Java, 
@@ -375,21 +376,21 @@ between Java types and their Swift counterparts that conform to `JavaValue`:
 | `T[]`     | `[T]`         |
 | `String`  | `String`      |
 
-For Swift projections of Java classes, the Swift type itself conforms to the `AnyJavaObject` protocol. This conformance is added automatically by the `JavaClass` macro. Swift projects of Java classes can be generic. In such cases, each generic parameter should itself conform to the `AnyJavaObject` protocol.
+For Swift projections of Java classes, the Swift type itself conforms to the `AnyJavaObject` protocol. This conformance is added automatically by the `JavaClass` macro. Swift projections of Java classes can be generic. In such cases, each generic parameter should itself conform to the `AnyJavaObject` protocol.
 
-Because Java has implicitly nullability of references, `AnyJavaObject` types do not  directly conform to `JavaValue`: rather, optionals of  `AnyJavaObject`-conforming type conform to `JavaValue`. This requires Swift code to deal with the optionality
+Because Java references are implicitly nullable, `AnyJavaObject` types do not directly conform to `JavaValue`: rather, optionals of  `AnyJavaObject`-conforming type conform to `JavaValue`. This requires Swift code to deal with the optionality
 at interface boundaries rather than invite implicit NULL pointer dereferences.
 
 A number of SwiftJava modules provide Swift projections of Java classes and interfaces. Here are a few:
 
 | Java class            | Swift class    | Swift module     |
 | --------------------- | -------------- | ---------------- |
-| `java.lang.Object`    | `JavaObject`   | `SwiftJava`        |
-| `java.lang.Class<T>`  | `JavaClass<T>` | `SwiftJava`        |
-| `java.lang.Throwable` | `Throwable`    | `SwiftJava`        |
-| `java.net.URL`        | `URL`          | `JavaNet` |
+| `java.lang.Object`    | `JavaObject`   | `SwiftJava`      |
+| `java.lang.Class<T>`  | `JavaClass<T>` | `SwiftJava`      |
+| `java.lang.Throwable` | `Throwable`    | `SwiftJava`      |
+| `java.net.URL`        | `JavaURL`      | `SwiftJava`      |
 
-The `swift-java` tool can translate any other Java classes into Swift projections. The easiest way to use `swift-java` is with the SwiftPM plugin described above. More information about using this tool directly are provided later in this document
+The `swift-java` tool can translate any other Java classes into Swift projections. The easiest way to use it is with the SwiftPM plugin described above; see <doc:SwiftJavaCommandLineTool> for invoking the tool directly.
 
 #### Improve parameter names of imported Java methods
 When building Java libraries you can pass the `-parameters` option to javac

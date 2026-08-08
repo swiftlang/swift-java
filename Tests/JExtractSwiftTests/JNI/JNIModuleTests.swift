@@ -326,4 +326,42 @@ struct JNIModuleTests {
       ]
     )
   }
+
+  @Test
+  func expandsVariadicParameter() throws {
+    let input = """
+      public func helloWorld()
+      public func sum(_ xs: Int64...) -> Int64 { xs.reduce(0, +) }
+      """
+
+    var config = Configuration()
+    config.maxVariadicOverloads = 3
+
+    try assertOutput(
+      input: input,
+      config: config,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        public static void helloWorld()
+        """,
+        """
+        public static long sum()
+        """,
+        """
+        public static long sum(long arg0)
+        """,
+        """
+        public static long sum(long arg0, long arg1)
+        """,
+        """
+        public static long sum(long arg0, long arg1, long arg2)
+        """,
+      ],
+      notExpectedChunks: [
+        "sum(long arg0, long arg1, long arg2, long arg3)"
+      ]
+    )
+  }
 }

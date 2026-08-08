@@ -50,10 +50,12 @@ public class MySwiftLibraryTest {
 
     @Test
     void call_writeString_jextract() {
+        // snippet.stringUsageJava
         var string = "Hello Swift!";
         long reply = MySwiftLibrary.globalWriteString(string);
 
         assertEquals(string.length(), reply);
+        // snippet.end
     }
 
     @Test
@@ -94,5 +96,13 @@ public class MySwiftLibraryTest {
             int result = MySwiftLibrary.consumeValueFromOtherModule(value);
             assertEquals(42, result);
         }
+    }
+
+    @Test
+    void variadicOverloads() {
+        assertEquals("", MySwiftLibrary.globalConcatStrings());
+        assertEquals("a", MySwiftLibrary.globalConcatStrings("a"));
+        assertEquals("ab", MySwiftLibrary.globalConcatStrings("a", "b"));
+        assertEquals("abc", MySwiftLibrary.globalConcatStrings("a", "b", "c"));
     }
 }

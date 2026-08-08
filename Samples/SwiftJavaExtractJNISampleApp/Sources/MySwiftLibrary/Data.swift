@@ -20,6 +20,7 @@ import FoundationEssentials
 import Foundation
 #endif
 
+// snippet.dataDefinition
 public func echoData(_ data: Data) -> Data {
   data
 }
@@ -27,6 +28,7 @@ public func echoData(_ data: Data) -> Data {
 public func makeData() -> Data {
   Data([0x01, 0x02, 0x03, 0x04])
 }
+// snippet.end
 
 public func getDataCount(_ data: Data) -> Int {
   data.count

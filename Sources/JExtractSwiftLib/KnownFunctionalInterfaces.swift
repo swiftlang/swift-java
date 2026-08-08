@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftExtract
 import SwiftJavaJNICore
 
 /// Describes a known functional interface such as `Runnable.run()` and similar.
@@ -28,8 +29,40 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .void
   )
 
+  static let booleanSupplier = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionBooleanSupplier,
+    method: "getAsBoolean",
+    parameters: [],
+    result: .boolean
+  )
+
+  static let intSupplier = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionIntSupplier,
+    method: "getAsInt",
+    parameters: [],
+    result: .int
+  )
+
+  static let longSupplier = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionLongSupplier,
+    method: "getAsLong",
+    parameters: [],
+    result: .long
+  )
+
+  static let doubleSupplier = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionDoubleSupplier,
+    method: "getAsDouble",
+    parameters: [],
+    result: .double
+  )
+
   static let all: [KnownJavaFunctionalInterface] = [
-    .runnable
+    .runnable,
+    .booleanSupplier,
+    .intSupplier,
+    .longSupplier,
+    .doubleSupplier,
   ]
 
   static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
@@ -46,6 +79,29 @@ struct KnownJavaFunctionalInterface: Sendable {
 
   static func find(_ methodSignature: MethodSignature) -> KnownJavaFunctionalInterface? {
     find(parameters: methodSignature.parameterTypes, result: methodSignature.resultType)
+  }
+
+  static func find(_ functionType: SwiftFunctionType) -> KnownJavaFunctionalInterface? {
+    if functionType.isEscaping {
+      return nil
+    }
+
+    let parameters = functionType.parameters
+    let result = functionType.resultType
+    return switch (parameters, result) {
+    case ([], _) where result.isVoid:
+      runnable
+    case ([], _) where result.isBoolean:
+      booleanSupplier
+    case ([], _) where result.isInt32:
+      intSupplier
+    case ([], _) where result.isInt64:
+      longSupplier
+    case ([], _) where result.isDouble:
+      doubleSupplier
+    default:
+      nil
+    }
   }
 
   static func find(_ functionType: JNISwift2JavaGenerator.TranslatedFunctionType) -> KnownJavaFunctionalInterface? {

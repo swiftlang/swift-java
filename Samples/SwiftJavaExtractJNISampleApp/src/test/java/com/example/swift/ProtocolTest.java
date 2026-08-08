@@ -22,11 +22,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ProtocolTest {
     @Test
     void takeProtocol() {
+        // snippet.takeProtocolUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             ConcreteProtocolAB proto1 = ConcreteProtocolAB.init(10, 5, arena);
             ConcreteProtocolAB proto2 = ConcreteProtocolAB.init(20, 1, arena);
             assertEquals(30, MySwiftLibrary.takeProtocol(proto1, proto2));
         }
+        // snippet.end
     }
 
     @Test
@@ -109,6 +111,7 @@ public class ProtocolTest {
 
     @Test
     void useStorage() {
+        // snippet.protocolUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             JavaStorage storage = new JavaStorage(null);
             MySwiftLibrary.saveWithStorage(StorageItem.init(10, arena), storage);
@@ -117,5 +120,6 @@ public class ProtocolTest {
             MySwiftLibrary.saveWithStorage(StorageItem.init(5, arena), storage);
             assertEquals(5, MySwiftLibrary.loadWithStorage(storage, arena).getValue());
         }
+        // snippet.end
     }
 }

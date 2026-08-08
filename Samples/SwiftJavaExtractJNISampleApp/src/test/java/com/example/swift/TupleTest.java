@@ -27,10 +27,26 @@ import java.util.OptionalLong;
 
 public class TupleTest {
     @Test
+    void returnIntPair() {
+        // snippet.tupleUsageJava
+        Tuple2<Integer, Long> result = MySwiftLibrary.returnIntPair();
+        assertEquals(42, result.$0);
+        assertEquals(43L, result.$1);
+        // snippet.end
+    }
+
+    @Test
+    void sumIntPair() {
+        assertEquals(12L, MySwiftLibrary.sumIntPair(new Tuple2<>(5, 7L)));
+    }
+
+    @Test
     void returnPair() {
+        // snippet.stringTupleUsageJava
         Tuple2<Long, String> result = MySwiftLibrary.returnPair();
         assertEquals(42L, result.$0);
         assertEquals("hello", result.$1);
+        // snippet.end
     }
 
     @Test

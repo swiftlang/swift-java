@@ -45,12 +45,20 @@ package struct ThunkNameRegistry {
         .joined()
     }
 
+    let baseName =
+      switch decl.apiKind {
+      case .binaryOperator, .prefixOperator, .postfixOperator:
+        JavaIdentifierFactory().makeJavaMethodName(decl)
+      default:
+        decl.name
+      }
+
     let name: String
     if let parent = decl.parentType, let nominalDecl = parent.asNominalTypeDeclaration {
       let parentName = nominalDecl.flatName
-      name = "swiftjava_\(decl.module)_\(parentName)_\(decl.name)\(suffix)"
+      name = "swiftjava_\(decl.module)_\(parentName)_\(baseName)\(suffix)"
     } else {
-      name = "swiftjava_\(decl.module)_\(decl.name)\(suffix)"
+      name = "swiftjava_\(decl.module)_\(baseName)\(suffix)"
     }
 
     let emittedCount = self.duplicateNames[name, default: 0]

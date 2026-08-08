@@ -40,10 +40,12 @@ public class MySwiftLibraryTest {
 
     @Test
     void call_writeString_jextract() {
+        // snippet.stringUsageJava
         var string = "Hello Swift!";
         long reply = MySwiftLibrary.globalWriteString(string);
 
         assertEquals(string.length(), reply);
+        // snippet.end
     }
 
     @Test
@@ -72,8 +74,6 @@ public class MySwiftLibraryTest {
         String result = MySwiftLibrary.globalStringIdentity("");
         assertEquals("", result);
     }
-
-
 
     @Test
     @Disabled("Upcalls not yet implemented in new scheme")
@@ -109,6 +109,22 @@ public class MySwiftLibraryTest {
         assertThrows(SwiftJavaErrorException.class, () -> {
             MySwiftLibrary.globalThrowingVoid(true);
         });
+    }
+
+    @Test
+    void call_throwString_throws() {
+        // snippet.throwUsageJava
+        SwiftJavaErrorException exception = assertThrows(SwiftJavaErrorException.class, () -> {
+            MySwiftLibrary.throwString("");
+        });
+        assertNotNull(exception.getMessage());
+        assertTrue(exception.getMessage().contains("swiftError"));
+        // snippet.end
+    }
+
+    @Test
+    void call_throwString_noThrow() throws SwiftJavaErrorException {
+        assertEquals("Hello!", MySwiftLibrary.throwString("Hello!"));
     }
 
     @Test
@@ -148,4 +164,29 @@ public class MySwiftLibraryTest {
         );
     }
 
+    @Test
+    void call_globalCallMeBooleanSupplier_noThrow() {
+        // snippet.closureUsageJava
+        boolean result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> true);
+        assertEquals(true, result);
+        // snippet.end
+    }
+
+    @Test
+    void call_globalCallMeIntSupplier_noThrow() {
+        int result = MySwiftLibrary.globalCallMeIntSupplier(() -> { return 2; });
+        assertEquals(2, result);
+    }
+
+    @Test
+    void call_globalCallMeLongSupplier_noThrow() {
+        long result = MySwiftLibrary.globalCallMeLongSupplier(() -> { return 2L; });
+        assertEquals(2L, result);
+    }
+
+    @Test
+    void call_globalCallMeDoubleSupplier_noThrow() {
+        double result = MySwiftLibrary.globalCallMeDoubleSupplier(() -> { return 2.0; });
+        assertEquals(2.0, result);
+    }
 }

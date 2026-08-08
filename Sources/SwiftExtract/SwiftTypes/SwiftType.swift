@@ -98,6 +98,20 @@ public enum SwiftType: Equatable {
     }
   }
 
+  public var isBoolean: Bool {
+    if case let .nominal(nominal) = self {
+      return nominal.nominalTypeDecl.knownTypeKind == .bool
+    }
+    return false
+  }
+
+  public var isDouble: Bool {
+    if case let .nominal(nominal) = self {
+      return nominal.nominalTypeDecl.knownTypeKind == .double
+    }
+    return false
+  }
+
   /// Whether this is a pointer type. I.e 'Unsafe[Mutable][Raw]Pointer'
   public var isPointer: Bool {
     switch self {
@@ -123,6 +137,28 @@ public enum SwiftType: Equatable {
       return true
     case .genericParameter, .tuple, .existential, .opaque, .composite, .inlineArray:
       return false
+    }
+  }
+
+  public var isInt32: Bool {
+    switch self {
+    case .nominal(let nominal):
+      switch nominal.nominalTypeDecl.knownTypeKind {
+      case .int32, .uint32: true
+      default: false
+      }
+    default: false
+    }
+  }
+
+  public var isInt64: Bool {
+    switch self {
+    case .nominal(let nominal):
+      switch nominal.nominalTypeDecl.knownTypeKind {
+      case .int64, .uint64: true
+      default: false
+      }
+    default: false
     }
   }
 
