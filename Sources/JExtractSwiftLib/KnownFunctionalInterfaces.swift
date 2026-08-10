@@ -57,12 +57,20 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .double
   )
 
+  static let intConsumer = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionIntConsumer,
+    method: "accept",
+    parameters: [.int],
+    result: .void
+  )
+
   static let all: [KnownJavaFunctionalInterface] = [
     .runnable,
     .booleanSupplier,
     .intSupplier,
     .longSupplier,
     .doubleSupplier,
+    .intConsumer,
   ]
 
   static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
@@ -88,20 +96,37 @@ struct KnownJavaFunctionalInterface: Sendable {
 
     let parameters = functionType.parameters
     let result = functionType.resultType
-    return switch (parameters, result) {
-    case ([], _) where result.isVoid:
-      runnable
-    case ([], _) where result.isBoolean:
-      booleanSupplier
-    case ([], _) where result.isInt32:
-      intSupplier
-    case ([], _) where result.isInt64:
-      longSupplier
-    case ([], _) where result.isDouble:
-      doubleSupplier
-    default:
-      nil
+
+    // Runnable & Suppliers
+    if parameters == [] {
+      return switch () {
+      case _ where result.isVoid:
+        runnable
+      case _ where result.isBoolean:
+        booleanSupplier
+      case _ where result.isInt32:
+        intSupplier
+      case _ where result.isInt64:
+        longSupplier
+      case _ where result.isDouble:
+        doubleSupplier
+      default:
+        nil
+      }
     }
+
+    // Consumers
+    if parameters.count == 1 && result.isVoid {
+      let parameter = parameters[0].type
+      return switch () {
+      case _ where parameter.isInt32:
+        intConsumer
+      default:
+        nil
+      }
+    }
+
+    return nil
   }
 
   static func find(_ functionType: JNISwift2JavaGenerator.TranslatedFunctionType) -> KnownJavaFunctionalInterface? {

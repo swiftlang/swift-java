@@ -64,6 +64,10 @@ public func globalCallMeDoubleSupplier(run: () -> Double) -> Double {
   run()
 }
 
+public func globalCallMeIntConsumer(run: (Int32) -> Void) {
+  run(1)
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }

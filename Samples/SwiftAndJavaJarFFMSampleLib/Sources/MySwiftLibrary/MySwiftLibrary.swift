@@ -52,6 +52,10 @@ public func globalCallMeDoubleSupplier(run: () -> Double) -> Double {
   run()
 }
 
+public func globalCallMeIntConsumer(run: (Int32) -> Void) {
+  run(1)
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
