@@ -559,7 +559,7 @@ extension JavaClassTranslator {
 
   /// Render the extension of JavaClass that collects all of the static
   /// fields and methods.
-  package func renderStaticMemberExtension() -> DeclSyntax? {
+  package func renderStaticMemberExtension(asCrossModuleExtension: Bool = false) -> DeclSyntax? {
     // Determine the where clause we need for static methods.
     let staticMemberWhereClause: String
     if !javaTypeParameters.isEmpty {
@@ -574,8 +574,11 @@ extension JavaClassTranslator {
     }
 
     // Render static fields.
-    let properties = staticFields.sortedForEmission().compactMap { field in
+    let properties = staticFields.sortedForEmission().compactMap { field -> DeclSyntax? in
       // Translate each static field.
+      guard !asCrossModuleExtension || referencesCurrentModule(field) else {
+        return nil
+      }
       do {
         return try renderField(field)
       } catch {
@@ -585,8 +588,11 @@ extension JavaClassTranslator {
     }
 
     // Render static methods.
-    let methods = staticMethods.methods.sortedForEmission().compactMap { method in
+    let methods = staticMethods.methods.sortedForEmission().compactMap { method -> DeclSyntax? in
       // Translate each static method.
+      guard !asCrossModuleExtension || referencesCurrentModule(method) else {
+        return nil
+      }
       do {
         return try renderMethod(
           method,
@@ -621,6 +627,87 @@ extension JavaClassTranslator {
     let extDecl: DeclSyntax =
       """
       extension JavaClass\(raw: extSpecialization) {
+      \(raw: members.map { $0.description }.joined(separator: "\n\n"))
+      }
+      """
+
+    return extDecl.formatted(using: translator.format).cast(DeclSyntax.self)
+  }
+
+  private func owningModule(of javaClass: JavaClass<JavaObject>?) -> String? {
+    guard var javaClass else { return nil }
+    while javaClass.isArray() {
+      guard let component = javaClass.getComponentType() else { break }
+      javaClass = component
+    }
+    return translator.translatedClasses[javaClass.getName()]?.swiftModule
+  }
+
+  /// Whether this method references at least one Java type whose Swift wrapper
+  /// is owned by the module currently being generated.
+  private func referencesCurrentModule(_ types: [JavaClass<JavaObject>?]) -> Bool {
+    types.contains { owningModule(of: $0) == translator.swiftModuleName }
+  }
+  private func referencesCurrentModule(_ method: Method) -> Bool {
+    referencesCurrentModule([method.getReturnType()] + method.getParameterTypes())
+  }
+  private func referencesCurrentModule(_ constructor: Constructor<JavaObject>) -> Bool {
+    referencesCurrentModule(constructor.getParameterTypes())
+  }
+  private func referencesCurrentModule(_ field: Field) -> Bool {
+    referencesCurrentModule([field.getType()])
+  }
+
+  package func renderCrossModuleExtension() -> [DeclSyntax] {
+    guard let extendedSwiftName: String = translator.translatedClasses[javaClass.getName()]?.swiftType else {
+      return []
+    }
+
+    var decls: [DeclSyntax] = []
+    if let staticExtension = renderStaticMemberExtension(asCrossModuleExtension: true) {
+      decls.append(staticExtension)
+    }
+    if let instanceExtension = renderCrossModuleInstanceExtension(of: extendedSwiftName) {
+      decls.append(instanceExtension)
+    }
+    return decls
+  }
+
+  private func renderCrossModuleInstanceExtension(of extendedSwiftName: String) -> DeclSyntax? {
+    let initializers: [DeclSyntax] = constructors.sortedForEmission().compactMap { constructor -> DeclSyntax? in
+      guard referencesCurrentModule(constructor) else {
+        return nil
+      }
+      do {
+        return try renderConstructor(constructor)
+      } catch {
+        translator.logUntranslated("Unable to translate '\(javaClass.getName())' constructor: \(error)")
+        return nil
+      }
+    }
+
+    let renderedMethods: [DeclSyntax] = methods.methods.sortedForEmission().compactMap { method -> DeclSyntax? in
+      guard referencesCurrentModule(method) else {
+        return nil
+      }
+      do {
+        return try renderMethod(method, implementedInSwift: false, asCrossModuleExtensionMember: true)
+      } catch {
+        translator.logUntranslated(
+          "Unable to translate '\(javaClass.getName())' method '\(method.getName())': \(error)"
+        )
+        return nil
+      }
+    }
+
+    let members = initializers + renderedMethods
+    if members.isEmpty {
+      return nil
+    }
+
+    let extDecl: DeclSyntax =
+      """
+      extension \(raw: extendedSwiftName) {
       \(raw: members.map { $0.description }.joined(separator: "\n\n"))
       }
       """
@@ -866,6 +953,18 @@ extension JavaClassTranslator {
       """
   }
 
+  private func typeReferencesTypeParam(_ type: Type?, _ typeParam: TypeVariable<Method>) -> Bool {
+    guard let type else { return false }
+    if type.isEqualTo(typeParam.as(Type.self)) {
+      return true
+    }
+    if let wildcard = type.as(WildcardType.self) {
+      return wildcard.getUpperBounds().contains { $0.map { typeParam.as(Type.self).isEqualTo($0) } ?? false }
+        || wildcard.getLowerBounds().contains { $0.map { typeParam.as(Type.self).isEqualTo($0) } ?? false }
+    }
+    return false
+  }
+
   func genericParameterIsUsedInSignature(_ typeParam: TypeVariable<Method>, in method: Method) -> Bool {
     // --- Return type
     // Is the return type exactly the type param
@@ -876,8 +975,7 @@ extension JavaClassTranslator {
 
     if let parameterizedReturnType = method.getGenericReturnType().as(ParameterizedType.self) {
       for actualTypeParam in parameterizedReturnType.getActualTypeArguments() {
-        guard let actualTypeParam else { continue }
-        if actualTypeParam.isEqualTo(typeParam.as(Type.self)) {
+        if typeReferencesTypeParam(actualTypeParam, typeParam) {
           return true
         }
       }
@@ -899,8 +997,7 @@ extension JavaClassTranslator {
         // Also check if the type param is used as a type argument inside a parameterized parameter type
         if let parameterizedParamType = parameterizedType.as(ParameterizedType.self) {
           for actualTypeParam in parameterizedParamType.getActualTypeArguments() {
-            guard let actualTypeParam else { continue }
-            if actualTypeParam.isEqualTo(typeParam.as(Type.self)) {
+            if typeReferencesTypeParam(actualTypeParam, typeParam) {
               return true
             }
           }
@@ -943,7 +1040,8 @@ extension JavaClassTranslator {
     _ javaMethod: Method,
     implementedInSwift: Bool,
     genericParameters: [String] = [],
-    whereClause: String = ""
+    whereClause: String = "",
+    asCrossModuleExtensionMember: Bool = false
   ) throws -> DeclSyntax {
     // Map the generic params on the method.
     let allGenericParameters = collectMethodGenericParameters(genericParameters: genericParameters, method: javaMethod)
@@ -1053,11 +1151,11 @@ extension JavaClassTranslator {
     let accessModifier =
       implementedInSwift
       ? ""
-      : (javaMethod.isStatic || !translateAsClass)
+      : (asCrossModuleExtensionMember || javaMethod.isStatic || !translateAsClass)
         ? "public "
         : "open "
     let overrideOpt =
-      (translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
+      (!asCrossModuleExtensionMember && translateAsClass && !javaMethod.isStatic && isOverride(javaMethod))
       ? "override "
       : ""
 

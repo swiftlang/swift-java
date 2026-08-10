@@ -37,7 +37,8 @@ $SWIFT_JAVA wrap-java \
     --swift-module JavaStdlib/JavaUtilFunction \
     -o Sources/JavaStdlib/JavaUtilFunction/generated \
     --config Sources/JavaStdlib/JavaUtilFunction/swift-java.config \
-    --depends-on SwiftJava=Sources/SwiftJava/swift-java.config
+    --depends-on SwiftJava=Sources/SwiftJava/swift-java.config \
+    --depends-on JavaUtil=Sources/JavaStdlib/JavaUtil/swift-java.config
 
 echo "Regenerating JavaNet..."
 $SWIFT_JAVA wrap-java \

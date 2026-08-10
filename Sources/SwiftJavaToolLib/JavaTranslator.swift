@@ -380,6 +380,10 @@ extension JavaTranslator {
   package func translateClass(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
     try JavaClassTranslator(javaClass: javaClass, translator: self).render()
   }
+
+  package func translateClassAsCrossModuleExtension(_ javaClass: JavaClass<JavaObject>) throws -> [DeclSyntax] {
+    try JavaClassTranslator(javaClass: javaClass, translator: self).renderCrossModuleExtension()
+  }
 }
 
 extension String {

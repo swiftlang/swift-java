@@ -219,7 +219,7 @@ let package = Package(
     ),
     .target(
       name: "JavaUtilFunction",
-      dependencies: ["SwiftJava"],
+      dependencies: ["SwiftJava", "JavaUtil"],
       path: "Sources/JavaStdlib/JavaUtilFunction",
       exclude: ["swift-java.config"],
       swiftSettings: [

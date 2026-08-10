@@ -21,11 +21,6 @@ import FoundationEssentials
 import Foundation
 #endif
 
-extension JavaURL {
-  @JavaMethod
-  public func toURI() throws -> URI!
-}
-
 extension URL {
   public static func fromJava(_ url: JavaURL) throws -> URL {
     guard let converted = URL(string: try url.toURI().toString()) else {

@@ -14,42 +14,7 @@
 
 import SwiftJava
 
-// TODO: We should be able to autogenerate this as an extension based on
-// knowing that JavaClass was defined elsewhere.
 extension JavaClass {
-  @JavaMethod
-  public func getDeclaredMethods() -> [Method?]
-
-  @JavaMethod
-  public func getMethods() -> [Method?]
-
-  @JavaMethod
-  public func getDeclaredMethod(
-    _ name: String,
-    _ parameterTypes: [JavaClass<JavaObject>?]
-  ) throws -> Method?
-
-  @JavaMethod
-  public func getFields() -> [Field?]
-
-  @JavaMethod
-  public func getGenericInterfaces() -> [Type?]
-
-  @JavaMethod
-  public func getGenericSuperclass() -> Type!
-
-  @JavaMethod
-  public func getConstructors() -> [Constructor<ObjectType>?]
-
-  @JavaMethod
-  public func getParameters() -> [Parameter?]
-
-  @JavaMethod
-  public func getTypeParameters() -> [TypeVariable<JavaClass<JavaObject>>?]
-
-  @JavaMethod
-  public func getAnnotations() -> [Annotation?]
-
   public func `as`(_: Type.Type) -> Type {
     Type(javaHolder: javaHolder)
   }

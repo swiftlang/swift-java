@@ -28,7 +28,9 @@ import Foundation
 
 public typealias JavaVersion = Int
 
-/// Configuration for the SwiftJava tools and plugins, provided on a per-target basis.Ó
+public typealias JavaFullyQualifiedTypeName = String
+
+/// Configuration for the SwiftJava tools and plugins, provided on a per-target basis.
 public struct Configuration: Codable {
 
   // ==== General --------------------------------------------------------------
@@ -343,6 +345,10 @@ public struct Configuration: Codable {
   /// }
   /// ```
   public var classes: [String: String]? = [:]
+
+  /// Java classes whose Swift wrapper type is owned by another module, but which
+  /// this module should generate an extension of.
+  public var extendClasses: [JavaFullyQualifiedTypeName]? = nil
 
   /// Compile for the specified Java SE release.
   ///
