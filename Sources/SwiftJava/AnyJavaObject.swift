@@ -175,3 +175,22 @@ extension AnyJavaObject {
     environment.interface.NewLocalRef(environment, self.javaThis)
   }
 }
+
+// ==== -----------------------------------------------------------------------
+// MARK: JNI conversions for arrays of non-optional Java objects
+
+// A wrapped Java class only conforms to `JavaValue` through
+// `Optional: JavaValue where Wrapped: AnyJavaObject`, so `[SomeJavaClass]` does not
+// pick up `Array: JavaValue where Element: JavaValue`. Bridge through `[Element?]`,
+// whose element type does conform
+extension Array where Element: AnyJavaObject {
+  /// Retrieve the underlying JNI object array for this array of Java objects.
+  public func getJNIValue(in environment: JNIEnvironment) -> jobject? {
+    self.map { Optional($0) }.getJNIValue(in: environment)
+  }
+
+  /// Return a JNI object array safe for returning from a JNI thunk.
+  public func getJNILocalRefValue(in environment: JNIEnvironment) -> jobject? {
+    self.map { Optional($0) }.getJNILocalRefValue(in: environment)
+  }
+}
