@@ -462,6 +462,15 @@ Example:
 
 ---
 
+#### extendClasses
+
+- **Type:** `[JavaFullyQualifiedTypeName]?`
+
+Java classes whose Swift wrapper type is owned by another module, but which
+this module should generate an extension of.
+
+---
+
 #### sourceCompatibility
 
 - **Type:** `JavaVersion?`

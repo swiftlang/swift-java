@@ -348,10 +348,9 @@ public struct Configuration: Codable {
 
   /// Java classes whose Swift wrapper type is owned by another module, but which
   /// this module should generate an extension of.
-
   public var extendClasses: [JavaFullyQualifiedTypeName]? = nil
 
-  // Compile for the specified Java SE release.
+  /// Compile for the specified Java SE release.
   ///
   /// `JavaVersion` is an integer identifying a Java SE release, in the same
   /// shape as `javaSourceLevel`. Supported values:
