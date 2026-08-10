@@ -76,4 +76,9 @@ public class ClosuresTest {
     void globalCallMeIntConsumer() {
         MySwiftLibrary.globalCallMeIntConsumer((int a) -> {});
     }
+
+    @Test
+    void globalCallMeLongConsumer() {
+        MySwiftLibrary.globalCallMeLongConsumer((long a) -> {});
+    }
 }
