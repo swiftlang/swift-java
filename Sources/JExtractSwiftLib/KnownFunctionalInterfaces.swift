@@ -64,6 +64,13 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .void
   )
 
+  static let longConsumer = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionLongConsumer,
+    method: "accept",
+    parameters: [.long],
+    result: .void
+  )
+
   static let all: [KnownJavaFunctionalInterface] = [
     .runnable,
     .booleanSupplier,
@@ -71,6 +78,7 @@ struct KnownJavaFunctionalInterface: Sendable {
     .longSupplier,
     .doubleSupplier,
     .intConsumer,
+    .longConsumer,
   ]
 
   static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
@@ -121,6 +129,8 @@ struct KnownJavaFunctionalInterface: Sendable {
       return switch () {
       case _ where parameter.isInt32:
         intConsumer
+      case _ where parameter.isInt64:
+        longConsumer
       default:
         nil
       }

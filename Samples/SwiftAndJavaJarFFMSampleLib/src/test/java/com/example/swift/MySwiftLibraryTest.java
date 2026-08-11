@@ -82,4 +82,9 @@ public class MySwiftLibraryTest {
     void call_globalCallMeIntConsumer_noThrow() {
         MySwiftLibrary.globalCallMeIntConsumer((int a) -> { });
     }
+
+    @Test
+    void call_globalCallMeLongConsumer_noThrow() {
+        MySwiftLibrary.globalCallMeLongConsumer((long a) -> { });
+    }
 }
