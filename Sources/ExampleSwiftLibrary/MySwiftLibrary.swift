@@ -67,6 +67,10 @@ public func globalCallMeLongConsumer(run: (Int64) -> Void) {
   run(1)
 }
 
+public func globalCallMeDoubleConsumer(run: (Double) -> Void) {
+  run(1.0)
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }

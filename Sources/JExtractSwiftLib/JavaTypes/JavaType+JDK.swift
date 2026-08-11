@@ -60,6 +60,11 @@ extension JavaType {
     .class(package: "java.util.function", name: "LongConsumer")
   }
 
+  /// The description of the type java.util.function.DoubleConsumer.
+  static var javaUtilFunctionDoubleConsumer: JavaType {
+    .class(package: "java.util.function", name: "DoubleConsumer")
+  }
+
   /// The description of the type java.lang.Class.
   static var javaLangClass: JavaType {
     .class(package: "java.lang", name: "Class")
