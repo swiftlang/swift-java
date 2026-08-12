@@ -45,6 +45,10 @@ public func globalCallMeLongConsumer(run: (Int64) -> Void) {
   run(1)
 }
 
+public func globalCallMeDoubleConsumer(run: (Double) -> Void) {
+  run(1.0)
+}
+
 public func closureMultipleArguments(
   input1: Int64,
   input2: Int64,

@@ -27,6 +27,7 @@ struct JNIClosureTests {
 
     public func closureIntConsumer(closure: (Int32) -> Void) {}
     public func closureLongConsumer(closure: (Int64) -> Void) {}
+    public func closureDoubleConsumer(closure: (Double) -> Void) {}
 
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
@@ -207,6 +208,31 @@ struct JNIClosureTests {
   }
 
   @Test
+  func closureDoubleConsumer_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureDoubleConsumer(closure: (Double) -> Void)
+         * }
+         */
+        public static void closureDoubleConsumer(java.util.function.DoubleConsumer closure) {
+          SwiftModule.$closureDoubleConsumer(closure);
+        }
+        """,
+        """
+        private static native void $closureDoubleConsumer(java.util.function.DoubleConsumer closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
   func emptyClosure_swiftThunks() throws {
     try assertOutput(
       input: source,
@@ -370,6 +396,31 @@ struct JNIClosureTests {
           SwiftModule.closureLongConsumer(closure: {
             let class$ = environment.interface.GetObjectClass(environment, closure)
             let methodID$ = environment.interface.GetMethodID(environment, class$, "accept", "(J)V")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
+            environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureDoubleConsumer_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleConsumer__Ljava_util_function_DoubleConsumer_2")
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleConsumer__Ljava_util_function_DoubleConsumer_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureDoubleConsumer(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "accept", "(D)V")!
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = [_0.getJValue(in: environment)]
             environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)

@@ -81,4 +81,9 @@ public class ClosuresTest {
     void globalCallMeLongConsumer() {
         MySwiftLibrary.globalCallMeLongConsumer((long a) -> {});
     }
+
+    @Test
+    void globalCallMeDoubleConsumer() {
+        MySwiftLibrary.globalCallMeDoubleConsumer((double a) -> {});
+    }
 }

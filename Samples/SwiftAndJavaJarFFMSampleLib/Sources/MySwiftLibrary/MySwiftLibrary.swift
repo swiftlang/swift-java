@@ -60,6 +60,10 @@ public func globalCallMeLongConsumer(run: (Int64) -> Void) {
   run(1)
 }
 
+public func globalCallMeDoubleConsumer(run: (Double) -> Void) {
+  run(1.0)
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

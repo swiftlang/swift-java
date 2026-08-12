@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -71,6 +71,13 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .void
   )
 
+  static let doubleConsumer = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionDoubleConsumer,
+    method: "accept",
+    parameters: [.double],
+    result: .void
+  )
+
   static let all: [KnownJavaFunctionalInterface] = [
     .runnable,
     .booleanSupplier,
@@ -79,6 +86,7 @@ struct KnownJavaFunctionalInterface: Sendable {
     .doubleSupplier,
     .intConsumer,
     .longConsumer,
+    .doubleConsumer,
   ]
 
   static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
@@ -131,6 +139,8 @@ struct KnownJavaFunctionalInterface: Sendable {
         intConsumer
       case _ where parameter.isInt64:
         longConsumer
+      case _ where parameter.isDouble:
+        doubleConsumer
       default:
         nil
       }

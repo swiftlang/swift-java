@@ -199,4 +199,9 @@ public class MySwiftLibraryTest {
     void call_globalCallMeLongConsumer_noThrow() {
         MySwiftLibrary.globalCallMeLongConsumer((long a) -> { });
     }
+
+    @Test
+    void call_globalCallMeDoubleConsumer_noThrow() {
+        MySwiftLibrary.globalCallMeDoubleConsumer((double a) -> { });
+    }
 }
