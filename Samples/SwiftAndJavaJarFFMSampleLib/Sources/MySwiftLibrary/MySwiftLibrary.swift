@@ -64,6 +64,10 @@ public func globalCallMeDoubleConsumer(run: (Double) -> Void) {
   run(1.0)
 }
 
+public func globalCallMeIntPredicate(run: (Int32) -> Bool) -> Bool {
+  run(1)
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

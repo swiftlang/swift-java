@@ -204,4 +204,10 @@ public class MySwiftLibraryTest {
     void call_globalCallMeDoubleConsumer_noThrow() {
         MySwiftLibrary.globalCallMeDoubleConsumer((double a) -> { });
     }
+
+    @Test
+    void call_globalCallMeIntPredicate_noThrow() {
+        boolean result = MySwiftLibrary.globalCallMeIntPredicate((int a) -> { return true; });
+        assertEquals(true, result);
+    }
 }
