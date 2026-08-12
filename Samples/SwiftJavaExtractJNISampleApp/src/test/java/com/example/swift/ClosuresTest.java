@@ -86,4 +86,10 @@ public class ClosuresTest {
     void globalCallMeDoubleConsumer() {
         MySwiftLibrary.globalCallMeDoubleConsumer((double a) -> {});
     }
+
+    @Test
+    void globalCallMeIntPredicate() {
+        boolean result = MySwiftLibrary.globalCallMeIntPredicate((int a) -> { return true; });
+        assertEquals(true, result);
+    }
 }

@@ -71,6 +71,10 @@ public func globalCallMeDoubleConsumer(run: (Double) -> Void) {
   run(1.0)
 }
 
+public func globalCallMeIntPredicate(run: (Int32) -> Bool) -> Bool {
+  run(1)
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }
