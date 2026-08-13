@@ -85,6 +85,13 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .boolean
   )
 
+  static let longPredicate = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionLongPredicate,
+    method: "test",
+    parameters: [.long],
+    result: .boolean
+  )
+
   static let all: [KnownJavaFunctionalInterface] = [
     .runnable,
     .booleanSupplier,
@@ -95,6 +102,7 @@ struct KnownJavaFunctionalInterface: Sendable {
     .longConsumer,
     .doubleConsumer,
     .intPredicate,
+    .longPredicate,
   ]
 
   static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
@@ -160,6 +168,8 @@ struct KnownJavaFunctionalInterface: Sendable {
       return switch () {
       case _ where parameter.isInt32:
         intPredicate
+      case _ where parameter.isInt64:
+        longPredicate
       default:
         nil
       }

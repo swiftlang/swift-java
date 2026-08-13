@@ -98,4 +98,10 @@ public class MySwiftLibraryTest {
         boolean result = MySwiftLibrary.globalCallMeIntPredicate((int a) -> { return true; });
         assertEquals(true, result);
     }
+
+    @Test
+    void call_globalCallMeLongPredicate_noThrow() {
+        boolean result = MySwiftLibrary.globalCallMeLongPredicate((long a) -> { return true; });
+        assertEquals(true, result);
+    }
 }
