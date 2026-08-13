@@ -70,6 +70,11 @@ extension JavaType {
     .class(package: "java.util.function", name: "IntPredicate")
   }
 
+  /// The description of the type java.util.function.LongPredicate.
+  static var javaUtilFunctionLongPredicate: JavaType {
+    .class(package: "java.util.function", name: "LongPredicate")
+  }
+
   /// The description of the type java.lang.Class.
   static var javaLangClass: JavaType {
     .class(package: "java.lang", name: "Class")

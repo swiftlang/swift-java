@@ -30,6 +30,7 @@ struct JNIClosureTests {
     public func closureDoubleConsumer(closure: (Double) -> Void) {}
 
     public func closureIntPredicate(closure: (Int32) -> Bool) {}
+    public func closureLongPredicate(closure: (Int64) -> Bool) {}
 
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
@@ -259,6 +260,30 @@ struct JNIClosureTests {
     )
   }
 
+  @Test
+  func closureLongPredicate_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureLongPredicate(closure: (Int64) -> Bool)
+         * }
+         */
+        public static void closureLongPredicate(java.util.function.LongPredicate closure) {
+          SwiftModule.$closureLongPredicate(closure);
+        }
+        """,
+        """
+        private static native void $closureLongPredicate(java.util.function.LongPredicate closure);
+        """,
+      ]
+    )
+  }
 
   @Test
   func emptyClosure_swiftThunks() throws {
@@ -460,6 +485,30 @@ struct JNIClosureTests {
     )
   }
 
+  @Test
+  func closureLongPredicate_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongPredicate__Ljava_util_function_LongPredicate_2")
+        public func Java_com_example_swift_SwiftModule__00024closureLongPredicate__Ljava_util_function_LongPredicate_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureLongPredicate(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "test", "(J)Z")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
+            return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
 
   @Test
   func closureDoubleConsumer_swiftThunks() throws {

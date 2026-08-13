@@ -44,6 +44,7 @@ final class FuncCallbackImportTests {
     public func callMeDoubleConsumer(callback: (Double) -> Void)
 
     public func callMeIntPredicate(callback: (Int32) -> Bool)
+    public func callMeLongPredicate(callback: (Int64) -> Bool)
 
     public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())
     public func withBuffer(body: (UnsafeRawBufferPointer) -> Int)
@@ -622,6 +623,49 @@ final class FuncCallbackImportTests {
         public static void callMeIntPredicate(java.util.function.IntPredicate callback) {
           try(var arena$ = Arena.ofConfined()) {
             swiftjava___FakeModule_callMeIntPredicate_callback.call(callMeIntPredicate.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test("Import: public func callMecallMeLongPredicateFunc(callback: (Int64) -> Bool)")
+  func func_callMecallMeLongPredicateFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeLongPredicate" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeLongPredicate(callback: (Int64) -> Bool)
+         * }
+         */
+        public static void callMeLongPredicate(java.util.function.LongPredicate callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeLongPredicate_callback.call(callMeLongPredicate.$toUpcallStub(callback, arena$));
           }
         }
         """
