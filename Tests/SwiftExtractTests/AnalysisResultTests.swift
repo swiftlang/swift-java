@@ -543,4 +543,30 @@ struct AnalysisResultSuite {
     #expect(result.extractedTypes["AlwaysHere"] != nil)
     #expect(result.extractedTypes["OnlyWhenImportable"] != nil)
   }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Method with an isolated parameter is extracted
+  @Test func methodWithIsolatedParameterIsExtracted() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public actor MyActor {}
+          public class Service {
+            public init() {}
+            public func run(_ a: isolated MyActor) {}
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let service = try #require(result.extractedTypes["Service"])
+    let run = try #require(service.methods.first { $0.name == "run" })
+    let param = try #require(run.functionSignature.parameters.first)
+
+    #expect(param.isIsolated)
+  }
 }

@@ -26,6 +26,8 @@ public struct SwiftParameter: Equatable {
   public var hasDefaultValue: Bool
   /// The default-value expression source, if any (e.g. `42`, `[]`).
   public var defaultValueExpression: String?
+  /// Whether the parameter is marked `isolated`.
+  public var isIsolated: Bool
 
   public init(
     convention: SwiftParameterConvention,
@@ -34,7 +36,8 @@ public struct SwiftParameter: Equatable {
     type: SwiftType,
     isVariadic: Bool = false,
     hasDefaultValue: Bool = false,
-    defaultValueExpression: String? = nil
+    defaultValueExpression: String? = nil,
+    isIsolated: Bool = false
   ) {
     self.convention = convention
     self.argumentLabel = argumentLabel
@@ -43,6 +46,7 @@ public struct SwiftParameter: Equatable {
     self.isVariadic = isVariadic
     self.hasDefaultValue = hasDefaultValue
     self.defaultValueExpression = defaultValueExpression
+    self.isIsolated = isIsolated
   }
 
   /// The simple parameter name, falling back to the argument label.
@@ -106,6 +110,7 @@ extension SwiftParameter {
     self.isVariadic = false
     self.hasDefaultValue = node.defaultValue != nil
     self.defaultValueExpression = node.defaultValue?.value.trimmedDescription
+    self.isIsolated = false
   }
 }
 
@@ -115,6 +120,7 @@ extension SwiftParameter {
     // specifiers on the type for other conventions (like `inout`).
     var type = node.type
     var convention = SwiftParameterConvention.byValue
+    var isIsolated = false
     if let attributedType = type.as(AttributedTypeSyntax.self) {
       var sawUnknownSpecifier = false
       for specifier in attributedType.specifiers {
@@ -128,6 +134,8 @@ extension SwiftParameter {
           convention = .consuming
         case .keyword(.inout):
           convention = .inout
+        case .keyword(.isolated):
+          isIsolated = true
         default:
           sawUnknownSpecifier = true
           break
@@ -140,6 +148,7 @@ extension SwiftParameter {
       }
     }
     self.convention = convention
+    self.isIsolated = isIsolated
 
     // Determine the type.
     self.type = try SwiftType(type, lookupContext: lookupContext)
