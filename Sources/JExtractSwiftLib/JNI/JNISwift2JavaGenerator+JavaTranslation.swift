@@ -215,8 +215,8 @@ extension JNISwift2JavaGenerator {
         }
       }
 
-      // Handle async methods
-      if decl.functionSignature.isAsync {
+      // Handle async methods and isolated methods
+      if decl.functionSignature.isAsync || decl.functionSignature.isIsolated {
         self.convertToAsync(
           translatedFunctionSignature: &translatedFunctionSignature,
           nativeFunctionSignature: &nativeFunctionSignature,
@@ -230,6 +230,7 @@ extension JNISwift2JavaGenerator {
         isStatic: decl.isStatic || !decl.hasParent || decl.isInitializer,
         isThrowing: decl.isThrowing,
         isAsync: decl.isAsync,
+        isIsolated: decl.isIsolated,
         nativeFunctionName: "$\(javaName)",
         parentName: parentName,
         functionTypes: funcTypes,
@@ -1695,6 +1696,8 @@ extension JNISwift2JavaGenerator {
 
     var isAsync: Bool
 
+    var isIsolated: Bool
+
     /// The name of the native function
     var nativeFunctionName: String
 
@@ -1717,7 +1720,7 @@ extension JNISwift2JavaGenerator {
 
     func throwsClause() -> String {
       guard !translatedFunctionSignature.exceptions.isEmpty else {
-        return isThrowing && !isAsync ? " throws Exception" : ""
+        return isThrowing && !(isAsync || isIsolated) ? " throws Exception" : ""
       }
 
       let signatureExceptions = translatedFunctionSignature.exceptions.compactMap(\.type.className).joined(

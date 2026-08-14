@@ -772,7 +772,7 @@ extension JNISwift2JavaGenerator {
       }
     }
 
-    if decl.isThrowing, !decl.isAsync {
+    if decl.isThrowing, !(decl.isAsync || decl.isIsolated) {
       printer.print("do {")
       printer.indent()
       printer.print(innerBody(in: &printer))

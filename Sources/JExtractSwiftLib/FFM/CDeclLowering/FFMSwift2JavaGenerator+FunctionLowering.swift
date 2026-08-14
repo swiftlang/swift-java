@@ -132,6 +132,10 @@ struct CdeclLowering {
       }
     }
 
+    if signature.isIsolated {
+      throw LoweringError.isolatedParameterNotSupported()
+    }
+
     // Lower the result.
     let loweredResult = try lowerResult(signature.result.type)
 
@@ -1158,4 +1162,5 @@ enum LoweringError: Error {
   case inoutNotSupported(SwiftType, file: String = #file, line: Int = #line)
   case unhandledType(SwiftType, file: String = #file, line: Int = #line)
   case effectNotSupported(SwiftEffectSpecifier, file: String = #file, line: Int = #line)
+  case isolatedParameterNotSupported(file: String = #file, line: Int = #line)
 }
