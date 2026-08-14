@@ -55,6 +55,26 @@ extension JavaType {
     .class(package: "java.util.function", name: "IntConsumer")
   }
 
+  /// The description of the type java.util.function.LongConsumer.
+  static var javaUtilFunctionLongConsumer: JavaType {
+    .class(package: "java.util.function", name: "LongConsumer")
+  }
+
+  /// The description of the type java.util.function.DoubleConsumer.
+  static var javaUtilFunctionDoubleConsumer: JavaType {
+    .class(package: "java.util.function", name: "DoubleConsumer")
+  }
+
+  /// The description of the type java.util.function.IntPredicate.
+  static var javaUtilFunctionIntPredicate: JavaType {
+    .class(package: "java.util.function", name: "IntPredicate")
+  }
+
+  /// The description of the type java.util.function.LongPredicate.
+  static var javaUtilFunctionLongPredicate: JavaType {
+    .class(package: "java.util.function", name: "LongPredicate")
+  }
+
   /// The description of the type java.lang.Class.
   static var javaLangClass: JavaType {
     .class(package: "java.lang", name: "Class")

@@ -194,4 +194,26 @@ public class MySwiftLibraryTest {
     void call_globalCallMeIntConsumer_noThrow() {
         MySwiftLibrary.globalCallMeIntConsumer((int a) -> { });
     }
+
+    @Test
+    void call_globalCallMeLongConsumer_noThrow() {
+        MySwiftLibrary.globalCallMeLongConsumer((long a) -> { });
+    }
+
+    @Test
+    void call_globalCallMeDoubleConsumer_noThrow() {
+        MySwiftLibrary.globalCallMeDoubleConsumer((double a) -> { });
+    }
+
+    @Test
+    void call_globalCallMeIntPredicate_noThrow() {
+        boolean result = MySwiftLibrary.globalCallMeIntPredicate((int a) -> { return true; });
+        assertEquals(true, result);
+    }
+
+    @Test
+    void call_globalCallMeLongPredicate_noThrow() {
+        boolean result = MySwiftLibrary.globalCallMeLongPredicate((long a) -> { return true; });
+        assertEquals(true, result);
+    }
 }

@@ -40,6 +40,11 @@ final class FuncCallbackImportTests {
     public func callMeDoubleSupplier(callback: () -> Double)
 
     public func callMeIntConsumer(callback: (Int32) -> Void)
+    public func callMeLongConsumer(callback: (Int64) -> Void)
+    public func callMeDoubleConsumer(callback: (Double) -> Void)
+
+    public func callMeIntPredicate(callback: (Int32) -> Bool)
+    public func callMeLongPredicate(callback: (Int64) -> Bool)
 
     public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())
     public func withBuffer(body: (UnsafeRawBufferPointer) -> Int)
@@ -344,7 +349,7 @@ final class FuncCallbackImportTests {
     )
   }
 
-  @Test("Import: public func callMeDoubleSupplier(callback: (Int32) -> Void)")
+  @Test("Import: public func callMeIntConsumerFunc(callback: (Int32) -> Void)")
   func func_callMeIntConsumerFunc_callback() throws {
     var config = Configuration()
     config.swiftModule = "__FakeModule"
@@ -387,6 +392,91 @@ final class FuncCallbackImportTests {
     )
   }
 
+  @Test("Import: public func callMeLongConsumerFunc(callback: (Int64) -> Void)")
+  func func_callMeLongConsumerFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeLongConsumer" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeLongConsumer(callback: (Int64) -> Void)
+         * }
+         */
+        public static void callMeLongConsumer(java.util.function.LongConsumer callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeLongConsumer_callback.call(callMeLongConsumer.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test("Import: public func callMeDoubleConsumerFunc(callback: (Double) -> Void)")
+  func func_callMeDoubleConsumerFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeDoubleConsumer" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeDoubleConsumer(callback: (Double) -> Void)
+         * }
+         */
+        public static void callMeDoubleConsumer(java.util.function.DoubleConsumer callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeDoubleConsumer_callback.call(callMeDoubleConsumer.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
+    )
+  }
 
   @Test("Import: public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())")
   func func_callMeMoreFunc_callback() throws {
@@ -494,6 +584,92 @@ final class FuncCallbackImportTests {
           }
         }
         """
+    )
+  }
+
+  @Test("Import: public func callMecallMeIntPredicateFunc(callback: (Int32) -> Bool)")
+  func func_callMecallMeIntPredicateFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeIntPredicate" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeIntPredicate(callback: (Int32) -> Bool)
+         * }
+         */
+        public static void callMeIntPredicate(java.util.function.IntPredicate callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeIntPredicate_callback.call(callMeIntPredicate.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test("Import: public func callMecallMeLongPredicateFunc(callback: (Int64) -> Bool)")
+  func func_callMecallMeLongPredicateFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeLongPredicate" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeLongPredicate(callback: (Int64) -> Bool)
+         * }
+         */
+        public static void callMeLongPredicate(java.util.function.LongPredicate callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeLongPredicate_callback.call(callMeLongPredicate.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
     )
   }
 

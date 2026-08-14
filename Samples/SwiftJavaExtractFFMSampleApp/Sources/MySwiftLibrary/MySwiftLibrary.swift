@@ -68,6 +68,22 @@ public func globalCallMeIntConsumer(run: (Int32) -> Void) {
   run(1)
 }
 
+public func globalCallMeLongConsumer(run: (Int64) -> Void) {
+  run(1)
+}
+
+public func globalCallMeDoubleConsumer(run: (Double) -> Void) {
+  run(1.0)
+}
+
+public func globalCallMeIntPredicate(run: (Int32) -> Bool) -> Bool {
+  run(1)
+}
+
+public func globalCallMeLongPredicate(run: (Int64) -> Bool) -> Bool {
+  run(1)
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }

@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -64,6 +64,34 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .void
   )
 
+  static let longConsumer = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionLongConsumer,
+    method: "accept",
+    parameters: [.long],
+    result: .void
+  )
+
+  static let doubleConsumer = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionDoubleConsumer,
+    method: "accept",
+    parameters: [.double],
+    result: .void
+  )
+
+  static let intPredicate = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionIntPredicate,
+    method: "test",
+    parameters: [.int],
+    result: .boolean
+  )
+
+  static let longPredicate = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionLongPredicate,
+    method: "test",
+    parameters: [.long],
+    result: .boolean
+  )
+
   static let all: [KnownJavaFunctionalInterface] = [
     .runnable,
     .booleanSupplier,
@@ -71,6 +99,10 @@ struct KnownJavaFunctionalInterface: Sendable {
     .longSupplier,
     .doubleSupplier,
     .intConsumer,
+    .longConsumer,
+    .doubleConsumer,
+    .intPredicate,
+    .longPredicate,
   ]
 
   static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
@@ -121,6 +153,23 @@ struct KnownJavaFunctionalInterface: Sendable {
       return switch () {
       case _ where parameter.isInt32:
         intConsumer
+      case _ where parameter.isInt64:
+        longConsumer
+      case _ where parameter.isDouble:
+        doubleConsumer
+      default:
+        nil
+      }
+    }
+
+    // Predicates
+    if parameters.count == 1 && result.isBoolean {
+      let parameter = parameters[0].type
+      return switch () {
+      case _ where parameter.isInt32:
+        intPredicate
+      case _ where parameter.isInt64:
+        longPredicate
       default:
         nil
       }

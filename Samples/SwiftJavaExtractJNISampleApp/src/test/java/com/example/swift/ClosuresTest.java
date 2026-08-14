@@ -76,4 +76,26 @@ public class ClosuresTest {
     void globalCallMeIntConsumer() {
         MySwiftLibrary.globalCallMeIntConsumer((int a) -> {});
     }
+
+    @Test
+    void globalCallMeLongConsumer() {
+        MySwiftLibrary.globalCallMeLongConsumer((long a) -> {});
+    }
+
+    @Test
+    void globalCallMeDoubleConsumer() {
+        MySwiftLibrary.globalCallMeDoubleConsumer((double a) -> {});
+    }
+
+    @Test
+    void globalCallMeIntPredicate() {
+        boolean result = MySwiftLibrary.globalCallMeIntPredicate((int a) -> { return true; });
+        assertEquals(true, result);
+    }
+
+    @Test
+    void globalCallMeLongPredicate() {
+        boolean result = MySwiftLibrary.globalCallMeLongPredicate((long a) -> { return true; });
+        assertEquals(true, result);
+    }
 }
