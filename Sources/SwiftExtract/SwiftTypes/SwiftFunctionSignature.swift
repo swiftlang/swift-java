@@ -43,6 +43,11 @@ public struct SwiftFunctionSignature: Equatable {
     parameters.contains(where: \.isVariadic)
   }
 
+  /// Whether any parameter is marked `isolated`.
+  public var isIsolated: Bool {
+    parameters.contains(where: \.isIsolated)
+  }
+
   public init(
     selfParameter: SwiftSelfParameter? = nil,
     parameters: [SwiftParameter],

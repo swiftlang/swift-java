@@ -369,6 +369,10 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
     self.functionSignature.isAsync
   }
 
+  public var isIsolated: Bool {
+    self.functionSignature.isIsolated
+  }
+
   public init(
     module: String,
     swiftDecl: any DeclSyntaxProtocol,
