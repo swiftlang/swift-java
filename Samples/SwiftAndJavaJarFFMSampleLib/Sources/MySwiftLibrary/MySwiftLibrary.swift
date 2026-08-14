@@ -72,6 +72,10 @@ public func globalCallMeLongPredicate(run: (Int64) -> Bool) -> Bool {
   run(1)
 }
 
+public func globalCallMeDoublePredicate(run: (Double) -> Bool) -> Bool {
+  run(1.0)
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

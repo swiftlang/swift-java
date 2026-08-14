@@ -57,6 +57,10 @@ public func globalCallMeLongPredicate(run: (Int64) -> Bool) -> Bool {
   run(1)
 }
 
+public func globalCallMeDoublePredicate(run: (Double) -> Bool) -> Bool {
+  run(1.0)
+}
+
 public func closureMultipleArguments(
   input1: Int64,
   input2: Int64,

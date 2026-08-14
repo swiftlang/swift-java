@@ -75,6 +75,11 @@ extension JavaType {
     .class(package: "java.util.function", name: "LongPredicate")
   }
 
+  /// The description of the type java.util.function.DoublePredicate.
+  static var javaUtilFunctionDoublePredicate: JavaType {
+    .class(package: "java.util.function", name: "DoublePredicate")
+  }
+
   /// The description of the type java.lang.Class.
   static var javaLangClass: JavaType {
     .class(package: "java.lang", name: "Class")
