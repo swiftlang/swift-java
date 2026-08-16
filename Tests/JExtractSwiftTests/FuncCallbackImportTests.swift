@@ -47,6 +47,8 @@ final class FuncCallbackImportTests {
     public func callMeLongPredicate(callback: (Int64) -> Bool)
     public func callMeDoublePredicate(callback: (Double) -> Bool)
 
+    public func callMeIntBinaryOperator(callback: (Int32, Int32) -> Int32)
+
     public func callMeMore(callback: (UnsafeRawPointer, Float) -> Int, fn: () -> ())
     public func withBuffer(body: (UnsafeRawBufferPointer) -> Int)
     """
@@ -710,6 +712,49 @@ final class FuncCallbackImportTests {
         public static void callMeDoublePredicate(java.util.function.DoublePredicate callback) {
           try(var arena$ = Arena.ofConfined()) {
             swiftjava___FakeModule_callMeDoublePredicate_callback.call(callMeDoublePredicate.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test("Import: public func callMecallMeIntBinaryOperatorFunc(callback: (Int32, Int32) -> Int32)")
+  func func_callMecallMeIntBinaryOperatorFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeIntBinaryOperator" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeIntBinaryOperator(callback: (Int32, Int32) -> Int32)
+         * }
+         */
+        public static void callMeIntBinaryOperator(java.util.function.IntBinaryOperator callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeIntBinaryOperator_callback.call(callMeIntBinaryOperator.$toUpcallStub(callback, arena$));
           }
         }
         """

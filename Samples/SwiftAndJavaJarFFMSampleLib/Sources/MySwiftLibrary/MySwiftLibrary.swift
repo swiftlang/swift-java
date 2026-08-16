@@ -76,6 +76,10 @@ public func globalCallMeDoublePredicate(run: (Double) -> Bool) -> Bool {
   run(1.0)
 }
 
+public func globalCallMeIntBinaryOperator(run: (Int32, Int32) -> Int32) -> Int32 {
+  run(1, 2)
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {

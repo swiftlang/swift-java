@@ -222,4 +222,10 @@ public class MySwiftLibraryTest {
         boolean result = MySwiftLibrary.globalCallMeDoublePredicate((double a) -> { return true; });
         assertEquals(true, result);
     }
+
+    @Test
+    void call_globalCallMeIntBinaryOperator_noThrow() {
+        int result = MySwiftLibrary.globalCallMeIntBinaryOperator((int a, int b) -> { return a + b; });
+        assertEquals(3, result);
+    }
 }
