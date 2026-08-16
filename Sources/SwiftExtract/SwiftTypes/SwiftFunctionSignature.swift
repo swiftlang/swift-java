@@ -74,6 +74,10 @@ public enum SwiftSelfParameter: Equatable {
   /// form the call.
   case staticMethod(SwiftType)
 
+  /// 'self' is the type for a call to a class method. We only need the type
+  /// to form the call.
+  case classMethod(SwiftType)
+
   /// 'self' is the type for a call to an initializer. We only need the type
   /// to form the call.
   case initializer(SwiftType)
@@ -81,7 +85,8 @@ public enum SwiftSelfParameter: Equatable {
   public var selfType: SwiftType {
     get {
       switch self {
-      case .instance(_, let swiftType), .staticMethod(let swiftType), .initializer(let swiftType):
+      case .instance(_, let swiftType), .staticMethod(let swiftType), .classMethod(let swiftType),
+        .initializer(let swiftType):
         return swiftType
       }
     }
@@ -91,6 +96,8 @@ public enum SwiftSelfParameter: Equatable {
         self = .instance(convention: convention, swiftType: newValue)
       case .staticMethod:
         self = .staticMethod(newValue)
+      case .classMethod:
+        self = .classMethod(newValue)
       case .initializer:
         self = .initializer(newValue)
       }
@@ -173,18 +180,21 @@ extension SwiftFunctionSignature {
       var isMutating = false
       var isConsuming = false
       var isStatic = false
+      var isClass = false
       for modifier in node.modifiers {
         switch modifier.name.tokenKind {
         case .keyword(.mutating): isMutating = true
         case .keyword(.static): isStatic = true
+        case .keyword(.class): isClass = true
         case .keyword(.consuming): isConsuming = true
-        case .keyword(.class): throw SwiftFunctionTranslationError.classMethod(modifier.name)
         default: break
         }
       }
 
       if isStatic {
         selfParameter = .staticMethod(enclosingType)
+      } else if isClass {
+        selfParameter = .classMethod(enclosingType)
       } else {
         selfParameter = .instance(
           convention: isMutating ? .inout : isConsuming ? .consuming : .byValue,
@@ -437,16 +447,19 @@ extension SwiftFunctionSignature {
     // type and convention for the self parameter.
     if let enclosingType {
       var isStatic = false
+      var isClass = false
       for modifier in modifiers {
         switch modifier.name.tokenKind {
         case .keyword(.static): isStatic = true
-        case .keyword(.class): throw SwiftFunctionTranslationError.classMethod(modifier.name)
+        case .keyword(.class): isClass = true
         default: break
         }
       }
 
       if isStatic {
         return .staticMethod(enclosingType)
+      } else if isClass {
+        return .classMethod(enclosingType)
       } else {
         return .instance(
           convention: isSet && !enclosingType.isReferenceType ? .inout : .byValue,
@@ -524,7 +537,6 @@ extension AccessorBlockSyntax {
 public enum SwiftFunctionTranslationError: Error {
   case `throws`(ThrowsClauseSyntax)
   case async(TokenSyntax)
-  case classMethod(TokenSyntax)
   case missingEnclosingType(InitializerDeclSyntax)
   case failableInitializer(InitializerDeclSyntax)
   case multipleBindings(VariableDeclSyntax)

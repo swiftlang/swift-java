@@ -324,6 +324,13 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
     return false
   }
 
+  public var isClass: Bool {
+    if case .classMethod = functionSignature.selfParameter {
+      return true
+    }
+    return false
+  }
+
   public var isInitializer: Bool {
     if case .initializer = functionSignature.selfParameter {
       return true
