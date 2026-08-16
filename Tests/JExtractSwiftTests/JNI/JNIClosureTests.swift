@@ -34,6 +34,7 @@ struct JNIClosureTests {
     public func closureDoublePredicate(closure: (Double) -> Bool) {}
 
     public func closureIntBinaryOperator(closure: (Int32, Int32) -> Int32) {}
+    public func closureLongBinaryOperator(closure: (Int64, Int64) -> Int64) {}
 
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
@@ -339,6 +340,31 @@ struct JNIClosureTests {
   }
 
   @Test
+  func closureLongBinaryOperator_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureLongBinaryOperator(closure: (Int64, Int64) -> Int64)
+         * }
+         */
+        public static void closureLongBinaryOperator(java.util.function.LongBinaryOperator closure) {
+          SwiftModule.$closureLongBinaryOperator(closure);
+        }
+        """,
+        """
+        private static native void $closureLongBinaryOperator(java.util.function.LongBinaryOperator closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
   func emptyClosure_swiftThunks() throws {
     try assertOutput(
       input: source,
@@ -630,6 +656,31 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
             return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureLongBinaryOperator_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongBinaryOperator__Ljava_util_function_LongBinaryOperator_2")
+        public func Java_com_example_swift_SwiftModule__00024closureLongBinaryOperator__Ljava_util_function_LongBinaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureLongBinaryOperator(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsLong", "(JJ)J")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
+            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }

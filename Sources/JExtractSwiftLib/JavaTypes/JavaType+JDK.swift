@@ -85,6 +85,11 @@ extension JavaType {
     .class(package: "java.util.function", name: "IntBinaryOperator")
   }
 
+  /// The description of the type java.util.function.LongBinaryOperator.
+  static var javaUtilFunctionLongBinaryOperator: JavaType {
+    .class(package: "java.util.function", name: "LongBinaryOperator")
+  }
+
   /// The description of the type java.lang.Class.
   static var javaLangClass: JavaType {
     .class(package: "java.lang", name: "Class")
