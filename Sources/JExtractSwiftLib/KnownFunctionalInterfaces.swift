@@ -106,6 +106,13 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .int
   )
 
+  static let longBinaryOperator = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionLongBinaryOperator,
+    method: "applyAsLong",
+    parameters: [.long, .long],
+    result: .long
+  )
+
   static let all: [KnownJavaFunctionalInterface] = [
     .runnable,
     .booleanSupplier,
@@ -119,6 +126,7 @@ struct KnownJavaFunctionalInterface: Sendable {
     .longPredicate,
     .doublePredicate,
     .intBinaryOperator,
+    .longBinaryOperator,
   ]
 
   static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
@@ -199,6 +207,8 @@ struct KnownJavaFunctionalInterface: Sendable {
       return switch () {
       case _ where parameter.isInt32:
         intBinaryOperator
+      case _ where parameter.isInt64:
+        longBinaryOperator
       default:
         nil
       }

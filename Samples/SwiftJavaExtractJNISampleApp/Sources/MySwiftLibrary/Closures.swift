@@ -65,6 +65,10 @@ public func globalCallMeIntBinaryOperator(run: (Int32, Int32) -> Int32) -> Int32
   run(1, 2)
 }
 
+public func globalCallMeLongBinaryOperator(run: (Int64, Int64) -> Int64) -> Int64 {
+  run(1, 2)
+}
+
 public func closureMultipleArguments(
   input1: Int64,
   input2: Int64,
