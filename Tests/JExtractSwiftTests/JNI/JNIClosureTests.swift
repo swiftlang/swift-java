@@ -33,6 +33,8 @@ struct JNIClosureTests {
     public func closureLongPredicate(closure: (Int64) -> Bool) {}
     public func closureDoublePredicate(closure: (Double) -> Bool) {}
 
+    public func closureIntBinaryOperator(closure: (Int32, Int32) -> Int32) {}
+
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
 
@@ -312,6 +314,31 @@ struct JNIClosureTests {
   }
 
   @Test
+  func closureIntBinaryOperator_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureIntBinaryOperator(closure: (Int32, Int32) -> Int32)
+         * }
+         */
+        public static void closureIntBinaryOperator(java.util.function.IntBinaryOperator closure) {
+          SwiftModule.$closureIntBinaryOperator(closure);
+        }
+        """,
+        """
+        private static native void $closureIntBinaryOperator(java.util.function.IntBinaryOperator closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
   func emptyClosure_swiftThunks() throws {
     try assertOutput(
       input: source,
@@ -578,6 +605,31 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = [_0.getJValue(in: environment)]
             return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureIntBinaryOperator_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntBinaryOperator__Ljava_util_function_IntBinaryOperator_2")
+        public func Java_com_example_swift_SwiftModule__00024closureIntBinaryOperator__Ljava_util_function_IntBinaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureIntBinaryOperator(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsInt", "(II)I")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
+            return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
