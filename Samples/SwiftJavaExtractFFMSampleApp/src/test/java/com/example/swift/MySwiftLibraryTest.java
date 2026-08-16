@@ -216,4 +216,10 @@ public class MySwiftLibraryTest {
         boolean result = MySwiftLibrary.globalCallMeLongPredicate((long a) -> { return true; });
         assertEquals(true, result);
     }
+
+    @Test
+    void call_globalCallMeDoublePredicate_noThrow() {
+        boolean result = MySwiftLibrary.globalCallMeDoublePredicate((double a) -> { return true; });
+        assertEquals(true, result);
+    }
 }

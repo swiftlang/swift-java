@@ -84,6 +84,10 @@ public func globalCallMeLongPredicate(run: (Int64) -> Bool) -> Bool {
   run(1)
 }
 
+public func globalCallMeDoublePredicate(run: (Double) -> Bool) -> Bool {
+  run(1.0)
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }

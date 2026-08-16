@@ -98,4 +98,10 @@ public class ClosuresTest {
         boolean result = MySwiftLibrary.globalCallMeLongPredicate((long a) -> { return true; });
         assertEquals(true, result);
     }
+
+    @Test
+    void globalCallMeDoublePredicate() {
+        boolean result = MySwiftLibrary.globalCallMeDoublePredicate((double a) -> { return true; });
+        assertEquals(true, result);
+    }
 }
