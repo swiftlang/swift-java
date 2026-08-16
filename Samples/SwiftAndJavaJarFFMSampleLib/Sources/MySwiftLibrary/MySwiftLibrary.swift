@@ -84,6 +84,10 @@ public func globalCallMeLongBinaryOperator(run: (Int64, Int64) -> Int64) -> Int6
   run(1, 2)
 }
 
+public func globalCallMeDoubleBinaryOperator(run: (Double, Double) -> Double) -> Double {
+  run(1.0, 2.0)
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
