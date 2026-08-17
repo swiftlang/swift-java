@@ -106,6 +106,13 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .int
   )
 
+  static let longUnaryOperator = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionLongUnaryOperator,
+    method: "applyAsLong",
+    parameters: [.long],
+    result: .long
+  )
+
   static let intBinaryOperator = KnownJavaFunctionalInterface(
     JavaType.javaUtilFunctionIntBinaryOperator,
     method: "applyAsInt",
@@ -140,6 +147,7 @@ struct KnownJavaFunctionalInterface: Sendable {
     .longPredicate,
     .doublePredicate,
     .intUnaryOperator,
+    .longUnaryOperator,
     .intBinaryOperator,
     .longBinaryOperator,
     .doubleBinaryOperator,
@@ -223,6 +231,8 @@ struct KnownJavaFunctionalInterface: Sendable {
       return switch () {
       case _ where parameter.isInt32:
         intUnaryOperator
+      case _ where parameter.isInt64:
+        longUnaryOperator
       default:
         nil
       }

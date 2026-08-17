@@ -118,6 +118,12 @@ public class MySwiftLibraryTest {
     }
 
     @Test
+    void call_globalCallMeLongUnaryOperator_noThrow() {
+        long result = MySwiftLibrary.globalCallMeLongBinaryOperator((long a) -> { return a; });
+        assertEquals(1L, result);
+    }
+
+    @Test
     void call_globalCallMeIntBinaryOperator_noThrow() {
         int result = MySwiftLibrary.globalCallMeIntBinaryOperator((int a, int b) -> { return a + b; });
         assertEquals(3, result);
