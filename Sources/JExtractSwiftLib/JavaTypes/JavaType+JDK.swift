@@ -80,6 +80,11 @@ extension JavaType {
     .class(package: "java.util.function", name: "DoublePredicate")
   }
 
+  /// The description of the type java.util.function.IntUnaryOperator.
+  static var javaUtilFunctionIntUnaryOperator: JavaType {
+    .class(package: "java.util.function", name: "IntUnaryOperator")
+  }
+
   /// The description of the type java.util.function.IntBinaryOperator.
   static var javaUtilFunctionIntBinaryOperator: JavaType {
     .class(package: "java.util.function", name: "IntBinaryOperator")

@@ -83,6 +83,10 @@ public func globalCallMeDoublePredicate(run: (Double) -> Bool) -> Bool {
   run(1.0)
 }
 
+public func globalCallMeIntUnaryOperator(run: (Int32) -> Int32) -> Int32 {
+  run(1)
+}
+
 public func globalCallMeIntBinaryOperator(run: (Int32, Int32) -> Int32) -> Int32 {
   run(1, 2)
 }

@@ -106,6 +106,12 @@ public class ClosuresTest {
     }
 
     @Test
+    void globalCallMeIntUnaryOperator() {
+        int result = MySwiftLibrary.globalCallMeIntUnaryOperator((int a) -> { return a; });
+        assertEquals(1, result);
+    }
+
+    @Test
     void globalCallMeIntBinaryOperator() {
         int result = MySwiftLibrary.globalCallMeIntBinaryOperator((int a, int b) -> { return a + b; });
         assertEquals(3, result);
