@@ -224,6 +224,12 @@ public class MySwiftLibraryTest {
     }
 
     @Test
+    void call_globalCallMeIntUnaryOperator_noThrow() {
+        int result = MySwiftLibrary.globalCallMeIntUnaryOperator((int a) -> { return a; });
+        assertEquals(1, result);
+    }
+
+    @Test
     void call_globalCallMeIntBinaryOperator_noThrow() {
         int result = MySwiftLibrary.globalCallMeIntBinaryOperator((int a, int b) -> { return a + b; });
         assertEquals(3, result);
