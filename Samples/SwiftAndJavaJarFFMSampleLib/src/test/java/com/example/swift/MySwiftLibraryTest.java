@@ -74,7 +74,7 @@ public class MySwiftLibraryTest {
 
     @Test
     void call_globalCallMeDoubleSupplier_noThrow() {
-        double result = MySwiftLibrary.globalCallMeBooleanSupplier(() -> { return 2.0; });
+        double result = MySwiftLibrary.globalCallMeDoubleSupplier(() -> { return 2.0; });
         assertEquals(2.0, result);
     }
 
