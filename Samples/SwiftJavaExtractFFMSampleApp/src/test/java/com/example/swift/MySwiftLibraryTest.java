@@ -234,4 +234,10 @@ public class MySwiftLibraryTest {
         long result = MySwiftLibrary.globalCallMeLongBinaryOperator((long a, long b) -> { return a + b; });
         assertEquals(3L, result);
     }
+
+    @Test
+    void call_globalCallMeDoubleBinaryOperator_noThrow() {
+        double result = MySwiftLibrary.globalCallMeDoubleBinaryOperator((double a, double b) -> { return a + b; });
+        assertEquals(3.0, result);
+    }
 }

@@ -35,6 +35,7 @@ struct JNIClosureTests {
 
     public func closureIntBinaryOperator(closure: (Int32, Int32) -> Int32) {}
     public func closureLongBinaryOperator(closure: (Int64, Int64) -> Int64) {}
+    public func closureDoubleBinaryOperator(closure: (Double, Double) -> Double) {}
 
     public func closureWithArgumentsAndReturn(closure: (Int64, Bool) -> Int64) {}
     """
@@ -365,6 +366,31 @@ struct JNIClosureTests {
   }
 
   @Test
+  func closureDoubleBinaryOperator_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureDoubleBinaryOperator(closure: (Double, Double) -> Double)
+         * }
+         */
+        public static void closureDoubleBinaryOperator(java.util.function.DoubleBinaryOperator closure) {
+          SwiftModule.$closureDoubleBinaryOperator(closure);
+        }
+        """,
+        """
+        private static native void $closureDoubleBinaryOperator(java.util.function.DoubleBinaryOperator closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
   func emptyClosure_swiftThunks() throws {
     try assertOutput(
       input: source,
@@ -681,6 +707,31 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
             return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureDoubleBinaryOperator_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleBinaryOperator__Ljava_util_function_DoubleBinaryOperator_2")
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleBinaryOperator__Ljava_util_function_DoubleBinaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureDoubleBinaryOperator(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsDouble", "(DD)D")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
+            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
