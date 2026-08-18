@@ -79,7 +79,7 @@ extension JNISwift2JavaGenerator {
               genericRequirements: functionSignature.genericRequirements
             )
           }
-        case nil, .initializer(_), .staticMethod(_):
+        case nil, .initializer(_), .staticMethod(_), .classMethod(_):
           nil
         }
 

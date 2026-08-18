@@ -172,7 +172,7 @@ extension JNISwift2JavaGenerator {
   /// doesn't translate (e.g. referencing `Self`/associated types).
   func supportedProtocolRequirements(of type: ExtractedNominalType) -> [ExtractedFunc] {
     (type.methods + type.variables).filter { requirement in
-      !requirement.isStatic && self.translatedDecl(for: requirement) != nil
+      !requirement.isStatic && !requirement.isClass && self.translatedDecl(for: requirement) != nil
     }
   }
 
