@@ -65,13 +65,11 @@ public class MySwiftClassTest {
     }
 
     @Test
-    void classMethod() {
+    void classMembers() {
+        // snippet.classMembersUsageJava
         assertEquals(24, MySwiftClass.classMethod(12));
-    }
-
-    @Test
-    void classVariable() {
         assertEquals(42, MySwiftClass.getClassVariable());
+        // snippet.end
     }
 
     @Test
