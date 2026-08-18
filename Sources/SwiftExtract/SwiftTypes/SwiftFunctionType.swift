@@ -25,16 +25,28 @@ public struct SwiftFunctionType: Equatable {
   public var resultType: SwiftType
   public var isEscaping: Bool = false
 
+  public var effectSpecifiers: [SwiftEffectSpecifier] = []
+
+  public var thrownTypedError: SwiftType? = nil
+
+  public var isAsync: Bool { effectSpecifiers.contains(.async) }
+  public var isThrowing: Bool { effectSpecifiers.contains(.throws) }
+  public var isTypedThrowing: Bool { thrownTypedError != nil }
+
   public init(
     convention: Convention,
     parameters: [SwiftParameter],
     resultType: SwiftType,
-    isEscaping: Bool = false
+    isEscaping: Bool = false,
+    effectSpecifiers: [SwiftEffectSpecifier] = [],
+    thrownTypedError: SwiftType? = nil
   ) {
     self.convention = convention
     self.parameters = parameters
     self.resultType = resultType
     self.isEscaping = isEscaping
+    self.effectSpecifiers = effectSpecifiers
+    self.thrownTypedError = thrownTypedError
   }
 }
 
@@ -47,7 +59,14 @@ extension SwiftFunctionType: CustomStringConvertible {
       case .swift: ""
       }
     let escapingPrefix = isEscaping ? "@escaping " : ""
-    return "\(escapingPrefix)\(conventionPrefix)(\(parameterString)) -> \(resultType.description)"
+    let throwsString =
+      switch (isThrowing, thrownTypedError) {
+      case (true, .some(let errorType)): " throws(\(errorType.description))"
+      case (true, .none): " throws"
+      case (false, _): ""
+      }
+    let effectsSuffix = (isAsync ? " async" : "") + throwsString
+    return "\(escapingPrefix)\(conventionPrefix)(\(parameterString))\(effectsSuffix) -> \(resultType.description)"
   }
 }
 
@@ -70,12 +89,16 @@ extension SwiftFunctionType {
 
     self.resultType = try SwiftType(node.returnClause.type, lookupContext: lookupContext)
 
-    // check for effect specifiers
+    var effectSpecifiers: [SwiftEffectSpecifier] = []
+    if node.effectSpecifiers?.asyncSpecifier != nil {
+      effectSpecifiers.append(.async)
+    }
     if let throwsClause = node.effectSpecifiers?.throwsClause {
-      throw SwiftFunctionTranslationError.throws(throwsClause)
+      effectSpecifiers.append(.throws)
+      if let errorTypeNode = throwsClause.type {
+        self.thrownTypedError = try? SwiftType(errorTypeNode, lookupContext: lookupContext)
+      }
     }
-    if let asyncSpecifier = node.effectSpecifiers?.asyncSpecifier {
-      throw SwiftFunctionTranslationError.async(asyncSpecifier)
-    }
+    self.effectSpecifiers = effectSpecifiers
   }
 }
