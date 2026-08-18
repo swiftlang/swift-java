@@ -90,6 +90,11 @@ extension JavaType {
     .class(package: "java.util.function", name: "LongUnaryOperator")
   }
 
+  /// The description of the type java.util.function.DoubleUnaryOperator.
+  static var javaUtilFunctionDoubleUnaryOperator: JavaType {
+    .class(package: "java.util.function", name: "DoubleUnaryOperator")
+  }
+
   /// The description of the type java.util.function.IntBinaryOperator.
   static var javaUtilFunctionIntBinaryOperator: JavaType {
     .class(package: "java.util.function", name: "IntBinaryOperator")
