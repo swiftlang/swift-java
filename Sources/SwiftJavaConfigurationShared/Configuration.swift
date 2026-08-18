@@ -322,6 +322,9 @@ public struct Configuration: Codable {
   /// ```
   public var staticBuildConfigurationFile: String?
 
+  /// Configure the bridging of `@Observable` Swift objects.
+  public var swiftObservableBridging: JExtractSwiftObservableBridging?
+
   // ==== wrap-java ---------------------------------------------------------
 
   /// The Java class path that should be passed along to the swift-java tool.

@@ -94,4 +94,10 @@ extension ExtractedFunc {
       return "set\(self.name.firstCharacterUppercased)"
     }
   }
+
+  /// The `TrackingToken` Java variable name for Swift Observation
+  package var observableTrackerName: String {
+    "\(self.name)Tracker"
+  }
 }
+
