@@ -34,6 +34,7 @@ struct JNIClosureTests {
     public func closureDoublePredicate(closure: (Double) -> Bool) {}
 
     public func closureIntUnaryOperator(closure: (Int32) -> Int32) {}
+    public func closureLongUnaryOperator(closure: (Int64) -> Int64) {}
 
     public func closureIntBinaryOperator(closure: (Int32, Int32) -> Int32) {}
     public func closureLongBinaryOperator(closure: (Int64, Int64) -> Int64) {}
@@ -337,6 +338,31 @@ struct JNIClosureTests {
         """,
         """
         private static native void $closureIntUnaryOperator(java.util.function.IntUnaryOperator closure);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func closureLongUnaryOperator_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureLongUnaryOperator(closure: (Int64) -> Int64)
+         * }
+         */
+        public static void closureLongUnaryOperator(java.util.function.LongUnaryOperator closure) {
+          SwiftModule.$closureLongUnaryOperator(closure);
+        }
+        """,
+        """
+        private static native void $closureLongUnaryOperator(java.util.function.LongUnaryOperator closure);
         """,
       ]
     )
@@ -709,6 +735,31 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = [_0.getJValue(in: environment)]
             return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureLongUnaryOperator_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongUnaryOperator__Ljava_util_function_LongUnaryOperator_2")
+        public func Java_com_example_swift_SwiftModule__00024closureLongUnaryOperator__Ljava_util_function_LongUnaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureLongUnaryOperator(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsLong", "(J)J")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
+            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
