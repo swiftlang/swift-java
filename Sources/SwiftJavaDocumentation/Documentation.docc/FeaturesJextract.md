@@ -34,10 +34,10 @@ Swift `class` methods and computed properties are imported as `static` methods o
       @Snippet(path: "Snippets/ClassesSwift.swift", slice: "classMembers")
    }
    @Tab("Java (JNI)") {
-      @Snippet(path: "Snippets/MySwiftClassTest", slice: "classMembersUsageJava")
+      @Snippet(path: "Snippets/ClassesJavaJNI", slice: "classMembersUsageJava")
    }
    @Tab("Java (FFM)") {
-      @Snippet(path: "Snippets/MySwiftClassTest", slice: "classMembersUsageJava")
+      @Snippet(path: "Snippets/ClassesJavaFFM", slice: "classMembersUsageJava")
    }
 }
 
