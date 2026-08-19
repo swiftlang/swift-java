@@ -545,9 +545,7 @@ extension VariableDeclSyntax {
       return [.get]
     }
 
-    // Account for private(set) and similar modifiers. This is checked before the
-    // accessor block, because a variable can restrict its setter's access level and
-    // still spell out its accessors explicitly.
+    // Account for private(set) and similar modifiers.
     for modifier in self.modifiers where modifier.detail?.detail.text == "set" {
       if !minimumAccessLevel.matches(modifier) {
         return [.get]

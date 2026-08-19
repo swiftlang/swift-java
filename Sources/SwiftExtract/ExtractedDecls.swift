@@ -137,6 +137,15 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
     return swiftNominal.qualifiedTypeName
   }
 
+  /// This type's module-qualified identity, keyed on the output-facing name so a
+  /// specialization identifies as itself ("FishBox") rather than as its base ("Box").
+  ///
+  /// `identity.qualifiedName` is therefore `effectiveTypeName`, the key this type is
+  /// registered under in `AnalysisResult.extractedTypes`
+  public var identity: SwiftNominalIdentity {
+    SwiftNominalIdentity(moduleName: swiftNominal.moduleName, typeName: effectiveOutputTypeName)
+  }
+
   /// The effective Swift-side type name used as a registration key in the
   /// analyzer's type table - "FishBox" for a specialization registered via
   /// `typealias FishBox = Box<Fish>`, the qualified base name (e.g. "Box")
