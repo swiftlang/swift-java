@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import SwiftExtract
+import SwiftSyntax
 import Testing
 
 /// End-to-end tests that drive the analysis pipeline (Swift source →
@@ -551,6 +552,35 @@ struct AnalysisResultSuite {
     #expect(result.extractedTypes["Tank"] != nil)
     let fishTank = try #require(result.extractedTypes["FishTank"])
     #expect(fishTank.isSpecialization)
+  }
+
+  @Test func typealiasTriggersDecider() throws {
+    final class RecordingDecider: ExtractDecider, @unchecked Sendable {
+      var typealiasNames: [String] = []
+      func shouldExtract(decl: DeclSyntax, in parent: ExtractedNominalType?) -> Bool {
+        if let ta = decl.as(TypeAliasDeclSyntax.self) {
+          typealiasNames.append(ta.name.text)
+        }
+        return true
+      }
+    }
+    let decider = RecordingDecider()
+    _ = try SwiftAnalyzer.analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct Tank<Element> { public init() {} }
+          public struct Fish {}
+          public typealias FishTank = Tank<Fish>
+          """
+        )
+      ],
+      moduleName: "Aquarium",
+      extractDecider: decider,
+      config: DefaultSwiftExtractConfiguration(swiftModule: "Aquarium")
+    )
+    #expect(decider.typealiasNames == ["FishTank"])
   }
 
   // ==== -----------------------------------------------------------------------

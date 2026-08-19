@@ -527,6 +527,10 @@ final class SwiftAnalysisVisitor {
     in typeContext: ExtractedNominalType?,
     sourceFilePath: String,
   ) {
+    guard node.shouldExtract(config: config, in: typeContext, decider: analyzer.extractDecider) else {
+      return
+    }
+
     let outputName = node.name.text
     let rhsType = node.initializer.value
 
