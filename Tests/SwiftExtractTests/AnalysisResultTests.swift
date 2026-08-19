@@ -711,7 +711,7 @@ struct AnalysisResultSuite {
     let count = try #require(fishTank.variables.first { $0.name == "count" })
     #expect(count.isClass)
   }
-}
+
 
   // ==== -----------------------------------------------------------------------
   // MARK: Actor members are extracted
