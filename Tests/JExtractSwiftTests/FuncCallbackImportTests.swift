@@ -49,6 +49,7 @@ final class FuncCallbackImportTests {
 
     public func callMeIntUnaryOperator(callback: (Int32) -> Int32)
     public func callMeLongUnaryOperator(callback: (Int64) -> Int64)
+    public func callMeDoubleUnaryOperator(callback: (Double) -> Double)
 
     public func callMeIntBinaryOperator(callback: (Int32, Int32) -> Int32)
     public func callMeLongBinaryOperator(callback: (Int64, Int64) -> Int64)
@@ -803,6 +804,49 @@ final class FuncCallbackImportTests {
         public static void callMeLongUnaryOperator(java.util.function.LongUnaryOperator callback) {
           try(var arena$ = Arena.ofConfined()) {
             swiftjava___FakeModule_callMeLongUnaryOperator_callback.call(callMeLongUnaryOperator.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test("Import: public func callMecallMeDoubleUnaryOperatorFunc(callback: (Double) -> Double)")
+  func func_callMecallMeDoubleUnaryOperatorFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeDoubleUnaryOperator" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeDoubleUnaryOperator(callback: (Double) -> Double)
+         * }
+         */
+        public static void callMeDoubleUnaryOperator(java.util.function.DoubleUnaryOperator callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeDoubleUnaryOperator_callback.call(callMeDoubleUnaryOperator.$toUpcallStub(callback, arena$));
           }
         }
         """

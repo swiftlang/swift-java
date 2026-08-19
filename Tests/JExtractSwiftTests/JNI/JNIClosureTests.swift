@@ -35,6 +35,7 @@ struct JNIClosureTests {
 
     public func closureIntUnaryOperator(closure: (Int32) -> Int32) {}
     public func closureLongUnaryOperator(closure: (Int64) -> Int64) {}
+    public func closureDoubleUnaryOperator(closure: (Double) -> Double) {}
 
     public func closureIntBinaryOperator(closure: (Int32, Int32) -> Int32) {}
     public func closureLongBinaryOperator(closure: (Int64, Int64) -> Int64) {}
@@ -363,6 +364,32 @@ struct JNIClosureTests {
         """,
         """
         private static native void $closureLongUnaryOperator(java.util.function.LongUnaryOperator closure);
+        """,
+      ]
+    )
+  }
+
+
+  @Test
+  func closureDoubleUnaryOperator_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func closureDoubleUnaryOperator(closure: (Double) -> Double)
+         * }
+         */
+        public static void closureDoubleUnaryOperator(java.util.function.DoubleUnaryOperator closure) {
+          SwiftModule.$closureDoubleUnaryOperator(closure);
+        }
+        """,
+        """
+        private static native void $closureDoubleUnaryOperator(java.util.function.DoubleUnaryOperator closure);
         """,
       ]
     )
@@ -760,6 +787,31 @@ struct JNIClosureTests {
             environment.interface.DeleteLocalRef(environment, class$)
             let arguments$: [jvalue] = [_0.getJValue(in: environment)]
             return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
+          }
+          )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func closureDoubleUnaryOperator_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleUnaryOperator__Ljava_util_function_DoubleUnaryOperator_2")
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleUnaryOperator__Ljava_util_function_DoubleUnaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+          SwiftModule.closureDoubleUnaryOperator(closure: {
+            let class$ = environment.interface.GetObjectClass(environment, closure)
+            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsDouble", "(D)D")!
+            environment.interface.DeleteLocalRef(environment, class$)
+            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
+            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }

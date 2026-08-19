@@ -69,6 +69,10 @@ public func globalCallMeLongUnaryOperator(run: (Int64) -> Int64) -> Int64 {
   run(1)
 }
 
+public func globalCallMeDoubleUnaryOperator(run: (Double) -> Double) -> Double {
+  run(1.0)
+}
+
 public func globalCallMeIntBinaryOperator(run: (Int32, Int32) -> Int32) -> Int32 {
   run(1, 2)
 }
