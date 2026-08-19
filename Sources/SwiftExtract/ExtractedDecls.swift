@@ -376,6 +376,10 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
     self.functionSignature.isAsync
   }
 
+  public var isImplicitlyAsync: Bool {
+    self.functionSignature.isImplicitlyAsync
+  }
+
   public var isIsolated: Bool {
     self.functionSignature.isIsolated
   }

@@ -712,3 +712,36 @@ struct AnalysisResultSuite {
     #expect(count.isClass)
   }
 }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Actor members are extracted
+  @Test func actorMembersAreExtracted() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public actor K {
+            public init() {}
+            public func hello() {}
+          }
+
+          extension K {
+            public func hi() {}
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let k = try #require(result.extractedTypes["K"])
+    #expect(k.swiftNominal.kind == .actor)
+
+    let hello = try #require(k.methods.first { $0.name == "hello" })
+    #expect(hello.isImplicitlyAsync)
+
+    let hi = try #require(k.methods.first { $0.name == "hi" })
+    #expect(hi.isImplicitlyAsync)
+  }
+}

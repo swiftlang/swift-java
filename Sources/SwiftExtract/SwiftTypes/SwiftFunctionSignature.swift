@@ -35,6 +35,10 @@ public struct SwiftFunctionSignature: Equatable {
     effectSpecifiers.contains(.async)
   }
 
+  public var isImplicitlyAsync: Bool {
+    return !isAsync && selfParameter?.selfType.isActor == true
+  }
+
   public var isThrowing: Bool {
     effectSpecifiers.contains(.throws)
   }
