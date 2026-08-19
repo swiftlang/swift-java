@@ -712,7 +712,6 @@ struct AnalysisResultSuite {
     #expect(count.isClass)
   }
 
-
   // ==== -----------------------------------------------------------------------
   // MARK: Actor members are extracted
   @Test func actorMembersAreExtracted() throws {

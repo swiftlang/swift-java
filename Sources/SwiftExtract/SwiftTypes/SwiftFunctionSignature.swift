@@ -36,7 +36,10 @@ public struct SwiftFunctionSignature: Equatable {
   }
 
   public var isImplicitlyAsync: Bool {
-    !isAsync && selfParameter?.selfType.isActor == true
+    guard !isAsync, case .instance(_, let selfType) = selfParameter else {
+      return false
+    }
+    return selfType.isActor
   }
 
   public var isThrowing: Bool {
