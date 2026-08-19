@@ -78,6 +78,14 @@ public class MySwiftClassTest {
     }
 
     @Test
+    void test_MySwiftClass_classMembers() {
+        // snippet.classMembersUsageJava
+        assertEquals(24, MySwiftClass.classMethod(12));
+        assertEquals(42, MySwiftClass.getClassVariable());
+        // snippet.end
+    }
+
+    @Test
     @Disabled // TODO: Need var mangled names in interfaces
     void test_MySwiftClass_property_x() {
         try(var arena = AllocatingSwiftArena.ofConfined()) {

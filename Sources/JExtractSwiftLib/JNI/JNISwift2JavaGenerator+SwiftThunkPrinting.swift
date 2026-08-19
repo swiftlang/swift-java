@@ -684,7 +684,7 @@ extension JNISwift2JavaGenerator {
           &printer,
           "selfPointer",
         )
-      case .staticMethod(let selfType), .initializer(let selfType):
+      case .staticMethod(let selfType), .classMethod(let selfType), .initializer(let selfType):
         "\(selfType)"
       case .none:
         swiftModuleName

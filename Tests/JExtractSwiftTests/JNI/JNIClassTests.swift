@@ -24,6 +24,9 @@ struct JNIClassTests {
 
         public static func method() {}
 
+        public class func classMethod() -> Int64 { 42 }
+        public class var classVariable: Int64 { 7 }
+
         public init(x: Int64, y: Int64) {
           self.x = y
           self.y = y
@@ -136,6 +139,92 @@ struct JNIClassTests {
         @_cdecl("Java_com_example_swift_MyClass__00024method__")
         public func Java_com_example_swift_MyClass__00024method__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
           MyClass.method()
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func classMethod_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public class func classMethod() -> Int64
+         * }
+         */
+        public static long classMethod() {
+          return MyClass.$classMethod();
+        }
+        """,
+        """
+        private static native long $classMethod();
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func classMethod_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyClass__00024classMethod__")
+        public func Java_com_example_swift_MyClass__00024classMethod__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+          return MyClass.classMethod().getJNILocalRefValue(in: environment)
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func classVariable_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public class var classVariable: Int64
+         * }
+         */
+        public static long getClassVariable() {
+          return MyClass.$getClassVariable();
+        }
+        """,
+        """
+        private static native long $getClassVariable();
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func classVariable_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_MyClass__00024getClassVariable__")
+        public func Java_com_example_swift_MyClass__00024getClassVariable__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+          return MyClass.classVariable.getJNILocalRefValue(in: environment)
         }
         """
       ]

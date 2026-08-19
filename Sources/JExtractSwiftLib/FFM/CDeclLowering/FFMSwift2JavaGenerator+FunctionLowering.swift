@@ -107,7 +107,7 @@ struct CdeclLowering {
           genericParameters: signature.genericParameters,
           genericRequirements: signature.genericRequirements,
         )
-      case nil, .initializer(_), .staticMethod(_):
+      case nil, .initializer(_), .staticMethod(_), .classMethod(_):
         nil
       }
 
@@ -1005,7 +1005,7 @@ extension LoweredFunctionSignature {
         placeholder: "self",
         bodyItems: &bodyItems,
       )
-    case .staticMethod(let selfType), .initializer(let selfType):
+    case .staticMethod(let selfType), .classMethod(let selfType), .initializer(let selfType):
       selfExpr = "\(raw: selfType.description)"
     case .none:
       selfExpr = nil

@@ -227,7 +227,7 @@ extension JNISwift2JavaGenerator {
 
       return TranslatedFunctionDecl(
         name: javaName,
-        isStatic: decl.isStatic || !decl.hasParent || decl.isInitializer,
+        isStatic: decl.isStatic || decl.isClass || !decl.hasParent || decl.isInitializer,
         isThrowing: decl.isThrowing,
         isAsync: decl.isAsync,
         isIsolated: decl.isIsolated,
@@ -391,7 +391,7 @@ extension JNISwift2JavaGenerator {
           parameter: JavaParameter(name: "selfTypePointer", type: .long),
           conversion: .typeMetadataAddress(.placeholder),
         )
-      case .staticMethod, .initializer:
+      case .staticMethod, .classMethod, .initializer:
         return TranslatedParameter(
           parameter: JavaParameter(name: "selfTypePointer", type: .long),
           conversion: .constant("$typeMetadataAddressDowncall()"),

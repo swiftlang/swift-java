@@ -412,7 +412,7 @@ extension JNISwift2JavaGenerator {
       }
 
       for method in decl.methods {
-        if isEffectivelyGeneric && method.isStatic {
+        if isEffectivelyGeneric && (method.isStatic || method.isClass) {
           self.logger.debug("Skipping static method '\(method.name)' on unspecialized generic type '\(decl.effectiveJavaName)'")
           continue
         }
@@ -421,7 +421,7 @@ extension JNISwift2JavaGenerator {
       }
 
       for variable in decl.variables {
-        if isEffectivelyGeneric && variable.isStatic {
+        if isEffectivelyGeneric && (variable.isStatic || variable.isClass) {
           self.logger.debug("Skipping static property '\(variable.name)' on unspecialized generic type '\(decl.effectiveJavaName)'")
           continue
         }

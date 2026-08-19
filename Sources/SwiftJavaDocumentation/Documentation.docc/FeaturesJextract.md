@@ -25,6 +25,22 @@ For guidance on choosing between JNI and FFM mode, see <doc:FeaturesOverview>.
 
 Classes and structs can both have initializers imported.
 
+### Class members
+
+Swift `class` methods and computed properties are imported as `static` methods on the generated Java wrapper type.
+
+@TabNavigator {
+   @Tab("Swift") {
+      @Snippet(path: "Snippets/ClassesSwift.swift", slice: "classMembers")
+   }
+   @Tab("Java (JNI)") {
+      @Snippet(path: "Snippets/ClassesJavaJNI", slice: "classMembersUsageJava")
+   }
+   @Tab("Java (FFM)") {
+      @Snippet(path: "Snippets/ClassesJavaFFM", slice: "classMembersUsageJava")
+   }
+}
+
 ### Optional initializers / Throwing initializers
 
 Optional and throwing initializers are supported in JNI mode.

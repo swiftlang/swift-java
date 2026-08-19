@@ -569,4 +569,33 @@ struct AnalysisResultSuite {
 
     #expect(param.isIsolated)
   }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: `class` functions and variables
+
+  @Test func classMembers() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public class FishTank {
+            public init() {}
+            public class func maxCapacity() -> Int64 { 100 }
+            public class var count: Int64 { 0 }
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let fishTank = try #require(result.extractedTypes["FishTank"])
+
+    let maxCapacity = try #require(fishTank.methods.first { $0.name == "maxCapacity" })
+    #expect(maxCapacity.isClass)
+
+    let count = try #require(fishTank.variables.first { $0.name == "count" })
+    #expect(count.isClass)
+  }
 }

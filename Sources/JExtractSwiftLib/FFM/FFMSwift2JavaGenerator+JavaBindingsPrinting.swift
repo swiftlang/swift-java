@@ -388,7 +388,7 @@ extension FFMSwift2JavaGenerator {
 
     var modifiers = "public"
     switch decl.functionSignature.selfParameter {
-    case .staticMethod, .initializer, nil:
+    case .staticMethod, .classMethod, .initializer, nil:
       modifiers.append(" static")
     default:
       break

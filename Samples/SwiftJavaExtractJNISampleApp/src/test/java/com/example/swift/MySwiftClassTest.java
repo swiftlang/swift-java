@@ -65,6 +65,14 @@ public class MySwiftClassTest {
     }
 
     @Test
+    void classMembers() {
+        // snippet.classMembersUsageJava
+        assertEquals(24, MySwiftClass.classMethod(12));
+        assertEquals(42, MySwiftClass.getClassVariable());
+        // snippet.end
+    }
+
+    @Test
     void xMultiplied() {
         try (var arena = SwiftArena.ofConfined()) {
             MySwiftClass c = MySwiftClass.init(20, 10, arena);

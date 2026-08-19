@@ -39,6 +39,14 @@ public class MySwiftClass {
     MySwiftClass(x: x, y: y)
   }
 
+  public class func classMethod(x: Int) -> Int {
+    x * 2
+  }
+
+  public class var classVariable: Int {
+    42
+  }
+
   public func sum() -> Int {
     x + y
   }

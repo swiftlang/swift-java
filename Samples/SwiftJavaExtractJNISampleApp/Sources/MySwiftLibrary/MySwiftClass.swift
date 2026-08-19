@@ -55,6 +55,16 @@ public class MySwiftClass {
   public static func method() {
   }
 
+  // snippet.classMembers
+  public class func classMethod(x: Int64) -> Int64 {
+    x * 2
+  }
+
+  public class var classVariable: Int64 {
+    42
+  }
+  // snippet.end
+
   // snippet.initializers
   public init(x: Int64, y: Int64) {
     self.x = x
