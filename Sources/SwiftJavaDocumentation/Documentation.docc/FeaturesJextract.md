@@ -195,8 +195,8 @@ There are two modes of extracting them, configurable using the `asyncFuncMode` s
    @Tab("Java (JNI)") {
       @Snippet(path: "Snippets/AsyncJavaJNI", slice: "asyncUsageJava")
    }
-   @Tab("Java (FFM): not supported") {
-      @Snippet(path: "Snippets/NotSupportedYetJavaFFM", slice: "notSupportedYet")
+   @Tab("Java (FFM)") {
+      @Snippet(path: "Snippets/AsyncJavaFFM", slice: "asyncUsageJava")
    }
 }
 

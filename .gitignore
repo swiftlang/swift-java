@@ -54,3 +54,6 @@ Package.resolved
 
 
 BuildLogic/.kotlin/
+
+# Ignore agent files
+.agents/
