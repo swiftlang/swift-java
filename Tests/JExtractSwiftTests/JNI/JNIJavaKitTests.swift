@@ -115,7 +115,7 @@ struct JNIJavaKitTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
         public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
-          return (SwiftModule.function() as Optional).getJNILocalRefValue(in: environment)
+          return SwiftModule.function().getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -160,7 +160,7 @@ struct JNIJavaKitTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
         public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
-          return (SwiftModule.function() as Optional).getJNILocalRefValue(in: environment)
+          return SwiftModule.function().getJNILocalRefValue(in: environment)
         }
         """
       ]
@@ -205,7 +205,7 @@ struct JNIJavaKitTests {
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
         public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobjectArray? {
-          return (SwiftModule.function() as Optional).getJNILocalRefValue(in: environment)
+          return SwiftModule.function().getJNILocalRefValue(in: environment)
         }
         """
       ]
