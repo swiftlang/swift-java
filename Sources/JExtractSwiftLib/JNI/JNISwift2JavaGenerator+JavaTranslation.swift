@@ -217,7 +217,8 @@ extension JNISwift2JavaGenerator {
 
       // Handle async methods and isolated methods
       if decl.functionSignature.isAsync || decl.functionSignature.isIsolated
-      || decl.functionSignature.isImplicitlyAsync {
+        || decl.functionSignature.isImplicitlyAsync
+      {
         self.convertToAsync(
           translatedFunctionSignature: &translatedFunctionSignature,
           nativeFunctionSignature: &nativeFunctionSignature,

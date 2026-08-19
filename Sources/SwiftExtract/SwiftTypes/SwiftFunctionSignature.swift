@@ -36,7 +36,7 @@ public struct SwiftFunctionSignature: Equatable {
   }
 
   public var isImplicitlyAsync: Bool {
-    return !isAsync && selfParameter?.selfType.isActor == true
+    !isAsync && selfParameter?.selfType.isActor == true
   }
 
   public var isThrowing: Bool {

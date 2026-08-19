@@ -77,7 +77,7 @@ public enum SwiftType: Equatable {
     asNominalType?.nominalTypeDecl
   }
 
-  public var isActor : Bool {
+  public var isActor: Bool {
     asNominalTypeDeclaration?.kind == .actor
   }
 
