@@ -27,11 +27,11 @@ public struct SwiftFunctionType: Equatable {
 
   public var effectSpecifiers: [SwiftEffectSpecifier] = []
 
-  public var thrownTypedError: SwiftType? = nil
-
   public var isAsync: Bool { effectSpecifiers.contains(.async) }
+
   public var isThrowing: Bool { effectSpecifiers.contains(.throws) }
   public var isTypedThrowing: Bool { thrownTypedError != nil }
+  public var thrownTypedError: SwiftType? = nil
 
   public init(
     convention: Convention,
@@ -95,9 +95,10 @@ extension SwiftFunctionType {
     }
     if let throwsClause = node.effectSpecifiers?.throwsClause {
       effectSpecifiers.append(.throws)
-      if let errorTypeNode = throwsClause.type {
-        self.thrownTypedError = try? SwiftType(errorTypeNode, lookupContext: lookupContext)
-      }
+      self.thrownTypedError = SwiftType.thrownTypedError(
+        from: throwsClause,
+        lookupContext: lookupContext
+      )
     }
     self.effectSpecifiers = effectSpecifiers
   }

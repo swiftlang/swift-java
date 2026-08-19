@@ -15,7 +15,7 @@
 import SwiftExtract
 import Testing
 
-@Suite("Function type effect specifiers")
+@Suite
 struct FunctionTypeEffectSpecifierSuite {
 
   private func closureParameterType(_ source: String) throws -> SwiftFunctionType {
@@ -108,7 +108,14 @@ struct FunctionTypeEffectSpecifierSuite {
   @Test
   func effectsOnReturnedClosureAreRecorded() throws {
     let result = try analyze(
-      sources: [("/fake/Source.swift", "public func get() -> () async -> Void { fatalError() }")],
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public func get() -> () async -> Void { fatalError() }
+          """
+        )
+      ],
       moduleName: "Test"
     )
 

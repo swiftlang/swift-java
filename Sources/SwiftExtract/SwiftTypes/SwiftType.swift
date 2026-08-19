@@ -340,6 +340,18 @@ extension SwiftNominalType {
 }
 
 extension SwiftType {
+  public static func thrownTypedError(
+    from throwsClause: ThrowsClauseSyntax?,
+    lookupContext: SwiftTypeLookupContext
+  ) -> SwiftType? {
+    guard let errorTypeNode = throwsClause?.type else {
+      return nil
+    }
+    return try? SwiftType(errorTypeNode, lookupContext: lookupContext)
+  }
+}
+
+extension SwiftType {
   public init(_ type: TypeSyntax, lookupContext: SwiftTypeLookupContext) throws {
     var knownTypes: SwiftKnownTypes {
       SwiftKnownTypes(symbolTable: lookupContext.symbolTable)
