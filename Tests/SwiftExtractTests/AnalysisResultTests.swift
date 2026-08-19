@@ -352,6 +352,119 @@ struct AnalysisResultSuite {
     #expect(both.functionSignature.effectSpecifiers.contains(.throws))
   }
 
+  @Test
+  func typedThrows() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct FishTankError: Error {}
+          public func untyped() throws {}
+          public func typed() throws(FishTankError) {}
+          public func typedAsync() async throws(FishTankError) {}
+          public func unresolvable() throws(NoSuchError) {}
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let byName = Dictionary(uniqueKeysWithValues: result.extractedGlobalFuncs.map { ($0.name, $0) })
+
+    let untyped = try #require(byName["untyped"])
+    #expect(untyped.functionSignature.isThrowing)
+    #expect(!untyped.functionSignature.isTypedThrowing)
+    #expect(untyped.functionSignature.thrownTypedError == nil)
+
+    let typed = try #require(byName["typed"])
+    #expect(typed.functionSignature.isThrowing)
+    #expect(typed.functionSignature.isTypedThrowing)
+    #expect(typed.functionSignature.thrownTypedError?.description == "FishTankError")
+
+    let typedAsync = try #require(byName["typedAsync"])
+    #expect(typedAsync.functionSignature.isAsync)
+    #expect(typedAsync.functionSignature.thrownTypedError?.description == "FishTankError")
+
+    // An unresolvable error type must not skip the entire decl
+    let unresolvable = try #require(byName["unresolvable"])
+    #expect(unresolvable.functionSignature.isThrowing)
+    #expect(unresolvable.functionSignature.thrownTypedError == nil)
+  }
+
+  @Test
+  func typedThrowsOnInitializers() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct FishTankError: Error {}
+          public struct FishTank {
+            public init(capacity: Int) throws(FishTankError) {}
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let fishTank = try #require(result.extractedTypes["FishTank"])
+    let initializer = try #require(fishTank.initializers.first)
+    #expect(initializer.functionSignature.isThrowing)
+    #expect(initializer.functionSignature.thrownTypedError?.description == "FishTankError")
+  }
+
+  @Test
+  func typedThrowsOnPropertyGetter() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct FishTankError: Error {}
+          public struct FishTank {
+            public var capacity: Int {
+              get throws(FishTankError) { 0 }
+            }
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let fishTank = try #require(result.extractedTypes["FishTank"])
+    let getter = try #require(fishTank.variables.first { $0.apiKind == .getter })
+    #expect(getter.functionSignature.isThrowing)
+    #expect(getter.functionSignature.thrownTypedError?.description == "FishTankError")
+  }
+
+  @Test
+  func typedThrowsOnSubscriptGetter() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public struct FishTankError: Error {}
+          public struct FishTank {
+            public subscript(index: Int) -> Int {
+              get throws(FishTankError) { 0 }
+            }
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let fishTank = try #require(result.extractedTypes["FishTank"])
+    let subscriptGetter = try #require(fishTank.variables.first { $0.apiKind == .subscriptGetter })
+    #expect(subscriptGetter.functionSignature.isThrowing)
+    #expect(subscriptGetter.functionSignature.thrownTypedError?.description == "FishTankError")
+  }
+
   // ==== -----------------------------------------------------------------------
   // MARK: Access-level filtering
 

@@ -27,6 +27,7 @@ public struct SwiftFunctionSignature: Equatable {
   public var parameters: [SwiftParameter]
   public var result: SwiftResult
   public var effectSpecifiers: [SwiftEffectSpecifier]
+  public var thrownTypedError: SwiftType?
   public var genericParameters: [SwiftGenericParameterDeclaration]
   public var genericRequirements: [SwiftGenericRequirement]
 
@@ -36,6 +37,10 @@ public struct SwiftFunctionSignature: Equatable {
 
   public var isThrowing: Bool {
     effectSpecifiers.contains(.throws)
+  }
+
+  public var isTypedThrowing: Bool {
+    thrownTypedError != nil
   }
 
   /// Whether any parameter is variadic (`T...`).
@@ -53,6 +58,7 @@ public struct SwiftFunctionSignature: Equatable {
     parameters: [SwiftParameter],
     result: SwiftResult,
     effectSpecifiers: [SwiftEffectSpecifier],
+    thrownTypedError: SwiftType? = nil,
     genericParameters: [SwiftGenericParameterDeclaration],
     genericRequirements: [SwiftGenericRequirement]
   ) {
@@ -60,6 +66,7 @@ public struct SwiftFunctionSignature: Equatable {
     self.parameters = parameters
     self.result = result
     self.effectSpecifiers = effectSpecifiers
+    self.thrownTypedError = thrownTypedError
     self.genericParameters = genericParameters
     self.genericRequirements = genericRequirements
   }
@@ -120,7 +127,7 @@ extension SwiftFunctionSignature {
       whereClause: node.genericWhereClause,
       lookupContext: lookupContext
     )
-    let (parameters, effectSpecifiers) = try Self.translateFunctionSignature(
+    let (parameters, effectSpecifiers, thrownTypedError) = try Self.translateFunctionSignature(
       node.signature,
       lookupContext: lookupContext
     )
@@ -138,6 +145,7 @@ extension SwiftFunctionSignature {
       parameters: parameters,
       result: SwiftResult(convention: .direct, type: type),
       effectSpecifiers: effectSpecifiers,
+      thrownTypedError: thrownTypedError,
       genericParameters: genericParams,
       genericRequirements: genericRequirements
     )
@@ -205,8 +213,8 @@ extension SwiftFunctionSignature {
       selfParameter = nil
     }
 
-    // Translate the parameters.
-    let (parameters, effectSpecifiers) = try Self.translateFunctionSignature(
+    // Translate the function signature
+    let (parameters, effectSpecifiers, thrownTypedError) = try Self.translateFunctionSignature(
       node.signature,
       lookupContext: lookupContext
     )
@@ -227,6 +235,7 @@ extension SwiftFunctionSignature {
       parameters: parameters,
       result: result,
       effectSpecifiers: effectSpecifiers,
+      thrownTypedError: thrownTypedError,
       genericParameters: genericParams,
       genericRequirements: genericRequirements
     )
@@ -289,11 +298,16 @@ extension SwiftFunctionSignature {
   }
 
   /// Translate the function signature, returning the list of translated
-  /// parameters and effect specifiers.
+  /// parameters, its effect specifiers, and the error type of a typed
+  /// `throws(E)` clause if present.
   public static func translateFunctionSignature(
     _ signature: FunctionSignatureSyntax,
     lookupContext: SwiftTypeLookupContext
-  ) throws -> ([SwiftParameter], [SwiftEffectSpecifier]) {
+  ) throws -> (
+    parameters: [SwiftParameter],
+    effectSpecifiers: [SwiftEffectSpecifier],
+    thrownTypedError: SwiftType?
+  ) {
     var effectSpecifiers = [SwiftEffectSpecifier]()
     if signature.effectSpecifiers?.throwsClause != nil {
       effectSpecifiers.append(.throws)
@@ -302,11 +316,16 @@ extension SwiftFunctionSignature {
       effectSpecifiers.append(.async)
     }
 
+    let thrownTypedError = SwiftType.thrownTypedError(
+      from: signature.effectSpecifiers?.throwsClause,
+      lookupContext: lookupContext
+    )
+
     let parameters = try signature.parameterClause.parameters.map { param in
       try SwiftParameter(param, lookupContext: lookupContext)
     }
 
-    return (parameters, effectSpecifiers)
+    return (parameters, effectSpecifiers, thrownTypedError)
   }
 
   public init(
@@ -331,21 +350,22 @@ extension SwiftFunctionSignature {
     }
     let valueType = try SwiftType(varTypeNode, lookupContext: lookupContext)
 
-    var effectSpecifiers: [SwiftEffectSpecifier]? = nil
+    var accessorEffects: AccessorEffects? = nil
     switch binding.accessorBlock?.accessors {
     case .getter(let getter):
       if let getter = getter.as(AccessorDeclSyntax.self) {
-        effectSpecifiers = try Self.effectSpecifiers(from: getter)
+        accessorEffects = Self.translateEffectSpecifiers(from: getter, lookupContext: lookupContext)
       }
     case .accessors(let accessors):
       if let getter = accessors.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
-        effectSpecifiers = try Self.effectSpecifiers(from: getter)
+        accessorEffects = Self.translateEffectSpecifiers(from: getter, lookupContext: lookupContext)
       }
     default:
       break
     }
 
-    self.effectSpecifiers = effectSpecifiers ?? []
+    self.effectSpecifiers = accessorEffects?.effectSpecifiers ?? []
+    self.thrownTypedError = accessorEffects?.thrownTypedError
 
     if isSet {
       self.parameters = [
@@ -388,21 +408,22 @@ extension SwiftFunctionSignature {
       return p
     }
 
-    var effectSpecifiers: [SwiftEffectSpecifier]? = nil
+    var accessorEffects: AccessorEffects? = nil
     switch subscriptNode.accessorBlock?.accessors {
     case .getter(let getter):
       if let getter = getter.as(AccessorDeclSyntax.self) {
-        effectSpecifiers = try Self.effectSpecifiers(from: getter)
+        accessorEffects = Self.translateEffectSpecifiers(from: getter, lookupContext: lookupContext)
       }
     case .accessors(let accessors):
       if let getter = accessors.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
-        effectSpecifiers = try Self.effectSpecifiers(from: getter)
+        accessorEffects = Self.translateEffectSpecifiers(from: getter, lookupContext: lookupContext)
       }
     default:
       break
     }
 
-    self.effectSpecifiers = effectSpecifiers ?? []
+    self.effectSpecifiers = accessorEffects?.effectSpecifiers ?? []
+    self.thrownTypedError = accessorEffects?.thrownTypedError
 
     if isSet {
       nodeParameters.append(SwiftParameter(convention: .byValue, parameterName: "newValue", type: valueType))
@@ -416,7 +437,15 @@ extension SwiftFunctionSignature {
     self.genericRequirements = []
   }
 
-  private static func effectSpecifiers(from decl: AccessorDeclSyntax) throws -> [SwiftEffectSpecifier] {
+  struct AccessorEffects {
+    var effectSpecifiers: [SwiftEffectSpecifier] = []
+    var thrownTypedError: SwiftType? = nil
+  }
+
+  private static func translateEffectSpecifiers(
+    from decl: AccessorDeclSyntax,
+    lookupContext: SwiftTypeLookupContext
+  ) -> AccessorEffects {
     var effectSpecifiers = [SwiftEffectSpecifier]()
     if decl.effectSpecifiers?.throwsClause != nil {
       effectSpecifiers.append(.throws)
@@ -424,7 +453,13 @@ extension SwiftFunctionSignature {
     if decl.effectSpecifiers?.asyncSpecifier != nil {
       effectSpecifiers.append(.async)
     }
-    return effectSpecifiers
+
+    let thrownTypedError = SwiftType.thrownTypedError(
+      from: decl.effectSpecifiers?.throwsClause,
+      lookupContext: lookupContext
+    )
+
+    return AccessorEffects(effectSpecifiers: effectSpecifiers, thrownTypedError: thrownTypedError)
   }
 
   private static func variableSelfParameter(
