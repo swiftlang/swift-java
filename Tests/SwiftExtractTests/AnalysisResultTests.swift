@@ -725,6 +725,7 @@ struct AnalysisResultSuite {
             public func hello() {}
             public nonisolated func explicitlyNonisolated() {}
             @concurrent public func concurrently() -> Int { 0 }
+            @concurrent public func shouldBeAsync() async -> Int { 0 }
             public static func staticMethod() {}
           }
 
@@ -751,6 +752,10 @@ struct AnalysisResultSuite {
 
     let concurrently = try #require(k.methods.first { $0.name == "concurrently" })
     #expect(!concurrently.isImplicitlyAsync)
+
+    let shouldBeAsync = try #require(k.methods.first { $0.name == "shouldBeAsync" })
+    #expect(shouldBeAsync.isAsync)
+    #expect(!shouldBeAsync.isImplicitlyAsync)
 
     let staticMethod = try #require(k.methods.first { $0.name == "staticMethod" })
     #expect(!staticMethod.isImplicitlyAsync)

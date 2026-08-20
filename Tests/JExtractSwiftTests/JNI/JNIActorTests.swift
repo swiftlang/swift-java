@@ -23,6 +23,8 @@ struct JNIActor1MethodsTests {
       public init() {}
       public func hello() {}
       public nonisolated func sync() {}
+      @concurrent public func concurrently() {}
+      @concurrent public func concurrentlyAsync() async {}
     }
 
     extension K {
@@ -176,6 +178,97 @@ struct JNIActor1MethodsTests {
       notExpectedChunks: [
         "await selfPointer$.pointee.sync()",
         "await selfPointer$.pointee.syncInExtension()",
+      ]
+    )
+  }
+
+  @Test("Import: @concurrent actor method stays synchronous (Java)")
+  func concurrentMethod_java() throws {
+    try assertOutput(
+      input: Self.source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public void concurrently() {
+          K.$concurrently(this.$memoryAddress());
+        }
+        """,
+        """
+        private static native void $concurrently(long selfPointer);
+        """,
+      ],
+      notExpectedChunks: [
+        "public java.util.concurrent.CompletableFuture<java.lang.Void> concurrently() {"
+      ]
+    )
+  }
+
+  @Test("Import: @concurrent actor method does not await the actor (Swift)")
+  func concurrentMethod_swift() throws {
+    try assertOutput(
+      input: Self.source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_K__00024concurrently__J")
+        ...
+        selfPointer$.pointee.concurrently()
+        """
+      ],
+      notExpectedChunks: [
+        "await selfPointer$.pointee.concurrently()"
+      ]
+    )
+  }
+
+  @Test("Import: @concurrent async actor method is imported as a future (Java)")
+  func concurrentAsyncMethod_java() throws {
+    try assertOutput(
+      input: Self.source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public java.util.concurrent.CompletableFuture<java.lang.Void> concurrentlyAsync() {
+          java.util.concurrent.CompletableFuture<java.lang.Void> future$ = new java.util.concurrent.CompletableFuture<java.lang.Void>();
+          K.$concurrentlyAsync(this.$memoryAddress(), future$);
+          return future$.thenApply((futureResult$) -> {
+            return futureResult$;
+          }
+          );
+        }
+        """,
+        """
+        private static native void $concurrentlyAsync(long selfPointer, java.util.concurrent.CompletableFuture<java.lang.Void> result_future);
+        """,
+      ],
+      notExpectedChunks: [
+        "public void concurrentlyAsync() {",
+        "private static native void $concurrentlyAsync(long selfPointer);",
+      ]
+    )
+  }
+
+  @Test("Import: @concurrent async actor method is awaited (Swift)")
+  func concurrentAsyncMethod_swift() throws {
+    try assertOutput(
+      input: Self.source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_K__00024concurrentlyAsync__JLjava_util_concurrent_CompletableFuture_2")
+        ...
+        task = Task.immediate {
+        ...
+        await selfPointer$.pointee.concurrentlyAsync()
+        """
       ]
     )
   }
