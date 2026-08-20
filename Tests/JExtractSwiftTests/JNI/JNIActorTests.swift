@@ -22,10 +22,12 @@ struct JNIActor1MethodsTests {
     public actor K {
       public init() {}
       public func hello() {}
+      public nonisolated func sync() {}
     }
 
     extension K {
       public func hi() {}
+      public nonisolated func syncInExtension() {}
     }
     """
 
@@ -121,6 +123,59 @@ struct JNIActor1MethodsTests {
         ...
         await selfPointer$.pointee.hi()
         """
+      ]
+    )
+  }
+
+  @Test("Import: nonisolated actor method stays synchronous (Java)")
+  func nonisolatedMethod_java() throws {
+    try assertOutput(
+      input: Self.source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public void sync() {
+          K.$sync(this.$memoryAddress());
+        }
+        """,
+        """
+        private static native void $sync(long selfPointer);
+        """,
+        """
+        public void syncInExtension() {
+          K.$syncInExtension(this.$memoryAddress());
+        }
+        """,
+        """
+        private static native void $syncInExtension(long selfPointer);
+        """,
+      ],
+      notExpectedChunks: [
+        "public java.util.concurrent.CompletableFuture<java.lang.Void> sync() {",
+        "public java.util.concurrent.CompletableFuture<java.lang.Void> syncInExtension() {",
+      ]
+    )
+  }
+
+  @Test("Import: nonisolated actor method does not await the actor (Swift)")
+  func nonisolatedMethod_swift() throws {
+    try assertOutput(
+      input: Self.source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_K__00024sync__J")
+        ...
+        selfPointer$.pointee.sync()
+        """
+      ],
+      notExpectedChunks: [
+        "await selfPointer$.pointee.sync()",
+        "await selfPointer$.pointee.syncInExtension()",
       ]
     )
   }

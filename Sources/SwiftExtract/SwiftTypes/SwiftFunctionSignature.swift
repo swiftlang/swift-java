@@ -248,7 +248,13 @@ extension SwiftFunctionSignature {
       genericParameters: genericParams,
       genericRequirements: genericRequirements
     )
-    self.isNonisolated = node.modifiers.contains { $0.name.tokenKind == .keyword(.nonisolated) }
+
+    self.isNonisolated =
+      node.modifiers.contains { $0.name.tokenKind == .keyword(.nonisolated) }
+      || node.attributes.contains { attribute in
+        attribute.as(AttributeSyntax.self)?
+          .attributeName.as(IdentifierTypeSyntax.self)?.name.text == "concurrent"
+      }
   }
 
   public static func translateGenericParameters(
