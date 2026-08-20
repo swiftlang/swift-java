@@ -110,6 +110,16 @@ extension JavaType {
     .class(package: "java.util.function", name: "DoubleBinaryOperator")
   }
 
+  /// The description of the type java.util.function.DoubleToIntFunction.
+  static var javaUtilFunctionDoubleToIntFunction: JavaType {
+    .class(package: "java.util.function", name: "DoubleToIntFunction")
+  }
+
+  /// The description of the type java.util.function.LongToIntFunction.
+  static var javaUtilFunctionLongToIntFunction: JavaType {
+    .class(package: "java.util.function", name: "LongToIntFunction")
+  }
+
   /// The description of the type java.lang.Class.
   static var javaLangClass: JavaType {
     .class(package: "java.lang", name: "Class")

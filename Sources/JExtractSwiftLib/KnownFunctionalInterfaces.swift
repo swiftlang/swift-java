@@ -141,6 +141,20 @@ struct KnownJavaFunctionalInterface: Sendable {
     result: .double
   )
 
+  static let doubleToIntFunction = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionDoubleToIntFunction,
+    method: "applyAsInt",
+    parameters: [.double],
+    result: .int
+  )
+
+  static let longToIntFunction = KnownJavaFunctionalInterface(
+    JavaType.javaUtilFunctionLongToIntFunction,
+    method: "applyAsInt",
+    parameters: [.long],
+    result: .int
+  )
+
   static let all: [KnownJavaFunctionalInterface] = [
     .runnable,
     .booleanSupplier,
@@ -159,6 +173,8 @@ struct KnownJavaFunctionalInterface: Sendable {
     .intBinaryOperator,
     .longBinaryOperator,
     .doubleBinaryOperator,
+    .doubleToIntFunction,
+    .longToIntFunction,
   ]
 
   static func find(parameters: [JavaType], result: JavaType) -> KnownJavaFunctionalInterface? {
@@ -243,6 +259,19 @@ struct KnownJavaFunctionalInterface: Sendable {
         longUnaryOperator
       case _ where parameter.isDouble:
         doubleUnaryOperator
+      default:
+        nil
+      }
+    }
+
+    // To int functions
+    if parameters.count == 1 && result.isInt32 {
+      let parameter = parameters[0].type
+      return switch () {
+      case _ where parameter.isInt64:
+        longToIntFunction
+      case _ where parameter.isDouble:
+        doubleToIntFunction
       default:
         nil
       }

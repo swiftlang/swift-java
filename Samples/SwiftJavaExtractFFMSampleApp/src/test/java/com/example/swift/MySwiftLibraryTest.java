@@ -258,4 +258,16 @@ public class MySwiftLibraryTest {
         double result = MySwiftLibrary.globalCallMeDoubleBinaryOperator((double a, double b) -> { return a + b; });
         assertEquals(3.0, result);
     }
+
+    @Test
+    void call_globalCallMeDoubleToIntFunction_noThrow() {
+        int result = MySwiftLibrary.globalCallMeDoubleToIntFunction((double a) -> { return (int) a; });
+        assertEquals(1, result);
+    }
+
+    @Test
+    void call_globalCallMeLongToIntFunction_noThrow() {
+        int result = MySwiftLibrary.globalCallMeLongToIntFunction((long a) -> { return (int) a; });
+        assertEquals(1, result);
+    }
 }
