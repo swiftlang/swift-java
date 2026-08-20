@@ -33,6 +33,8 @@ public struct SwiftFunctionSignature: Equatable {
 
   public var isNonisolated: Bool = false
 
+  public var isDistributed: Bool = false
+
   public var isAsync: Bool {
     effectSpecifiers.contains(.async)
   }
@@ -46,6 +48,10 @@ public struct SwiftFunctionSignature: Equatable {
 
   public var isThrowing: Bool {
     effectSpecifiers.contains(.throws)
+  }
+
+  public var isImplicitlyThrowing: Bool {
+    !isThrowing && isDistributed
   }
 
   public var isTypedThrowing: Bool {
@@ -255,6 +261,8 @@ extension SwiftFunctionSignature {
         attribute.as(AttributeSyntax.self)?
           .attributeName.as(IdentifierTypeSyntax.self)?.name.text == "concurrent"
       }
+
+    self.isDistributed = node.modifiers.contains { $0.name.tokenKind == .keyword(.distributed) }
   }
 
   public static func translateGenericParameters(

@@ -369,7 +369,7 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
   }
 
   public var isThrowing: Bool {
-    self.functionSignature.effectSpecifiers.contains(.throws)
+    self.functionSignature.effectSpecifiers.contains(.throws) || self.functionSignature.isImplicitlyThrowing
   }
 
   public var isAsync: Bool {

@@ -727,6 +727,7 @@ struct AnalysisResultSuite {
             @concurrent public func concurrently() -> Int { 0 }
             @concurrent public func shouldBeAsync() async -> Int { 0 }
             public static func staticMethod() {}
+            public distributed func distributedMethod() {}
           }
 
           extension K {
@@ -759,5 +760,9 @@ struct AnalysisResultSuite {
 
     let staticMethod = try #require(k.methods.first { $0.name == "staticMethod" })
     #expect(!staticMethod.isImplicitlyAsync)
+
+    let distributedMethod = try #require(k.methods.first { $0.name == "distributedMethod" })
+    #expect(distributedMethod.isImplicitlyAsync)
+    #expect(distributedMethod.isThrowing)
   }
 }

@@ -692,7 +692,7 @@ extension JNISwift2JavaGenerator {
       nativeFunctionSignature.result.conversion = .asyncCompleteFuture(
         swiftFunctionResultType: originalFunctionSignature.result.type,
         nativeFunctionSignature: nativeFunctionSignature,
-        isThrowing: originalFunctionSignature.isThrowing,
+        isThrowing: originalFunctionSignature.isThrowing || originalFunctionSignature.isImplicitlyThrowing,
         completeMethodID: completeMethodID,
         completeExceptionallyMethodID: completeExceptionallyMethodID,
       )
