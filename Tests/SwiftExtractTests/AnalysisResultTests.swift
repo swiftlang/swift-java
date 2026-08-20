@@ -723,6 +723,8 @@ struct AnalysisResultSuite {
           public actor K {
             public init() {}
             public func hello() {}
+            public nonisolated func explicitlyNonisolated() {}
+            public static func staticMethod() {}
           }
 
           extension K {
@@ -742,5 +744,11 @@ struct AnalysisResultSuite {
 
     let hi = try #require(k.methods.first { $0.name == "hi" })
     #expect(hi.isImplicitlyAsync)
+
+    let explicitlyNonisolated = try #require(k.methods.first { $0.name == "explicitlyNonisolated" })
+    #expect(!explicitlyNonisolated.isImplicitlyAsync)
+
+    let staticMethod = try #require(k.methods.first { $0.name == "staticMethod" })
+    #expect(!staticMethod.isImplicitlyAsync)
   }
 }

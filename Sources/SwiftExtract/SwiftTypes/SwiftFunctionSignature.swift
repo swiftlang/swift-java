@@ -31,12 +31,14 @@ public struct SwiftFunctionSignature: Equatable {
   public var genericParameters: [SwiftGenericParameterDeclaration]
   public var genericRequirements: [SwiftGenericRequirement]
 
+  public var isNonisolated: Bool = false
+
   public var isAsync: Bool {
     effectSpecifiers.contains(.async)
   }
 
   public var isImplicitlyAsync: Bool {
-    guard !isAsync, case .instance(_, let selfType) = selfParameter else {
+    guard !isAsync, !isNonisolated, case .instance(_, let selfType) = selfParameter else {
       return false
     }
     return selfType.isActor
@@ -246,6 +248,7 @@ extension SwiftFunctionSignature {
       genericParameters: genericParams,
       genericRequirements: genericRequirements
     )
+    self.isNonisolated = node.modifiers.contains { $0.name.tokenKind == .keyword(.nonisolated) }
   }
 
   public static func translateGenericParameters(
