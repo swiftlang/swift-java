@@ -56,4 +56,38 @@ public class IsolatedTest {
             assertEquals("swiftError", cause.getMessage());
         }
     }
+
+    @Test
+    void actorIsolatedMethodReturnsFuture() throws Exception {
+        try (var arena = SwiftArena.ofConfined()) {
+            Counter counter = Counter.init(arena);
+
+            Future<Long> afterFirst = counter.incrementIsolated(3);
+            assertEquals(3, afterFirst.get());
+
+            Future<Long> afterSecond = counter.incrementIsolated(4);
+            assertEquals(7, afterSecond.get());
+        }
+    }
+
+    @Test
+    void actorIsolatedMethodInExtensionReturnsFuture() throws Exception {
+        try (var arena = SwiftArena.ofConfined()) {
+            Counter counter = Counter.init(arena);
+            counter.incrementIsolated(5).get();
+
+            Future<Long> current = counter.currentValue();
+            assertEquals(5, current.get());
+        }
+    }
+
+    @Test
+    void nonisolatedMethodStaysSynchronous() {
+        try (var arena = SwiftArena.ofConfined()) {
+            Counter counter = Counter.init(arena);
+
+            String label = counter.label();
+            assertEquals("Counter", label);
+        }
+    }
 }

@@ -18,6 +18,22 @@ public actor Counter {
   var value: Int64 = 0
 
   public init() {}
+
+  public func incrementIsolated(by amount: Int64) -> Int64 {
+    value += amount
+    return value
+  }
+
+  public nonisolated func label() -> String {
+    "Counter"
+  }
+
+}
+
+extension Counter {
+  public func currentValue() -> Int64 {
+    value
+  }
 }
 
 public func increment(_ counter: isolated Counter, by amount: Int64) -> Int64 {
