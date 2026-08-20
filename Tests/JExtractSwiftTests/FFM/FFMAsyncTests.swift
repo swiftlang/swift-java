@@ -51,7 +51,7 @@ struct FFMAsyncTests {
             return future$;
           }
         }
-        """
+        """,
       ]
     )
   }
@@ -72,7 +72,7 @@ struct FFMAsyncTests {
             $async$completion?()
           }
         }
-        """
+        """,
       ]
     )
   }
@@ -106,7 +106,7 @@ struct FFMAsyncTests {
             return future$;
           }
         }
-        """
+        """,
       ]
     )
   }
@@ -134,7 +134,7 @@ struct FFMAsyncTests {
             }
           }
         }
-        """
+        """,
       ]
     )
   }
