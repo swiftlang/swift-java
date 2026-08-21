@@ -394,6 +394,31 @@ struct AnalysisResultSuite {
   }
 
   @Test
+  func opaquePointerIsAKnownSwiftType() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public func takePointer(_ pointer: OpaquePointer) {}
+          public func makePointer() -> OpaquePointer? { nil }
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let byName = Dictionary(uniqueKeysWithValues: result.extractedGlobalFuncs.map { ($0.name, $0) })
+
+    let take = try #require(byName["takePointer"])
+    let parameterType = try #require(take.functionSignature.parameters.first?.type)
+    #expect(parameterType.asNominalTypeDeclaration?.knownTypeKind == .opaquePointer)
+
+    let make = try #require(byName["makePointer"])
+    #expect(make.functionSignature.result.type.description == "OpaquePointer?")
+  }
+
+  @Test
   func typedThrowsOnInitializers() throws {
     let result = try analyze(
       sources: [

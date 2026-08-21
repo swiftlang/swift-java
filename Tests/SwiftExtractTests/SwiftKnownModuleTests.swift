@@ -27,6 +27,7 @@ struct SwiftKnownModuleSuite {
     "Float", "Double",
     "Bool", "String",
     "Array", "Dictionary", "Set", "Optional",
+    "OpaquePointer",
   ])
   func swiftModuleContains(_ typeName: String) throws {
     let table = SwiftKnownModule.swift.symbolTable

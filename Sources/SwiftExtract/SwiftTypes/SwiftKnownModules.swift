@@ -94,6 +94,8 @@ private let swiftSourceFile: SourceFileSyntax = """
   public struct UnsafeBufferPointer<Element> {}
   public struct UnsafeMutableBufferPointer<Element> {}
 
+  public struct OpaquePointer {}
+
   public struct Optional<Wrapped> {}
 
   public struct Array<Element> {}

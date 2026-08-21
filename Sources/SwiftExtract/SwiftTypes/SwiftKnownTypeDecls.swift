@@ -36,6 +36,7 @@ public enum SwiftKnownType: Equatable {
   case unsafeMutablePointer(_ pointee: SwiftType)
   case unsafeBufferPointer(_ element: SwiftType)
   case unsafeMutableBufferPointer(_ element: SwiftType)
+  case opaquePointer
   case optional(_ wrapped: SwiftType)
   case void
   case string
@@ -86,6 +87,7 @@ public enum SwiftKnownType: Equatable {
     case .unsafeMutableBufferPointer:
       guard let arg = genericArguments?.first else { return nil }
       self = .unsafeMutableBufferPointer(arg)
+    case .opaquePointer: self = .opaquePointer
     case .optional:
       guard let arg = genericArguments?.first else { return nil }
       self = .optional(arg)
@@ -136,6 +138,7 @@ public enum SwiftKnownType: Equatable {
     case .unsafeMutablePointer: .unsafeMutablePointer
     case .unsafeBufferPointer: .unsafeBufferPointer
     case .unsafeMutableBufferPointer: .unsafeMutableBufferPointer
+    case .opaquePointer: .opaquePointer
     case .optional: .optional
     case .void: .void
     case .string: .string
@@ -179,6 +182,7 @@ public enum SwiftKnownTypeDeclKind: String, Hashable {
   case unsafeMutablePointer = "Swift.UnsafeMutablePointer"
   case unsafeBufferPointer = "Swift.UnsafeBufferPointer"
   case unsafeMutableBufferPointer = "Swift.UnsafeMutableBufferPointer"
+  case opaquePointer = "Swift.OpaquePointer"
   case optional = "Swift.Optional"
   case void = "Swift.Void"
   case string = "Swift.String"
