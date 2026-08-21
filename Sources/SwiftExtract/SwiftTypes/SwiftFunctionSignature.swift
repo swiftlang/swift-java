@@ -31,12 +31,27 @@ public struct SwiftFunctionSignature: Equatable {
   public var genericParameters: [SwiftGenericParameterDeclaration]
   public var genericRequirements: [SwiftGenericRequirement]
 
+  public var isNonisolated: Bool = false
+
+  public var isDistributed: Bool = false
+
   public var isAsync: Bool {
     effectSpecifiers.contains(.async)
   }
 
+  public var isImplicitlyAsync: Bool {
+    guard !isAsync, !isNonisolated, case .instance(_, let selfType) = selfParameter else {
+      return false
+    }
+    return selfType.isActor
+  }
+
   public var isThrowing: Bool {
     effectSpecifiers.contains(.throws)
+  }
+
+  public var isImplicitlyThrowing: Bool {
+    !isThrowing && isDistributed
   }
 
   public var isTypedThrowing: Bool {
@@ -239,6 +254,15 @@ extension SwiftFunctionSignature {
       genericParameters: genericParams,
       genericRequirements: genericRequirements
     )
+
+    self.isNonisolated =
+      node.modifiers.contains { $0.name.tokenKind == .keyword(.nonisolated) }
+      || node.attributes.contains { attribute in
+        attribute.as(AttributeSyntax.self)?
+          .attributeName.as(IdentifierTypeSyntax.self)?.name.text == "concurrent"
+      }
+
+    self.isDistributed = node.modifiers.contains { $0.name.tokenKind == .keyword(.distributed) }
   }
 
   public static func translateGenericParameters(

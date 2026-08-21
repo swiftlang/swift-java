@@ -77,6 +77,10 @@ public enum SwiftType: Equatable {
     asNominalType?.nominalTypeDecl
   }
 
+  public var isActor: Bool {
+    asNominalTypeDeclaration?.kind == .actor
+  }
+
   /// True when this type is a synthetic placeholder produced by SwiftExtract
   /// for an unresolved name — see
   /// `SwiftNominalTypeDeclaration.isUnresolvedTypePlaceholder` for why these

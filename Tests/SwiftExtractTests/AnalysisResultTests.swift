@@ -741,4 +741,58 @@ struct AnalysisResultSuite {
     let count = try #require(fishTank.variables.first { $0.name == "count" })
     #expect(count.isClass)
   }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Actor members are extracted
+  @Test func actorMembersAreExtracted() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public actor K {
+            public init() {}
+            public func hello() {}
+            public nonisolated func explicitlyNonisolated() {}
+            @concurrent public func concurrently() -> Int { 0 }
+            @concurrent public func shouldBeAsync() async -> Int { 0 }
+            public static func staticMethod() {}
+            public distributed func distributedMethod() {}
+          }
+
+          extension K {
+            public func hi() {}
+          }
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let k = try #require(result.extractedTypes["K"])
+    #expect(k.swiftNominal.kind == .actor)
+
+    let hello = try #require(k.methods.first { $0.name == "hello" })
+    #expect(hello.isImplicitlyAsync)
+
+    let hi = try #require(k.methods.first { $0.name == "hi" })
+    #expect(hi.isImplicitlyAsync)
+
+    let explicitlyNonisolated = try #require(k.methods.first { $0.name == "explicitlyNonisolated" })
+    #expect(!explicitlyNonisolated.isImplicitlyAsync)
+
+    let concurrently = try #require(k.methods.first { $0.name == "concurrently" })
+    #expect(!concurrently.isImplicitlyAsync)
+
+    let shouldBeAsync = try #require(k.methods.first { $0.name == "shouldBeAsync" })
+    #expect(shouldBeAsync.isAsync)
+    #expect(!shouldBeAsync.isImplicitlyAsync)
+
+    let staticMethod = try #require(k.methods.first { $0.name == "staticMethod" })
+    #expect(!staticMethod.isImplicitlyAsync)
+
+    let distributedMethod = try #require(k.methods.first { $0.name == "distributedMethod" })
+    #expect(distributedMethod.isImplicitlyAsync)
+    #expect(distributedMethod.isThrowing)
+  }
 }
