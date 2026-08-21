@@ -59,6 +59,11 @@ public protocol SwiftExtractConfiguration {
   /// generator can declare its runtime module importable here). Default: empty.
   var availableImportModules: Set<String> { get }
 
+  /// Consumer-specific guidance appended to "unresolved type" log messages,
+  /// e.g. pointing the user at the consumer's mechanism for declaring
+  /// cross-module dependencies. `nil` appends nothing.
+  var unresolvedTypeHint: String? { get }
+
   /// Whether type lookups that can't resolve a name should fall back to a
   /// synthetic, unresolved nominal reference instead of throwing
   /// `TypeTranslationError.unknown`.
@@ -87,6 +92,8 @@ extension SwiftExtractConfiguration {
   public var availableImportModules: Set<String> { [] }
 
   public var allowUnresolvedTypeReferences: Bool { false }
+
+  public var unresolvedTypeHint: String? { nil }
 
   public func hasImportedModuleStub(moduleOfNominal moduleName: String) -> Bool {
     importedModuleStubs?.keys.contains(moduleName) ?? false

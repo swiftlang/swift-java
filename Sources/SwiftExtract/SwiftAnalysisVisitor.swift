@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import Logging
 import SwiftIfConfig
 import SwiftParser
 import SwiftSyntax
@@ -207,7 +206,7 @@ final class SwiftAnalysisVisitor {
       )
     } catch {
       self.log.warning(
-        Self.makeMissingTypeMessage(
+        self.makeMissingTypeMessage(
           "Failed to import: '\(node.qualifiedNameForDebug)' in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
@@ -281,7 +280,7 @@ final class SwiftAnalysisVisitor {
       }
     } catch {
       self.log.warning(
-        Self.makeMissingTypeMessage(
+        self.makeMissingTypeMessage(
           "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
@@ -328,7 +327,7 @@ final class SwiftAnalysisVisitor {
       }
     } catch {
       self.log.warning(
-        Self.makeMissingTypeMessage(
+        self.makeMissingTypeMessage(
           "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
@@ -358,7 +357,7 @@ final class SwiftAnalysisVisitor {
       )
     } catch {
       self.log.warning(
-        Self.makeMissingTypeMessage(
+        self.makeMissingTypeMessage(
           "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
@@ -409,7 +408,7 @@ final class SwiftAnalysisVisitor {
       }
     } catch {
       self.log.warning(
-        Self.makeMissingTypeMessage(
+        self.makeMissingTypeMessage(
           "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
         )
       )
@@ -720,8 +719,11 @@ final class SwiftAnalysisVisitor {
     return true
   }
 
-  static func makeMissingTypeMessage(_ message: String) -> String {
-    "\(message). If the unresolved type lives in another Swift module, declare it as a SwiftPM target dependency with its own swift-java.config (the JExtractSwiftPlugin wires --depends-on automatically), or pass --depends-on <Module>=<config-path> explicitly."
+  func makeMissingTypeMessage(_ message: String) -> String {
+    guard let hint = config.unresolvedTypeHint else {
+      return message
+    }
+    return "\(message). \(hint)"
   }
 }
 

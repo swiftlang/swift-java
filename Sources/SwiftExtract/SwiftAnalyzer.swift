@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import Logging
 import SwiftIfConfig
 import SwiftParser
 import SwiftSyntax

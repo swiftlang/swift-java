@@ -14,6 +14,11 @@
 
 import SwiftExtract
 
+extension SwiftQualifiedTypeName {
+  /// Dollar-separated for JNI C symbol parent names, e.g. "Logger$Message"
+  package var jniEscapedName: String { components.joined(separator: "$") }
+}
+
 extension String {
   /// Returns whether the string is of the format `isX` (Java Beans boolean
   /// property naming convention)

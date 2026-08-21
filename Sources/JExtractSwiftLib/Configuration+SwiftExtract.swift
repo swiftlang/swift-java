@@ -22,4 +22,8 @@ import SwiftJavaConfigurationShared
 /// protocol extension on `SwiftExtractConfiguration` defaults
 /// `availableImportModules` and `allowUnresolvedTypeReferences`, so this
 /// conformance is empty.
-extension Configuration: SwiftExtractConfiguration {}
+extension Configuration: SwiftExtractConfiguration {
+  public var unresolvedTypeHint: String? {
+    "If the unresolved type lives in another Swift module, declare it as a SwiftPM target dependency with its own swift-java.config (the JExtractSwiftPlugin wires --depends-on automatically), or pass --depends-on <Module>=<config-path> explicitly."
+  }
+}
