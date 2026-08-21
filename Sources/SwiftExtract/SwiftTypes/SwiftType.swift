@@ -521,7 +521,7 @@ extension SwiftType {
       if someOrAntType.someOrAnySpecifier.tokenKind == .keyword(.some) {
         self = .opaque(try SwiftType(someOrAntType.constraint, lookupContext: lookupContext))
       } else {
-        self = .opaque(try SwiftType(someOrAntType.constraint, lookupContext: lookupContext))
+        self = .existential(try SwiftType(someOrAntType.constraint, lookupContext: lookupContext))
       }
 
     case .compositionType(let compositeType):
