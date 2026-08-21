@@ -394,6 +394,39 @@ struct AnalysisResultSuite {
   }
 
   @Test
+  func someAndAnyProduceOpaqueAndExistentialTypes() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public protocol Swimmer {}
+          public func trainOpaque(_ swimmer: some Swimmer) {}
+          public func trainExistential(_ swimmer: any Swimmer) {}
+          """
+        )
+      ],
+      moduleName: "Aquarium"
+    )
+
+    let byName = Dictionary(uniqueKeysWithValues: result.extractedGlobalFuncs.map { ($0.name, $0) })
+
+    let opaque = try #require(byName["trainOpaque"]?.functionSignature.parameters.first?.type)
+    guard case .opaque = opaque else {
+      Issue.record("expected .opaque, got \(opaque)")
+      return
+    }
+    #expect(opaque.description == "some Swimmer")
+
+    let existential = try #require(byName["trainExistential"]?.functionSignature.parameters.first?.type)
+    guard case .existential = existential else {
+      Issue.record("expected .existential, got \(existential)")
+      return
+    }
+    #expect(existential.description == "any Swimmer")
+  }
+
+  @Test
   func opaquePointerIsAKnownSwiftType() throws {
     let result = try analyze(
       sources: [
