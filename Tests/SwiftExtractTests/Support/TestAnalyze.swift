@@ -27,7 +27,8 @@ func analyze(
   sources: [(path: String, text: String)],
   moduleName: String,
   config: (any SwiftExtractConfiguration)? = nil,
-  sourceDependencies: SourceDependencies = SourceDependencies()
+  sourceDependencies: SourceDependencies = SourceDependencies(),
+  diagnosticsSink: (any SwiftExtractDiagnosticsSink)? = nil
 ) throws -> AnalysisResult {
   let effectiveConfig = config ?? DefaultSwiftExtractConfiguration(swiftModule: moduleName)
   return try SwiftAnalyzer.analyze(
@@ -35,6 +36,7 @@ func analyze(
     moduleName: moduleName,
     extractDecider: DefaultAccessLevelExtractDecider(accessLevel: effectiveConfig.effectiveMinimumInputAccessLevelMode),
     config: effectiveConfig,
-    sourceDependencies: sourceDependencies
+    sourceDependencies: sourceDependencies,
+    diagnosticsSink: diagnosticsSink
   )
 }
