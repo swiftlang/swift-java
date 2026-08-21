@@ -70,10 +70,15 @@ public final class SwiftAnalyzer {
   /// access-level-only baseline.
   package let extractDecider: any ExtractDecider
 
+  /// Receives an event for every declaration the analyzer skips; `nil`
+  /// keeps the default log-and-drop behavior only.
+  package let diagnosticsSink: (any SwiftExtractDiagnosticsSink)?
+
   public init(
     config: any SwiftExtractConfiguration,
     moduleName: String? = nil,
-    extractDecider: any ExtractDecider
+    extractDecider: any ExtractDecider,
+    diagnosticsSink: (any SwiftExtractDiagnosticsSink)? = nil
   ) {
     guard let swiftModule = moduleName ?? config.swiftModule else {
       fatalError("Missing 'swiftModule' name.") // FIXME: can we make it required in config? but we shared config for many cases
@@ -82,6 +87,7 @@ public final class SwiftAnalyzer {
     self.config = config
     self.swiftModuleName = swiftModule
     self.extractDecider = extractDecider
+    self.diagnosticsSink = diagnosticsSink
 
     if let staticBuildConfigPath = config.staticBuildConfigurationFile {
       do {
@@ -270,10 +276,16 @@ extension SwiftAnalyzer {
     extractDecider: any ExtractDecider,
     config: (any SwiftExtractConfiguration)? = nil,
     sourceDependencies: SourceDependencies = SourceDependencies(),
+    diagnosticsSink: (any SwiftExtractDiagnosticsSink)? = nil,
     beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void = { _ in }
   ) throws -> AnalysisResult {
     let effectiveConfig = config ?? DefaultSwiftExtractConfiguration(swiftModule: moduleName)
-    let analyzer = SwiftAnalyzer(config: effectiveConfig, moduleName: moduleName, extractDecider: extractDecider)
+    let analyzer = SwiftAnalyzer(
+      config: effectiveConfig,
+      moduleName: moduleName,
+      extractDecider: extractDecider,
+      diagnosticsSink: diagnosticsSink
+    )
     analyzer.sourceDependencies = sourceDependencies
     for source in sources {
       analyzer.add(filePath: source.path, text: source.text)
