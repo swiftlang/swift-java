@@ -227,6 +227,7 @@ final class SwiftAnalysisVisitor {
       name: node.name.text.unescapedSwiftName,
       apiKind: apiKind,
       functionSignature: signature,
+      sourceFilePath: sourceFilePath,
     )
 
     log.debug("Record extracted method \(node.qualifiedNameForDebug)")
@@ -268,6 +269,7 @@ final class SwiftAnalysisVisitor {
           name: caseName,
           apiKind: .enumCase,
           functionSignature: signature,
+          sourceFilePath: sourceFilePath,
         )
 
         let extractedCase = ExtractedEnumCase(
@@ -318,6 +320,7 @@ final class SwiftAnalysisVisitor {
           in: typeContext,
           kind: .getter,
           name: varName,
+          sourceFilePath: sourceFilePath,
         )
       }
       if supportedAccessors.contains(.set) {
@@ -326,6 +329,7 @@ final class SwiftAnalysisVisitor {
           in: typeContext,
           kind: .setter,
           name: varName,
+          sourceFilePath: sourceFilePath,
         )
       }
     } catch {
@@ -375,6 +379,7 @@ final class SwiftAnalysisVisitor {
       name: "init",
       apiKind: .initializer,
       functionSignature: signature,
+      sourceFilePath: sourceFilePath,
     )
 
     typeContext.initializers.append(extracted)
@@ -403,6 +408,7 @@ final class SwiftAnalysisVisitor {
           in: typeContext,
           kind: .subscriptGetter,
           name: name,
+          sourceFilePath: sourceFilePath,
         )
       }
       if accessors.contains(.set) {
@@ -411,6 +417,7 @@ final class SwiftAnalysisVisitor {
           in: typeContext,
           kind: .subscriptSetter,
           name: name,
+          sourceFilePath: sourceFilePath,
         )
       }
     } catch {
@@ -452,6 +459,7 @@ final class SwiftAnalysisVisitor {
     in typeContext: ExtractedNominalType?,
     kind: SwiftAPIKind,
     name: String,
+    sourceFilePath: String,
   ) throws {
     let signature: SwiftFunctionSignature
 
@@ -481,6 +489,7 @@ final class SwiftAnalysisVisitor {
       name: name,
       apiKind: kind,
       functionSignature: signature,
+      sourceFilePath: sourceFilePath,
     )
 
     log.debug(
