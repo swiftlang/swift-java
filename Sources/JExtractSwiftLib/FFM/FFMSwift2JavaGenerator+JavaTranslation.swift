@@ -131,6 +131,7 @@ extension FFMSwift2JavaGenerator {
     var parameters: [TranslatedParameter]
     var result: TranslatedResult
     var isThrowing: Bool = false
+    var isAsync: Bool = false
 
     /// Whether any parameter or the result requires a 32-bit integer overflow check,
     /// which means the Java method must declare `throws SwiftIntegerOverflowException`
@@ -328,17 +329,22 @@ extension FFMSwift2JavaGenerator {
         }
 
       // Result.
-      let result = try self.translateResult(
+      var result = try self.translateResult(
         swiftResult: swiftSignature.result,
         loweredResult: loweredFunctionSignature.result,
         methodName: methodName
       )
 
+      if loweredFunctionSignature.isAsync {
+        result.javaResultType = .completableFuture(result.javaResultType)
+      }
+
       return TranslatedFunctionSignature(
         selfParameter: selfParameter,
         parameters: parameters,
         result: result,
-        isThrowing: loweredFunctionSignature.isThrowing
+        isThrowing: loweredFunctionSignature.isThrowing,
+        isAsync: loweredFunctionSignature.isAsync
       )
     }
 

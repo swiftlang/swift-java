@@ -190,6 +190,35 @@ public class MySwiftLibraryTest {
         assertEquals(2.0, result);
     }
 
+    // ==== ----------------------------------------------------------------
+    // Async functions
+
+    @Test
+    void call_asyncSum() throws Exception {
+        // snippet.asyncUsageJava
+        java.util.concurrent.CompletableFuture<Long> future = MySwiftLibrary.asyncSum(10, 12);
+        Long result = future.get();
+        assertEquals(22, result);
+        // snippet.end
+    }
+
+    @Test
+    void call_asyncThrowsVoid_noThrow() throws Exception {
+        java.util.concurrent.CompletableFuture<Void> future = MySwiftLibrary.asyncThrowsVoid(false);
+        future.get(); // Should complete normally
+    }
+
+    @Test
+    void call_asyncThrowsVoid_throws() {
+        java.util.concurrent.CompletableFuture<Void> future = MySwiftLibrary.asyncThrowsVoid(true);
+        java.util.concurrent.ExecutionException ex = assertThrows(java.util.concurrent.ExecutionException.class, future::get);
+        
+        Throwable cause = ex.getCause();
+        assertNotNull(cause);
+        assertTrue(cause instanceof SwiftJavaErrorException);
+        assertTrue(cause.getMessage().contains("expected error in asyncThrowsVoid"));
+    }
+
     @Test
     void call_globalCallMeIntConsumer_noThrow() {
         MySwiftLibrary.globalCallMeIntConsumer((int a) -> { });
