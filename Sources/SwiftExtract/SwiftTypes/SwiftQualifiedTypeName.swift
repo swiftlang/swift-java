@@ -40,9 +40,6 @@ public struct SwiftQualifiedTypeName: Hashable, Sendable, CustomStringConvertibl
   /// Underscore-separated for C symbols and Java identifiers, e.g. "Logger_Message"
   public var fullFlatName: String { components.joined(separator: "_") }
 
-  /// Dollar-separated for JNI C symbol parent names, e.g. "Logger$Message"
-  public var jniEscapedName: String { components.joined(separator: "$") }
-
   /// CustomStringConvertible - uses fullName
   public var description: String { fullName }
 

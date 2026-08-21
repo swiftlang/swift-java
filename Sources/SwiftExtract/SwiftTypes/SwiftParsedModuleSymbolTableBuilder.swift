@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Logging
 import SwiftIfConfig
 import SwiftSyntax
 
