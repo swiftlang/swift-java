@@ -123,7 +123,7 @@ extension SwiftAnalyzer {
     )
   }
 
-  package func add(filePath: String, text: String) {
+  public func add(filePath: String, text: String) {
     log.debug("Adding: \(filePath)")
     let sourceFileSyntax = Parser.parse(source: text)
     self.inputs.append(SwiftInputFile(syntax: sourceFileSyntax, path: filePath))
@@ -149,7 +149,7 @@ extension SwiftAnalyzer {
   /// the analyzer's natively-registered ones. Without the hook, those
   /// specializations are registered too late and any constrained extension
   /// (`extension Box where T == ConcreteT { … }`) is silently dropped.
-  package func analyze(
+  public func analyze(
     beforeProcessingDeferredExtensions hook: (SwiftAnalyzer) throws -> Void = { _ in }
   ) throws {
     prepareForTranslation()
@@ -280,6 +280,15 @@ extension SwiftAnalyzer {
     }
     try analyzer.analyze(beforeProcessingDeferredExtensions: hook)
     return analyzer.result
+  }
+
+  /// Resolve a type reference found outside of a declaration signature
+  /// (e.g. inside an attribute argument such as `@JavaExport(as: Foo.self)`)
+  /// against the analyzed module's symbol tables. Only valid after
+  /// `analyze()` has run.
+  public func resolveType(_ syntax: TypeSyntax) throws -> SwiftType {
+    precondition(lookupContext != nil, "resolveType may only be called after analyze()")
+    return try SwiftType(syntax, lookupContext: lookupContext)
   }
 
   package func prepareForTranslation() {
