@@ -309,6 +309,10 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
 
   public let functionSignature: SwiftFunctionSignature
 
+  /// The short path from module root to the file in which this declaration was originally declared.
+  /// E.g. for `Sources/Example/My/Types.swift` it would be `My/Types.swift`.
+  public let sourceFilePath: String?
+
   public var signatureString: String {
     self.swiftDecl.signatureString
   }
@@ -390,12 +394,14 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
     name: String,
     apiKind: SwiftAPIKind,
     functionSignature: SwiftFunctionSignature,
+    sourceFilePath: String? = nil,
   ) {
     self.module = module
     self.name = name
     self.swiftDecl = swiftDecl
     self.apiKind = apiKind
     self.functionSignature = functionSignature
+    self.sourceFilePath = sourceFilePath
   }
 
   public var description: String {
@@ -418,7 +424,8 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
       swiftDecl: swiftDecl,
       name: name,
       apiKind: apiKind,
-      functionSignature: functionSignature
+      functionSignature: functionSignature,
+      sourceFilePath: sourceFilePath
     )
   }
 
@@ -469,7 +476,8 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
           swiftDecl: swiftDecl,
           name: name,
           apiKind: apiKind,
-          functionSignature: newSignature
+          functionSignature: newSignature,
+          sourceFilePath: sourceFilePath
         )
       )
     }
