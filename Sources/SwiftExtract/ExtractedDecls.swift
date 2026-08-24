@@ -309,8 +309,8 @@ public final class ExtractedFunc: ExtractedSwiftDecl, CustomStringConvertible {
 
   public let functionSignature: SwiftFunctionSignature
 
-  // The short path from module root to the file in which this declaration was originally declared.
-  // E.g. for `Sources/Example/My/Types.swift` it would be `My/Types.swift`.
+  /// The short path from module root to the file in which this declaration was originally declared.
+  /// E.g. for `Sources/Example/My/Types.swift` it would be `My/Types.swift`.
   public let sourceFilePath: String?
 
   public var signatureString: String {
