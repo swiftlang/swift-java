@@ -1958,20 +1958,20 @@ extension JNISwift2JavaGenerator {
           """
         )
 
-        var selfCaptures: [(sendable: String, original: String)] = []
+        var selfCaptures: [(unsafeSendable: String, original: String)] = []
         if let selfParameter = nativeFunctionSignature.selfParameter {
           if case .extractSwiftProtocolValue = selfParameter.conversion {
             for parameter in selfParameter.parameters {
-              selfCaptures.append(("\(parameter.name)ExistentialSendable$", "\(parameter.name)Existential$"))
+              selfCaptures.append(("\(parameter.name)ExistentialUnsafeSendable$", "\(parameter.name)Existential$"))
             }
           } else {
             for parameter in selfParameter.parameters {
-              selfCaptures.append(("\(parameter.name)Sendable$", "\(parameter.name)$"))
+              selfCaptures.append(("\(parameter.name)UnsafeSendable$", "\(parameter.name)$"))
             }
           }
         }
         for capture in selfCaptures {
-          printer.print("nonisolated(unsafe) let \(capture.sendable) = \(capture.original)")
+          printer.print("nonisolated(unsafe) let \(capture.unsafeSendable) = \(capture.original)")
         }
 
         func printDo(printer: inout SwiftPrinter) {
@@ -2017,7 +2017,7 @@ extension JNISwift2JavaGenerator {
 
         func printTaskBody(printer: inout SwiftPrinter) {
           for capture in selfCaptures {
-            printer.print("let \(capture.original) = \(capture.sendable)")
+            printer.print("let \(capture.original) = \(capture.unsafeSendable)")
           }
           printer.printBraceBlock("defer") { printer in
             // Defer might on any thread, so we need to attach environment.

@@ -34,11 +34,11 @@ struct JNIAsyncSelfCaptureTests {
         """
         @_cdecl("Java_com_example_swift_MyClass__00024compute__JLjava_util_concurrent_CompletableFuture_2")
         ...
-        nonisolated(unsafe) let selfPointerSendable$ = selfPointer$
+        nonisolated(unsafe) let selfPointerUnsafeSendable$ = selfPointer$
         ...
         task = Task.immediate {
         ...
-        let selfPointer$ = selfPointerSendable$
+        let selfPointer$ = selfPointerUnsafeSendable$
         ...
         let swiftResult$ = await selfPointer$.pointee.compute()
         """
@@ -61,18 +61,18 @@ struct JNIAsyncSelfCaptureTests {
         """
         @_cdecl("Java_com_example_swift_WorkerBox__00024work__JJLjava_util_concurrent_CompletableFuture_2")
         ...
-        nonisolated(unsafe) let selfPointerExistentialSendable$ = selfPointerExistential$
+        nonisolated(unsafe) let selfPointerExistentialUnsafeSendable$ = selfPointerExistential$
         ...
         task = Task.immediate {
         ...
-        let selfPointerExistential$ = selfPointerExistentialSendable$
+        let selfPointerExistential$ = selfPointerExistentialUnsafeSendable$
         ...
         let swiftResult$ = await selfPointerExistential$.work()
         """
       ],
       notExpectedChunks: [
-        "nonisolated(unsafe) let selfPointerSendable$",
-        "nonisolated(unsafe) let selfTypePointerSendable$",
+        "nonisolated(unsafe) let selfPointerUnsafeSendable$",
+        "nonisolated(unsafe) let selfTypePointerUnsafeSendable$",
       ]
     )
   }
@@ -92,17 +92,17 @@ struct JNIAsyncSelfCaptureTests {
         """
         extension Box: _SwiftModule_Box_opener {
         ...
-        nonisolated(unsafe) let selfPointerSendable$ = selfPointer$
+        nonisolated(unsafe) let selfPointerUnsafeSendable$ = selfPointer$
         ...
         task = Task.immediate {
         ...
-        let selfPointer$ = selfPointerSendable$
+        let selfPointer$ = selfPointerUnsafeSendable$
         ...
         let swiftResult$ = await selfPointer$.pointee.compute()
         """
       ],
       notExpectedChunks: [
-        "selfTypePointerSendable$",
+        "selfTypePointerUnsafeSendable$"
       ]
     )
   }
