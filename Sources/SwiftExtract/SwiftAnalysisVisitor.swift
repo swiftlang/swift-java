@@ -79,15 +79,15 @@ final class SwiftAnalysisVisitor {
       break // TODO: Implement associated types
 
     case .initializerDecl(let node):
-      self.visit(initializerDecl: node, in: parent)
+      self.visit(initializerDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .functionDecl(let node):
       self.visit(functionDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .variableDecl(let node):
       self.visit(variableDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .subscriptDecl(let node):
-      self.visit(subscriptDecl: node, in: parent)
+      self.visit(subscriptDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .enumCaseDecl(let node):
-      self.visit(enumCaseDecl: node, in: parent)
+      self.visit(enumCaseDecl: node, in: parent, sourceFilePath: sourceFilePath)
     case .ifConfigDecl(let node):
       self.visit(ifConfigDecl: node, in: parent, sourceFilePath: sourceFilePath)
     default:
@@ -205,10 +205,11 @@ final class SwiftAnalysisVisitor {
         lookupContext: analyzer.lookupContext,
       )
     } catch {
-      self.log.warning(
-        self.makeMissingTypeMessage(
-          "Failed to import: '\(node.qualifiedNameForDebug)' in module '\(analyzer.swiftModuleName)'; \(error)"
-        )
+      self.reportSkipped(
+        node,
+        name: "'\(node.qualifiedNameForDebug)'",
+        sourceFilePath: sourceFilePath,
+        error: error
       )
       return
     }
@@ -239,6 +240,7 @@ final class SwiftAnalysisVisitor {
   func visit(
     enumCaseDecl node: EnumCaseDeclSyntax,
     in typeContext: ExtractedNominalType?,
+    sourceFilePath: String,
   ) {
     guard let typeContext else {
       self.log.info("Enum case must be within a current type; \(node)")
@@ -279,10 +281,11 @@ final class SwiftAnalysisVisitor {
         typeContext.cases.append(extractedCase)
       }
     } catch {
-      self.log.warning(
-        self.makeMissingTypeMessage(
-          "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
-        )
+      self.reportSkipped(
+        node,
+        name: "\(node.qualifiedNameForDebug)",
+        sourceFilePath: sourceFilePath,
+        error: error
       )
     }
   }
@@ -326,10 +329,11 @@ final class SwiftAnalysisVisitor {
         )
       }
     } catch {
-      self.log.warning(
-        self.makeMissingTypeMessage(
-          "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
-        )
+      self.reportSkipped(
+        node,
+        name: "\(node.qualifiedNameForDebug)",
+        sourceFilePath: sourceFilePath,
+        error: error
       )
     }
   }
@@ -337,6 +341,7 @@ final class SwiftAnalysisVisitor {
   func visit(
     initializerDecl node: InitializerDeclSyntax,
     in typeContext: ExtractedNominalType?,
+    sourceFilePath: String,
   ) {
     guard let typeContext else {
       self.log.info("Initializer must be within a current type; \(node)")
@@ -356,10 +361,11 @@ final class SwiftAnalysisVisitor {
         lookupContext: analyzer.lookupContext,
       )
     } catch {
-      self.log.warning(
-        self.makeMissingTypeMessage(
-          "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
-        )
+      self.reportSkipped(
+        node,
+        name: "\(node.qualifiedNameForDebug)",
+        sourceFilePath: sourceFilePath,
+        error: error
       )
       return
     }
@@ -377,6 +383,7 @@ final class SwiftAnalysisVisitor {
   private func visit(
     subscriptDecl node: SubscriptDeclSyntax,
     in typeContext: ExtractedNominalType?,
+    sourceFilePath: String,
   ) {
     guard node.shouldExtract(config: config, in: typeContext, decider: analyzer.extractDecider) else {
       return
@@ -407,10 +414,11 @@ final class SwiftAnalysisVisitor {
         )
       }
     } catch {
-      self.log.warning(
-        self.makeMissingTypeMessage(
-          "Failed to import: \(node.qualifiedNameForDebug) in module '\(analyzer.swiftModuleName)'; \(error)"
-        )
+      self.reportSkipped(
+        node,
+        name: "\(node.qualifiedNameForDebug)",
+        sourceFilePath: sourceFilePath,
+        error: error
       )
     }
   }
@@ -724,6 +732,29 @@ final class SwiftAnalysisVisitor {
       return message
     }
     return "\(message). \(hint)"
+  }
+
+  /// Log a skipped declaration (as before) and report it to the configured
+  /// diagnostics sink, if any.
+  func reportSkipped(
+    _ node: some SyntaxProtocol,
+    name: String,
+    sourceFilePath: String,
+    error: any Error
+  ) {
+    let message = "Failed to import: \(name) in module '\(analyzer.swiftModuleName)'; \(error)"
+    self.log.warning(self.makeMissingTypeMessage(message))
+    analyzer.diagnosticsSink?.emit(
+      SwiftExtractDiagnostic(
+        kind: .skippedDeclaration,
+        declarationName: name,
+        moduleName: analyzer.swiftModuleName,
+        message: message,
+        node: Syntax(node),
+        sourceFilePath: sourceFilePath,
+        underlyingError: error
+      )
+    )
   }
 }
 
