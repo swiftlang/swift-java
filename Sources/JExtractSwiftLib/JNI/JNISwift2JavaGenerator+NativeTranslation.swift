@@ -1958,15 +1958,20 @@ extension JNISwift2JavaGenerator {
           """
         )
 
+        var selfCaptures: [(unsafeSendable: String, original: String)] = []
         if let selfParameter = nativeFunctionSignature.selfParameter {
-          for parameter in selfParameter.parameters {
-            printer.print("nonisolated(unsafe) let \(parameter.name)Sendable$ = \(parameter.name)$")
+          if case .extractSwiftProtocolValue = selfParameter.conversion {
+            for parameter in selfParameter.parameters {
+              selfCaptures.append(("\(parameter.name)ExistentialUnsafeSendable$", "\(parameter.name)Existential$"))
+            }
+          } else {
+            for parameter in selfParameter.parameters {
+              selfCaptures.append(("\(parameter.name)UnsafeSendable$", "\(parameter.name)$"))
+            }
           }
         }
-        if let selfTypeParameter = nativeFunctionSignature.selfTypeParameter {
-          for parameter in selfTypeParameter.parameters {
-            printer.print("nonisolated(unsafe) let \(parameter.name)Sendable$ = \(parameter.name)$")
-          }
+        for capture in selfCaptures {
+          printer.print("nonisolated(unsafe) let \(capture.unsafeSendable) = \(capture.original)")
         }
 
         func printDo(printer: inout SwiftPrinter) {
@@ -2011,15 +2016,8 @@ extension JNISwift2JavaGenerator {
         }
 
         func printTaskBody(printer: inout SwiftPrinter) {
-          if let selfParameter = nativeFunctionSignature.selfParameter {
-            for parameter in selfParameter.parameters {
-              printer.print("let \(parameter.name)$ = \(parameter.name)Sendable$")
-            }
-          }
-          if let selfTypeParameter = nativeFunctionSignature.selfTypeParameter {
-            for parameter in selfTypeParameter.parameters {
-              printer.print("let \(parameter.name)$ = \(parameter.name)Sendable$")
-            }
+          for capture in selfCaptures {
+            printer.print("let \(capture.original) = \(capture.unsafeSendable)")
           }
           printer.printBraceBlock("defer") { printer in
             // Defer might on any thread, so we need to attach environment.
