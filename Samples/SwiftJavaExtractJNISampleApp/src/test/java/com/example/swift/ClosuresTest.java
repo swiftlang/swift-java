@@ -140,4 +140,16 @@ public class ClosuresTest {
         double result = MySwiftLibrary.globalCallMeDoubleBinaryOperator((double a, double b) -> { return a + b; });
         assertEquals(3.0, result);
     }
+
+    @Test
+    void globalCallMeDoubleToIntFunction() {
+        int result = MySwiftLibrary.globalCallMeDoubleToIntFunction((double a) -> { return (int) a; });
+        assertEquals(1, result);
+    }
+
+    @Test
+    void globalCallMeLongToIntFunction() {
+        int result = MySwiftLibrary.globalCallMeLongToIntFunction((long a) -> { return (int) a; });
+        assertEquals(1, result);
+    }
 }

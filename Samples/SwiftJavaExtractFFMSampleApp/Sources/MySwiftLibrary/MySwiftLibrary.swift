@@ -112,6 +112,14 @@ public func globalCallMeDoubleBinaryOperator(run: (Double, Double) -> Double) ->
   run(1.0, 2.0)
 }
 
+public func globalCallMeDoubleToIntFunction(run: (Double) -> Int32) -> Int32 {
+  run(1.0)
+}
+
+public func globalCallMeLongToIntFunction(run: (Int64) -> Int32) -> Int32 {
+  run(1)
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }

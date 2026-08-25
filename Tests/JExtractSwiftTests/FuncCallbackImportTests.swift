@@ -47,6 +47,9 @@ final class FuncCallbackImportTests {
     public func callMeLongPredicate(callback: (Int64) -> Bool)
     public func callMeDoublePredicate(callback: (Double) -> Bool)
 
+    public func callMeDoubleToIntFunction(callback: (Double) -> Int32)
+    public func callMeLongToIntFunction(callback: (Int64) -> Int32)
+
     public func callMeIntUnaryOperator(callback: (Int32) -> Int32)
     public func callMeLongUnaryOperator(callback: (Int64) -> Int64)
     public func callMeDoubleUnaryOperator(callback: (Double) -> Double)
@@ -847,6 +850,92 @@ final class FuncCallbackImportTests {
         public static void callMeDoubleUnaryOperator(java.util.function.DoubleUnaryOperator callback) {
           try(var arena$ = Arena.ofConfined()) {
             swiftjava___FakeModule_callMeDoubleUnaryOperator_callback.call(callMeDoubleUnaryOperator.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test("Import: public func callMeDoubleToIntFunction(callback: (Double) -> Int32)")
+  func func_callMecallMeDoubleToIntFunctionFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeDoubleToIntFunction" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeDoubleToIntFunction(callback: (Double) -> Int32)
+         * }
+         */
+        public static void callMeDoubleToIntFunction(java.util.function.DoubleToIntFunction callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeDoubleToIntFunction_callback.call(callMeDoubleToIntFunction.$toUpcallStub(callback, arena$));
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test("Import: public func callMeLongToIntFunction(callback: (Int64) -> Int32)")
+  func func_callMecallMeLongToIntFunctionFunc_callback() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: Self.class_interfaceFile)
+
+    let funcDecl = st.extractedGlobalFuncs.first { $0.name == "callMeLongToIntFunction" }!
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printFunctionDowncallMethods(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func callMeLongToIntFunction(callback: (Int64) -> Int32)
+         * }
+         */
+        public static void callMeLongToIntFunction(java.util.function.LongToIntFunction callback) {
+          try(var arena$ = Arena.ofConfined()) {
+            swiftjava___FakeModule_callMeLongToIntFunction_callback.call(callMeLongToIntFunction.$toUpcallStub(callback, arena$));
           }
         }
         """
