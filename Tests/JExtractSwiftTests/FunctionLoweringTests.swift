@@ -322,13 +322,13 @@ final class FunctionLoweringTests {
         """,
       expectedCDecl: """
         @_cdecl("c_getBufferPointer")
-        public func c_getBufferPointer(_ _result_0: UnsafeMutablePointer<UnsafeMutableRawPointer>, _ _result_1: UnsafeMutablePointer<Int>) {
+        public func c_getBufferPointer(_ _result_pointer: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ _result_count: UnsafeMutablePointer<Int>) {
           let _result = getBufferPointer()
-          _result_0.initialize(to: _result.0)
-          _result_1.initialize(to: _result.1)
+          _result_pointer.initialize(to: UnsafeMutableRawPointer(_result.baseAddress))
+          _result_count.initialize(to: _result.count)
         }
         """,
-      expectedCFunction: "void c_getBufferPointer(void **_result_0, ptrdiff_t *_result_1)",
+      expectedCFunction: "void c_getBufferPointer(void **_result_pointer, ptrdiff_t *_result_count)",
     )
   }
 

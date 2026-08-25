@@ -398,11 +398,20 @@ extension FFMSwift2JavaGenerator {
           }
           switch knownType {
           case .unsafePointer, .unsafeMutablePointer:
-            // FIXME: Implement
-            throw JavaTranslationError.unhandledType(swiftType)
-          case .unsafeBufferPointer, .unsafeMutableBufferPointer:
-            // FIXME: Implement
-            throw JavaTranslationError.unhandledType(swiftType)
+            return TranslatedParameter(
+              parameter: JavaParameter(name: parameterName, type: .javaForeignMemorySegment),
+              conversion: .placeholder
+            )
+          case .unsafeBufferPointer(let element), .unsafeMutableBufferPointer(let element):
+            let elementLayout = try CType(cdeclType: element).foreignValueLayout
+            return TranslatedParameter(
+              parameter: JavaParameter(name: parameterName, type: .javaForeignMemorySegment),
+              conversion: .commaSeparated([
+                .placeholder,
+                // Calculate the element count: buffer size / element size
+                .constant("\(parameterName).byteSize() / \(elementLayout.description).byteSize()"),
+              ])
+            )
 
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
@@ -739,11 +748,32 @@ extension FFMSwift2JavaGenerator {
             break // Implemented as wrapper
 
           case .unsafePointer, .unsafeMutablePointer:
-            // FIXME: Implement
-            throw JavaTranslationError.unhandledType(swiftType)
-          case .unsafeBufferPointer, .unsafeMutableBufferPointer:
-            // FIXME: Implement
-            throw JavaTranslationError.unhandledType(swiftType)
+
+            return TranslatedResult(
+              javaResultType: .javaForeignMemorySegment,
+              annotations: resultAnnotations,
+              outParameters: [],
+              conversion: .placeholder
+            )
+          case .unsafeBufferPointer(let element), .unsafeMutableBufferPointer(let element):
+            let elementLayout = try CType(cdeclType: element).foreignValueLayout
+            return TranslatedResult(
+              javaResultType: .javaForeignMemorySegment,
+              annotations: resultAnnotations,
+              outParameters: [
+                JavaParameter(name: "pointer", type: .javaForeignMemorySegment),
+                JavaParameter(name: "count", type: .long),
+              ],
+              conversion: .method(
+                .readMemorySegment(.explodedName(component: "pointer"), as: .javaForeignMemorySegment),
+                methodName: "reinterpret",
+                arguments: [
+                  .constant("result$_count.get(SwiftValueLayout.SWIFT_INT64, 0) * \(elementLayout.description).byteSize()")
+                ],
+                withArena: false
+              )
+            )
+
           case .string:
             return TranslatedResult(
               javaResultType: .javaLangString,
