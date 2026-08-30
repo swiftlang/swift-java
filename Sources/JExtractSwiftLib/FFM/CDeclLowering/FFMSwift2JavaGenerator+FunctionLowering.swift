@@ -123,21 +123,22 @@ struct CdeclLowering {
     }
 
     var isThrowing = false
+    var isAsync = false
     for effect in signature.effectSpecifiers {
       switch effect {
       case .throws:
         isThrowing = true
       case .async:
-        throw LoweringError.effectNotSupported(effect)
+        isAsync = true
       }
     }
 
     // Lower the result.
-    let loweredResult = try lowerResult(signature.result.type)
+    var loweredResult = try lowerResult(signature.result.type)
 
-    // If the function throws, create an error out parameter
+    // If the function throws (and isn't async), create an error out parameter
     let errorOutParameter: LoweredParameter? =
-      if isThrowing {
+      if isThrowing && !isAsync {
         LoweredParameter(
           cdeclParameters: [
             SwiftParameter(
@@ -152,10 +153,62 @@ struct CdeclLowering {
         nil
       }
 
+    let asyncCompletionOutParameter: LoweredParameter?
+    let asyncErrorOutParameter: LoweredParameter?
+
+    if isAsync {
+      let completionType = SwiftFunctionType(
+        convention: .c,
+        parameters: [
+          SwiftParameter(convention: .byValue, type: loweredResult.cdeclResultType)
+        ],
+        resultType: .tuple([])
+      )
+      asyncCompletionOutParameter = LoweredParameter(
+        cdeclParameters: [
+          SwiftParameter(
+            convention: .byValue,
+            parameterName: "async$completion",
+            type: .function(completionType)
+          )
+        ],
+        conversion: .placeholder
+      )
+
+      if isThrowing {
+        let errorCompletionType = SwiftFunctionType(
+          convention: .c,
+          parameters: [
+            SwiftParameter(convention: .byValue, type: knownTypes.unsafePointer(knownTypes.int8))
+          ],
+          resultType: .tuple([])
+        )
+        asyncErrorOutParameter = LoweredParameter(
+          cdeclParameters: [
+            SwiftParameter(
+              convention: .byValue,
+              parameterName: "async$error",
+              type: .function(errorCompletionType)
+            )
+          ],
+          conversion: .placeholder
+        )
+      } else {
+        asyncErrorOutParameter = nil
+      }
+
+      loweredResult.cdeclResultType = .tuple([])
+    } else {
+      asyncCompletionOutParameter = nil
+      asyncErrorOutParameter = nil
+    }
+
     // When throwing with a non-void pointer return, make the return type
     // optional so the catch block can return nil (nullable pointer in C)
     let cdeclReturnTypeForThunk: SwiftType
-    if isThrowing && loweredResult.cdeclResultType.isPointer {
+    if isAsync {
+      cdeclReturnTypeForThunk = .tuple([])
+    } else if isThrowing && loweredResult.cdeclResultType.isPointer {
       cdeclReturnTypeForThunk = knownTypes.optionalSugar(loweredResult.cdeclResultType)
     } else {
       cdeclReturnTypeForThunk = loweredResult.cdeclResultType
@@ -167,6 +220,8 @@ struct CdeclLowering {
       parameters: loweredParameters,
       result: loweredResult,
       errorOutParameter: errorOutParameter,
+      asyncCompletionOutParameter: asyncCompletionOutParameter,
+      asyncErrorOutParameter: asyncErrorOutParameter,
       cdeclReturnTypeForThunk: cdeclReturnTypeForThunk,
     )
   }
@@ -928,13 +983,16 @@ public struct LoweredFunctionSignature: Equatable {
   var parameters: [LoweredParameter]
   var result: LoweredResult
   var errorOutParameter: LoweredParameter?
+  var asyncCompletionOutParameter: LoweredParameter?
+  var asyncErrorOutParameter: LoweredParameter?
 
   /// The cdecl return type for the thunk. When the function is throwing and
   /// returns a pointer, this is the optional-wrapped version of
   /// `result.cdeclResultType` so the catch block can return nil
   var cdeclReturnTypeForThunk: SwiftType
 
-  var isThrowing: Bool { errorOutParameter != nil }
+  var isThrowing: Bool { errorOutParameter != nil || asyncErrorOutParameter != nil }
+  var isAsync: Bool { asyncCompletionOutParameter != nil }
 
   var allLoweredParameters: [SwiftParameter] {
     var all: [SwiftParameter] = []
@@ -951,6 +1009,12 @@ public struct LoweredFunctionSignature: Equatable {
     // Error out parameter (always last)
     if let errorOutParameter {
       all += errorOutParameter.cdeclParameters
+    }
+    if let asyncCompletionOutParameter {
+      all += asyncCompletionOutParameter.cdeclParameters
+    }
+    if let asyncErrorOutParameter {
+      all += asyncErrorOutParameter.cdeclParameters
     }
     return all
   }
@@ -1098,45 +1162,100 @@ extension LoweredFunctionSignature {
       resultExpr = "\(callee)[\(raw: parameters)] = \(newValueArgument)"
     }
 
-    // Lower the result.
     let tryKeyword: String = isThrowing ? "try " : ""
-    if !original.result.type.isVoid {
-      let loweredResult: ExprSyntax? = result.conversion.asExprSyntax(
-        placeholder: resultExpr.description,
-        bodyItems: &bodyItems,
-      )
+    let awaitKeyword: String = isAsync ? "await " : ""
 
-      if let loweredResult {
-        let returnKeyword = !result.cdeclResultType.isVoid ? "return " : ""
-        bodyItems.append("\(raw: returnKeyword)\(raw: tryKeyword)\(loweredResult)")
+    if isAsync {
+      var taskBodyItems: [CodeBlockItemSyntax] = []
+
+      if !original.result.type.isVoid {
+        // Use a temporary variable to hold the async result before conversion, since conversion
+        // might assume a simple placeholder name or expression.
+        taskBodyItems.append("let async$result = \(raw: tryKeyword)\(raw: awaitKeyword)\(resultExpr)")
+
+        let loweredResult: ExprSyntax? = result.conversion.asExprSyntax(
+          placeholder: "async$result",
+          bodyItems: &taskBodyItems,
+        )
+
+        if let loweredResult {
+          taskBodyItems.append("async$completion(\(loweredResult))")
+        }
+      } else {
+        taskBodyItems.append("\(raw: tryKeyword)\(raw: awaitKeyword)\(resultExpr)")
+        taskBodyItems.append("async$completion()")
       }
-    } else {
-      bodyItems.append("\(raw: tryKeyword)\(resultExpr)")
-    }
 
-    // If throwing, wrap body in do/catch.
-    if isThrowing {
-      let doBody = bodyItems.map { item in
+      if isThrowing {
+        let doBody = taskBodyItems.map { item in
+          item.with(\.leadingTrivia, [.newlines(1), .spaces(4)])
+        }
+
+        let doStmt: StmtSyntax = """
+          do {\(CodeBlockItemListSyntax(doBody))
+            } catch {
+              let errorString = String(describing: error)
+              errorString.withCString { errorCString in
+                  async$error(errorCString)
+              }
+            }
+          """
+        taskBodyItems = [
+          CodeBlockItemSyntax(item: .stmt(doStmt))
+        ]
+      }
+
+      let taskBody = taskBodyItems.map { item in
         item.with(\.leadingTrivia, [.newlines(1), .spaces(4)])
       }
 
-      let dummyReturnStmt: String
-      if !result.cdeclResultType.isVoid {
-        let dummyReturn = result.cdeclResultType.isPointer ? "nil" : "0"
-        dummyReturnStmt = "\n    return \(dummyReturn)"
-      } else {
-        dummyReturnStmt = ""
-      }
-      let doStmt: StmtSyntax = """
-        do {\(CodeBlockItemListSyntax(doBody))
-          } catch {
-            result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()\(raw: dummyReturnStmt)
-          }
+      let taskExpr: ExprSyntax = """
+        Task.immediate {\(CodeBlockItemListSyntax(taskBody))
+        }
         """
 
       bodyItems = [
-        CodeBlockItemSyntax(item: .stmt(doStmt))
+        CodeBlockItemSyntax(item: .expr(taskExpr))
       ]
+    } else {
+      if !original.result.type.isVoid {
+        let loweredResult: ExprSyntax? = result.conversion.asExprSyntax(
+          placeholder: resultExpr.description,
+          bodyItems: &bodyItems,
+        )
+
+        if let loweredResult {
+          let returnKeyword = !result.cdeclResultType.isVoid ? "return " : ""
+          bodyItems.append("\(raw: returnKeyword)\(raw: tryKeyword)\(loweredResult)")
+        }
+      } else {
+        bodyItems.append("\(raw: tryKeyword)\(resultExpr)")
+      }
+
+      // If throwing, wrap body in do/catch.
+      if isThrowing {
+        let doBody = bodyItems.map { item in
+          item.with(\.leadingTrivia, [.newlines(1), .spaces(4)])
+        }
+
+        let dummyReturnStmt: String
+        if !result.cdeclResultType.isVoid {
+          let dummyReturn = result.cdeclResultType.isPointer ? "nil" : "0"
+          dummyReturnStmt = "\n    return \(dummyReturn)"
+        } else {
+          dummyReturnStmt = ""
+        }
+        let doStmt: StmtSyntax = """
+          do {\(CodeBlockItemListSyntax(doBody))
+            } catch {
+              result$throws.pointee = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()\(raw: dummyReturnStmt)
+            }
+          """
+
+        bodyItems = [
+          CodeBlockItemSyntax(item: .stmt(doStmt))
+        ]
+      }
     }
 
     loweredCDecl.body!.statements = CodeBlockItemListSyntax {

@@ -33,9 +33,20 @@ extension CType {
         }
 
         switch knownType {
-        case .optional(let wrapped) where wrapped.isPointer:
-          try self.init(cdeclType: wrapped)
-          return
+        case .optional(let wrapped):
+          let isNullableInC: Bool
+          if wrapped.isPointer {
+            isNullableInC = true
+          } else if case .function(let fn) = wrapped, fn.convention == .c {
+            isNullableInC = true
+          } else {
+            isNullableInC = false
+          }
+
+          if isNullableInC {
+            try self.init(cdeclType: wrapped)
+            return
+          }
 
         case .unsafePointer(let pointee):
           self = .pointer(

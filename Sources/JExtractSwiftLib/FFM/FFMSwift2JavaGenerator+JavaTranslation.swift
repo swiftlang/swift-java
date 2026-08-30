@@ -131,6 +131,7 @@ extension FFMSwift2JavaGenerator {
     var parameters: [TranslatedParameter]
     var result: TranslatedResult
     var isThrowing: Bool = false
+    var isAsync: Bool = false
 
     /// Whether any parameter or the result requires a 32-bit integer overflow check,
     /// which means the Java method must declare `throws SwiftIntegerOverflowException`
@@ -328,17 +329,22 @@ extension FFMSwift2JavaGenerator {
         }
 
       // Result.
-      let result = try self.translateResult(
+      var result = try self.translateResult(
         swiftResult: swiftSignature.result,
         loweredResult: loweredFunctionSignature.result,
         methodName: methodName
       )
 
+      if loweredFunctionSignature.isAsync {
+        result.javaResultType = .completableFuture(result.javaResultType)
+      }
+
       return TranslatedFunctionSignature(
         selfParameter: selfParameter,
         parameters: parameters,
         result: result,
-        isThrowing: loweredFunctionSignature.isThrowing
+        isThrowing: loweredFunctionSignature.isThrowing,
+        isAsync: loweredFunctionSignature.isAsync
       )
     }
 
@@ -1065,9 +1071,17 @@ extension CType {
       return inner.javaType
 
     case .tag(_):
-      fatalError("unsupported")
-    case .integral(.signed(bits: _)), .integral(.unsigned(bits: _)):
-      fatalError("unreachable")
+      return .javaForeignMemorySegment
+    case .integral(.signed(bits: let bits)):
+      if bits <= 8 { return .byte }
+      if bits <= 16 { return .short }
+      if bits <= 32 { return .int }
+      return .long
+    case .integral(.unsigned(bits: let bits)):
+      if bits <= 8 { return .byte }
+      if bits <= 16 { return .char }
+      if bits <= 32 { return .int }
+      return .long
     }
   }
 
@@ -1098,9 +1112,22 @@ extension CType {
       return inner.foreignValueLayout
 
     case .tag(_):
-      fatalError("unsupported")
-    case .void, .integral(.signed(bits: _)), .integral(.unsigned(bits: _)):
-      fatalError("unreachable")
+      return .SwiftPointer
+
+    case .void:
+      return .SwiftPointer
+
+    case .integral(.signed(bits: let bits)):
+      if bits <= 8 { return .SwiftInt8 }
+      if bits <= 16 { return .SwiftInt16 }
+      if bits <= 32 { return .SwiftInt32 }
+      return .SwiftInt64
+
+    case .integral(.unsigned(bits: let bits)):
+      if bits <= 8 { return .SwiftUInt8 }
+      if bits <= 16 { return .SwiftUInt16 }
+      if bits <= 32 { return .SwiftUInt32 }
+      return .SwiftUInt64
     }
   }
 }
