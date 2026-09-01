@@ -270,4 +270,16 @@ public class MySwiftLibraryTest {
         int result = MySwiftLibrary.globalCallMeLongToIntFunction((long a) -> { return (int) a; });
         assertEquals(1, result);
     }
+
+    @Test
+    void call_globalCallMeDoubleToLongFunction_noThrow() {
+        long result = MySwiftLibrary.globalCallMeDoubleToLongFunction((double a) -> { return (long) a; });
+        assertEquals(1L, result);
+    }
+
+    @Test
+    void call_globalCallMeIntToLongFunction_noThrow() {
+        long result = MySwiftLibrary.globalCallMeIntToLongFunction((int a) -> { return (long) a; });
+        assertEquals(1L, result);
+    }
 }
