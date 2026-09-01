@@ -152,4 +152,16 @@ public class ClosuresTest {
         int result = MySwiftLibrary.globalCallMeLongToIntFunction((long a) -> { return (int) a; });
         assertEquals(1, result);
     }
+
+    @Test
+    void globalCallMeDoubleToLongFunction() {
+        long result = MySwiftLibrary.globalCallMeDoubleToLongFunction((double a) -> { return (long) a; });
+        assertEquals(1L, result);
+    }
+
+    @Test
+    void globalCallMeIntToLongFunction() {
+        long result = MySwiftLibrary.globalCallMeIntToLongFunction((int a) -> { return (long) a; });
+        assertEquals(1L, result);
+    }
 }
