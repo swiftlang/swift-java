@@ -1015,7 +1015,7 @@ extension FFMSwift2JavaGenerator.TranslatedFunctionSignature {
   /// Whether or not if the down-calling requires temporary "Arena" which is
   /// only used during the down-calling.
   var requiresTemporaryArena: Bool {
-    if self.isThrowing {
+    if self.isThrowing && !self.isAsync {
       return true
     }
     if self.parameters.contains(where: { $0.conversion.requiresTemporaryArena }) {
@@ -1115,7 +1115,7 @@ extension CType {
       return .SwiftPointer
 
     case .void:
-      return .SwiftPointer
+      fatalError("unreachable")
 
     case .integral(.signed(bits: let bits)):
       if bits <= 8 { return .SwiftInt8 }

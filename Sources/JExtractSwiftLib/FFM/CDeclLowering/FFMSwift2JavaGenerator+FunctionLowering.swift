@@ -157,11 +157,13 @@ struct CdeclLowering {
     let asyncErrorOutParameter: LoweredParameter?
 
     if isAsync {
+      let completionParams: [SwiftParameter] = loweredResult.cdeclResultType.isVoid
+        ? []
+        : [SwiftParameter(convention: .byValue, type: loweredResult.cdeclResultType)]
+
       let completionType = SwiftFunctionType(
         convention: .c,
-        parameters: [
-          SwiftParameter(convention: .byValue, type: loweredResult.cdeclResultType)
-        ],
+        parameters: completionParams,
         resultType: .tuple([])
       )
       asyncCompletionOutParameter = LoweredParameter(
@@ -179,7 +181,10 @@ struct CdeclLowering {
         let errorCompletionType = SwiftFunctionType(
           convention: .c,
           parameters: [
-            SwiftParameter(convention: .byValue, type: knownTypes.unsafePointer(knownTypes.int8))
+            SwiftParameter(
+              convention: .byValue,
+              type: knownTypes.optionalSugar(knownTypes.unsafeMutableRawPointer)
+            )
           ],
           resultType: .tuple([])
         )
@@ -1194,10 +1199,8 @@ extension LoweredFunctionSignature {
         let doStmt: StmtSyntax = """
           do {\(CodeBlockItemListSyntax(doBody))
             } catch {
-              let errorString = String(describing: error)
-              errorString.withCString { errorCString in
-                  async$error(errorCString)
-              }
+              let errorPtr = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+              async$error(errorPtr)
             }
           """
         taskBodyItems = [
@@ -1209,14 +1212,21 @@ extension LoweredFunctionSignature {
         item.with(\.leadingTrivia, [.newlines(1), .spaces(4)])
       }
 
-      let taskExpr: ExprSyntax = """
-        Task.immediate {\(CodeBlockItemListSyntax(taskBody))
+      let taskStatements: CodeBlockItemListSyntax = """
+        var task: Task<Void, Never>? = nil
+        #if swift(>=6.2)
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+          task = Task.immediate {\(CodeBlockItemListSyntax(taskBody))
+          }
+        }
+        #endif
+        if task == nil {
+          task = Task {\(CodeBlockItemListSyntax(taskBody))
+          }
         }
         """
 
-      bodyItems = [
-        CodeBlockItemSyntax(item: .expr(taskExpr))
-      ]
+      bodyItems = Array(taskStatements)
     } else {
       if !original.result.type.isVoid {
         let loweredResult: ExprSyntax? = result.conversion.asExprSyntax(

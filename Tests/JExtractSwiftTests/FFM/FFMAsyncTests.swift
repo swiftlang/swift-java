@@ -29,7 +29,7 @@ struct FFMAsyncTests {
         """
         /**
          * {@snippet lang=c :
-         * void swiftjava_SwiftModule_asyncVoid(void **$async$completion, void **$async$error)
+         * void swiftjava_SwiftModule_asyncVoid(void (*async$completion)(void))
          * }
          */
         private static class swiftjava_SwiftModule_asyncVoid {
@@ -42,14 +42,12 @@ struct FFMAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<java.lang.Void> asyncVoid() {
-          try (var arena$ = org.swift.swiftkit.core.AllocatingSwiftArena.ofConfined()) {
-            java.util.concurrent.CompletableFuture future$ = new java.util.concurrent.CompletableFuture();
-            java.lang.foreign.MemorySegment $async$completion = swiftjava_SwiftModule_asyncVoid.$async$completion.toUpcallStub((result$) -> {
-              future$.complete(null);
-            }, java.lang.foreign.Arena.ofAuto());
-            swiftjava_SwiftModule_asyncVoid.call($async$completion);
-            return future$;
-          }
+          java.util.concurrent.CompletableFuture<java.lang.Void> future$ = new java.util.concurrent.CompletableFuture<java.lang.Void>();
+          MemorySegment $async$completion = swiftjava_SwiftModule_asyncVoid.$async$completion.toUpcallStub(() -> {
+            future$.complete(null);
+          }, Arena.ofAuto());
+          swiftjava_SwiftModule_asyncVoid.call($async$completion);
+          return future$;
         }
         """,
       ]
@@ -66,13 +64,22 @@ struct FFMAsyncTests {
       expectedChunks: [
         """
         @_cdecl("swiftjava_SwiftModule_asyncVoid")
-        public func swiftjava_SwiftModule_asyncVoid(_ $async$completion: @convention(c) () -> Void) {
-          Task.immediate {
-            await asyncVoid()
-            $async$completion()
-          }
-        }
+        public func swiftjava_SwiftModule_asyncVoid(_ async$completion: @convention(c) () -> ()) {
+        """,
         """
+            task = Task.immediate {
+              await asyncVoid()
+              async$completion()
+            }
+        """,
+        """
+          if task == nil {
+            task = Task {
+              await asyncVoid()
+              async$completion()
+            }
+          }
+        """,
       ]
     )
   }
@@ -86,27 +93,33 @@ struct FFMAsyncTests {
       expectedChunks: [
         """
         /**
+         * {@snippet lang=c :
+         * void swiftjava_SwiftModule_asyncThrowsVoid(void (*async$completion)(void), void (*async$error)(void *))
+         * }
+         */
+        private static class swiftjava_SwiftModule_asyncThrowsVoid {
+        """,
+        """
+        /**
          * Downcall to Swift:
          * {@snippet lang=swift :
          * public func asyncThrowsVoid() async throws
          * }
          */
         public static java.util.concurrent.CompletableFuture<java.lang.Void> asyncThrowsVoid() {
-          try (var arena$ = org.swift.swiftkit.core.AllocatingSwiftArena.ofConfined()) {
-            java.util.concurrent.CompletableFuture future$ = new java.util.concurrent.CompletableFuture();
-            java.lang.foreign.MemorySegment $async$completion = swiftjava_SwiftModule_asyncThrowsVoid.$async$completion.toUpcallStub((result$) -> {
-              future$.complete(null);
-            }, java.lang.foreign.Arena.ofAuto());
-            java.lang.foreign.MemorySegment $async$error = swiftjava_SwiftModule_asyncThrowsVoid.$async$error.toUpcallStub((error$) -> {
-              if (!error$.equals(java.lang.foreign.MemorySegment.NULL)) {
-                future$.completeExceptionally(new org.swift.swiftkit.ffm.generated.SwiftJavaErrorException(error$, org.swift.swiftkit.core.AllocatingSwiftArena.ofAuto()));
-              }
-            }, java.lang.foreign.Arena.ofAuto());
-            swiftjava_SwiftModule_asyncThrowsVoid.call($async$completion, $async$error);
-            return future$;
-          }
+          java.util.concurrent.CompletableFuture<java.lang.Void> future$ = new java.util.concurrent.CompletableFuture<java.lang.Void>();
+          MemorySegment $async$completion = swiftjava_SwiftModule_asyncThrowsVoid.$async$completion.toUpcallStub(() -> {
+            future$.complete(null);
+          }, Arena.ofAuto());
+          MemorySegment $async$error = swiftjava_SwiftModule_asyncThrowsVoid.$async$error.toUpcallStub((error$) -> {
+            if (!error$.equals(MemorySegment.NULL)) {
+              future$.completeExceptionally(new SwiftJavaErrorException(error$, AllocatingSwiftArena.ofAuto()));
+            }
+          }, Arena.ofAuto());
+          swiftjava_SwiftModule_asyncThrowsVoid.call($async$completion, $async$error);
+          return future$;
         }
-        """
+        """,
       ]
     )
   }
@@ -121,20 +134,58 @@ struct FFMAsyncTests {
       expectedChunks: [
         """
         @_cdecl("swiftjava_SwiftModule_asyncThrowsVoid")
-        public func swiftjava_SwiftModule_asyncThrowsVoid(_ $async$completion: @convention(c) () -> Void, _ $async$error: @convention(c) (UnsafePointer<CChar>) -> Void) {
-          Task.immediate {
-            do {
-              try await asyncThrowsVoid()
-              $async$completion()
-            } catch {
-              let errorString = String(describing: error)
-              errorString.withCString { errorCString in
-                  $async$error(errorCString)
-              }
-            }
-          }
-        }
+        public func swiftjava_SwiftModule_asyncThrowsVoid(_ async$completion: @convention(c) () -> (), _ async$error: @convention(c) (UnsafeMutableRawPointer?) -> ()) {
+        """,
         """
+              do {
+                try await asyncThrowsVoid()
+                async$completion()
+              } catch {
+                let errorPtr = Unmanaged.passRetained(SwiftJavaError(error)).toOpaque()
+                async$error(errorPtr)
+              }
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: async -> Int64 (Java, CompletableFuture)")
+  func completableFuture_asyncSum_java() throws {
+    try assertOutput(
+      input: "public func asyncSum(a: Int64, b: Int64) async -> Int64",
+      .ffm,
+      .java,
+      expectedChunks: [
+        """
+        public static java.util.concurrent.CompletableFuture<java.lang.Long> asyncSum(long a, long b) {
+          java.util.concurrent.CompletableFuture<java.lang.Long> future$ = new java.util.concurrent.CompletableFuture<java.lang.Long>();
+          MemorySegment $async$completion = swiftjava_SwiftModule_asyncSum_a_b.$async$completion.toUpcallStub((result$) -> {
+            future$.complete(result$);
+          }, Arena.ofAuto());
+          swiftjava_SwiftModule_asyncSum_a_b.call(a, b, $async$completion);
+          return future$;
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test("Import: async -> Int64 (Swift, CompletableFuture)")
+  func completableFuture_asyncSum_swift() throws {
+    try assertOutput(
+      input: "public func asyncSum(a: Int64, b: Int64) async -> Int64",
+      .ffm,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("swiftjava_SwiftModule_asyncSum_a_b")
+        public func swiftjava_SwiftModule_asyncSum_a_b(_ a: Int64, _ b: Int64, _ async$completion: @convention(c) (Int64) -> ()) {
+        """,
+        """
+              let async$result = await asyncSum(a: a, b: b)
+              async$completion(async$result)
+        """,
       ]
     )
   }

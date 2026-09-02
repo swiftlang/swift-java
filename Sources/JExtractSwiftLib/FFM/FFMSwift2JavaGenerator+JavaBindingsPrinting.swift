@@ -419,7 +419,7 @@ extension FFMSwift2JavaGenerator {
     var throwsClauses: [String] = []
     // If a Swift function is 'throws' we throw a checked error for the Java side
     // TODO: When we support typed throws on Swift side we'll want to throw the right type here instead
-    if translatedSignature.isThrowing {
+    if translatedSignature.isThrowing && !translatedSignature.isAsync {
       throwsClauses.append(JavaType.swiftJavaErrorException.className!)
     }
     if translatedSignature.canThrowSwiftIntegerOverflowException {
@@ -516,12 +516,15 @@ extension FFMSwift2JavaGenerator {
     }
 
     if translatedSignature.isAsync {
-      printer.print("java.util.concurrent.CompletableFuture future$ = new java.util.concurrent.CompletableFuture();")
+      printer.print("\(translatedSignature.result.javaResultType) future$ = new \(translatedSignature.result.javaResultType)();")
+
+      let isVoidResult = translatedSignature.result.javaResultType == .void || translatedSignature.result.javaResultType == .completableFuture(.void)
+      let completionLambdaArgs = isVoidResult ? "()" : "(result$)"
 
       let completionName = "$async$completion"
-      printer.print("MemorySegment \(completionName) = \(thunkName).\(completionName).toUpcallStub((result$) -> {")
+      printer.print("MemorySegment \(completionName) = \(thunkName).\(completionName).toUpcallStub(\(completionLambdaArgs) -> {")
       printer.indent()
-      if translatedSignature.result.javaResultType == .void || translatedSignature.result.javaResultType == .completableFuture(.void) {
+      if isVoidResult {
         printer.print("future$.complete(null);")
       } else {
         let result = translatedSignature.result.conversion.render(
