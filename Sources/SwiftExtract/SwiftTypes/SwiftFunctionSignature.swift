@@ -545,15 +545,17 @@ extension VariableDeclSyntax {
       return [.get]
     }
 
-    if let accessorBlock = binding.accessorBlock {
-      return accessorBlock.supportedAccessorKinds()
-    }
-
-    // Account for private(set) and similar modifiers
+    // Account for private(set) and similar modifiers. This is checked before the
+    // accessor block, because a variable can restrict its setter's access level and
+    // still spell out its accessors explicitly.
     for modifier in self.modifiers where modifier.detail?.detail.text == "set" {
       if !minimumAccessLevel.matches(modifier) {
         return [.get]
       }
+    }
+
+    if let accessorBlock = binding.accessorBlock {
+      return accessorBlock.supportedAccessorKinds()
     }
 
     return [.get, .set]
