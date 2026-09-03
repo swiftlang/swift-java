@@ -165,7 +165,7 @@ struct FFMAsyncTests {
           swiftjava_SwiftModule_asyncSum_a_b.call(a, b, $async$completion);
           return future$;
         }
-        """,
+        """
       ]
     )
   }

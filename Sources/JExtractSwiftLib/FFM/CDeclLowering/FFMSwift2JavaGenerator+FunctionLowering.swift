@@ -157,7 +157,8 @@ struct CdeclLowering {
     let asyncErrorOutParameter: LoweredParameter?
 
     if isAsync {
-      let completionParams: [SwiftParameter] = loweredResult.cdeclResultType.isVoid
+      let completionParams: [SwiftParameter] =
+        loweredResult.cdeclResultType.isVoid
         ? []
         : [SwiftParameter(convention: .byValue, type: loweredResult.cdeclResultType)]
 
