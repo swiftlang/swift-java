@@ -71,7 +71,7 @@ class JavaKitMacroTests: XCTestCase {
 
               /// The full Java class name for this Swift type.
               open override class var fullJavaClassName: String {
-                #if os(Android) && AndroidCoreLibraryDesugaring
+                #if os(Android)
                   AndroidSupport.androidDesugarClassNameConversion(for: "org.swift.example.HelloWorld")
                 #else
                   "org.swift.example.HelloWorld"
@@ -197,7 +197,7 @@ class JavaKitMacroTests: XCTestCase {
 
               /// The full Java class name for this Swift type.
               public static var fullJavaClassName: String {
-                #if os(Android) && AndroidCoreLibraryDesugaring
+                #if os(Android)
                   AndroidSupport.androidDesugarClassNameConversion(for: "org.swift.example.HelloWorld")
                 #else
                   "org.swift.example.HelloWorld"
@@ -306,7 +306,7 @@ class JavaKitMacroTests: XCTestCase {
 
               /// The full Java class name for this Swift type.
               open override class var fullJavaClassName: String {
-                #if os(Android) && AndroidCoreLibraryDesugaring
+                #if os(Android)
                   AndroidSupport.androidDesugarClassNameConversion(for: "org.swift.example.HelloWorld")
                 #else
                   "org.swift.example.HelloWorld"
@@ -364,7 +364,7 @@ class JavaKitMacroTests: XCTestCase {
 
               /// The full Java class name for this Swift type.
               open class var fullJavaClassName: String {
-                #if os(Android) && AndroidCoreLibraryDesugaring
+                #if os(Android)
                   AndroidSupport.androidDesugarClassNameConversion(for: "java.lang.Object")
                 #else
                   "java.lang.Object"
@@ -418,7 +418,7 @@ class JavaKitMacroTests: XCTestCase {
 
               /// The full Java class name for this Swift type.
               open override class var fullJavaClassName: String {
-                #if os(Android) && AndroidCoreLibraryDesugaring
+                #if os(Android)
                   AndroidSupport.androidDesugarClassNameConversion(for: "java.lang.Optional")
                 #else
                   "java.lang.Optional"
@@ -537,7 +537,7 @@ class JavaKitMacroTests: XCTestCase {
 
               /// The full Java class name for this Swift type.
               open override class var fullJavaClassName: String {
-                #if os(Android) && AndroidCoreLibraryDesugaring
+                #if os(Android)
                   AndroidSupport.androidDesugarClassNameConversion(for: "com.example.Point")
                 #else
                   "com.example.Point"
@@ -587,7 +587,7 @@ class JavaKitMacroTests: XCTestCase {
 
             /// The full Java class name for this Swift type.
             open override class var fullJavaClassName: String {
-              #if os(Android) && AndroidCoreLibraryDesugaring
+              #if os(Android)
                 AndroidSupport.androidDesugarClassNameConversion(for: "java.util.ArrayList")
               #else
                 "java.util.ArrayList"
