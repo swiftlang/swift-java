@@ -34,7 +34,7 @@ public enum AndroidSupport {
   ]
 
   /// The `j$` name for a desugarable class, or nil if the class is never desugared.
-  @_spi(Testing) @inline(__always)
+  @_spi(Testing)
   public static func _desugaredName(forDotted name: String) -> String? {
     guard desugaredClassNames.contains(name) else {
       return nil
