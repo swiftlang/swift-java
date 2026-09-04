@@ -23,8 +23,8 @@ For example, if your library's package is `org.swift.exampleapp`, add the follow
 ### Android Core Library Desugaring
 
 If you are using [Core Library Desugaring](https://developer.android.com/studio/write/java8-support) in your
-Android project, you must enable the `AndroidCoreLibraryDesugaring` trait to ensure that the SwiftJava wrappers
-use the desugared class names:
+Android project, enable the `AndroidCoreLibraryDesugaring` trait so that SwiftJava can find classes that
+desugaring relocates to a `j$` package (for example, `java.util.Optional` becomes `j$.util.Optional`):
 
 ```swift
 let package = Package(
@@ -41,6 +41,11 @@ let package = Package(
   ]
 )
 ```
+
+Enabling the trait does **not** bake a fixed `java.*` -> `j$.*` mapping into the binary. Instead it enables a
+runtime probe: the first time SwiftJava needs to resolve a desugarable class, it checks -- once per class name,
+cached for the life of the process -- whether the `j$` name is actually loadable in this process, and falls back
+to the original `java.*` name otherwise.
 
 ### Android SDK Availability
 
