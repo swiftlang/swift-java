@@ -121,6 +121,14 @@ public class MySwiftClass {
   public func returnXAsJavaLong() -> JavaLong {
     JavaLong(self.x)
   }
+
+  public func returnXAsOptionalJavaLong() -> JavaLong? {
+    JavaLong(self.x)
+  }
+
+  public func returnXYAsJavaLongs() -> [JavaLong] {
+    [JavaLong(self.x), JavaLong(self.y)]
+  }
 }
 
 extension MySwiftClass: CustomStringConvertible {
