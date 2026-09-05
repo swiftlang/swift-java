@@ -18,7 +18,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.generated.SwiftJavaErrorException;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -196,7 +198,7 @@ public class MySwiftLibraryTest {
     @Test
     void call_asyncSum() throws Exception {
         // snippet.asyncUsageJava
-        java.util.concurrent.CompletableFuture<Long> future = MySwiftLibrary.asyncSum(10, 12);
+        CompletableFuture<Long> future = MySwiftLibrary.asyncSum(10, 12);
         Long result = future.get();
         assertEquals(22, result);
         // snippet.end
@@ -204,14 +206,14 @@ public class MySwiftLibraryTest {
 
     @Test
     void call_asyncThrowsVoid_noThrow() throws Exception {
-        java.util.concurrent.CompletableFuture<Void> future = MySwiftLibrary.asyncThrowsVoid(false);
+        CompletableFuture<Void> future = MySwiftLibrary.asyncThrowsVoid(false);
         future.get(); // Should complete normally
     }
 
     @Test
     void call_asyncThrowsVoid_throws() {
-        java.util.concurrent.CompletableFuture<Void> future = MySwiftLibrary.asyncThrowsVoid(true);
-        java.util.concurrent.ExecutionException ex = assertThrows(java.util.concurrent.ExecutionException.class, future::get);
+        CompletableFuture<Void> future = MySwiftLibrary.asyncThrowsVoid(true);
+        ExecutionException ex = assertThrows(ExecutionException.class, future::get);
         
         Throwable cause = ex.getCause();
         assertNotNull(cause);
