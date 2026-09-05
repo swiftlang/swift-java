@@ -28,4 +28,20 @@ public func sumOfBytes(data: UnsafeRawBufferPointer) -> Int64 {
 public func bufferCount(data: UnsafeRawBufferPointer) -> Int64 {
   Int64(data.count)
 }
-// snippet.end
+//snippet.end
+
+private let rawBufferStorage: [UInt8] = [10, 20, 30, 40]
+private let emptyRawBufferStorage: [UInt8] = []
+private var mutableRawBufferStorage: [UInt8] = [5, 10, 15]
+
+public func makeRawBuffer() -> UnsafeRawBufferPointer {
+  rawBufferStorage.withUnsafeBytes { $0 }
+}
+
+public func makeEmptyRawBuffer() -> UnsafeRawBufferPointer {
+  emptyRawBufferStorage.withUnsafeBytes { $0 }
+}
+
+public func makeMutableRawBuffer() -> UnsafeMutableRawBufferPointer {
+  mutableRawBufferStorage.withUnsafeMutableBytes { $0 }
+}

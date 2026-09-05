@@ -719,14 +719,29 @@ struct CdeclLowering {
           )
 
         case .unsafeBufferPointer, .unsafeMutableBufferPointer:
-          // Typed pointers are lowered to (raw-pointer, count) pair.
+          // Typed buffer pointers are lowered to (raw-pointer, count) pair.
+
           let isMutable = knownType.kind == .unsafeMutableBufferPointer
-          return try lowerResult(
-            .tuple([
-              SwiftTupleElement(label: nil, type: isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer),
-              SwiftTupleElement(label: nil, type: knownTypes.int),
-            ]),
-            outParameterName: outParameterName,
+          let rawPointerType = isMutable ? knownTypes.unsafeMutableRawPointer : knownTypes.unsafeRawPointer
+          return LoweredResult(
+            cdeclResultType: .void,
+            cdeclOutParameters: makeBufferIndirectReturnParameters(outParameterName, isMutable: isMutable),
+            conversion: .aggregate(
+              [
+                .populatePointer(
+                  name: "\(outParameterName)_pointer",
+                  to: .initialize(
+                    rawPointerType,
+                    arguments: [LabeledArgument(argument: .member(.placeholder, member: "baseAddress"))],
+                  ),
+                ),
+                .populatePointer(
+                  name: "\(outParameterName)_count",
+                  to: .member(.placeholder, member: "count"),
+                ),
+              ],
+              name: outParameterName,
+            ),
           )
 
         case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
