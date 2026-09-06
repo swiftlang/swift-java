@@ -1768,7 +1768,7 @@ extension JNISwift2JavaGenerator {
                 let \(javaInterfaceVar) = \(syntheticFunction.javaInterfaceName)(javaThis: \(placeholder), environment: environment)
                 return \(closureHeader)
                   let future$ = \(upcallExpr)
-                  _ = \(tryKeyword)future$?.dynamicJavaMethodCall(methodName: "get")
+                  _ = \(tryKeyword)future$?.get()
                 }
               }()
               """
@@ -1784,7 +1784,7 @@ extension JNISwift2JavaGenerator {
                 return \(closureHeader)
                   let environment$ = try! JavaVirtualMachine.shared().environment()
                   let future$ = \(upcallExpr)
-                  let result$ = \(tryKeyword)future$?.dynamicJavaMethodCall(methodName: "get", resultType: JavaObject?.self)
+                  let result$ = \(tryKeyword)future$?.get()
                   return \(fn.resultType.description).fromJavaObject(result$?.javaThis, in: environment$)
                 }
               }()
