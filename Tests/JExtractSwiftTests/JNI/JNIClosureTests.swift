@@ -1159,4 +1159,179 @@ struct JNIClosureTests {
       ]
     )
   }
+
+  @Test
+  func asyncVoidClosure_javaBindings() throws {
+    let source = """
+      public func schedule(op: () async -> Void) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static class schedule {
+          /** Corresponds to the Swift closure parameter of type {@code () async -> Void}. */
+          @FunctionalInterface
+          public interface op {
+            java.util.concurrent.CompletableFuture<java.lang.Void> apply();
+          }
+        }
+        """,
+        """
+        public static void schedule(com.example.swift.SwiftModule.schedule.op op) {
+          SwiftModule.$schedule(op);
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func escapingAsyncVoidClosure_javaBindings() throws {
+    let source = """
+      public func schedule(op: @escaping () async -> Void) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static class schedule {
+          /** Corresponds to the Swift closure parameter of type {@code @escaping () async -> Void}. */
+          @FunctionalInterface
+          public interface op {
+            java.util.concurrent.CompletableFuture<java.lang.Void> apply();
+          }
+        }
+        """,
+        """
+        public static void schedule(com.example.swift.SwiftModule.schedule.op op) {
+          SwiftModule.$schedule(op);
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func asyncVoidClosure_swiftThunks() throws {
+    let source = """
+      public func schedule(op: () async -> Void) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.swift.SwiftModule$schedule$op")
+        public struct JavaSwiftModule_schedule_op {
+          @JavaMethod
+          public func apply() -> JavaObject?
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024schedule__Lcom_example_swift_SwiftModule_00024schedule_00024op_2")
+        public func Java_com_example_swift_SwiftModule__00024schedule__Lcom_example_swift_SwiftModule_00024schedule_00024op_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, op: jobject?) {
+          SwiftModule.schedule(op: {
+            guard let op else {
+              fatalError("op is null")
+            }
+            let javaInterface_op$ = JavaSwiftModule_schedule_op(javaThis: op, environment: environment)
+            return {
+              let future$ = javaInterface_op$.apply()
+              _ = try? future$?.dynamicJavaMethodCall(methodName: "get")
+            }
+          }()
+          )
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func asyncThrowingClosure_swiftThunks() throws {
+    let source = """
+      public func schedule(op: () async throws -> Void) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        let future$ = javaInterface_op$.apply()
+        _ = try future$?.dynamicJavaMethodCall(methodName: "get")
+        """
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureWithParametersAndResult_javaBindings() throws {
+    let source = """
+      public func compute(op: (Int64) async -> String) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static class compute {
+          /** Corresponds to the Swift closure parameter of type {@code (Int64) async -> String}. */
+          @FunctionalInterface
+          public interface op {
+            java.util.concurrent.CompletableFuture<java.lang.String> apply(long _0);
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureWithParametersAndResult_swiftThunks() throws {
+    let source = """
+      public func compute(op: (Int64) async -> String) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.swift.SwiftModule$compute$op")
+        public struct JavaSwiftModule_compute_op {
+          @JavaMethod
+          public func apply(_ _0: Int64) -> JavaObject?
+        }
+        """,
+        """
+        return { _0 in
+          let environment$ = try! JavaVirtualMachine.shared().environment()
+          let future$ = javaInterface_op$.apply(_0)
+          let result$ = try? future$?.dynamicJavaMethodCall(methodName: "get", resultType: JavaObject?.self)
+          return String.fromJavaObject(result$?.javaThis, in: environment$)
+        }
+        """,
+      ]
+    )
+  }
 }

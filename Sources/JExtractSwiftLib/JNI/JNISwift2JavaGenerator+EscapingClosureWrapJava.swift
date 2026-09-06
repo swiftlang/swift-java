@@ -65,6 +65,10 @@ extension JNISwift2JavaGenerator {
     }
     let paramList = "(\(params.joined(separator: .comma)))"
 
+    if type.isAsync {
+      return "\(paramList) -> JavaObject?"
+    }
+
     if type.resultType.isVoid {
       return paramList
     } else {

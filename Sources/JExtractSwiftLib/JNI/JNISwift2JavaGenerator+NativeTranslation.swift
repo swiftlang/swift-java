@@ -370,11 +370,11 @@ extension JNISwift2JavaGenerator {
       parentName: SwiftQualifiedTypeName
     ) throws -> NativeParameter {
       // @Sendable is not supported yet as "environment" is later captured inside the closure.
-      if functionType.isEscaping {
-        // For escaping closures we e need to create a Swift wrapper around
+      if functionType.isEscaping || functionType.isAsync {
+        // For escaping or async closures we need to create a Swift wrapper around
         // the passed down Java functional interface because we must keep it
         // alive with a global ref, that will remain around for as long as the
-        // escaping closure is.
+        // closure is.
         //
         // Prepare the name and shapes of the Java side functional interface
         // and Swift side @JavaInterface wrapper we'll use to implement that
@@ -1746,12 +1746,8 @@ extension JNISwift2JavaGenerator {
         }
 
         // Build result conversion
-        // Note: The Java interface is synchronous even for async closures.
-        // The async nature is on the Swift side, inferred from the expected type.
         var resultPrinter = SwiftPrinter()
         let upcallExpr = "\(javaInterfaceVar).apply(\(upcallArguments.joined(separator: .comma)))"
-        let resultConverted = syntheticFunction.resultConversion.render(&resultPrinter, upcallExpr)
-        let resultPrefix = resultPrinter.finalize()
 
         // Note: async is part of the closure TYPE, not the closure literal syntax.
         // For closures without parameters, we can omit "in" entirely.
@@ -1759,6 +1755,48 @@ extension JNISwift2JavaGenerator {
           fn.parameters.isEmpty
           ? "{"
           : "{ \(closureParameters) in"
+
+        if fn.isAsync {
+          let tryKeyword = fn.isThrowing ? "try " : "try? "
+          if isVoid {
+            printer.print(
+              """
+              {
+                guard let \(placeholder) else {
+                  fatalError("\(placeholder) is null")
+                }
+                let \(javaInterfaceVar) = \(syntheticFunction.javaInterfaceName)(javaThis: \(placeholder), environment: environment)
+                return \(closureHeader)
+                  let future$ = \(upcallExpr)
+                  _ = \(tryKeyword)future$?.dynamicJavaMethodCall(methodName: "get")
+                }
+              }()
+              """
+            )
+          } else {
+            printer.print(
+              """
+              {
+                guard let \(placeholder) else {
+                  fatalError("\(placeholder) is null")
+                }
+                let \(javaInterfaceVar) = \(syntheticFunction.javaInterfaceName)(javaThis: \(placeholder), environment: environment)
+                return \(closureHeader)
+                  let environment$ = try! JavaVirtualMachine.shared().environment()
+                  let future$ = \(upcallExpr)
+                  let result$ = \(tryKeyword)future$?.dynamicJavaMethodCall(methodName: "get", resultType: JavaObject?.self)
+                  return \(fn.resultType.description).fromJavaObject(result$?.javaThis, in: environment$)
+                }
+              }()
+              """
+            )
+          }
+
+          return printer.finalize()
+        }
+
+        let resultConverted = syntheticFunction.resultConversion.render(&resultPrinter, upcallExpr)
+        let resultPrefix = resultPrinter.finalize()
 
         // Construct the generated `@JavaInterface` wrap-java struct.
         // It will cause a new global ref on the javaThis, so no need for explicit global refs.
