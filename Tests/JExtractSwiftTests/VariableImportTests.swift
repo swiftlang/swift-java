@@ -154,4 +154,38 @@ final class VariableImportTests {
       ]
     )
   }
+
+  let class_privateSetWithAccessorBlockInterfaceFile =
+    """
+    public class MySwiftClass {
+      public private(set) var counterInt: Int {
+        get { fatalError() }
+        set { fatalError() }
+      }
+    }
+    """
+
+  @Test("Import: public private(set) var counterInt: Int with an explicit accessor block emits only the getter")
+  func variable_int_privateSet_explicitAccessorBlock() throws {
+    try assertOutput(
+      input: class_privateSetWithAccessorBlockInterfaceFile,
+      .ffm,
+      .java,
+      swiftModuleName: "FakeModule",
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public long getCounterInt() throws SwiftIntegerOverflowException {
+          $ensureAlive();
+          long result$checked = swiftjava_FakeModule_MySwiftClass_counterInt$get.call(this.$memorySegment());
+          ...
+        }
+        """
+      ],
+      notExpectedChunks: [
+        "swiftjava_FakeModule_MySwiftClass_counterInt$set",
+        "setCounterInt",
+      ]
+    )
+  }
 }
