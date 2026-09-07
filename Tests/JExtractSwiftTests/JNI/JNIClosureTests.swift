@@ -1159,4 +1159,334 @@ struct JNIClosureTests {
       ]
     )
   }
+
+  @Test
+  func asyncVoidClosure_javaBindings() throws {
+    let source = """
+      public func schedule(op: () async -> Void) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static class schedule {
+          /** Corresponds to the Swift closure parameter of type {@code () async -> Void}. */
+          @FunctionalInterface
+          public interface op {
+            java.util.concurrent.CompletableFuture<java.lang.Void> apply();
+          }
+        }
+        """,
+        """
+        public static void schedule(com.example.swift.SwiftModule.schedule.op op) {
+          SwiftModule.$schedule(op);
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func escapingAsyncVoidClosure_javaBindings() throws {
+    let source = """
+      public func schedule(op: @escaping () async -> Void) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static class schedule {
+          /** Corresponds to the Swift closure parameter of type {@code @escaping () async -> Void}. */
+          @FunctionalInterface
+          public interface op {
+            java.util.concurrent.CompletableFuture<java.lang.Void> apply();
+          }
+        }
+        """,
+        """
+        public static void schedule(com.example.swift.SwiftModule.schedule.op op) {
+          SwiftModule.$schedule(op);
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func asyncVoidClosure_swiftThunks() throws {
+    let source = """
+      public func schedule(op: () async -> Void) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.swift.SwiftModule$schedule$op")
+        public struct JavaSwiftModule_schedule_op {
+          @JavaMethod
+          public func apply() -> JavaCompletableFuture<JavaObject>?
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024schedule__Lcom_example_swift_SwiftModule_00024schedule_00024op_2")
+        public func Java_com_example_swift_SwiftModule__00024schedule__Lcom_example_swift_SwiftModule_00024schedule_00024op_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, op: jobject?) {
+          SwiftModule.schedule(op: {
+            guard let op else {
+              fatalError("op is null")
+            }
+            let javaInterface_op$ = JavaSwiftModule_schedule_op(javaThis: op, environment: environment)
+            return {
+              guard let future$ = javaInterface_op$.apply() else {
+                fatalError("Async closure upcall to apply returned a nil future")
+              }
+              _ = try! future$.get()
+            }
+          }()
+          )
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func asyncThrowingClosure_swiftThunks() throws {
+    let source = """
+      public func schedule(op: () async throws -> Void) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        guard let future$ = javaInterface_op$.apply() else {
+          fatalError("Async closure upcall to apply returned a nil future")
+        }
+        _ = try future$.get()
+        """
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureWithParametersAndResult_javaBindings() throws {
+    let source = """
+      public func compute(op: (Int64) async -> String) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static class compute {
+          /** Corresponds to the Swift closure parameter of type {@code (Int64) async -> String}. */
+          @FunctionalInterface
+          public interface op {
+            java.util.concurrent.CompletableFuture<java.lang.String> apply(long _0);
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureWithParametersAndResult_swiftThunks() throws {
+    let source = """
+      public func compute(op: (Int64) async -> String) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.swift.SwiftModule$compute$op")
+        public struct JavaSwiftModule_compute_op {
+          @JavaMethod
+          public func apply(_ _0: Int64) -> JavaCompletableFuture<JavaObject>?
+        }
+        """,
+        """
+        return { _0 in
+          guard let future$ = javaInterface_op$.apply(_0) else {
+            fatalError("Async closure upcall to apply returned a nil future")
+          }
+          let environment$ = try! JavaVirtualMachine.shared().environment()
+          let result$ = try! future$.get()
+          return String.fromJavaObject(result$?.javaThis, in: environment$)
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func asyncThrowingClosureWithParametersAndResult_swiftThunks() throws {
+    let source = """
+      public func computeThrowing(op: (Int64) async throws -> String) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.swift.SwiftModule$computeThrowing$op")
+        public struct JavaSwiftModule_computeThrowing_op {
+          @JavaMethod
+          public func apply(_ _0: Int64) -> JavaCompletableFuture<JavaObject>?
+        }
+        """,
+        """
+        return { _0 in
+          guard let future$ = javaInterface_op$.apply(_0) else {
+            fatalError("Async closure upcall to apply returned a nil future")
+          }
+          let environment$ = try! JavaVirtualMachine.shared().environment()
+          let result$ = try future$.get()
+          return String.fromJavaObject(result$?.javaThis, in: environment$)
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureWithPrimitiveParametersAndResult_javaBindings() throws {
+    let source = """
+      public func computeInt(op: (Int64) async -> Int64) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static class computeInt {
+          /** Corresponds to the Swift closure parameter of type {@code (Int64) async -> Int64}. */
+          @FunctionalInterface
+          public interface op {
+            java.util.concurrent.CompletableFuture<java.lang.Long> apply(long _0);
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureWithPrimitiveParametersAndResult_swiftThunks() throws {
+    let source = """
+      public func computeInt(op: (Int64) async -> Int64) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.swift.SwiftModule$computeInt$op")
+        public struct JavaSwiftModule_computeInt_op {
+          @JavaMethod
+          public func apply(_ _0: Int64) -> JavaCompletableFuture<JavaObject>?
+        }
+        """,
+        """
+        return { _0 in
+          guard let future$ = javaInterface_op$.apply(_0) else {
+            fatalError("Async closure upcall to apply returned a nil future")
+          }
+          let environment$ = try! JavaVirtualMachine.shared().environment()
+          let result$ = try! future$.get()
+          return Int64.fromJavaObject(result$?.javaThis, in: environment$)
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureReturningOptional_javaBindings() throws {
+    let source = """
+      public func fetchOptional(op: () async -> Int64?) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static class fetchOptional {
+          /** Corresponds to the Swift closure parameter of type {@code () async -> Int64?}. */
+          @FunctionalInterface
+          public interface op {
+            java.util.concurrent.CompletableFuture<OptionalLong> apply();
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureReturningOptional_swiftThunks() throws {
+    let source = """
+      public func fetchOptional(op: () async -> Int64?) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.swift.SwiftModule$fetchOptional$op")
+        public struct JavaSwiftModule_fetchOptional_op {
+          @JavaMethod
+          public func apply() -> JavaCompletableFuture<JavaObject>?
+        }
+        """,
+        """
+        return {
+          guard let future$ = javaInterface_op$.apply() else {
+            fatalError("Async closure upcall to apply returned a nil future")
+          }
+          let environment$ = try! JavaVirtualMachine.shared().environment()
+          let result$ = try! future$.get()
+          return Optional(javaOptional: result$?.as(JavaOptionalLong.self))
+        }
+        """,
+      ]
+    )
+  }
 }

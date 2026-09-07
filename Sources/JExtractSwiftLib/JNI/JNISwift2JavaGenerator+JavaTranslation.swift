@@ -265,7 +265,24 @@ extension JNISwift2JavaGenerator {
         )
       }
 
-      let translatedResult = try translateResult(swiftType: swiftType.resultType, methodName: name)
+      var translatedResult = try translateResult(swiftType: swiftType.resultType, methodName: name)
+
+      if swiftType.isAsync {
+        let futureType: JavaType =
+          switch self.config.effectiveAsyncFuncMode {
+          case .completableFuture:
+            .completableFuture(translatedResult.javaType)
+          case .legacyFuture:
+            .simpleCompletableFuture(translatedResult.javaType)
+          }
+        translatedResult = TranslatedResult(
+          javaType: futureType,
+          nativeJavaType: futureType,
+          annotations: translatedResult.annotations,
+          outParameters: [],
+          conversion: .placeholder
+        )
+      }
 
       return TranslatedFunctionType(
         name: name,
@@ -1814,6 +1831,7 @@ extension JNISwift2JavaGenerator {
     var swiftType: SwiftFunctionType
 
     var isEscaping: Bool { swiftType.isEscaping }
+    var isAsync: Bool { swiftType.isAsync }
 
     /// Represents this `TranslatedFunctionType` if we need to create a synthetic protocol
     /// to handle the cross-language call to the function (closure).
