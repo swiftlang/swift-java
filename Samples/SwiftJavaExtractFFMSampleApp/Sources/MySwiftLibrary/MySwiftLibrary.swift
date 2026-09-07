@@ -224,6 +224,19 @@ public func globalThrowingString(doThrow: Bool) throws -> String {
 }
 
 // ==== -----------------------------------------------------------------------
+// MARK: Async functions
+
+public func asyncSum(a: Int64, b: Int64) async -> Int64 {
+  a + b
+}
+
+public func asyncThrowsVoid(doThrow: Bool) async throws {
+  if doThrow {
+    throw SwiftExampleError(message: "expected error in asyncThrowsVoid")
+  }
+}
+
+// ==== -----------------------------------------------------------------------
 // MARK: Overloaded functions
 
 public func globalOverloaded(a: Int) {

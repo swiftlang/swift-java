@@ -332,24 +332,33 @@ extension FFMSwift2JavaGenerator {
       )
     } else {
       // Otherwise, the lambda must be wrapped with the lowered function instance.
-      let apiParams = functionType.parameters.map {
-        "\($0.parameter.type) \($0.parameter.name)"
-      }
-
-      printer.print(
-        """
-        @FunctionalInterface
-        public interface \(functionType.name) {
-          \(functionType.result.javaResultType) apply(\(apiParams.joined(separator: .comma)));
+      let (interfaceName, isKnownFuncInterface) =
+        if let known = KnownJavaFunctionalInterface.find(functionType) {
+          (known.javaType.description, true)
+        } else {
+          (functionType.name, false)
         }
-        """
-      )
+
+      if !isKnownFuncInterface {
+        let apiParams = functionType.parameters.map {
+          "\($0.parameter.type) \($0.parameter.name)"
+        }
+
+        printer.print(
+          """
+          @FunctionalInterface
+          public interface \(interfaceName) {
+            \(functionType.result.javaResultType) apply(\(apiParams.joined(separator: .comma)));
+          }
+          """
+        )
+      }
 
       let cdeclParams = functionType.cdeclType.parameters.map({ "\($0.parameterName!)" })
 
       printer.printBraceBlock(
         """
-        private static MemorySegment $toUpcallStub(\(functionType.name) fi, Arena arena)
+        private static MemorySegment $toUpcallStub(\(interfaceName) fi, Arena arena)
         """
       ) { printer in
         printer.print(
@@ -364,7 +373,8 @@ extension FFMSwift2JavaGenerator {
           convertedArgs.append(arg)
         }
 
-        let call = "fi.apply(\(convertedArgs.joined(separator: .comma)))"
+        let methodName = isKnownFuncInterface ? KnownJavaFunctionalInterface.find(functionType)!.method : "apply"
+        let call = "fi.\(methodName)(\(convertedArgs.joined(separator: .comma)))"
         let result = functionType.result.conversion.render(&printer, call)
         if functionType.result.javaResultType == .void {
           printer.print("\(result);")
@@ -409,7 +419,7 @@ extension FFMSwift2JavaGenerator {
     var throwsClauses: [String] = []
     // If a Swift function is 'throws' we throw a checked error for the Java side
     // TODO: When we support typed throws on Swift side we'll want to throw the right type here instead
-    if translatedSignature.isThrowing {
+    if translatedSignature.isThrowing && !translatedSignature.isAsync {
       throwsClauses.append(JavaType.swiftJavaErrorException.className!)
     }
     if translatedSignature.canThrowSwiftIntegerOverflowException {
@@ -505,8 +515,46 @@ extension FFMSwift2JavaGenerator {
       )
     }
 
+    if translatedSignature.isAsync {
+      printer.print("\(translatedSignature.result.javaResultType) future$ = new \(translatedSignature.result.javaResultType)();")
+
+      let isVoidResult = translatedSignature.result.javaResultType == .void || translatedSignature.result.javaResultType == .completableFuture(.void)
+      let completionLambdaArgs = isVoidResult ? "()" : "(result$)"
+
+      let completionName = "$async$completion"
+      printer.print("MemorySegment \(completionName) = \(thunkName).\(completionName).toUpcallStub(\(completionLambdaArgs) -> {")
+      printer.indent()
+      if isVoidResult {
+        printer.print("future$.complete(null);")
+      } else {
+        let result = translatedSignature.result.conversion.render(
+          &printer,
+          "result$",
+          placeholderForDowncall: nil
+        )
+        printer.print("future$.complete(\(result));")
+      }
+      printer.outdent()
+      printer.print("}, Arena.ofAuto());")
+      downCallArguments.append(completionName)
+
+      if translatedSignature.isThrowing {
+        let errorName = "$async$error"
+        printer.print("MemorySegment \(errorName) = \(thunkName).\(errorName).toUpcallStub((error$) -> {")
+        printer.indent()
+        printer.print("if (!error$.equals(MemorySegment.NULL)) {")
+        printer.indent()
+        printer.print("future$.completeExceptionally(new \(JavaType.swiftJavaErrorException.className!)(error$, AllocatingSwiftArena.ofAuto()));")
+        printer.outdent()
+        printer.print("}")
+        printer.outdent()
+        printer.print("}, Arena.ofAuto());")
+        downCallArguments.append(errorName)
+      }
+    }
+
     // Error out parameter for throwing functions.
-    if translatedSignature.isThrowing {
+    if translatedSignature.isThrowing && !translatedSignature.isAsync {
       printer.print("MemorySegment result$throws = arena$.allocate(ValueLayout.ADDRESS);")
       printer.print("result$throws.set(ValueLayout.ADDRESS, 0, MemorySegment.NULL);")
       downCallArguments.append("result$throws")
@@ -548,7 +596,10 @@ extension FFMSwift2JavaGenerator {
     }
 
     //=== Part 4: Convert the return value.
-    if translatedSignature.result.javaResultType == .void {
+    if translatedSignature.isAsync {
+      printer.print("\(downCall);")
+      printer.print("return future$;")
+    } else if translatedSignature.result.javaResultType == .void {
       // Trivial downcall with no conversion needed, no callback either
       printer.print("\(downCall);")
       printErrorCheck(&printer)
