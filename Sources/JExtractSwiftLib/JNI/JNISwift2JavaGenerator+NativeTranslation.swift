@@ -152,6 +152,35 @@ extension JNISwift2JavaGenerator {
               elementType: element,
               parameterName: parameterName
             )
+          case .unsafePointer(let pointee), .unsafeMutablePointer(let pointee):
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: parameterName, type: .long)
+              ],
+              conversion: .extractSwiftValue(.placeholder, swiftType: pointee),
+              indirectConversion: nil,
+              conversionCheck: nil
+            )
+
+          case .unsafeBufferPointer(let element), .unsafeMutableBufferPointer(let element):
+            let isMutable = knownType.kind == .unsafeMutableBufferPointer
+            let countParameterName = "\(parameterName)_count"
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: parameterName, type: .long),
+                JavaParameter(name: countParameterName, type: .long),
+              ],
+              conversion: .constructUnsafeBufferPointer(
+                base: .extractSwiftValue(.placeholder, swiftType: element, allowNil: true),
+                count: .labelessInitializer(
+                  .initFromJNI(.constant(countParameterName), swiftType: self.knownTypes.int64),
+                  swiftType: self.knownTypes.int
+                ),
+                mutable: isMutable
+              ),
+              indirectConversion: nil,
+              conversionCheck: nil
+            )
 
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             let isMutable = knownType.kind == .unsafeMutableRawBufferPointer
@@ -829,6 +858,27 @@ extension JNISwift2JavaGenerator {
               outParameters: []
             )
 
+          case .unsafePointer, .unsafeMutablePointer:
+            return NativeResult(
+              javaType: .long,
+              conversion: .getJNIValue(.convertToBitPattern(.placeholder)),
+              outParameters: []
+            )
+
+          case .unsafeBufferPointer, .unsafeMutableBufferPointer:
+            let isMutable = knownType.kind == .unsafeMutableBufferPointer
+            let javaBufferType: JavaType = isMutable ? .swiftUnsafeMutableBufferPointer : .swiftUnsafeBufferPointer
+            return NativeResult(
+              javaType: .void,
+              conversion: .bufferPointerIndirectReturn(.placeholder, outArgumentName: resultName + "Out"),
+              outParameters: [JavaParameter(name: resultName + "Out", type: javaBufferType)]
+            )
+          case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+            return NativeResult(
+              javaType: .array(.byte),
+              conversion: .getJNIValue(.rawBufferPointerToByteArray(.placeholder)),
+              outParameters: []
+            )
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType.kind, config: self.config),
               javaType.implementsJavaValue
@@ -1364,6 +1414,10 @@ extension JNISwift2JavaGenerator {
     /// of the `Unsafe(Mutable)Pointer` types in Swift.
     indirect case pointee(NativeSwiftConversionStep)
 
+    indirect case convertToBitPattern(NativeSwiftConversionStep)
+
+    indirect case constructUnsafeBufferPointer(base: NativeSwiftConversionStep, count: NativeSwiftConversionStep, mutable: Bool)
+
     indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
 
     /// Escaping closure lowering using the protocol infrastructure.
@@ -1404,6 +1458,11 @@ extension JNISwift2JavaGenerator {
     )
 
     indirect case existentialValueIndirectReturn(
+      NativeSwiftConversionStep,
+      outArgumentName: String
+    )
+
+    indirect case bufferPointerIndirectReturn(
       NativeSwiftConversionStep,
       outArgumentName: String
     )
@@ -1449,6 +1508,9 @@ extension JNISwift2JavaGenerator {
 
     /// Converts a jbyteArray to UnsafeRawBufferPointer or UnsafeMutableRawBufferPointer via GetByteArrayElements
     indirect case jniByteArrayToUnsafeRawBufferPointer(NativeSwiftConversionStep, name: String, mutable: Bool)
+
+    /// Converts an UnsafeRawBufferPointer or UnsafeMutableRawBufferPointer into a [UInt8] array for returned JNI byte[] values.
+    indirect case rawBufferPointerToByteArray(NativeSwiftConversionStep)
 
     /// Constructs a Swift tuple from individually-converted elements.
     /// E.g. `(label0: conv0, conv1)` for `(label0: Int, String)`
@@ -1629,6 +1691,10 @@ extension JNISwift2JavaGenerator {
         )
         return bitsName
 
+      case .convertToBitPattern(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "Int64(Int(bitPattern: \(inner)))"
+
       case .allocateExistentialValue(let inner, let name, let protocolTypes):
         let inner = inner.render(&printer, placeholder)
         let existentialType = SwiftKitPrinting.renderExistentialType(protocolTypes)
@@ -1666,6 +1732,12 @@ extension JNISwift2JavaGenerator {
       case .pointee(let inner):
         let inner = inner.render(&printer, placeholder)
         return "\(inner).pointee"
+
+      case .constructUnsafeBufferPointer(let base, let count, let mutable):
+        let base = base.render(&printer, placeholder)
+        let count = count.render(&printer, placeholder)
+        let bufferTypeName: String = mutable ? "UnsafeMutableBufferPointer" : "UnsafeBufferPointer"
+        return "\(bufferTypeName)(start: \(base), count: \(count))"
 
       case .closureLowering(let parameters, let nativeResult):
         var printer = SwiftPrinter()
@@ -1871,6 +1943,20 @@ extension JNISwift2JavaGenerator {
             let (selfPointerBits$, selfTypePointerBits$) = \(boxed)
             environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, selfPointerBits$.getJNIValue(in: environment))
             environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, selfTypePointerBits$.getJNIValue(in: environment))
+            """
+          )
+        }
+        return ""
+
+      case .bufferPointerIndirectReturn(let inner, let outArgumentName):
+        let inner = inner.render(&printer, placeholder)
+        printer.printBraceBlock("do") { printer in
+          printer.print(
+            """
+            let baseAddressBits$ = Int64(Int(bitPattern: \(inner).baseAddress))
+            environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache.SwiftUnsafeBufferPointer.baseAddress, baseAddressBits$.getJNIValue(in: environment))
+            let countBits$ = Int64(\(inner).count)
+            environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache.SwiftUnsafeBufferPointer.count, countBits$.getJNIValue(in: environment))
             """
           )
         }
@@ -2111,6 +2197,10 @@ extension JNISwift2JavaGenerator {
           """
         )
         return rbpVar
+
+      case .rawBufferPointerToByteArray(let inner):
+        let inner = inner.render(&printer, placeholder)
+        return "[UInt8](\(inner))"
 
       case .tupleConstruct(let elements):
         let parts = elements.enumerated().map { idx, element in

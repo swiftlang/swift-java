@@ -21,4 +21,14 @@ extension JavaType {
     .class(package: "org.swift.swiftkit.core", name: "_OutSwiftGenericInstance")
   }
 
+  /// A base address and element count pair
+  static var swiftUnsafeBufferPointer: JavaType {
+    .class(package: "org.swift.swiftkit.core", name: "SwiftUnsafeBufferPointer")
+  }
+
+  /// A mutable base address and element count pair
+  static var swiftUnsafeMutableBufferPointer: JavaType {
+    .class(package: "org.swift.swiftkit.core", name: "SwiftUnsafeMutableBufferPointer")
+  }
+
 }

@@ -49,6 +49,14 @@ final class MethodImportTests {
 
     public func swapRawBufferPointer(buffer: UnsafeRawBufferPointer) -> UnsafeMutableRawBufferPointer
 
+    public func globalTakeUnsafePointer(p: UnsafePointer<MySwiftStruct>)
+
+    public func globalReturnUnsafePointer() -> UnsafePointer<MySwiftStruct>
+
+    public func globalTakeUnsafeBufferPointer(buffer: UnsafeBufferPointer<Int32>)
+
+    public func globalReturnUnsafeBufferPointer() -> UnsafeBufferPointer<Int32>
+
     extension MySwiftClass {
       public func helloMemberInExtension()
     }
@@ -294,6 +302,187 @@ final class MethodImportTests {
             MemorySegment result$_count = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
             swiftjava___FakeModule_swapRawBufferPointer_buffer.call(buffer, buffer.byteSize(), result$_pointer, result$_count);
             return result$_pointer.get(SwiftValueLayout.SWIFT_POINTER, 0).reinterpret(result$_count.get(SwiftValueLayout.SWIFT_INT64, 0));
+          }
+        }
+        """
+    )
+  }
+
+  @Test("Import: func globalTakeUnsafePointer(p: UnsafePointer<MySwiftStruct>)")
+  func func_globalTakeUnsafePointer() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
+
+    let funcDecl = try #require(
+      st.extractedGlobalFuncs.first {
+        $0.name == "globalTakeUnsafePointer"
+      }
+    )
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expected:
+        """
+        /**
+        * Downcall to Swift:
+        * {@snippet lang=swift :
+        * public func globalTakeUnsafePointer(p: UnsafePointer<MySwiftStruct>)
+        * }
+        */
+        public static void globalTakeUnsafePointer(java.lang.foreign.MemorySegment p) {
+        swiftjava___FakeModule_globalTakeUnsafePointer_p.call(p);
+        }
+        """
+    )
+  }
+
+  @Test("Import: func globalReturnUnsafePointer() -> UnsafePointer<MySwiftStruct>")
+  func func_globalReturnUnsafePointer() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
+
+    let funcDecl = try #require(
+      st.extractedGlobalFuncs.first {
+        $0.name == "globalReturnUnsafePointer"
+      }
+    )
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expected:
+        """
+        /**
+        * Downcall to Swift:
+        * {@snippet lang=swift :
+        * public func globalReturnUnsafePointer() -> UnsafePointer<MySwiftStruct>
+        * }
+        */
+        public static java.lang.foreign.MemorySegment globalReturnUnsafePointer() {
+          return swiftjava___FakeModule_globalReturnUnsafePointer.call();
+        }
+        """
+    )
+  }
+
+  @Test("Import: func globalTakeUnsafeBufferPointer(buffer: UnsafeBufferPointer<Int32>)")
+  func func_globalTakeUnsafeBufferPointer() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
+
+    let funcDecl = try #require(
+      st.extractedGlobalFuncs.first {
+        $0.name == "globalTakeUnsafeBufferPointer"
+      }
+    )
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expected:
+        """
+        /**
+        * Downcall to Swift:
+        * {@snippet lang=swift :
+        * public func globalTakeUnsafeBufferPointer(buffer: UnsafeBufferPointer<Int32>)
+        * }
+        */
+        public static void globalTakeUnsafeBufferPointer(java.lang.foreign.MemorySegment buffer) {
+        swiftjava___FakeModule_globalTakeUnsafeBufferPointer_buffer.call(buffer, buffer.byteSize() / SwiftValueLayout.SWIFT_INT32.byteSize());
+        }
+        """
+    )
+  }
+
+  @Test("Import: func globalReturnUnsafeBufferPointer() -> UnsafeBufferPointer<Int32>")
+  func func_globalReturnUnsafeBufferPointer() throws {
+    var config = Configuration()
+    config.swiftModule = "__FakeModule"
+    let st = makeSwiftJavaAnalyzer(config: config)
+    st.log.logLevel = .error
+
+    try st.analyze(path: "Fake.swift", text: class_interfaceFile)
+
+    let funcDecl = try #require(
+      st.extractedGlobalFuncs.first {
+        $0.name == "globalReturnUnsafeBufferPointer"
+      }
+    )
+
+    let generator = FFMSwift2JavaGenerator(
+      config: config,
+      translator: st,
+      javaPackage: "com.example.swift",
+      swiftOutputDirectory: "/fake",
+      javaOutputDirectory: "/fake"
+    )
+
+    let output = JavaPrinter.toString { printer in
+      generator.printJavaBindingWrapperMethod(&printer, funcDecl)
+    }
+
+    assertOutput(
+      output,
+      expected:
+        """
+        /**
+        * Downcall to Swift:
+        * {@snippet lang=swift :
+        * public func globalReturnUnsafeBufferPointer() -> UnsafeBufferPointer<Int32>
+        * }
+        */
+        public static java.lang.foreign.MemorySegment globalReturnUnsafeBufferPointer() {
+          try(var arena$ = Arena.ofConfined()) {
+            MemorySegment result$_pointer = arena$.allocate(SwiftValueLayout.SWIFT_POINTER);
+            MemorySegment result$_count = arena$.allocate(SwiftValueLayout.SWIFT_INT64);
+            swiftjava___FakeModule_globalReturnUnsafeBufferPointer.call(result$_pointer, result$_count);
+            return result$_pointer.get(SwiftValueLayout.SWIFT_POINTER, 0).reinterpret(result$_count.get(SwiftValueLayout.SWIFT_INT64, 0) * SwiftValueLayout.SWIFT_INT32.byteSize());
           }
         }
         """

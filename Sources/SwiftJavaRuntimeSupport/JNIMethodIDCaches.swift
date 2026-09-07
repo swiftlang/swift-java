@@ -240,4 +240,62 @@ extension _JNIMethodIDCache {
       cache.fields[selfTypePointerField]!
     }
   }
+
+  public enum SwiftUnsafeBufferPointer {
+    private static let baseAddressField = Field(
+      name: "baseAddress",
+      signature: "J"
+    )
+
+    private static let countField = Field(
+      name: "count",
+      signature: "J"
+    )
+
+    private static let cache = _JNIMethodIDCache(
+      className: "org/swift/swiftkit/core/SwiftUnsafeBufferPointer",
+      fields: [baseAddressField, countField]
+    )
+
+    public static var `class`: jclass {
+      cache.javaClass
+    }
+
+    public static var baseAddress: jfieldID {
+      cache.fields[baseAddressField]!
+    }
+
+    public static var count: jfieldID {
+      cache.fields[countField]!
+    }
+  }
+
+  public enum SwiftUnsafeMutableBufferPointer {
+    private static let baseAddressField = Field(
+      name: "baseAddress",
+      signature: "J"
+    )
+
+    private static let countField = Field(
+      name: "count",
+      signature: "J"
+    )
+
+    private static let cache = _JNIMethodIDCache(
+      className: "org/swift/swiftkit/core/SwiftUnsafeMutableBufferPointer",
+      fields: [baseAddressField, countField]
+    )
+
+    public static var `class`: jclass {
+      cache.javaClass
+    }
+
+    public static var baseAddress: jfieldID {
+      cache.fields[baseAddressField]!
+    }
+
+    public static var count: jfieldID {
+      cache.fields[countField]!
+    }
+  }
 }

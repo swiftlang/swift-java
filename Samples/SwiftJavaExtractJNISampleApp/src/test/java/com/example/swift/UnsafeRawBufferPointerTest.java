@@ -44,4 +44,23 @@ public class UnsafeRawBufferPointerTest {
         byte[] input = new byte[] {};
         assertEquals(0, MySwiftLibrary.bufferCount(input));
     }
+
+    @Test
+    void returnRawBuffer() {
+        byte[] expected = new byte[] { 10, 20, 30, 40 };
+
+        assertArrayEquals(expected, MySwiftLibrary.makeRawBuffer());
+    }
+
+    @Test
+    void returnEmptyRawBuffer() {
+        assertArrayEquals(new byte[] {}, MySwiftLibrary.makeEmptyRawBuffer());
+    }
+
+    @Test
+    void returnMutableRawBuffer() {
+        byte[] expected = new byte[] { 5, 10, 15 };
+
+        assertArrayEquals(expected, MySwiftLibrary.makeMutableRawBuffer());
+    }
 }

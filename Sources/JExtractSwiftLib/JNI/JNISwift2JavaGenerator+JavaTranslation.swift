@@ -456,6 +456,33 @@ extension JNISwift2JavaGenerator {
 
           case .foundationDate, .essentialsDate, .foundationData, .essentialsData, .foundationURL, .essentialsURL:
             break // Handled as wrapped struct
+          case .unsafePointer, .unsafeMutablePointer:
+            return TranslatedParameter(
+              parameter: JavaParameter(
+                name: parameterName,
+                type: .long
+              ),
+              conversion: .placeholder
+            )
+
+          case .unsafeBufferPointer, .unsafeMutableBufferPointer:
+            let isMutable = knownType.kind == .unsafeMutableBufferPointer
+            let javaBufferType: JavaType = isMutable ? .swiftUnsafeMutableBufferPointer : .swiftUnsafeBufferPointer
+            return TranslatedParameter(
+              parameter: JavaParameter(name: parameterName, type: javaBufferType),
+              conversion: .commaSeparated([
+                .method(
+                  .placeholder,
+                  function: "getBaseAddress",
+                  arguments: []
+                ),
+                .method(
+                  .placeholder,
+                  function: "getCount",
+                  arguments: []
+                ),
+              ])
+            )
 
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
             return TranslatedParameter(
@@ -934,6 +961,36 @@ extension JNISwift2JavaGenerator {
                 arguments: [.placeholder],
               ),
             )
+
+          case .unsafePointer, .unsafeMutablePointer:
+            return TranslatedResult(
+              javaType: .long,
+              nativeJavaType: .long,
+              annotations: resultAnnotations,
+              outParameters: [],
+              conversion: .placeholder,
+            )
+
+          case .unsafeBufferPointer, .unsafeMutableBufferPointer:
+            let isMutable = knownType.kind == .unsafeMutableBufferPointer
+            let javaBufferType: JavaType = isMutable ? .swiftUnsafeMutableBufferPointer : .swiftUnsafeBufferPointer
+            return TranslatedResult(
+              javaType: javaBufferType,
+              nativeJavaType: .void,
+              annotations: resultAnnotations,
+              outParameters: [.init(name: resultName, type: javaBufferType, allocation: .new)],
+              conversion: .constant(resultName),
+            )
+          //taenda todo: add support for UnsafeRawBufferPointer and UnsafeMutableRawBufferPointer
+          case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
+            return TranslatedResult(
+              javaType: .array(.byte),
+              nativeJavaType: .array(.byte),
+              annotations: resultAnnotations,
+              outParameters: [],
+              conversion: .placeholder,
+            )
+
 
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType.kind, config: self.config) else {
