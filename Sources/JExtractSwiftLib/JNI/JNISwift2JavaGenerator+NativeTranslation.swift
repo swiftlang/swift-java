@@ -1755,51 +1755,6 @@ extension JNISwift2JavaGenerator {
           fn.parameters.isEmpty
           ? "{"
           : "{ \(closureParameters) in"
-
-        if fn.isAsync {
-          let tryKeyword = fn.isThrowing ? "try " : "try! "
-          if isVoid {
-            printer.print(
-              """
-              {
-                guard let \(placeholder) else {
-                  fatalError("\(placeholder) is null")
-                }
-                let \(javaInterfaceVar) = \(syntheticFunction.javaInterfaceName)(javaThis: \(placeholder), environment: environment)
-                return \(closureHeader)
-                  let future$ = \(upcallExpr)
-                  _ = \(tryKeyword)future$?.get()
-                }
-              }()
-              """
-            )
-          } else {
-            let resultConversionExpr = Self.renderAsyncClosureResultConversion(
-              fn.resultType,
-              resultVar: "result$",
-              environmentVar: "environment$"
-            )
-            printer.print(
-              """
-              {
-                guard let \(placeholder) else {
-                  fatalError("\(placeholder) is null")
-                }
-                let \(javaInterfaceVar) = \(syntheticFunction.javaInterfaceName)(javaThis: \(placeholder), environment: environment)
-                return \(closureHeader)
-                  let environment$ = try! JavaVirtualMachine.shared().environment()
-                  let future$ = \(upcallExpr)
-                  let result$ = \(tryKeyword)future$?.get()
-                  return \(resultConversionExpr)
-                }
-              }()
-              """
-            )
-          }
-
-          return printer.finalize()
-        }
-
         let resultConverted = syntheticFunction.resultConversion.render(&resultPrinter, upcallExpr)
         let resultPrefix = resultPrinter.finalize()
 
@@ -2188,36 +2143,6 @@ extension JNISwift2JavaGenerator {
           }
         }
         return ""
-      }
-    }
-
-    private static func renderAsyncClosureResultConversion(
-      _ resultType: SwiftType,
-      resultVar: String,
-      environmentVar: String
-    ) -> String {
-      switch resultType.asNominalType?.asKnownType {
-      case .optional(let wrapped):
-        switch wrapped.asNominalType?.asKnownType {
-        case .int64:
-          return "Optional(javaOptional: \(resultVar)?.as(JavaOptionalLong.self))"
-        case .int32:
-          return "Optional(javaOptional: \(resultVar)?.as(JavaOptionalInt.self))"
-        case .double:
-          return "Optional(javaOptional: \(resultVar)?.as(JavaOptionalDouble.self))"
-        case .string:
-          return "Optional(javaOptional: \(resultVar)?.as(JavaOptional<JavaString>.self))"
-        default:
-          return "\(resultVar)?.as(\(wrapped.description).self)"
-        }
-
-      case .int64, .int32, .int16, .int8, .int,
-        .uint64, .uint32, .uint16, .uint8, .uint,
-        .double, .float, .bool, .string:
-        return "\(resultType.description).fromJavaObject(\(resultVar)?.javaThis, in: \(environmentVar))"
-
-      default:
-        return "\(resultVar)!.as(\(resultType.description).self)!"
       }
     }
   }

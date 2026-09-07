@@ -1248,8 +1248,10 @@ struct JNIClosureTests {
             }
             let javaInterface_op$ = JavaSwiftModule_schedule_op(javaThis: op, environment: environment)
             return {
-              let future$ = javaInterface_op$.apply()
-              _ = try! future$?.get()
+              guard let future$ = javaInterface_op$.apply() else {
+                fatalError("Async closure upcall to apply returned a nil future")
+              }
+              _ = try! future$.get()
             }
           }()
           )
@@ -1272,8 +1274,10 @@ struct JNIClosureTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        let future$ = javaInterface_op$.apply()
-        _ = try future$?.get()
+        guard let future$ = javaInterface_op$.apply() else {
+          fatalError("Async closure upcall to apply returned a nil future")
+        }
+        _ = try future$.get()
         """
       ]
     )
@@ -1325,9 +1329,11 @@ struct JNIClosureTests {
         """,
         """
         return { _0 in
+          guard let future$ = javaInterface_op$.apply(_0) else {
+            fatalError("Async closure upcall to apply returned a nil future")
+          }
           let environment$ = try! JavaVirtualMachine.shared().environment()
-          let future$ = javaInterface_op$.apply(_0)
-          let result$ = try! future$?.get()
+          let result$ = try! future$.get()
           return String.fromJavaObject(result$?.javaThis, in: environment$)
         }
         """,
@@ -1356,9 +1362,11 @@ struct JNIClosureTests {
         """,
         """
         return { _0 in
+          guard let future$ = javaInterface_op$.apply(_0) else {
+            fatalError("Async closure upcall to apply returned a nil future")
+          }
           let environment$ = try! JavaVirtualMachine.shared().environment()
-          let future$ = javaInterface_op$.apply(_0)
-          let result$ = try future$?.get()
+          let result$ = try future$.get()
           return String.fromJavaObject(result$?.javaThis, in: environment$)
         }
         """,
@@ -1412,9 +1420,11 @@ struct JNIClosureTests {
         """,
         """
         return { _0 in
+          guard let future$ = javaInterface_op$.apply(_0) else {
+            fatalError("Async closure upcall to apply returned a nil future")
+          }
           let environment$ = try! JavaVirtualMachine.shared().environment()
-          let future$ = javaInterface_op$.apply(_0)
-          let result$ = try! future$?.get()
+          let result$ = try! future$.get()
           return Int64.fromJavaObject(result$?.javaThis, in: environment$)
         }
         """,
@@ -1468,9 +1478,11 @@ struct JNIClosureTests {
         """,
         """
         return {
+          guard let future$ = javaInterface_op$.apply() else {
+            fatalError("Async closure upcall to apply returned a nil future")
+          }
           let environment$ = try! JavaVirtualMachine.shared().environment()
-          let future$ = javaInterface_op$.apply()
-          let result$ = try! future$?.get()
+          let result$ = try! future$.get()
           return Optional(javaOptional: result$?.as(JavaOptionalLong.self))
         }
         """,
