@@ -14,14 +14,8 @@
 
 import SwiftJavaJNICore
 
-@JavaClass("java.util.concurrent.CompletableFuture")
-open class JavaCompletableFuture: JavaObject {
-  @JavaMethod
-  public func get() throws -> JavaObject?
-}
-
 @JavaClass("org.swift.swiftkit.core.SimpleCompletableFuture")
-open class JavaSimpleCompletableFuture: JavaObject {
+open class SwiftJavaSimpleCompletableFuture: JavaObject {
   @JavaMethod
   public func get() throws -> JavaObject?
 }

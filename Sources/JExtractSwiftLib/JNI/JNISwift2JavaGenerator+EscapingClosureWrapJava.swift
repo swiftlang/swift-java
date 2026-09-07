@@ -69,9 +69,9 @@ extension JNISwift2JavaGenerator {
       let futureType: String =
         switch self.config.effectiveAsyncFuncMode {
         case .completableFuture:
-          "JavaCompletableFuture?"
+          "JavaCompletableFuture<JavaObject>?"
         case .legacyFuture:
-          "JavaSimpleCompletableFuture?"
+          "SwiftJavaSimpleCompletableFuture?"
         }
       return "\(paramList) -> \(futureType)"
     }

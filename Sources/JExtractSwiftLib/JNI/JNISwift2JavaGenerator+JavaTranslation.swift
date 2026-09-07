@@ -279,8 +279,8 @@ extension JNISwift2JavaGenerator {
           javaType: futureType,
           nativeJavaType: futureType,
           annotations: translatedResult.annotations,
-          outParameters: translatedResult.outParameters,
-          conversion: translatedResult.conversion
+          outParameters: [],
+          conversion: .placeholder
         )
       }
 

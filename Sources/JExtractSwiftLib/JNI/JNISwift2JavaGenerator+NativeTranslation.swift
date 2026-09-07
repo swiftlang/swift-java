@@ -1757,7 +1757,7 @@ extension JNISwift2JavaGenerator {
           : "{ \(closureParameters) in"
 
         if fn.isAsync {
-          let tryKeyword = fn.isThrowing ? "try " : "try? "
+          let tryKeyword = fn.isThrowing ? "try " : "try! "
           if isVoid {
             printer.print(
               """
@@ -1774,6 +1774,11 @@ extension JNISwift2JavaGenerator {
               """
             )
           } else {
+            let resultConversionExpr = Self.renderAsyncClosureResultConversion(
+              fn.resultType,
+              resultVar: "result$",
+              environmentVar: "environment$"
+            )
             printer.print(
               """
               {
@@ -1785,7 +1790,7 @@ extension JNISwift2JavaGenerator {
                   let environment$ = try! JavaVirtualMachine.shared().environment()
                   let future$ = \(upcallExpr)
                   let result$ = \(tryKeyword)future$?.get()
-                  return \(fn.resultType.description).fromJavaObject(result$?.javaThis, in: environment$)
+                  return \(resultConversionExpr)
                 }
               }()
               """
@@ -2183,6 +2188,36 @@ extension JNISwift2JavaGenerator {
           }
         }
         return ""
+      }
+    }
+
+    private static func renderAsyncClosureResultConversion(
+      _ resultType: SwiftType,
+      resultVar: String,
+      environmentVar: String
+    ) -> String {
+      switch resultType.asNominalType?.asKnownType {
+      case .optional(let wrapped):
+        switch wrapped.asNominalType?.asKnownType {
+        case .int64:
+          return "Optional(javaOptional: \(resultVar)?.as(JavaOptionalLong.self))"
+        case .int32:
+          return "Optional(javaOptional: \(resultVar)?.as(JavaOptionalInt.self))"
+        case .double:
+          return "Optional(javaOptional: \(resultVar)?.as(JavaOptionalDouble.self))"
+        case .string:
+          return "Optional(javaOptional: \(resultVar)?.as(JavaOptional<JavaString>.self))"
+        default:
+          return "\(resultVar)?.as(\(wrapped.description).self)"
+        }
+
+      case .int64, .int32, .int16, .int8, .int,
+        .uint64, .uint32, .uint16, .uint8, .uint,
+        .double, .float, .bool, .string:
+        return "\(resultType.description).fromJavaObject(\(resultVar)?.javaThis, in: \(environmentVar))"
+
+      default:
+        return "\(resultVar)!.as(\(resultType.description).self)!"
       }
     }
   }

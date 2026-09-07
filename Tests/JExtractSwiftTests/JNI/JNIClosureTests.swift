@@ -1236,7 +1236,7 @@ struct JNIClosureTests {
         @JavaInterface("com.example.swift.SwiftModule$schedule$op")
         public struct JavaSwiftModule_schedule_op {
           @JavaMethod
-          public func apply() -> JavaCompletableFuture?
+          public func apply() -> JavaCompletableFuture<JavaObject>?
         }
         """,
         """
@@ -1249,7 +1249,7 @@ struct JNIClosureTests {
             let javaInterface_op$ = JavaSwiftModule_schedule_op(javaThis: op, environment: environment)
             return {
               let future$ = javaInterface_op$.apply()
-              _ = try? future$?.get()
+              _ = try! future$?.get()
             }
           }()
           )
@@ -1320,14 +1320,45 @@ struct JNIClosureTests {
         @JavaInterface("com.example.swift.SwiftModule$compute$op")
         public struct JavaSwiftModule_compute_op {
           @JavaMethod
-          public func apply(_ _0: Int64) -> JavaCompletableFuture?
+          public func apply(_ _0: Int64) -> JavaCompletableFuture<JavaObject>?
         }
         """,
         """
         return { _0 in
           let environment$ = try! JavaVirtualMachine.shared().environment()
           let future$ = javaInterface_op$.apply(_0)
-          let result$ = try? future$?.get()
+          let result$ = try! future$?.get()
+          return String.fromJavaObject(result$?.javaThis, in: environment$)
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func asyncThrowingClosureWithParametersAndResult_swiftThunks() throws {
+    let source = """
+      public func computeThrowing(op: (Int64) async throws -> String) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.swift.SwiftModule$computeThrowing$op")
+        public struct JavaSwiftModule_computeThrowing_op {
+          @JavaMethod
+          public func apply(_ _0: Int64) -> JavaCompletableFuture<JavaObject>?
+        }
+        """,
+        """
+        return { _0 in
+          let environment$ = try! JavaVirtualMachine.shared().environment()
+          let future$ = javaInterface_op$.apply(_0)
+          let result$ = try future$?.get()
           return String.fromJavaObject(result$?.javaThis, in: environment$)
         }
         """,
@@ -1376,15 +1407,71 @@ struct JNIClosureTests {
         @JavaInterface("com.example.swift.SwiftModule$computeInt$op")
         public struct JavaSwiftModule_computeInt_op {
           @JavaMethod
-          public func apply(_ _0: Int64) -> JavaCompletableFuture?
+          public func apply(_ _0: Int64) -> JavaCompletableFuture<JavaObject>?
         }
         """,
         """
         return { _0 in
           let environment$ = try! JavaVirtualMachine.shared().environment()
           let future$ = javaInterface_op$.apply(_0)
-          let result$ = try? future$?.get()
+          let result$ = try! future$?.get()
           return Int64.fromJavaObject(result$?.javaThis, in: environment$)
+        }
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureReturningOptional_javaBindings() throws {
+    let source = """
+      public func fetchOptional(op: () async -> Int64?) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static class fetchOptional {
+          /** Corresponds to the Swift closure parameter of type {@code () async -> Int64?}. */
+          @FunctionalInterface
+          public interface op {
+            java.util.concurrent.CompletableFuture<OptionalLong> apply();
+          }
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func asyncClosureReturningOptional_swiftThunks() throws {
+    let source = """
+      public func fetchOptional(op: () async -> Int64?) {}
+      """
+
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @JavaInterface("com.example.swift.SwiftModule$fetchOptional$op")
+        public struct JavaSwiftModule_fetchOptional_op {
+          @JavaMethod
+          public func apply() -> JavaCompletableFuture<JavaObject>?
+        }
+        """,
+        """
+        return {
+          let environment$ = try! JavaVirtualMachine.shared().environment()
+          let future$ = javaInterface_op$.apply()
+          let result$ = try! future$?.get()
+          return Optional(javaOptional: result$?.as(JavaOptionalLong.self))
         }
         """,
       ]

@@ -144,4 +144,39 @@ public class AsyncTest {
 
         assertThrows(ExecutionException.class, future::get);
     }
+
+    @Test
+    void asyncFetchOptional_present() throws Exception {
+        Future<OptionalLong> future = MySwiftLibrary.asyncFetchOptional(() -> {
+            return CompletableFuture.completedFuture(OptionalLong.of(99L));
+        });
+        assertEquals(OptionalLong.of(99L), future.get());
+    }
+
+    @Test
+    void asyncFetchOptional_empty() throws Exception {
+        Future<OptionalLong> future = MySwiftLibrary.asyncFetchOptional(() -> {
+            return CompletableFuture.completedFuture(OptionalLong.empty());
+        });
+        assertEquals(OptionalLong.empty(), future.get());
+    }
+
+    @Test
+    void asyncComputeThrowing_success() throws Exception {
+        Future<Long> future = MySwiftLibrary.asyncComputeThrowing(10, (val) -> {
+            return CompletableFuture.completedFuture(val + 5);
+        });
+        assertEquals(15L, future.get());
+    }
+
+    @Test
+    void asyncComputeThrowing_exceptionPropagates() {
+        Future<Long> future = MySwiftLibrary.asyncComputeThrowing(10, (val) -> {
+            CompletableFuture<Long> failed = new CompletableFuture<>();
+            failed.completeExceptionally(new RuntimeException("compute throwing failed"));
+            return failed;
+        });
+
+        assertThrows(ExecutionException.class, future::get);
+    }
 }
