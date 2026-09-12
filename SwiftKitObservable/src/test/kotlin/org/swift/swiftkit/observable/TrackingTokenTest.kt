@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkit.compose
+package org.swift.swiftkit.observable
 
 import org.junit.jupiter.api.Test
 

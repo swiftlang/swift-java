@@ -668,7 +668,7 @@ extension JNISwift2JavaGenerator {
     }
 
     if config.swiftObservableBridging == .jetpackCompose {
-      printer.print("import org.swift.swiftkit.compose.*;")
+      printer.print("import org.swift.swiftkit.observable.*;")
     }
 
     printer.print("")

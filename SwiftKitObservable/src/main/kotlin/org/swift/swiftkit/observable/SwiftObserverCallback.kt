@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkit.compose
+package org.swift.swiftkit.observable
 
 /**
  * Callback invoked from Swift when an observed property of a bridged

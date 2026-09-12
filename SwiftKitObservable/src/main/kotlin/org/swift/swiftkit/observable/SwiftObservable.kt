@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package org.swift.swiftkit.compose
+package org.swift.swiftkit.observable
 
 /**
  * Implemented by the generated Java bindings of a Swift `@Observable` type to

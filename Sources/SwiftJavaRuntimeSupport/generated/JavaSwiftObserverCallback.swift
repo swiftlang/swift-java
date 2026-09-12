@@ -2,13 +2,13 @@
 import SwiftJava
 import SwiftJavaJNICore
 
-@JavaInterface("org.swift.swiftkit.compose.SwiftObserverCallback")
+@JavaInterface("org.swift.swiftkit.observable.SwiftObserverCallback")
 public struct JavaSwiftObserverCallback {
   /// Java method `onPropertyChanged`.
   ///
   /// ### Java method signature
   /// ```java
-  /// public abstract void org.swift.swiftkit.compose.SwiftObserverCallback.onPropertyChanged(int)
+  /// public abstract void org.swift.swiftkit.observable.SwiftObserverCallback.onPropertyChanged(int)
   /// ```
   @JavaMethod
   public func onPropertyChanged(_ arg0: Int32)

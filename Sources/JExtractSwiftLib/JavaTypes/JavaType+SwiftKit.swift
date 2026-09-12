@@ -22,6 +22,6 @@ extension JavaType {
   }
 
   static var SwiftObserverCallback: JavaType {
-    .class(package: "org.swift.swiftkit.compose", name: "SwiftObserverCallback")
+    .class(package: "org.swift.swiftkit.observable", name: "SwiftObserverCallback")
   }
 }
