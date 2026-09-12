@@ -27,7 +27,7 @@ plugins {
 group = "org.swift.swiftkit"
 version = "1.0-SNAPSHOT"
 base {
-    archivesName = "swiftkit-compose"
+    archivesName = "swiftkit-observable"
 }
 
 repositories {
@@ -40,7 +40,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = group as? String
-            artifactId = "swiftkit-compose"
+            artifactId = "swiftkit-observable"
             version = "1.0-SNAPSHOT"
 
             from(components["java"])

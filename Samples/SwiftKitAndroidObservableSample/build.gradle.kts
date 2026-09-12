@@ -63,7 +63,7 @@ kotlin {
 
 dependencies {
     implementation(project(":SwiftKitCore"))
-    implementation(project(":SwiftKitCompose"))
+    implementation(project(":SwiftKitObservable"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

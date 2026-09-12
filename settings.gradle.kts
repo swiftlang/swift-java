@@ -97,7 +97,7 @@ val androidAvailable = detectAndroidSdk()
 
 // Samples that apply the Android Gradle Plugin.
 val androidModules = setOf(
-    "SwiftKitAndroidComposeSample",
+    "SwiftKitAndroidObservableSample",
 )
 
 val skipped = mutableListOf<String>()
@@ -105,7 +105,7 @@ val skipped = mutableListOf<String>()
 include("SwiftKitCore")
 // Kotlin + Compose helpers for the Swift @Observable bridge. Pure JVM (no Android
 // Gradle Plugin), so it builds on the same JDK matrix as SwiftKitCore.
-include("SwiftKitCompose")
+include("SwiftKitObservable")
 if (ffmCapable) {
     include("SwiftKitFFM")
 } else {
