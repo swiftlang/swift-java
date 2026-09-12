@@ -28,6 +28,10 @@ lib/
 # Though make sure we include actual sources, even if they are ignored because e.g. /build/ in the path
 !**/src/main/kotlin/**
 
+# Android local SDK location + native build intermediates
+local.properties
+**/.cxx/
+
 # Ignore JVM crash logs
 **/*.log
 
