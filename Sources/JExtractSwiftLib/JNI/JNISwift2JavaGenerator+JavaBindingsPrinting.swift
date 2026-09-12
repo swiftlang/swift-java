@@ -688,7 +688,6 @@ extension JNISwift2JavaGenerator {
     }
     modifiers.append("final")
     var implements = ["JNISwiftInstance"]
-    if config.effectiveObservableComposeBridging, decl.isObservable {
 
     if config.swiftObservableBridging == .jetpackCompose, decl.isObservable {
       implements += ["SwiftObservable", "SwiftObserverCallback"]
