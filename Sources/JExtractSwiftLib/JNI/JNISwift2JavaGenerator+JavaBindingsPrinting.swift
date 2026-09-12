@@ -485,7 +485,7 @@ extension JNISwift2JavaGenerator {
       """
       /** Pointer to the "Subscription" type that is observing changes to this object */
       private long observerPointer;
-      
+
       /** The count of how many are observing changes to this object */
       private int observerCount;
       """

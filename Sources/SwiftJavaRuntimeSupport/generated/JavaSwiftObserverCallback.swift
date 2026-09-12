@@ -10,6 +10,6 @@ public struct JavaSwiftObserverCallback {
   /// ```java
   /// public abstract void org.swift.swiftkit.compose.SwiftObserverCallback.onPropertyChanged(int)
   /// ```
-@JavaMethod
+  @JavaMethod
   public func onPropertyChanged(_ arg0: Int32)
 }

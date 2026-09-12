@@ -389,7 +389,7 @@ extension JNISwift2JavaGenerator {
       parentName: type.effectiveJavaTypeName,
       parameters: [
         selfPointerParam,
-        callbackPointer
+        callbackPointer,
       ],
       resultType: .long,
     ) { printer in
@@ -1110,7 +1110,7 @@ extension JNISwift2JavaGenerator {
     var imports = [
       "SwiftJava",
       "SwiftJavaJNICore",
-      "SwiftJavaRuntimeSupport"
+      "SwiftJavaRuntimeSupport",
     ]
 
     if config.swiftObservableBridging == .jetpackCompose {

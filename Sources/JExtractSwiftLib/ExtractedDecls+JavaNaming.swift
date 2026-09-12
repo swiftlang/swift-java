@@ -100,4 +100,3 @@ extension ExtractedFunc {
     "\(self.name)Tracker"
   }
 }
-

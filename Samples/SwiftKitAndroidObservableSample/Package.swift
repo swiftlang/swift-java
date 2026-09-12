@@ -14,18 +14,18 @@ let package = Package(
       name: "MySwiftLibrary",
       type: .dynamic,
       targets: ["MySwiftLibrary"]
-    ),
+    )
   ],
   dependencies: [
     .package(name: "swift-java", path: "../../"),
-    .package(url: "https://github.com/swift-android-sdk/swift-android-native.git", from: "2.0.0")
+    .package(url: "https://github.com/swift-android-sdk/swift-android-native.git", from: "2.0.0"),
   ],
   targets: [
     .target(
       name: "MySwiftLibrary",
       dependencies: [
         .product(name: "SwiftJava", package: "swift-java"),
-        .product(name: "AndroidLooper", package: "swift-android-native", condition: .when(platforms: [.android]))
+        .product(name: "AndroidLooper", package: "swift-android-native", condition: .when(platforms: [.android])),
       ],
       exclude: [
         "swift-java.config"
@@ -36,6 +36,6 @@ let package = Package(
       plugins: [
         .plugin(name: "JExtractSwiftPlugin", package: "swift-java")
       ]
-    ),
+    )
   ]
 )

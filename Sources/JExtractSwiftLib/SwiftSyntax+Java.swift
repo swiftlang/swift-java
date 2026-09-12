@@ -63,5 +63,3 @@ extension SwiftNominalType {
     nominalTypeDecl.syntax.attributes.contains(where: \.isJavaKitMacro)
   }
 }
-
-
