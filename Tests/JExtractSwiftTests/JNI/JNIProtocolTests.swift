@@ -82,6 +82,18 @@ struct JNIProtocolTests {
       public func makeChild() -> any ChildProtocol
     """
 
+  let protocolDefaultImplementationSource = """
+      public protocol Test {
+        public func action()
+      }
+
+      public extension Test {
+        public func action() {}
+      }
+
+      public func makeTest() -> any Test
+    """
+
   @Test
   func generatesJavaInterface() throws {
     try assertOutput(
@@ -538,6 +550,31 @@ struct JNIProtocolTests {
           return selfPointerExistential$.greeting().getJNILocalRefValue(in: environment)
         }
         """,
+      ]
+    )
+  }
+
+  @Test
+  func existentialBoxDispatchThunkWithDefaultImplementationIsUnique() throws {
+    var config = config
+    config.enableJavaCallbacks = false
+
+    try assertOutput(
+      input: protocolDefaultImplementationSource,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_TestBox__00024action_1__JJ")
+        public func Java_com_example_swift_TestBox__00024action_1__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) {
+          ...
+        }
+        """
+      ],
+      expectedOccurrences: [
+        "@_cdecl(\"Java_com_example_swift_TestBox__00024action_1__JJ\")": 1
       ]
     )
   }
