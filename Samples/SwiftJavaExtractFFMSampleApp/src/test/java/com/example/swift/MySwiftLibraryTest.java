@@ -14,7 +14,6 @@
 
 package com.example.swift;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.generated.SwiftJavaErrorException;
 
@@ -76,7 +75,6 @@ public class MySwiftLibraryTest {
     }
 
     @Test
-    @Disabled("Upcalls not yet implemented in new scheme")
     @SuppressWarnings({"Convert2Lambda", "Convert2MethodRef"})
     void call_globalCallMeRunnable() {
         CountDownLatch countDownLatch = new CountDownLatch(3);

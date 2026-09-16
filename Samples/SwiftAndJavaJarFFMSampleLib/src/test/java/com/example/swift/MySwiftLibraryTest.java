@@ -14,7 +14,6 @@
 
 package com.example.swift;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -34,14 +33,13 @@ public class MySwiftLibraryTest {
     }
 
     @Test
-    @Disabled("Upcalls not yet implemented in new scheme")
     @SuppressWarnings({"Convert2Lambda", "Convert2MethodRef"})
     void call_globalCallMeRunnable() {
         CountDownLatch countDownLatch = new CountDownLatch(3);
 
-        MySwiftLibrary.globalCallMeRunnable(new MySwiftLibrary.globalCallMeRunnable.run() {
+        MySwiftLibrary.globalCallMeRunnable(new java.lang.Runnable() {
             @Override
-            public void apply() {
+            public void run() {
                 countDownLatch.countDown();
             }
         });
@@ -113,19 +111,19 @@ public class MySwiftLibraryTest {
 
     @Test
     void call_globalCallMeIntUnaryOperator_noThrow() {
-        int result = MySwiftLibrary.globalCallMeIntBinaryOperator((int a) -> { return a; });
+        int result = MySwiftLibrary.globalCallMeIntUnaryOperator((int a) -> { return a; });
         assertEquals(1, result);
     }
 
     @Test
     void call_globalCallMeLongUnaryOperator_noThrow() {
-        long result = MySwiftLibrary.globalCallMeLongBinaryOperator((long a) -> { return a; });
+        long result = MySwiftLibrary.globalCallMeLongUnaryOperator((long a) -> { return a; });
         assertEquals(1L, result);
     }
 
     @Test
     void call_globalCallMeDoubleUnaryOperator_noThrow() {
-        double result = MySwiftLibrary.globalCallMeDoubleBinaryOperator((double a) -> { return a; });
+        double result = MySwiftLibrary.globalCallMeDoubleUnaryOperator((double a) -> { return a; });
         assertEquals(1.0, result);
     }
 
