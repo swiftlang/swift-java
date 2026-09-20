@@ -42,6 +42,8 @@ public struct Configuration: Codable {
 
   /// The Java package the generated Java code should be emitted into.
   ///
+  /// jextract requires a non-empty Java package name. The unnamed/default package is not supported.
+  ///
   /// Example:
   /// ```swift
   /// "com.example.mypackage"

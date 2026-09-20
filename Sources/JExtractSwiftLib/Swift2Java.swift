@@ -35,14 +35,10 @@ public struct SwiftToJava {
       fatalError("Missing '--swift-module' name.")
     }
 
+    let javaPackage = try validateJavaPackage(config.javaPackage)
+
     let translator = makeSwiftJavaAnalyzer(config: config)
     let log = translator.log
-
-    if config.javaPackage == nil || config.javaPackage!.isEmpty {
-      translator.log.warning(
-        "Configured java package is '', consider specifying concrete package for generated sources."
-      )
-    }
 
     guard let inputSwift = config.inputSwiftDirectory else {
       fatalError("Missing '--swift-input' directory!")
@@ -126,7 +122,7 @@ public struct SwiftToJava {
       let generator = FFMSwift2JavaGenerator(
         config: self.config,
         translator: translator,
-        javaPackage: config.javaPackage ?? "",
+        javaPackage: javaPackage,
         swiftOutputDirectory: outputSwiftDirectory,
         javaOutputDirectory: outputJavaDirectory
       )
@@ -137,7 +133,7 @@ public struct SwiftToJava {
       let generator = JNISwift2JavaGenerator(
         config: self.config,
         translator: translator,
-        javaPackage: config.javaPackage ?? "",
+        javaPackage: javaPackage,
         swiftOutputDirectory: outputSwiftDirectory,
         javaOutputDirectory: outputJavaDirectory,
         javaClassLookupTable: wrappedJavaClassesLookupTable,
