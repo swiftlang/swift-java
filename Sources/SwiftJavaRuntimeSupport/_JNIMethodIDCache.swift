@@ -60,8 +60,12 @@ public final class _JNIMethodIDCache: Sendable {
   public init(className: String, methods: [Method] = [], fields: [Field] = []) {
     let environment = try! JavaVirtualMachine.shared().environment()
 
+    // Android core library desugaring relocates some `java.*` classes to `j$.*` in the consuming
+    // app; this is a no-op everywhere else. See `AndroidSupport` for details.
+    let resolvedClassName = AndroidSupport.androidDesugarClassNameConversionWithSlashes(for: className)
+
     let clazz: jobject
-    if let jniClass = environment.interface.FindClass(environment, className) {
+    if let jniClass = environment.interface.FindClass(environment, resolvedClassName) {
       clazz = environment.interface.NewGlobalRef(environment, jniClass)!
       environment.interface.DeleteLocalRef(environment, jniClass)
       self.javaObjectHolder = nil
@@ -75,10 +79,10 @@ public final class _JNIMethodIDCache: Sendable {
       }
       guard
         let javaClass = try? jni.applicationClassLoader?.loadClass(
-          className.replacing("/", with: ".")
+          resolvedClassName.replacing("/", with: ".")
         )
       else {
-        fatalError("Class \(className) could not be found!")
+        fatalError("Class \(resolvedClassName) could not be found!")
       }
 
       clazz = javaClass.javaThis
@@ -87,36 +91,38 @@ public final class _JNIMethodIDCache: Sendable {
 
     self._class = clazz
     self.methods = methods.reduce(into: [:]) { (result, method) in
+      let signature = AndroidSupport.androidDesugarMethodSignatureConversion(for: method.signature)
       if method.isStatic {
-        if let methodID = environment.interface.GetStaticMethodID(environment, clazz, method.name, method.signature) {
+        if let methodID = environment.interface.GetStaticMethodID(environment, clazz, method.name, signature) {
           result[method] = methodID
         } else {
           fatalError(
-            "Static method \(method.signature) with signature \(method.signature) not found in class \(className)"
+            "Static method \(method.name) with signature \(signature) not found in class \(resolvedClassName)"
           )
         }
       } else {
-        if let methodID = environment.interface.GetMethodID(environment, clazz, method.name, method.signature) {
+        if let methodID = environment.interface.GetMethodID(environment, clazz, method.name, signature) {
           result[method] = methodID
         } else {
-          fatalError("Method \(method.signature) with signature \(method.signature) not found in class \(className)")
+          fatalError("Method \(method.name) with signature \(signature) not found in class \(resolvedClassName)")
         }
       }
     }
     self.fields = fields.reduce(into: [:]) { (result, field) in
+      let signature = AndroidSupport.androidDesugarMethodSignatureConversion(for: field.signature)
       if field.isStatic {
-        if let fieldID = environment.interface.GetStaticFieldID(environment, clazz, field.name, field.signature) {
+        if let fieldID = environment.interface.GetStaticFieldID(environment, clazz, field.name, signature) {
           result[field] = fieldID
         } else {
           fatalError(
-            "Static field \(field.signature) with signature \(field.signature) not found in class \(className)"
+            "Static field \(field.name) with signature \(signature) not found in class \(resolvedClassName)"
           )
         }
       } else {
-        if let fieldID = environment.interface.GetFieldID(environment, clazz, field.name, field.signature) {
+        if let fieldID = environment.interface.GetFieldID(environment, clazz, field.name, signature) {
           result[field] = fieldID
         } else {
-          fatalError("field \(field.signature) with signature \(field.signature) not found in class \(className)")
+          fatalError("field \(field.name) with signature \(signature) not found in class \(resolvedClassName)")
         }
       }
     }

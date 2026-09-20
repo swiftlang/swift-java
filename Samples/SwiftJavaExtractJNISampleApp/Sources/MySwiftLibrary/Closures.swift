@@ -93,6 +93,14 @@ public func globalCallMeLongToIntFunction(run: (Int64) -> Int32) -> Int32 {
   run(1)
 }
 
+public func globalCallMeDoubleToLongFunction(run: (Double) -> Int64) -> Int64 {
+  run(1.0)
+}
+
+public func globalCallMeIntToLongFunction(run: (Int32) -> Int64) -> Int64 {
+  run(1)
+}
+
 public func closureMultipleArguments(
   input1: Int64,
   input2: Int64,

@@ -14,7 +14,6 @@
 
 package com.example.swift;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.core.SwiftLibraries;
 import org.swift.swiftkit.ffm.AllocatingSwiftArena;
@@ -86,7 +85,6 @@ public class MySwiftClassTest {
     }
 
     @Test
-    @Disabled // TODO: Need var mangled names in interfaces
     void test_MySwiftClass_property_x() {
         try(var arena = AllocatingSwiftArena.ofConfined()) {
             MySwiftClass o = MySwiftClass.init(12, 42, arena);

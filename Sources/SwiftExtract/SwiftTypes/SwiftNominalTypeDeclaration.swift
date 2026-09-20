@@ -14,6 +14,39 @@
 
 import SwiftSyntax
 
+// ==== -----------------------------------------------------------------------
+// MARK: Nominal identity
+
+/// A module-qualified identity for a nominal type.
+public struct SwiftNominalIdentity: Hashable, Sendable, CustomStringConvertible {
+  /// The module that declares this nominal, e.g. "Swift"
+  public let moduleName: String
+
+  /// The parent-chained name within that module, e.g. `GeneratedContent.Kind`
+  public let typeName: SwiftQualifiedTypeName
+
+  public init(moduleName: String, typeName: SwiftQualifiedTypeName) {
+    self.moduleName = moduleName
+    self.typeName = typeName
+  }
+
+  /// e.g. "Swift.String", "MyLib.GeneratedContent.Kind"
+  public var fullyQualifiedName: String {
+    "\(moduleName).\(typeName.fullName)"
+  }
+
+  /// Parent-chained but module-unqualified: the spelling `extractedTypes` is keyed by
+  public var qualifiedName: String {
+    typeName.fullName
+  }
+
+  public var leafName: String {
+    typeName.leafName
+  }
+
+  public var description: String { fullyQualifiedName }
+}
+
 /// A syntax node for a nominal type declaration.
 public typealias NominalTypeDeclSyntaxNode = any DeclGroupSyntax & NamedDeclSyntax & WithAttributesSyntax
   & WithModifiersSyntax
@@ -187,6 +220,14 @@ public class SwiftNominalTypeDeclaration: SwiftTypeDeclaration {
     } else {
       return SwiftQualifiedTypeName(name)
     }
+  }
+
+  /// This declaration's module-qualified identity.
+  ///
+  /// `qualifiedName` alone cannot distinguish `Swift.String` from a locally declared
+  /// `String`, which is why anything indexing types across module boundaries keys on this
+  public var identity: SwiftNominalIdentity {
+    SwiftNominalIdentity(moduleName: moduleName, typeName: qualifiedTypeName)
   }
 
   public var qualifiedName: String {

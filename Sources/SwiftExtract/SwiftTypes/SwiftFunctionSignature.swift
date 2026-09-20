@@ -545,15 +545,15 @@ extension VariableDeclSyntax {
       return [.get]
     }
 
-    if let accessorBlock = binding.accessorBlock {
-      return accessorBlock.supportedAccessorKinds()
-    }
-
-    // Account for private(set) and similar modifiers
+    // Account for private(set) and similar modifiers.
     for modifier in self.modifiers where modifier.detail?.detail.text == "set" {
       if !minimumAccessLevel.matches(modifier) {
         return [.get]
       }
+    }
+
+    if let accessorBlock = binding.accessorBlock {
+      return accessorBlock.supportedAccessorKinds()
     }
 
     return [.get, .set]

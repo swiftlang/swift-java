@@ -14,7 +14,6 @@
 
 package com.example.swift;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.generated.SwiftJavaErrorException;
 
@@ -76,7 +75,6 @@ public class MySwiftLibraryTest {
     }
 
     @Test
-    @Disabled("Upcalls not yet implemented in new scheme")
     @SuppressWarnings({"Convert2Lambda", "Convert2MethodRef"})
     void call_globalCallMeRunnable() {
         CountDownLatch countDownLatch = new CountDownLatch(3);
@@ -269,5 +267,17 @@ public class MySwiftLibraryTest {
     void call_globalCallMeLongToIntFunction_noThrow() {
         int result = MySwiftLibrary.globalCallMeLongToIntFunction((long a) -> { return (int) a; });
         assertEquals(1, result);
+    }
+
+    @Test
+    void call_globalCallMeDoubleToLongFunction_noThrow() {
+        long result = MySwiftLibrary.globalCallMeDoubleToLongFunction((double a) -> { return (long) a; });
+        assertEquals(1L, result);
+    }
+
+    @Test
+    void call_globalCallMeIntToLongFunction_noThrow() {
+        long result = MySwiftLibrary.globalCallMeIntToLongFunction((int a) -> { return (long) a; });
+        assertEquals(1L, result);
     }
 }

@@ -132,7 +132,33 @@ final class SwiftAnalysisVisitor {
       // 'extension' in a nominal type is invalid. Ignore
       return
     }
-    guard let extractedNominalType = analyzer.extractedNominalType(node.extendedType) else {
+
+    let extractedNominalType: ExtractedNominalType
+    switch analyzer.resolveExtendedType(node.extendedType) {
+    case .extractable(let extracted):
+      extractedNominalType = extracted
+
+    case .otherModule(let otherModuleDecl):
+      recordCrossModuleExtension(node, extending: otherModuleDecl, sourceFilePath: sourceFilePath)
+      return
+
+    case .rejected:
+      return
+
+    case .unresolved:
+      self.reportSkipped(
+        node,
+        name: "extension \(node.extendedType.trimmedDescription)",
+        sourceFilePath: sourceFilePath,
+        reason: "extended type '\(node.extendedType.trimmedDescription)' did not resolve"
+      )
+      analyzer.crossModuleExtensions.record(
+        unresolved: UnresolvedExtension(
+          extendedTypeDescription: node.extendedType.trimmedDescription,
+          syntax: node,
+          sourceFilePath: sourceFilePath,
+        )
+      )
       return
     }
 
@@ -184,6 +210,130 @@ final class SwiftAnalysisVisitor {
         self.visit(decl: memberItem.decl, in: specialized, sourceFilePath: sourceFilePath)
       }
     }
+  }
+
+  // ==== -----------------------------------------------------------------------
+  // MARK: Cross-module extensions
+
+  /// Record an extension on a nominal owned by another module.
+  private func recordCrossModuleExtension(
+    _ node: ExtensionDeclSyntax,
+    extending otherModuleDecl: SwiftNominalTypeDeclaration,
+    sourceFilePath: String,
+  ) {
+    let addedConformances =
+      node.inheritanceClause?.inheritedTypes.compactMap {
+        try? SwiftType($0.type, lookupContext: analyzer.lookupContext)
+      } ?? []
+    let (requirements, hasUnrepresentable) = resolveExtensionRequirements(
+      node.genericWhereClause,
+      of: "\(otherModuleDecl.moduleName).\(otherModuleDecl.qualifiedName)"
+    )
+
+    log.debug(
+      "Record cross-module extension of '\(otherModuleDecl.moduleName).\(otherModuleDecl.qualifiedName)'"
+        + " adding [\(addedConformances.map(\.description).joined(separator: ", "))]"
+    )
+
+    analyzer.crossModuleExtensions.record(
+      CrossModuleExtension(
+        extendedType: otherModuleDecl.identity,
+        syntax: node,
+        addedConformances: addedConformances,
+        members: captureCrossModuleMembers(of: node, extending: otherModuleDecl, sourceFilePath: sourceFilePath),
+        requirements: requirements,
+        hasUnrepresentableRequirements: hasUnrepresentable,
+        attributes: node.attributes,
+        sourceFilePath: sourceFilePath,
+      )
+    )
+  }
+
+  /// Collect the members a cross-module extension adds
+  private func captureCrossModuleMembers(
+    of node: ExtensionDeclSyntax,
+    extending otherModuleDecl: SwiftNominalTypeDeclaration,
+    sourceFilePath: String,
+  ) -> CrossModuleExtensionMembers {
+    guard
+      let scratch = try? ExtractedNominalType(
+        swiftNominal: otherModuleDecl,
+        lookupContext: analyzer.lookupContext
+      )
+    else {
+      return CrossModuleExtensionMembers()
+    }
+
+    for memberItem in node.memberBlock.members {
+      switch memberItem.decl.as(DeclSyntaxEnum.self) {
+      case .functionDecl(let functionNode):
+        self.visit(functionDecl: functionNode, in: scratch, sourceFilePath: sourceFilePath)
+      case .variableDecl(let variableNode):
+        self.visit(variableDecl: variableNode, in: scratch, sourceFilePath: sourceFilePath)
+      case .initializerDecl(let initializerNode):
+        self.visit(initializerDecl: initializerNode, in: scratch, sourceFilePath: sourceFilePath)
+      case .subscriptDecl(let subscriptNode):
+        self.visit(subscriptDecl: subscriptNode, in: scratch, sourceFilePath: sourceFilePath)
+      default:
+        log.debug("Skip member of cross-module extension of '\(otherModuleDecl.qualifiedName)': \(memberItem.decl.kind)")
+      }
+    }
+
+    return CrossModuleExtensionMembers(
+      initializers: scratch.initializers,
+      methods: scratch.methods,
+      variables: scratch.variables,
+    )
+  }
+
+  /// Resolve an extension's `where` clause into the requirements.
+  private func resolveExtensionRequirements(
+    _ whereClause: GenericWhereClauseSyntax?,
+    of extendedTypeDescription: String
+  ) -> (requirements: [SwiftGenericRequirement], hasUnrepresentable: Bool) {
+    guard let whereClause else { return ([], false) }
+
+    var requirements: [SwiftGenericRequirement] = []
+    var hasUnrepresentable = false
+
+    /// A requirement we cannot represent makes `requirements` an incomplete picture of
+    /// what guards the conformance, so say which one and why
+    func reportUnrepresentable(_ requirementNode: some SyntaxProtocol, reason: String, hint: Bool) {
+      let message =
+        "Unrepresentable requirement '\(requirementNode.trimmedDescription)'"
+        + " in extension of '\(extendedTypeDescription)'; \(reason)"
+      self.log.warning(hint ? self.makeMissingTypeMessage(message) : message)
+      hasUnrepresentable = true
+    }
+
+    for requirementNode in whereClause.requirements {
+      switch requirementNode.requirement {
+      case .conformanceRequirement(let conformance):
+        if let lhs = try? SwiftType(conformance.leftType, lookupContext: analyzer.lookupContext),
+          let rhs = try? SwiftType(conformance.rightType, lookupContext: analyzer.lookupContext)
+        {
+          requirements.append(.inherits(lhs, rhs))
+        } else {
+          reportUnrepresentable(conformance, reason: "a type in it did not resolve", hint: true)
+        }
+
+      case .sameTypeRequirement(let sameType):
+        if let leftNode = sameType.leftType.as(TypeSyntax.self),
+          let rightNode = sameType.rightType.as(TypeSyntax.self),
+          let lhs = try? SwiftType(leftNode, lookupContext: analyzer.lookupContext),
+          let rhs = try? SwiftType(rightNode, lookupContext: analyzer.lookupContext)
+        {
+          requirements.append(.equals(lhs, rhs))
+        } else {
+          reportUnrepresentable(sameType, reason: "a type in it did not resolve", hint: true)
+        }
+
+      case .layoutRequirement(let layout):
+        // The shared requirement vocabulary has no layout case
+        reportUnrepresentable(layout, reason: "layout requirements are not supported", hint: false)
+      }
+    }
+    return (requirements, hasUnrepresentable)
   }
 
   func visit(
@@ -751,7 +901,24 @@ final class SwiftAnalysisVisitor {
     sourceFilePath: String,
     error: any Error
   ) {
-    let message = "Failed to import: \(name) in module '\(analyzer.swiftModuleName)'; \(error)"
+    self.reportSkipped(
+      node,
+      name: name,
+      sourceFilePath: sourceFilePath,
+      reason: "\(error)",
+      error: error
+    )
+  }
+
+  /// Same, for skips that are not driven by a thrown error
+  func reportSkipped(
+    _ node: some SyntaxProtocol,
+    name: String,
+    sourceFilePath: String,
+    reason: String,
+    error: (any Error)? = nil
+  ) {
+    let message = "Failed to import: \(name) in module '\(analyzer.swiftModuleName)'; \(reason)"
     self.log.warning(self.makeMissingTypeMessage(message))
     analyzer.diagnosticsSink?.emit(
       SwiftExtractDiagnostic(
