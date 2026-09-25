@@ -224,11 +224,14 @@ jobs:
         env:
           SWIFT_VERSION: "${{ matrix.swift_version }}"
       - name: Swift Build
-        run: "swift build --build-tests --disable-sandbox"
+        run: swift build --disable-sandbox
+      - name: Use Xcode Swift for tests
+        # Build plugins resolve `swift` through PATH, bypassing xcrun.
+        run: echo "$(dirname "$(xcrun --find swift)")" >> "$GITHUB_PATH"
       - name: Swift Test (swift-testing)
-        run: swift test --disable-xctest
+        run: xcrun swift test --disable-xctest
       - name: Swift Test (XCTest)
-        run: swift test --disable-experimental-swift-testing
+        run: xcrun swift test --disable-experimental-swift-testing
 
   build-swift-android:
     name: Sample SwiftJavaExtractJNISampleApp (Android) (swift:${{ matrix.swift_version }} android:${{matrix.sdk_triple}} NDK:${{matrix.ndk_version}})
