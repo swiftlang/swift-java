@@ -94,6 +94,39 @@ struct JNIProtocolTests {
       public func makeTest() -> any Test
     """
 
+  let protocolDefaultImplementationWithDifferentSpellingSource = """
+      public protocol Test {
+        func action(_ value: Int64)
+      }
+
+      public extension Test {
+        func action(_ otherValue: Int64) {}
+      }
+
+      public func makeTest() -> any Test
+    """
+
+  let overloadedProtocolSource = """
+      public protocol Overloaded {
+        func action(a: Int64)
+        func action(b: Int64)
+      }
+
+      public func makeOverloaded() -> any Overloaded
+    """
+
+  let nonthrowingDefaultImplementationSource = """
+      public protocol Test {
+        func work() throws
+      }
+
+      public extension Test {
+        func work() {}
+      }
+
+      public func makeTest() -> any Test
+    """
+
   @Test
   func generatesJavaInterface() throws {
     try assertOutput(
@@ -567,14 +600,15 @@ struct JNIProtocolTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_TestBox__00024action_1__JJ")
-        public func Java_com_example_swift_TestBox__00024action_1__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) {
+        @_cdecl("Java_com_example_swift_TestBox__00024action__JJ")
+        public func Java_com_example_swift_TestBox__00024action__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) {
           ...
         }
         """
       ],
       expectedOccurrences: [
-        "@_cdecl(\"Java_com_example_swift_TestBox__00024action_1__JJ\")": 1
+        "@_cdecl(\"Java_com_example_swift_TestBox__00024action__JJ\")": 1,
+        "@_cdecl(\"Java_com_example_swift_TestBox__00024action": 1,
       ]
     )
   }
@@ -598,8 +632,103 @@ struct JNIProtocolTests {
         private static native void $action(long selfPointer, long selfTypePointer);
         """
       ],
+      notExpectedChunks: ["action_("],
       expectedOccurrences: [
-        "private static native void $action(long selfPointer, long selfTypePointer);": 1
+        "private static native void $action(long selfPointer, long selfTypePointer);": 1,
+        "public void action();": 1,
+        "public void action() {": 1,
+      ]
+    )
+  }
+
+  @Test
+  func defaultImplementationWithDifferentSpellingIsUnique() throws {
+    var config = config
+    config.enableJavaCallbacks = false
+
+    try assertOutput(
+      input: protocolDefaultImplementationWithDifferentSpellingSource,
+      config: config,
+      .jni,
+      .swift,
+      expectedChunks: [],
+      expectedOccurrences: [
+        "@_cdecl(\"Java_com_example_swift_TestBox__00024action__JJJ\")": 1,
+        "@_cdecl(\"Java_com_example_swift_TestBox__00024action": 1,
+      ]
+    )
+
+    try assertOutput(
+      input: protocolDefaultImplementationWithDifferentSpellingSource,
+      config: config,
+      .jni,
+      .java,
+      expectedChunks: [],
+      notExpectedChunks: ["action_("],
+      expectedOccurrences: [
+        "public void action(long": 2,
+        "private static native void $action(long": 1,
+      ]
+    )
+  }
+
+  @Test
+  func defaultImplementationCallbackWrapperIsUnique() throws {
+    try assertOutput(
+      input: protocolDefaultImplementationSource,
+      config: config,
+      .jni,
+      .swift,
+      expectedChunks: [],
+      expectedOccurrences: [
+        "func action() {": 1
+      ]
+    )
+  }
+
+  @Test
+  func distinctProtocolOverloadsArePreserved() throws {
+    var config = config
+    config.enableJavaCallbacks = false
+
+    try assertOutput(
+      input: overloadedProtocolSource,
+      config: config,
+      .jni,
+      .java,
+      expectedChunks: [],
+      expectedOccurrences: [
+        "public void actionA(long": 2,
+        "public void actionB(long": 2,
+      ]
+    )
+  }
+
+  @Test
+  func nonthrowingDefaultImplementationIsUnique() throws {
+    var config = config
+    config.enableJavaCallbacks = false
+
+    try assertOutput(
+      input: nonthrowingDefaultImplementationSource,
+      config: config,
+      .jni,
+      .swift,
+      expectedChunks: [],
+      expectedOccurrences: [
+        "@_cdecl(\"Java_com_example_swift_TestBox__00024work": 1
+      ]
+    )
+
+    try assertOutput(
+      input: nonthrowingDefaultImplementationSource,
+      config: config,
+      .jni,
+      .java,
+      expectedChunks: [],
+      expectedOccurrences: [
+        "private static native void $work(": 1,
+        "public void work() throws Exception;": 1,
       ]
     )
   }
