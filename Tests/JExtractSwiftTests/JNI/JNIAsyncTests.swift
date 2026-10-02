@@ -482,4 +482,51 @@ struct JNIAsyncTests {
       ]
     )
   }
+
+  @Test(
+    "Import: async with result in out parameters completes future with nil (Swift, CompletableFuture)",
+    arguments: [
+      (
+        """
+        public struct MyID<T> {
+          public var rawValue: T
+        }
+        public func asyncGeneric() async -> MyID<String>
+        """,
+        "asyncGeneric"
+      ),
+      (
+        """
+        public protocol Shape {
+          func area() -> Double
+        }
+        public func asyncExistential() async -> any Shape
+        """,
+        "asyncExistential"
+      ),
+      (
+        "public func asyncTuple() async -> (Int64, String)",
+        "asyncTuple"
+      ),
+    ]
+  )
+  func completableFuture_asyncOutParameterResult_swift(input: String, functionName: String) throws {
+    try assertOutput(
+      input: input,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        let swiftResult$ = await SwiftModule.\(functionName)()
+        environment = try! JavaVirtualMachine.shared().environment()
+        ...
+        _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+        """
+      ],
+      notExpectedChunks: [
+        "[jvalue(l: )]"
+      ]
+    )
+  }
 }

@@ -2000,7 +2000,10 @@ extension JNISwift2JavaGenerator {
             printer.print("environment = try! JavaVirtualMachine.shared().environment()")
             let inner = nativeFunctionSignature.result.conversion.render(&printer, "swiftResult$")
             let result: String
-            if nativeFunctionSignature.result.javaType.requiresBoxing {
+            if nativeFunctionSignature.result.javaType.isVoid {
+              // The result was written to the out parameters, so the Java future is completed with Void
+              result = "nil"
+            } else if nativeFunctionSignature.result.javaType.requiresBoxing {
               printer.print(
                 "let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(\(inner), in: environment)"
               )
