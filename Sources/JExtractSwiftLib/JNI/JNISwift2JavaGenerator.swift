@@ -171,9 +171,45 @@ extension JNISwift2JavaGenerator {
   /// (getters/setters), excluding statics and anything whose signature
   /// doesn't translate (e.g. referencing `Self`/associated types).
   func supportedProtocolRequirements(of type: ExtractedNominalType) -> [ExtractedFunc] {
-    (type.methods + type.variables).filter { requirement in
-      !requirement.isStatic && !requirement.isClass && self.translatedDecl(for: requirement) != nil
+    uniqueProtocolRequirements(
+      (type.methods + type.variables).filter { requirement in
+        !requirement.isStatic && !requirement.isClass
+          && (try? self.javaTranslator.translate(requirement)) != nil
+      }
+    )
+  }
+
+  /// Compare the callable signature rather than source text. A default
+  /// implementation may use different access modifiers, local parameter names,
+  /// default arguments, or a narrower throwing effect from the protocol
+  /// requirement it implements.
+  func uniqueProtocolRequirements(_ methods: [ExtractedFunc]) -> [ExtractedFunc] {
+    var unique: [ExtractedFunc] = []
+    for method in methods {
+      let duplicate = unique.contains { existing in
+        existing.apiKind == method.apiKind && existing.name == method.name
+          && normalizedProtocolSignature(existing) == normalizedProtocolSignature(method)
+      }
+      if !duplicate {
+        unique.append(method)
+      }
     }
+    return unique
+  }
+
+  private func normalizedProtocolSignature(_ method: ExtractedFunc) -> SwiftFunctionSignature {
+    var signature = method.functionSignature
+    signature.selfParameter = nil
+    signature.effectSpecifiers.removeAll { $0 == .throws }
+    signature.thrownTypedError = nil
+    signature.parameters = signature.parameters.map { parameter in
+      var parameter = parameter
+      parameter.parameterName = nil
+      parameter.hasDefaultValue = false
+      parameter.defaultValueExpression = nil
+      return parameter
+    }
+    return signature
   }
 
   /// All wrappable requirements for `type` (a protocol), including those
@@ -183,26 +219,18 @@ extension JNISwift2JavaGenerator {
   /// since the box must implement everything the protocol (directly or
   /// transitively) requires.
   ///
-  /// A protocol requirement and its default implementation (defined in an
-  /// unconstrained extension) are extracted as distinct ``ExtractedFunc``
-  /// instances that share the same signature.  We keep only the first
-  /// occurrence so that downstream code never emits duplicate JNI thunks
-  /// or duplicate Java methods.
+  /// A protocol requirement and its default implementation are extracted as
+  /// distinct ``ExtractedFunc`` instances. Keep the first occurrence so the
+  /// box emits one JNI thunk and one Java method for each callable signature.
   func allProtocolRequirementMethods(of type: ExtractedNominalType) -> [ExtractedFunc] {
     var visited: Set<ObjectIdentifier> = []
     var queue: [ExtractedNominalType] = [type]
     var methods: [ExtractedFunc] = []
-    var seenSignatures: Set<String> = []
     while let current = queue.popLast() {
       guard visited.insert(ObjectIdentifier(current)).inserted else { continue }
-      for method in self.supportedProtocolRequirements(of: current) {
-        let key = "\(method.apiKind):\(method.signatureString)"
-        if seenSignatures.insert(key).inserted {
-          methods.append(method)
-        }
-      }
+      methods.append(contentsOf: self.supportedProtocolRequirements(of: current))
       queue.append(contentsOf: inheritedProtocols(of: current))
     }
-    return methods
+    return uniqueProtocolRequirements(methods)
   }
 }

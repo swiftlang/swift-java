@@ -173,7 +173,11 @@ extension JNISwift2JavaGenerator {
     let filename = "\(decl.effectiveJavaSimpleName).java"
     logger.debug("Printing contents: \(filename)")
 
-    resetForNewOutputFile(decl.initializers + decl.variables + decl.methods)
+    let methods =
+      decl.swiftNominal.kind == .protocol
+      ? self.supportedProtocolRequirements(of: decl)
+      : decl.initializers + decl.variables + decl.methods
+    resetForNewOutputFile(methods)
 
     printHeader(&printer)
     printPackage(&printer)

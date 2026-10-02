@@ -310,9 +310,11 @@ extension JNISwift2JavaGenerator {
     printHeader(&printer)
     printer.println()
 
-    self.currentJavaIdentifiers = JavaIdentifierFactory(
-      type.initializers + type.variables + type.methods
-    )
+    let methods =
+      type.swiftNominal.kind == .protocol
+      ? self.allProtocolRequirementMethods(of: type)
+      : type.initializers + type.variables + type.methods
+    self.currentJavaIdentifiers = JavaIdentifierFactory(methods)
 
     switch type.swiftNominal.kind {
     case .actor, .class, .enum, .struct:
@@ -838,8 +840,12 @@ extension JNISwift2JavaGenerator {
     )
   }
 
-
-  private func nativeParameters(for nativeSignature: NativeFunctionSignature) -> [JavaParameter] {
+  private func printCDecl(
+    _ printer: inout SwiftPrinter,
+    _ translatedDecl: TranslatedFunctionDecl,
+    _ body: (inout SwiftPrinter) -> Void,
+  ) {
+    let nativeSignature = translatedDecl.nativeFunctionSignature
     var parameters = nativeSignature.parameters.flatMap(\.parameters)
 
     if let selfParameter = nativeSignature.selfParameter {
@@ -849,17 +855,6 @@ extension JNISwift2JavaGenerator {
       parameters += selfTypeParameter.parameters
     }
     parameters += nativeSignature.result.outParameters
-
-    return parameters
-  }
-
-  private func printCDecl(
-    _ printer: inout SwiftPrinter,
-    _ translatedDecl: TranslatedFunctionDecl,
-    _ body: (inout SwiftPrinter) -> Void,
-  ) {
-    let nativeSignature = translatedDecl.nativeFunctionSignature
-    let parameters = nativeParameters(for: nativeSignature)
 
     printCDecl(
       &printer,
@@ -880,10 +875,15 @@ extension JNISwift2JavaGenerator {
     resultType: JavaType,
     _ body: (inout SwiftPrinter) -> Void,
   ) {
-    let cName = cDeclSymbolName(
-      javaMethodName: javaMethodName,
-      parentName: parentName,
-      parameters: parameters
+    let jniSignature = parameters.reduce(into: "") { signature, parameter in
+      signature += parameter.type.jniTypeSignature
+    }
+
+    let cName = String.jniSymbolName(
+      package: self.javaPackage,
+      parent: parentName,
+      method: javaMethodName,
+      signature: jniSignature,
     )
 
     self.generatedCDeclSymbolNames.append(cName)
@@ -914,23 +914,6 @@ extension JNISwift2JavaGenerator {
     ) { printer in
       body(&printer)
     }
-  }
-
-  private func cDeclSymbolName(
-    javaMethodName: String,
-    parentName: SwiftQualifiedTypeName,
-    parameters: [JavaParameter],
-  ) -> String {
-    let jniSignature = parameters.reduce(into: "") { signature, parameter in
-      signature += parameter.type.jniTypeSignature
-    }
-
-    return String.jniSymbolName(
-      package: self.javaPackage,
-      parent: parentName,
-      method: javaMethodName,
-      signature: jniSignature,
-    )
   }
 
   private func printJNICache(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
