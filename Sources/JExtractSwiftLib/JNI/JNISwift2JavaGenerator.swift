@@ -182,13 +182,25 @@ extension JNISwift2JavaGenerator {
   /// box's method bodies and per-requirement `@_cdecl` dispatch thunks,
   /// since the box must implement everything the protocol (directly or
   /// transitively) requires.
+  ///
+  /// A protocol requirement and its default implementation (defined in an
+  /// unconstrained extension) are extracted as distinct ``ExtractedFunc``
+  /// instances that share the same signature.  We keep only the first
+  /// occurrence so that downstream code never emits duplicate JNI thunks
+  /// or duplicate Java methods.
   func allProtocolRequirementMethods(of type: ExtractedNominalType) -> [ExtractedFunc] {
     var visited: Set<ObjectIdentifier> = []
     var queue: [ExtractedNominalType] = [type]
     var methods: [ExtractedFunc] = []
+    var seenSignatures: Set<String> = []
     while let current = queue.popLast() {
       guard visited.insert(ObjectIdentifier(current)).inserted else { continue }
-      methods.append(contentsOf: self.supportedProtocolRequirements(of: current))
+      for method in self.supportedProtocolRequirements(of: current) {
+        let key = "\(method.apiKind):\(method.signatureString)"
+        if seenSignatures.insert(key).inserted {
+          methods.append(method)
+        }
+      }
       queue.append(contentsOf: inheritedProtocols(of: current))
     }
     return methods

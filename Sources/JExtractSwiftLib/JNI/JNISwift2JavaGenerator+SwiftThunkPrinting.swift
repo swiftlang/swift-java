@@ -389,7 +389,6 @@ extension JNISwift2JavaGenerator {
   /// function (including requirements inherited from refined protocols).
   private func printExistentialBoxDispatchThunks(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
     let boxParentName = SwiftQualifiedTypeName(type.swiftNominal.javaExistentialBoxName)
-    var emittedCDeclSymbols: Set<String> = []
 
     for method in self.allProtocolRequirementMethods(of: type) {
       guard var translated = try? self.javaTranslator.translate(method) else {
@@ -397,14 +396,6 @@ extension JNISwift2JavaGenerator {
         continue
       }
       translated.parentName = boxParentName
-
-      let cName = cDeclSymbolName(for: translated)
-      // A protocol requirement and its default implementation can be represented
-      // by distinct extracted declarations while mapping to the same JNI symbol.
-      // The existential box only needs one dispatch thunk for that symbol.
-      guard emittedCDeclSymbols.insert(cName).inserted else {
-        continue
-      }
 
       printCDecl(&printer, translated) { printer in
         self.printFunctionDowncall(&printer, method)
@@ -847,13 +838,6 @@ extension JNISwift2JavaGenerator {
     )
   }
 
-  private func cDeclSymbolName(for translatedDecl: TranslatedFunctionDecl) -> String {
-    cDeclSymbolName(
-      javaMethodName: translatedDecl.nativeFunctionName,
-      parentName: translatedDecl.parentName,
-      parameters: nativeParameters(for: translatedDecl.nativeFunctionSignature)
-    )
-  }
 
   private func nativeParameters(for nativeSignature: NativeFunctionSignature) -> [JavaParameter] {
     var parameters = nativeSignature.parameters.flatMap(\.parameters)

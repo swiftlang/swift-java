@@ -84,11 +84,11 @@ struct JNIProtocolTests {
 
   let protocolDefaultImplementationSource = """
       public protocol Test {
-        public func action()
+        func action()
       }
 
       public extension Test {
-        public func action() {}
+        func action() {}
       }
 
       public func makeTest() -> any Test
@@ -575,6 +575,31 @@ struct JNIProtocolTests {
       ],
       expectedOccurrences: [
         "@_cdecl(\"Java_com_example_swift_TestBox__00024action_1__JJ\")": 1
+      ]
+    )
+  }
+
+  @Test
+  func existentialBoxJavaMethodWithDefaultImplementationIsUnique() throws {
+    var config = config
+    config.enableJavaCallbacks = false
+
+    try assertOutput(
+      input: protocolDefaultImplementationSource,
+      config: config,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public void action() {
+          TestBox.$action(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+        private static native void $action(long selfPointer, long selfTypePointer);
+        """
+      ],
+      expectedOccurrences: [
+        "private static native void $action(long selfPointer, long selfTypePointer);": 1
       ]
     )
   }
