@@ -199,7 +199,7 @@ final class ByteArrayTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024acceptArray___3B")
-        public func Java_com_example_swift_SwiftModule__00024acceptArray___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, array: jbyteArray?) {
+        public func Java_com_example_swift_SwiftModule__00024acceptArray___3B(environment: JNIEnvironment!, thisClass: JNITypes.jclass, array: JNITypes.jbyteArray?) {
           SwiftModule.acceptArray(array: [UInt8](fromJNI: array, in: environment))
         }
         """
@@ -232,7 +232,7 @@ final class ByteArrayTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024returnArray__")
-        public func Java_com_example_swift_SwiftModule__00024returnArray__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jbyteArray? {
+        public func Java_com_example_swift_SwiftModule__00024returnArray__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> JNITypes.jbyteArray? {
           return SwiftModule.returnArray().getJNILocalRefValue(in: environment)
         }
         """
@@ -266,10 +266,10 @@ final class ByteArrayTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024receiveBuffer___3B")
-        public func Java_com_example_swift_SwiftModule__00024receiveBuffer___3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, data: jbyteArray?) {
-          let data$count = Int(environment.interface.GetArrayLength(environment, data))
-          let data$ptr = environment.interface.GetByteArrayElements(environment, data, nil)!
-          defer { environment.interface.ReleaseByteArrayElements(environment, data, data$ptr, jint(JNI_ABORT)) }
+        public func Java_com_example_swift_SwiftModule__00024receiveBuffer___3B(environment: JNIEnvironment!, thisClass: JNITypes.jclass, data: JNITypes.jbyteArray?) {
+          let data$count = Int(environment.swiftInterface.GetArrayLength(environment, data))
+          let data$ptr = environment.swiftInterface.GetByteArrayElements(environment, data, nil)!
+          defer { environment.swiftInterface.ReleaseByteArrayElements(environment, data, data$ptr, jint(JNI_ABORT)) }
           let data$rbp = UnsafeRawBufferPointer(start: data$ptr, count: data$count)
           SwiftModule.receiveBuffer(data: data$rbp)
         }

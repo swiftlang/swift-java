@@ -4,6 +4,11 @@
 import CompilerPluginSupport
 import PackageDescription
 
+// Enable C++ interoperability only in the consumer targets, not their dependencies.
+let sampleSwiftSettings: [SwiftSetting] =
+  [.swiftLanguageMode(.v5)]
+  + (Context.environment["CXX_INTEROP"] == "1" ? [.interoperabilityMode(.Cxx)] : [])
+
 let package = Package(
   name: "JExtractJNISampleApp",
   platforms: [
@@ -34,9 +39,7 @@ let package = Package(
       exclude: [
         "swift-java.config"
       ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ],
+      swiftSettings: sampleSwiftSettings,
       plugins: [
         .plugin(name: "JExtractSwiftPlugin", package: "swift-java")
       ]
@@ -50,9 +53,7 @@ let package = Package(
       exclude: [
         "swift-java.config"
       ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ],
+      swiftSettings: sampleSwiftSettings,
       plugins: [
         .plugin(name: "JExtractSwiftPlugin", package: "swift-java")
       ]

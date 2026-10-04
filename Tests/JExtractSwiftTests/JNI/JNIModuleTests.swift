@@ -131,19 +131,19 @@ struct JNIModuleTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024helloWorld__")
-        public func Java_com_example_swift_SwiftModule__00024helloWorld__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
+        public func Java_com_example_swift_SwiftModule__00024helloWorld__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) {
           SwiftModule.helloWorld()
         }
         """,
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024takeIntegers__BSIJ")
-        public func Java_com_example_swift_SwiftModule__00024takeIntegers__BSIJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i1: jbyte, i2: jshort, i3: jint, i4: jlong) -> jchar {
+        public func Java_com_example_swift_SwiftModule__00024takeIntegers__BSIJ(environment: JNIEnvironment!, thisClass: JNITypes.jclass, i1: jbyte, i2: jshort, i3: jint, i4: jlong) -> jchar {
           return SwiftModule.takeIntegers(i1: Int8(fromJNI: i1, in: environment), i2: Int16(fromJNI: i2, in: environment), i3: Int32(fromJNI: i3, in: environment), i4: Int64(fromJNI: i4, in: environment)).getJNILocalRefValue(in: environment)
         }
         """,
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024otherPrimitives__ZFD")
-        public func Java_com_example_swift_SwiftModule__00024otherPrimitives__ZFD(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, b: jboolean, f: jfloat, d: jdouble) {
+        public func Java_com_example_swift_SwiftModule__00024otherPrimitives__ZFD(environment: JNIEnvironment!, thisClass: JNITypes.jclass, b: jboolean, f: jfloat, d: jdouble) {
           SwiftModule.otherPrimitives(b: Bool(fromJNI: b, in: environment), f: Float(fromJNI: f, in: environment), d: Double(fromJNI: d, in: environment))
         }
         """,
@@ -186,7 +186,7 @@ struct JNIModuleTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2")
-        public func Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, string: jstring?) -> jstring? {
+        public func Java_com_example_swift_SwiftModule__00024copy__Ljava_lang_String_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, string: JNITypes.jstring?) -> JNITypes.jstring? {
           return SwiftModule.copy(String(fromJNI: string, in: environment)).getJNILocalRefValue(in: environment)
         }
         """
@@ -243,7 +243,7 @@ struct JNIModuleTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024methodA__")
-        public func Java_com_example_swift_SwiftModule__00024methodA__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) {
+        public func Java_com_example_swift_SwiftModule__00024methodA__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) {
           do {
             try SwiftModule.methodA()
           } catch {
@@ -254,7 +254,7 @@ struct JNIModuleTests {
         """,
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024methodB__")
-        public func Java_com_example_swift_SwiftModule__00024methodB__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+        public func Java_com_example_swift_SwiftModule__00024methodB__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> jlong {
           do {
             return try SwiftModule.methodB().getJNILocalRefValue(in: environment)
           } catch {
@@ -265,7 +265,7 @@ struct JNIModuleTests {
         """,
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024methodC__")
-        public func Java_com_example_swift_SwiftModule__00024methodC__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jstring? {
+        public func Java_com_example_swift_SwiftModule__00024methodC__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> JNITypes.jstring? {
           do {
             return try SwiftModule.methodC().getJNILocalRefValue(in: environment)
           } catch {

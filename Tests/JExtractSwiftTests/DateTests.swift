@@ -34,7 +34,7 @@ struct DateTests {
         [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024acceptDate__J")
-          public func Java_com_example_swift_SwiftModule__00024acceptDate__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, date: jlong) {
+          public func Java_com_example_swift_SwiftModule__00024acceptDate__J(environment: JNIEnvironment!, thisClass: JNITypes.jclass, date: jlong) {
           """
         ],
       )
@@ -84,7 +84,7 @@ struct DateTests {
         [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024returnDate__")
-          public func Java_com_example_swift_SwiftModule__00024returnDate__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+          public func Java_com_example_swift_SwiftModule__00024returnDate__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> jlong {
           """
         ]
       )
@@ -143,11 +143,11 @@ struct DateTests {
         [
           """
           @_cdecl("Java_com_example_swift_Date__00024init__D")
-          public func Java_com_example_swift_Date__00024init__D(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, timeIntervalSince1970: jdouble) -> jlong {
+          public func Java_com_example_swift_Date__00024init__D(environment: JNIEnvironment!, thisClass: JNITypes.jclass, timeIntervalSince1970: jdouble) -> jlong {
           """,
           """
           @_cdecl("Java_com_example_swift_Date__00024getTimeIntervalSince1970__J")
-          public func Java_com_example_swift_Date__00024getTimeIntervalSince1970__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jdouble {
+          public func Java_com_example_swift_Date__00024getTimeIntervalSince1970__J(environment: JNIEnvironment!, thisClass: JNITypes.jclass, selfPointer: jlong) -> jdouble {
           """,
         ]
       )
