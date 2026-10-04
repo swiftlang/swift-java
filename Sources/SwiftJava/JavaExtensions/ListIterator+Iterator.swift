@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension JavaIterator: IteratorProtocol, Sequence {
+extension ListIterator: IteratorProtocol, Sequence {
   public typealias Element = E
 
   @_implements(IteratorProtocol,next())
@@ -24,7 +24,7 @@ extension JavaIterator: IteratorProtocol, Sequence {
     return nil
   }
 
-  public func makeIterator() -> JavaIterator<E> {
+  public func makeIterator() -> ListIterator<E> {
     self
   }
 }

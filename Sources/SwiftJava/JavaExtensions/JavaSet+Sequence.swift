@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2026 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,19 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension JavaIterator: IteratorProtocol, Sequence {
+extension JavaSet: JavaCollectionProtocol {
   public typealias Element = E
-
-  @_implements(IteratorProtocol,next())
-  public mutating func swiftNext() -> E? {
-    if hasNext() {
-      return next() as E
-    }
-
-    return nil
-  }
-
-  public func makeIterator() -> JavaIterator<E> {
-    self
-  }
 }
