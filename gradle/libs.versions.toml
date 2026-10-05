@@ -13,11 +13,37 @@
 ##===----------------------------------------------------------------------===##
 
 [versions]
+kotlin = "2.4.0"
+# Jetbrains Compose Multiplatform runtime. Resolves the JVM variant when consumed
+# from a plain kotlin("jvm") module, and redirects to androidx.compose.runtime on
+# Android consumers via Gradle module metadata.
+compose = "1.11.1"
+# Android Gradle Plugin — used only by the Android Compose sample. Must stay
+# compatible with the Gradle version in gradle/wrapper (9.x).
+agp = "9.1.1"
+# androidx Compose BOM aligns all androidx.compose.* artifact versions.
+androidx-compose-bom = "2026.05.01"
+androidx-activity-compose = "1.13.0"
 kotlinx-serialization = "1.7.3"
 junit-version = "5.10.0"
 
 [libraries]
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+# androidx Compose (Android sample only); versions come from the BOM below.
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidx-compose-bom" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit-version" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+# Compose compiler plugin; ships in lockstep with the Kotlin version.
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

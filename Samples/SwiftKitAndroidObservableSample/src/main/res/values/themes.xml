@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The UI itself is built with Compose's MaterialTheme; this XML theme only
+         needs to be a no-action-bar app theme. We use a platform theme to avoid
+         pulling in the com.google.android.material dependency. -->
+    <style name="Theme.SwiftKitAndroidComposeSample" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
