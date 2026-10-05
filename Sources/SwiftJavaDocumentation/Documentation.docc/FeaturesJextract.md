@@ -162,7 +162,7 @@ extending `org.swift.swiftkit.core.SwiftError`, which is a `java.lang.Exception`
 
 When a Swift function throws such an error, Java receives that exact class.
 Errors whose type was not extracted (for example a non-public error type) are thrown as
-`org.swift.swiftkit.core.SwiftJavaErrorException`, which is also a `SwiftError`.
+`org.swift.swiftkit.core.AnySwiftError`, which is also a `SwiftError`.
 
 Swift typed throws (`throws(MyError)`) become a checked `throws MyError` in Java,
 while untyped `throws` stays `throws Exception`.

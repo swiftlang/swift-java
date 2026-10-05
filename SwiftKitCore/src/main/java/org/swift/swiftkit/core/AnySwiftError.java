@@ -26,7 +26,7 @@ package org.swift.swiftkit.core;
  * {@code e.as(MyError.class)}. For error types without a Java class, {@code as} always returns an empty result.
  */
 @SuppressWarnings("serial")
-public final class SwiftJavaErrorException extends SwiftError {
+public final class AnySwiftError extends SwiftError {
 
     /** Pointer to the boxed {@code any Error}. */
     private final long selfPointer;
@@ -44,7 +44,7 @@ public final class SwiftJavaErrorException extends SwiftError {
      * @param typeMetadataAddress the metadata address of {@code (any Error).self}
      * @param swiftArena          the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
      */
-    private SwiftJavaErrorException(long selfPointer, long typeMetadataAddress, SwiftArena swiftArena) {
+    private AnySwiftError(long selfPointer, long typeMetadataAddress, SwiftArena swiftArena) {
         SwiftObjects.requireNonZero(selfPointer, "selfPointer");
         SwiftObjects.requireNonZero(typeMetadataAddress, "typeMetadataAddress");
         this.selfPointer = selfPointer;
@@ -64,8 +64,8 @@ public final class SwiftJavaErrorException extends SwiftError {
      *   <li>This operation does not copy, or retain, the pointed at pointer, so its lifetime must be ensured manually to be valid when wrapping.</li>
      * </ul>
      */
-    public static SwiftJavaErrorException wrapMemoryAddressUnsafe(long selfPointer, long typeMetadataAddress) {
-        return new SwiftJavaErrorException(selfPointer, typeMetadataAddress, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
+    public static AnySwiftError wrapMemoryAddressUnsafe(long selfPointer, long typeMetadataAddress) {
+        return new AnySwiftError(selfPointer, typeMetadataAddress, SwiftMemoryManagement.DEFAULT_SWIFT_JAVA_AUTO_ARENA);
     }
 
     @Override

@@ -16,7 +16,7 @@ package com.example.swift;
 
 import com.example.swift.MySwiftLibrary;
 import org.junit.jupiter.api.Test;
-import org.swift.swiftkit.core.SwiftJavaErrorException;
+import org.swift.swiftkit.core.AnySwiftError;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -83,8 +83,8 @@ public class ThrowTest {
     }
 
     @Test
-    void nonExtractedErrorFallsBackToSwiftJavaErrorException() {
-        SwiftJavaErrorException e = assertThrows(SwiftJavaErrorException.class, () -> {
+    void nonExtractedErrorFallsBackToAnySwiftError() {
+        AnySwiftError e = assertThrows(AnySwiftError.class, () -> {
             MySwiftLibrary.throwInternalError();
         });
         assertNotNull(e.getMessage());

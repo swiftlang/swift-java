@@ -241,15 +241,15 @@ extension _JNIMethodIDCache {
     }
   }
 
-  public enum SwiftJavaErrorException {
+  public enum AnySwiftError {
     private static let wrapMemoryAddressUnsafeMethod = Method(
       name: "wrapMemoryAddressUnsafe",
-      signature: "(JJ)Lorg/swift/swiftkit/core/SwiftJavaErrorException;",
+      signature: "(JJ)Lorg/swift/swiftkit/core/AnySwiftError;",
       isStatic: true
     )
 
     private static let cache = _JNIMethodIDCache(
-      className: "org/swift/swiftkit/core/SwiftJavaErrorException",
+      className: "org/swift/swiftkit/core/AnySwiftError",
       methods: [wrapMemoryAddressUnsafeMethod]
     )
 

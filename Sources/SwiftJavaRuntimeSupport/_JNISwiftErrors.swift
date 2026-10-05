@@ -26,7 +26,7 @@ extension JNIEnvironment {
   ///
   /// - A Java `Throwable` is passed through as is.
   /// - A ``_JNIThrowableError`` is converted to its dedicated Java exception class.
-  /// - Any other error is boxed in a `SwiftJavaErrorException`.
+  /// - Any other error is boxed in an `AnySwiftError`.
   public func makeJavaThrowable(for error: any Error) -> jthrowable? {
     // If we're throwing something that's already a Java Throwable object,
     // use it directly.
@@ -39,7 +39,7 @@ extension JNIEnvironment {
     if let throwableError = error as? any _JNIThrowableError {
       return throwableError._makeJavaThrowable(in: self)
     }
-    return makeSwiftJavaErrorException(for: error)
+    return makeAnySwiftError(for: error)
   }
 
   /// Throw the given Swift error as a Java exception.
@@ -50,8 +50,8 @@ extension JNIEnvironment {
     _ = interface.Throw(self, throwable)
   }
 
-  /// Box the error in a `SwiftJavaErrorException`.
-  private func makeSwiftJavaErrorException(for error: any Error) -> jthrowable? {
+  /// Box the error in an `AnySwiftError`.
+  private func makeAnySwiftError(for error: any Error) -> jthrowable? {
     let selfPointer$ = UnsafeMutablePointer<any Error>.allocate(capacity: 1)
     selfPointer$.initialize(to: error)
     let selfPointerBits$ = Int64(Int(bitPattern: selfPointer$))
@@ -62,8 +62,8 @@ extension JNIEnvironment {
     args[1].j = metadataBits$.getJNIValue(in: self)
     return interface.CallStaticObjectMethodA(
       self,
-      _JNIMethodIDCache.SwiftJavaErrorException.class,
-      _JNIMethodIDCache.SwiftJavaErrorException.wrapMemoryAddressUnsafe,
+      _JNIMethodIDCache.AnySwiftError.class,
+      _JNIMethodIDCache.AnySwiftError.wrapMemoryAddressUnsafe,
       &args
     )
   }
