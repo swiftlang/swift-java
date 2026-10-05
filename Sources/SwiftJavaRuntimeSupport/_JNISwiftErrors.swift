@@ -36,17 +36,10 @@ extension JNIEnvironment {
       return throwable.javaThis
     }
 
-    let throwable: jthrowable?
     if let throwableError = error as? any _JNIThrowableError {
-      throwable = throwableError._makeJavaThrowable(in: self)
-    } else {
-      throwable = makeSwiftJavaErrorException(for: error)
+      return throwableError._makeJavaThrowable(in: self)
     }
-
-    if let throwable {
-      _ = interface.CallVoidMethodA(self, throwable, _JNIMethodIDCache.SwiftError.captureStackTrace, nil)
-    }
-    return throwable
+    return makeSwiftJavaErrorException(for: error)
   }
 
   /// Throw the given Swift error as a Java exception.

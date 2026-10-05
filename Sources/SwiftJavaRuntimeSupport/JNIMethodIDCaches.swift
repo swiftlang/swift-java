@@ -261,24 +261,4 @@ extension _JNIMethodIDCache {
       cache.methods[wrapMemoryAddressUnsafeMethod]!
     }
   }
-
-  public enum SwiftError {
-    private static let captureStackTraceMethod = Method(
-      name: "$captureStackTrace",
-      signature: "()V"
-    )
-
-    private static let cache = _JNIMethodIDCache(
-      className: "org/swift/swiftkit/core/SwiftError",
-      methods: [captureStackTraceMethod]
-    )
-
-    public static var `class`: jclass {
-      cache.javaClass
-    }
-
-    public static var captureStackTrace: jmethodID {
-      cache.methods[captureStackTraceMethod]!
-    }
-  }
 }
