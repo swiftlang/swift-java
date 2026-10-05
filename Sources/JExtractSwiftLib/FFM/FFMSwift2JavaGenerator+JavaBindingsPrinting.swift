@@ -315,6 +315,9 @@ extension FFMSwift2JavaGenerator {
       if !isKnownFuncInterface {
         // If the user-facing functional interface is C ABI compatible, just extend
         // the lowered function pointer parameter interface.
+        if functionType.swiftType.isSendable {
+          printer.print("@ThreadSafe // Sendable")
+        }
         printer.print(
           """
           @FunctionalInterface
@@ -336,6 +339,9 @@ extension FFMSwift2JavaGenerator {
         "\($0.parameter.type) \($0.parameter.name)"
       }
 
+      if functionType.swiftType.isSendable {
+        printer.print("@ThreadSafe // Sendable")
+      }
       printer.print(
         """
         @FunctionalInterface

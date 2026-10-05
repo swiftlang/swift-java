@@ -450,7 +450,8 @@ extension JNISwift2JavaGenerator {
         ],
         conversion: .closureLowering(
           parameters: parameters,
-          result: result
+          result: result,
+          functionType: functionType
         ),
         indirectConversion: nil,
         conversionCheck: nil
@@ -1364,7 +1365,7 @@ extension JNISwift2JavaGenerator {
     /// of the `Unsafe(Mutable)Pointer` types in Swift.
     indirect case pointee(NativeSwiftConversionStep)
 
-    indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
+    indirect case closureLowering(parameters: [NativeParameter], result: NativeResult, functionType: SwiftFunctionType)
 
     /// Escaping closure lowering using the protocol infrastructure.
     /// This uses UpcallConversionStep for full support of optionals, arrays, custom types, etc.
@@ -1667,7 +1668,7 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(inner).pointee"
 
-      case .closureLowering(let parameters, let nativeResult):
+      case .closureLowering(let parameters, let nativeResult, let functionType):
         var printer = SwiftPrinter()
 
         let methodSignature = MethodSignature(
@@ -1683,8 +1684,10 @@ extension JNISwift2JavaGenerator {
         )
 
         let names = parameters.flatMap { $0.parameters.map(\.name) }
-        let closureParameters = !parameters.isEmpty ? "\(names.joined(separator: .comma)) in" : ""
-        printer.print("{ \(closureParameters)")
+        let sendablePrefix = functionType.isSendable ? "@Sendable " : ""
+        let closureParameters = !parameters.isEmpty ? "\(sendablePrefix)\(names.joined(separator: .comma)) in" : (functionType.isSendable ? "@Sendable in" : "")
+        let space = closureParameters.isEmpty ? "" : " "
+        printer.print("{\(space)\(closureParameters)")
         printer.indent()
 
         // TODO: Add support for types that are lowered to multiple parameters in closures
@@ -1692,9 +1695,8 @@ extension JNISwift2JavaGenerator {
           $0.conversion.render(&printer, $0.parameters.first!.name)
         }
 
-
         let methodName =
-          if let known = KnownJavaFunctionalInterface.find(methodSignature) {
+          if let known = KnownJavaFunctionalInterface.find(functionType) {
             known.method
           } else {
             "apply"
@@ -1755,10 +1757,11 @@ extension JNISwift2JavaGenerator {
 
         // Note: async is part of the closure TYPE, not the closure literal syntax.
         // For closures without parameters, we can omit "in" entirely.
+        let sendablePrefix = fn.isSendable ? "@Sendable " : ""
         let closureHeader =
           fn.parameters.isEmpty
-          ? "{"
-          : "{ \(closureParameters) in"
+          ? (fn.isSendable ? "{ @Sendable in" : "{")
+          : "{ \(sendablePrefix)\(closureParameters) in"
 
         // Construct the generated `@JavaInterface` wrap-java struct.
         // It will cause a new global ref on the javaThis, so no need for explicit global refs.
