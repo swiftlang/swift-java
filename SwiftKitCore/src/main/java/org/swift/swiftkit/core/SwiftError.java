@@ -24,7 +24,8 @@ public abstract class SwiftError extends Exception implements JNISwiftInstance, 
 
     @Override
     public String getMessage() {
-        // Messages are read by loggers and stack trace printers, so don't throw on a destroyed instance
+        // Loggers and stack trace printers call this implicitly, even after a confined arena has freed the
+        // Swift value, so avoid reading freed memory
         if ($cleanup().isDestroyed()) {
             return "<destroyed " + getClass().getSimpleName() + ">";
         }
