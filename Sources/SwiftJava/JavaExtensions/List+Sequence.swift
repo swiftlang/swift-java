@@ -12,11 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-extension List: Sequence {
+extension List: JavaCollectionProtocol {
   public typealias Element = E
-  public typealias Iterator = JavaIterator<E>
-
-  public func makeIterator() -> Iterator {
-    self.iterator()
-  }
 }
