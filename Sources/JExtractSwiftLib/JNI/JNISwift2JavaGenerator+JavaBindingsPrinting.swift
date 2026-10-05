@@ -287,7 +287,7 @@ extension JNISwift2JavaGenerator {
         printer.println()
       }
 
-      printSwiftInstanceObjectMethods(&printer)
+      printSwiftInstanceObjectMethods(&printer, decl)
       printer.println()
     }
   }
@@ -434,7 +434,7 @@ extension JNISwift2JavaGenerator {
       printTypeMetadataAddressFunction(&printer, decl)
       printer.println()
 
-      printSwiftInstanceObjectMethods(&printer)
+      printSwiftInstanceObjectMethods(&printer, decl)
       printer.println()
     }
   }
@@ -509,7 +509,7 @@ extension JNISwift2JavaGenerator {
   }
 
   /// Prints common Swift object methods such as `equals`, `hashCode` etc.
-  private func printSwiftInstanceObjectMethods(_ printer: inout JavaPrinter) {
+  private func printSwiftInstanceObjectMethods(_ printer: inout JavaPrinter, _ decl: ExtractedNominalType) {
     printer.print(
       """
       public boolean equals(Object obj) {
@@ -523,10 +523,21 @@ extension JNISwift2JavaGenerator {
         return SwiftObjects.hashCode(this.$memoryAddress(), this.$typeMetadataAddress());
       }
 
-      public java.lang.String toString() {
-        return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
-      }
+      """
+    )
+    // Error types inherit `Throwable.toString()`, which prints the class name followed by the Swift description.
+    if !self.isSwiftErrorType(decl) {
+      printer.print(
+        """
+        public java.lang.String toString() {
+          return SwiftObjects.toString(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
 
+        """
+      )
+    }
+    printer.print(
+      """
       public java.lang.String toDebugString() {
         return SwiftObjects.toDebugString(this.$memoryAddress(), this.$typeMetadataAddress());
       }
@@ -589,14 +600,21 @@ extension JNISwift2JavaGenerator {
       modifiers.append("static")
     }
     modifiers.append("final")
-    var implements = ["JNISwiftInstance"]
+    let isErrorType = self.isSwiftErrorType(decl)
+    // Error types get `JNISwiftInstance` from their `SwiftError` base class.
+    var implements = isErrorType ? [] : ["JNISwiftInstance"]
     // Only protocols that were actually extracted have a generated Java interface to implement.
     implements += self.inheritedProtocols(of: decl).map(\.effectiveJavaSimpleName)
-    let implementsClause = implements.joined(separator: .comma)
+    // Fully qualified so a user type named `SwiftError` cannot shadow it.
+    let extendsClause = isErrorType ? " extends org.swift.swiftkit.core.SwiftError" : ""
+    let implementsClause = implements.isEmpty ? "" : " implements \(implements.joined(separator: .comma))"
+    if isErrorType {
+      printer.print("@SuppressWarnings(\"serial\")")
+    }
     // Specialized types are concrete — no generic clause on the Java side
     let genericClause = decl.javaGenericClause
     printer.printBraceBlock(
-      "\(modifiers.joined(separator: " ")) class \(decl.effectiveJavaSimpleName)\(genericClause) implements \(implementsClause)"
+      "\(modifiers.joined(separator: " ")) class \(decl.effectiveJavaSimpleName)\(genericClause)\(extendsClause)\(implementsClause)"
     ) { printer in
       body(&printer)
     }

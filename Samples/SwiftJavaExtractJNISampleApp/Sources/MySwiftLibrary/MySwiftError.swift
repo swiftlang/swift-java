@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-enum MySwiftError: Error {
+public enum MySwiftError: Error {
   case swiftError
+  case invalidInput(reason: String)
 }

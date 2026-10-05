@@ -364,6 +364,11 @@ extension JNISwift2JavaGenerator {
       printer.println()
       printNominalJavaBridge(&printer, type)
       printer.println()
+
+      if self.isSwiftErrorType(type) && !self.inheritsThrowableErrorConformance(type) {
+        printThrowableErrorConformance(&printer, type)
+        printer.println()
+      }
     }
 
     printSpecificTypeThunks(&printer, type)
@@ -781,7 +786,7 @@ extension JNISwift2JavaGenerator {
       printer.indent()
       printer.print(
         """
-        environment.throwAsException(error)
+        environment.throwSwiftErrorAsJava(error)
         \(dummyReturn(for: nativeSignature))
         """
       )
@@ -948,6 +953,16 @@ extension JNISwift2JavaGenerator {
         }
         """
       )
+    }
+  }
+
+  /// Prints the `_JNIThrowableError` conformance that lets the runtime throw this error as its generated Java class.
+  private func printThrowableErrorConformance(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
+    let bridgeName = JNICaching.bridgeName(for: type)
+    printer.printBraceBlock("extension \(type.effectiveSwiftTypeName): _JNIThrowableError") { printer in
+      printer.printBraceBlock("public func _makeJavaThrowable(in environment: JNIEnvironment) -> jthrowable?") { printer in
+        printer.print("\(bridgeName).toJavaObject(self, in: environment)")
+      }
     }
   }
 

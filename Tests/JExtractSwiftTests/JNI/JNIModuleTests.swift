@@ -247,7 +247,7 @@ struct JNIModuleTests {
           do {
             try SwiftModule.methodA()
           } catch {
-            environment.throwAsException(error)
+            environment.throwSwiftErrorAsJava(error)
             return ()
           }
         }
@@ -258,7 +258,7 @@ struct JNIModuleTests {
           do {
             return try SwiftModule.methodB().getJNILocalRefValue(in: environment)
           } catch {
-            environment.throwAsException(error)
+            environment.throwSwiftErrorAsJava(error)
             return 0
           }
         }
@@ -269,7 +269,7 @@ struct JNIModuleTests {
           do {
             return try SwiftModule.methodC().getJNILocalRefValue(in: environment)
           } catch {
-            environment.throwAsException(error)
+            environment.throwSwiftErrorAsJava(error)
             return nil
           }
         }

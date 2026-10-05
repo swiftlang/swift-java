@@ -244,7 +244,7 @@ struct JNIVariablesTests {
           do {
             return try selfPointer$.pointee.computedThrowing.getJNILocalRefValue(in: environment)
           } catch {
-            environment.throwAsException(error)
+            environment.throwSwiftErrorAsJava(error)
             return 0
           }
         }

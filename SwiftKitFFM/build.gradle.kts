@@ -101,6 +101,11 @@ val compileSwift = tasks.register<Exec>("compileSwift") {
         "SDK_STAT_CACHE_DIR", "SDK_STAT_CACHE_ENABLE", "SDK_STAT_CACHE_PATH",
         "SWIFTC_PASS_SDKROOT", "SWIFTC_PASS_SYSROOT", "TOOLCHAINS",
     ).forEach { environment.remove(it) }
+    // swift-build (6.4+) may point DEVELOPER_DIR at the toolchain, which has no xcrun.
+    // Keep deliberate overrides (Xcode, CommandLineTools) that are valid developer dirs.
+    (environment["DEVELOPER_DIR"] as? String)?.let { dir ->
+        if (!File(dir, "usr/bin/xcrun").exists()) environment.remove("DEVELOPER_DIR")
+    }
 }
 tasks.build {
     dependsOn(compileSwift)

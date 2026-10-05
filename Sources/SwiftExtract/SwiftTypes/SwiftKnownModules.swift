@@ -104,6 +104,8 @@ private let swiftSourceFile: SourceFileSyntax = """
 
   public struct Set<Element> {}
 
+  public protocol Error {}
+
   // FIXME: Support 'typealias Void = ()'
   public struct Void {}
 
@@ -115,6 +117,8 @@ private let swiftSourceFile: SourceFileSyntax = """
 
 private let foundationEssentialsSourceFile: SourceFileSyntax = """
   public protocol DataProtocol {}
+
+  public protocol LocalizedError: Error {}
 
   public struct Data: DataProtocol {
     public init(bytes: UnsafeRawPointer, count: Int)
