@@ -15,10 +15,15 @@
 package org.swift.swiftkit.core;
 
 /**
- * A boxed Swift {@code any Error}, thrown when a Swift error has no dedicated Java class.
+ * A boxed Swift {@code any Error}, thrown when the error's type is not surfaced as its own {@link SwiftError}
+ * subclass, for example a non-public error type or one from a module that was not extracted.
  * <p>
- * Catch this exception and use {@link #as(Class)} to recover the concrete error type, for example
- * {@code e.as(MyError.class)}.
+ * {@link #getMessage()} returns the Swift {@code String(describing:)} of the error, and {@link #toDebugString()}
+ * its {@code String(reflecting:)}.
+ * <p>
+ * If the error's type was extracted but not recognized as an error type (for example because its {@code Error}
+ * conformance comes through a protocol from another module), {@link #as(Class)} recovers it, for example
+ * {@code e.as(MyError.class)}. For error types without a Java class, {@code as} always returns an empty result.
  */
 @SuppressWarnings("serial")
 public final class SwiftJavaErrorException extends SwiftError {
