@@ -156,17 +156,13 @@ In JNI mode the thrown exception depends on the Swift error, as described below.
 
 #### Errors in JNI mode
 
-In JNI mode, extracted Swift types that conform to `Error` (directly, through an extension,
-through a protocol refining `Error`, or through `LocalizedError`) are generated as Java classes
+In JNI mode, extracted Swift types that conform to `Error` or `LocalizedError` are generated as Java classes
 extending `org.swift.swiftkit.core.SwiftError`, which is a `java.lang.Exception`.
-Generic types and enums without cases are not treated this way.
 `getMessage()` returns the Swift `String(describing:)` of the error.
-Error enums keep their `getCase()` API.
 
 When a Swift function throws such an error, Java receives that exact class.
 Errors whose type was not extracted (for example a non-public error type) are thrown as
-`org.swift.swiftkit.core.SwiftJavaErrorException`, which is also a `SwiftError`, and
-offers `as(MyError.class)` returning an `Optional` of the extracted error type.
+`org.swift.swiftkit.core.SwiftJavaErrorException`, which is also a `SwiftError`.
 
 Swift typed throws (`throws(MyError)`) become a checked `throws MyError` in Java,
 while untyped `throws` stays `throws Exception`.

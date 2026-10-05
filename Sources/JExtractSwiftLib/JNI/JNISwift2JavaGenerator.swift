@@ -181,7 +181,6 @@ extension JNISwift2JavaGenerator {
     guard type.swiftNominal.kind != .protocol else { return false }
     guard !type.swiftNominal.isGeneric, !type.isSpecialization else { return false }
     guard !(type.swiftNominal.kind == .enum && type.cases.isEmpty) else { return false }
-    // `LocalizedError` lives in Foundation, so the in-module walk cannot reach `Error` through it.
     return type.conformsTo("Error", in: analysis.extractedTypes)
       || type.conformsTo("LocalizedError", in: analysis.extractedTypes)
   }
