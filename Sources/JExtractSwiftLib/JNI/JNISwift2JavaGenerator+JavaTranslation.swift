@@ -49,22 +49,8 @@ extension JNISwift2JavaGenerator {
       translated = nil
     }
 
-    if let parent = decl.parentType?.asNominalTypeDeclaration,
-      self.swiftErrorTypes.contains(parent.identity),
-      let candidate = translated,
-      candidate.translatedFunctionSignature.parameters.isEmpty,
-      Self.throwableMemberNames.contains(candidate.name)
-    {
-      // `getMessage()`/`getLocalizedMessage()` returning a String naturally override the Throwable ones.
-      let isStringOverride =
-        ["getMessage", "getLocalizedMessage"].contains(candidate.name)
-        && candidate.translatedFunctionSignature.result.javaType == .javaLangString
-      if !isStringOverride {
-        self.logger.warning(
-          "Skipping '\(parent.qualifiedName).\(candidate.name)': it collides with 'java.lang.Throwable.\(candidate.name)()' on the generated exception class."
-        )
-        translated = nil
-      }
+    if let candidate = translated, collidesWithThrowableMember(candidate, of: decl) {
+      translated = nil
     }
 
     translatedDecls[decl] = translated
@@ -76,6 +62,31 @@ extension JNISwift2JavaGenerator {
     "getMessage", "getLocalizedMessage", "getCause", "fillInStackTrace", "printStackTrace", "getStackTrace",
     "getSuppressed",
   ]
+
+  /// Whether `translated`, a member of an error type, would clash with a `java.lang.Throwable` method
+  /// on the generated exception class, in which case it is skipped with a warning.
+  private func collidesWithThrowableMember(_ translated: TranslatedFunctionDecl, of decl: ExtractedFunc) -> Bool {
+    guard let parent = decl.parentType?.asNominalTypeDeclaration,
+      self.swiftErrorTypes.contains(parent.identity),
+      translated.translatedFunctionSignature.parameters.isEmpty,
+      Self.throwableMemberNames.contains(translated.name)
+    else {
+      return false
+    }
+
+    // `getMessage()`/`getLocalizedMessage()` returning a String naturally override the Throwable ones.
+    let isStringOverride =
+      ["getMessage", "getLocalizedMessage"].contains(translated.name)
+      && translated.translatedFunctionSignature.result.javaType == .javaLangString
+    if isStringOverride {
+      return false
+    }
+
+    self.logger.warning(
+      "Skipping '\(parent.qualifiedName).\(translated.name)': it collides with 'java.lang.Throwable.\(translated.name)()' on the generated exception class."
+    )
+    return true
+  }
 
   func translatedEnumCase(
     for decl: ExtractedEnumCase
