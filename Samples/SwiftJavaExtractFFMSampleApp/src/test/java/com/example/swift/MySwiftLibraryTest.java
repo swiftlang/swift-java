@@ -17,7 +17,9 @@ package com.example.swift;
 import org.junit.jupiter.api.Test;
 import org.swift.swiftkit.ffm.generated.SwiftJavaErrorException;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -186,6 +188,35 @@ public class MySwiftLibraryTest {
     void call_globalCallMeDoubleSupplier_noThrow() {
         double result = MySwiftLibrary.globalCallMeDoubleSupplier(() -> { return 2.0; });
         assertEquals(2.0, result);
+    }
+
+    // ==== ----------------------------------------------------------------
+    // Async functions
+
+    @Test
+    void call_asyncSum() throws Exception {
+        // snippet.asyncUsageJava
+        CompletableFuture<Long> future = MySwiftLibrary.asyncSum(10, 12);
+        Long result = future.get();
+        assertEquals(22, result);
+        // snippet.end
+    }
+
+    @Test
+    void call_asyncThrowsVoid_noThrow() throws Exception {
+        CompletableFuture<Void> future = MySwiftLibrary.asyncThrowsVoid(false);
+        future.get(); // Should complete normally
+    }
+
+    @Test
+    void call_asyncThrowsVoid_throws() {
+        CompletableFuture<Void> future = MySwiftLibrary.asyncThrowsVoid(true);
+        ExecutionException ex = assertThrows(ExecutionException.class, future::get);
+        
+        Throwable cause = ex.getCause();
+        assertNotNull(cause);
+        assertTrue(cause instanceof SwiftJavaErrorException);
+        assertTrue(cause.getMessage().contains("expected error in asyncThrowsVoid"));
     }
 
     @Test
