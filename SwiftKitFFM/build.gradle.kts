@@ -88,19 +88,6 @@ val compileSwift = tasks.register<Exec>("compileSwift") {
     commandLine("swift")
     // FIXME: disable prebuilts until swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
     args("build", "--disable-experimental-prebuilts", "--target", "SwiftRuntimeFunctions")
-
-    // When this task runs inside an outer swift-build-driven invocation (e.g.
-    // JExtractSwiftPlugin -> java-callbacks-build -> gradle -> here) the outer
-    // build leaks Xcode-style build settings (SDKROOT=/, TOOLCHAINS, SDK_*,
-    // SWIFTC_PASS_*) into the subprocess environment, which breaks the nested
-    // swift build with "unable to resolve run destination SDK: '/'". Strip
-    // them so the inner invocation resolves its own defaults.
-    listOf(
-        "SDKROOT", "SDK_DIR", "SDK_DIR_linux", "SDK_NAME", "SDK_NAMES",
-        "SDK_VERSION", "SDK_VERSION_ACTUAL", "SDK_VERSION_MAJOR", "SDK_VERSION_MINOR",
-        "SDK_STAT_CACHE_DIR", "SDK_STAT_CACHE_ENABLE", "SDK_STAT_CACHE_PATH",
-        "SWIFTC_PASS_SDKROOT", "SWIFTC_PASS_SYSROOT", "TOOLCHAINS",
-    ).forEach { environment.remove(it) }
 }
 tasks.build {
     dependsOn(compileSwift)
