@@ -130,6 +130,16 @@ extension JavaType {
     .class(package: "java.util.function", name: "IntToLongFunction")
   }
 
+  /// The description of the type java.util.function.IntToDoubleFunction.
+  static var javaUtilFunctionIntToDoubleFunction: JavaType {
+    .class(package: "java.util.function", name: "IntToDoubleFunction")
+  }
+
+  /// The description of the type java.util.function.LongToDoubleFunction.
+  static var javaUtilFunctionLongToDoubleFunction: JavaType {
+    .class(package: "java.util.function", name: "LongToDoubleFunction")
+  }
+
   /// The description of the type java.lang.Class.
   static var javaLangClass: JavaType {
     .class(package: "java.lang", name: "Class")

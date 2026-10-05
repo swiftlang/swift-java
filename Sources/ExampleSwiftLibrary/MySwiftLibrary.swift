@@ -123,6 +123,14 @@ public func globalCallMeIntToLongFunction(run: (Int32) -> Int64) -> Int64 {
   run(1)
 }
 
+public func globalCallMeIntToDoubleFunction(run: (Int32) -> Double) -> Double {
+  run(1)
+}
+
+public func globalCallMeLongToDoubleFunction(run: (Int64) -> Double) -> Double {
+  run(1)
+}
+
 public func globalReceiveRawBuffer(buf: UnsafeRawBufferPointer) -> Int {
   buf.count
 }

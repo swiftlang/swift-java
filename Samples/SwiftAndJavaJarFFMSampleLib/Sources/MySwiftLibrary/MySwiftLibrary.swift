@@ -116,6 +116,14 @@ public func globalCallMeIntToLongFunction(run: (Int32) -> Int64) -> Int64 {
   run(1)
 }
 
+public func globalCallMeIntToDoubleFunction(run: (Int32) -> Double) -> Double {
+  run(1)
+}
+
+public func globalCallMeLongToDoubleFunction(run: (Int64) -> Double) -> Double {
+  run(1)
+}
+
 // ==== Internal helpers
 
 func p(_ msg: String, file: String = #fileID, line: UInt = #line, function: String = #function) {
