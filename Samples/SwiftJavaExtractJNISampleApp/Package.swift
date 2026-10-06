@@ -51,7 +51,10 @@ let package = Package(
         "swift-java.config"
       ],
       swiftSettings: [
-        .swiftLanguageMode(.v5)
+        .swiftLanguageMode(.v5),
+        // Generated thunks use a different code path when existentials are opened
+        // implicitly (the Swift 6 default), so enable it to build and test that path.
+        .enableUpcomingFeature("ImplicitOpenExistentials"),
       ],
       plugins: [
         .plugin(name: "JExtractSwiftPlugin", package: "swift-java")

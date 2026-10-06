@@ -68,3 +68,23 @@ public func makeOpaqueGreeter(name: String) -> some Greeter {
 public func describeGreeter(_ greeter: any Greeter) -> String {
   greeter.greeting()
 }
+
+public final class GreeterFactory {
+  public let name: String
+
+  public init(name: String) {
+    self.name = name
+  }
+
+  public var englishGreeter: any Greeter {
+    EnglishGreeter(name: name)
+  }
+
+  public func makeDanishGreeter() -> any Greeter {
+    DanishGreeter(name: name)
+  }
+
+  public func makeOpaqueGreeter() -> some Greeter {
+    DanishGreeter(name: name)
+  }
+}
