@@ -33,7 +33,7 @@ public func throwTyped(input: String) throws(MySwiftError) -> String {
   return input
 }
 
-// Not public, so it is not extracted and surfaces in Java as `AnySwiftError`.
+// Not public, so it is not extracted and surfaces in Java as `SwiftErrorException`.
 struct InternalOnlyError: Error {
   let code: Int
 }
