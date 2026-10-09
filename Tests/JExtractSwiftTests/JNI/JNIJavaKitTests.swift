@@ -63,7 +63,7 @@ struct JNIJavaKitTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024function__Ljava_lang_Long_2Ljava_lang_Integer_2J")
-        public func Java_com_example_swift_SwiftModule__00024function__Ljava_lang_Long_2Ljava_lang_Integer_2J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, javaLong: jobject?, javaInteger: jobject?, int: jlong) {
+        public func Java_com_example_swift_SwiftModule__00024function__Ljava_lang_Long_2Ljava_lang_Integer_2J(environment: JNIEnvironment!, thisClass: JNITypes.jclass, javaLong: JNITypes.jobject?, javaInteger: JNITypes.jobject?, int: jlong) {
           guard let javaLong_unwrapped$ = javaLong else {
             fatalError("javaLong was null in call to \\(#function), but Swift requires non-optional!")
           }
@@ -114,7 +114,7 @@ struct JNIJavaKitTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
-        public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
+        public func Java_com_example_swift_SwiftModule__00024function__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> JNITypes.jobject? {
           return (SwiftModule.function() as Optional).getJNILocalRefValue(in: environment)
         }
         """
@@ -159,7 +159,7 @@ struct JNIJavaKitTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
-        public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobject? {
+        public func Java_com_example_swift_SwiftModule__00024function__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> JNITypes.jobject? {
           return (SwiftModule.function() as Optional).getJNILocalRefValue(in: environment)
         }
         """
@@ -204,7 +204,7 @@ struct JNIJavaKitTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024function__")
-        public func Java_com_example_swift_SwiftModule__00024function__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jobjectArray? {
+        public func Java_com_example_swift_SwiftModule__00024function__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> JNITypes.jobjectArray? {
           return (SwiftModule.function() as Optional).getJNILocalRefValue(in: environment)
         }
         """

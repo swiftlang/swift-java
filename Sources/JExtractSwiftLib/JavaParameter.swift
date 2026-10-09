@@ -14,6 +14,18 @@
 
 import SwiftJavaJNICore
 
+extension JavaType {
+  /// Preserve the runtime's C JNI reference types in C++-enabled consumers.
+  var swiftJNITypeName: String {
+    switch self {
+    case .class, .array:
+      "JNITypes.\(jniTypeName)"
+    default:
+      jniTypeName
+    }
+  }
+}
+
 /// Represent a parameter in Java code.
 struct JavaParameter {
   enum ParameterType: Equatable, CustomStringConvertible {
@@ -52,10 +64,10 @@ struct JavaParameter {
       }
     }
 
-    var jniTypeName: String {
+    var swiftJNITypeName: String {
       switch self {
-      case .concrete(let type): type.jniTypeName
-      case .generic: "jobject?"
+      case .concrete(let type): type.swiftJNITypeName
+      case .generic: "JNITypes.jobject?"
       }
     }
 

@@ -79,23 +79,23 @@ struct JNIGenericCombinationTests {
         expectedChunks: [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024makeStringIDOptional__Ljava_lang_String_2_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2")
-          public func Java_com_example_swift_SwiftModule__00024makeStringIDOptional__Ljava_lang_String_2_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jstring?, result_discriminator$: jbyteArray?, resultWrappedOut: jobject?) {
+          public func Java_com_example_swift_SwiftModule__00024makeStringIDOptional__Ljava_lang_String_2_3BLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, value: JNITypes.jstring?, result_discriminator$: JNITypes.jbyteArray?, resultWrappedOut: JNITypes.jobject?) {
             if let innerResult$ = SwiftModule.makeStringIDOptional(String(fromJNI: value, in: environment)) {
               let resultWrapped$ = UnsafeMutablePointer<MyID<String>>.allocate(capacity: 1)
               resultWrapped$.initialize(to: innerResult$)
               let resultWrappedBits$ = Int64(Int(bitPattern: resultWrapped$))
               do {
-               environment.interface.SetLongField(environment, resultWrappedOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, resultWrappedBits$.getJNIValue(in: environment))
+               environment.swiftInterface.SetLongField(environment, resultWrappedOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, resultWrappedBits$.getJNIValue(in: environment))
                let metadataPointer = unsafeBitCast(MyID<String>.self, to: UnsafeRawPointer.self)
                let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
-               environment.interface.SetLongField(environment, resultWrappedOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+               environment.swiftInterface.SetLongField(environment, resultWrappedOut, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
               }
               var flag$ = Int8(1)
-              environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+              environment.swiftInterface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
             } 
             else {
               var flag$ = Int8(0)
-              environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+              environment.swiftInterface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
             }
             return 
           }
@@ -134,7 +134,7 @@ struct JNIGenericCombinationTests {
         expectedChunks: [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024takeStringIDOptional__J")
-          public func Java_com_example_swift_SwiftModule__00024takeStringIDOptional__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jlong) {
+          public func Java_com_example_swift_SwiftModule__00024takeStringIDOptional__J(environment: JNIEnvironment!, thisClass: JNITypes.jclass, value: jlong) {
             let valueBits$ = Int(Int64(fromJNI: value, in: environment))
             let value$ = UnsafeMutablePointer<MyID<String>>(bitPattern: valueBits$)
             SwiftModule.takeStringIDOptional(value$?.pointee)
@@ -197,25 +197,25 @@ struct JNIGenericCombinationTests {
         expectedChunks: [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024makeIDs__Ljava_lang_String_2JLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2")
-          public func Java_com_example_swift_SwiftModule__00024makeIDs__Ljava_lang_String_2JLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, stringValue: jstring?, intValue: jlong, result_0$Out: jobject?, result_1$Out: jobject?) {
+          public func Java_com_example_swift_SwiftModule__00024makeIDs__Ljava_lang_String_2JLorg_swift_swiftkit_core__1OutSwiftGenericInstance_2Lorg_swift_swiftkit_core__1OutSwiftGenericInstance_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, stringValue: JNITypes.jstring?, intValue: jlong, result_0$Out: JNITypes.jobject?, result_1$Out: JNITypes.jobject?) {
             let tupleResult$ = SwiftModule.makeIDs(String(fromJNI: stringValue, in: environment), Int64(fromJNI: intValue, in: environment))
             let result_0$$ = UnsafeMutablePointer<MyID<String>>.allocate(capacity: 1)
             result_0$$.initialize(to: tupleResult$.0)
             let result_0$Bits$ = Int64(Int(bitPattern: result_0$$))
             do {
-              environment.interface.SetLongField(environment, result_0$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, result_0$Bits$.getJNIValue(in: environment))
+              environment.swiftInterface.SetLongField(environment, result_0$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, result_0$Bits$.getJNIValue(in: environment))
               let metadataPointer = unsafeBitCast(MyID<String>.self, to: UnsafeRawPointer.self)
               let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
-              environment.interface.SetLongField(environment, result_0$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+              environment.swiftInterface.SetLongField(environment, result_0$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
             }
             let result_1$$ = UnsafeMutablePointer<MyID<Int64>>.allocate(capacity: 1)
             result_1$$.initialize(to: tupleResult$.1)
             let result_1$Bits$ = Int64(Int(bitPattern: result_1$$))
             do {
-              environment.interface.SetLongField(environment, result_1$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, result_1$Bits$.getJNIValue(in: environment))
+              environment.swiftInterface.SetLongField(environment, result_1$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, result_1$Bits$.getJNIValue(in: environment))
               let metadataPointer = unsafeBitCast(MyID<Int64>.self, to: UnsafeRawPointer.self)
               let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
-              environment.interface.SetLongField(environment, result_1$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+              environment.swiftInterface.SetLongField(environment, result_1$Out, _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
             }
             return 
           }
@@ -257,7 +257,7 @@ struct JNIGenericCombinationTests {
         expectedChunks: [
           #"""
           @_cdecl("Java_com_example_swift_SwiftModule__00024takeValues__JJ_3Ljava_lang_String_2_3J")
-          public func Java_com_example_swift_SwiftModule__00024takeValues__JJ_3Ljava_lang_String_2_3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, tuple_0: jlong, tuple_1: jlong, result_0$: jobjectArray?, result_1$: jlongArray?) {
+          public func Java_com_example_swift_SwiftModule__00024takeValues__JJ_3Ljava_lang_String_2_3J(environment: JNIEnvironment!, thisClass: JNITypes.jclass, tuple_0: jlong, tuple_1: jlong, result_0$: JNITypes.jobjectArray?, result_1$: JNITypes.jlongArray?) {
             assert(tuple_0 != 0, "tuple_0 memory address was null")
             let tuple_0Bits$ = Int(Int64(fromJNI: tuple_0, in: environment))
             let tuple_0$ = UnsafeMutablePointer<MyID<String>>(bitPattern: tuple_0Bits$)
@@ -272,9 +272,9 @@ struct JNIGenericCombinationTests {
             }
             let tupleResult$ = SwiftModule.takeValues(from: (tuple_0$.pointee, tuple_1$.pointee))
             let element_0_jni$ = tupleResult$.0.getJNILocalRefValue(in: environment)
-            environment.interface.SetObjectArrayElement(environment, result_0$, 0, element_0_jni$)
+            environment.swiftInterface.SetObjectArrayElement(environment, result_0$, 0, element_0_jni$)
             var element_1_jni$ = tupleResult$.1.getJNILocalRefValue(in: environment)
-            environment.interface.SetLongArrayRegion(environment, result_1$, 0, 1, &element_1_jni$)
+            environment.swiftInterface.SetLongArrayRegion(environment, result_1$, 0, 1, &element_1_jni$)
             return 
           }
           """#

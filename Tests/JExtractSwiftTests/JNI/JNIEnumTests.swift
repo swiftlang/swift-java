@@ -201,7 +201,7 @@ struct JNIEnumTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024first__")
-        public func Java_com_example_swift_MyEnum__00024first__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+        public func Java_com_example_swift_MyEnum__00024first__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.first)
           let resultBits$ = Int64(Int(bitPattern: result$))
@@ -210,7 +210,7 @@ struct JNIEnumTests {
         """,
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2")
-        public func Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg0: jstring?) -> jlong {
+        public func Java_com_example_swift_MyEnum__00024second__Ljava_lang_String_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, arg0: JNITypes.jstring?) -> jlong {
           let result$ = UnsafeMutablePointer<MyEnum>.allocate(capacity: 1)
           result$.initialize(to: MyEnum.second(String(fromJNI: arg0, in: environment)))
           let resultBits$ = Int64(Int(bitPattern: result$))
@@ -219,7 +219,7 @@ struct JNIEnumTests {
         """,
         """
         @_cdecl("Java_com_example_swift_MyEnum__00024third__JIJ")
-        public func Java_com_example_swift_MyEnum__00024third__JIJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, x: jlong, y: jint, arg2: jlong) -> jlong {
+        public func Java_com_example_swift_MyEnum__00024third__JIJ(environment: JNIEnvironment!, thisClass: JNITypes.jclass, x: jlong, y: jint, arg2: jlong) -> jlong {
           assert(arg2 != 0, "arg2 memory address was null")
           let arg2Bits$ = Int(Int64(fromJNI: arg2, in: environment))
           let arg2$ = UnsafeMutablePointer<MyValue>(bitPattern: arg2Bits$)

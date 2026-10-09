@@ -1515,8 +1515,8 @@ extension JNISwift2JavaGenerator {
           let typeMetadataVariableName = "\(inner)typeMetadata$"
           printer.print(
             """
-            let \(pointerVariableName) = environment.interface.CallLongMethodA(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.memoryAddress, [])
-            let \(typeMetadataVariableName) = environment.interface.CallLongMethodA(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.typeMetadataAddress, [])
+            let \(pointerVariableName) = environment.swiftInterface.CallLongMethodA(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.memoryAddress, [])
+            let \(typeMetadataVariableName) = environment.swiftInterface.CallLongMethodA(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.typeMetadataAddress, [])
             """
           )
           let existentialName = NativeSwiftConversionStep.extractSwiftProtocolValue(
@@ -1533,7 +1533,7 @@ extension JNISwift2JavaGenerator {
         // or if its a custom class implementing the interface.
         if allowsJavaImplementations {
           printer.printBraceBlock(
-            "if environment.interface.IsInstanceOf(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.class) != 0"
+            "if environment.swiftInterface.IsInstanceOf(environment, \(inner), _JNIMethodIDCache.JNISwiftInstance.class) != 0"
           ) { printer in
             printStandardJExtractBlock(&printer)
           }
@@ -1702,15 +1702,15 @@ extension JNISwift2JavaGenerator {
 
         printer.print(
           """
-          let class$ = environment.interface.GetObjectClass(environment, \(placeholder))
-          let methodID$ = environment.interface.GetMethodID(environment, class$, "\(methodName)", "\(methodSignature.mangledName)")!
-          environment.interface.DeleteLocalRef(environment, class$)
-          let arguments$: [jvalue] = [\(arguments.joined(separator: .comma))]
+          let class$ = environment.swiftInterface.GetObjectClass(environment, \(placeholder))
+          let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "\(methodName)", "\(methodSignature.mangledName)")!
+          environment.swiftInterface.DeleteLocalRef(environment, class$)
+          let arguments$: [JNITypes.jvalue] = [\(arguments.joined(separator: .comma))]
           """
         )
 
         let upcall =
-          "environment.interface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
+          "environment.swiftInterface.\(nativeResult.javaType.jniCallMethodAName)(environment, \(placeholder), methodID$, arguments$)"
         let result = nativeResult.conversion.render(&printer, upcall)
 
         if nativeResult.javaType.isVoid {
@@ -1818,7 +1818,7 @@ extension JNISwift2JavaGenerator {
         let discriminatorParameterName
       ):
         if !returnType.isVoid {
-          printer.print("let \(resultName): \(returnType.jniTypeName)")
+          printer.print("let \(resultName): \(returnType.swiftJNITypeName)")
         }
         printer.printIfBlock("let innerResult$ = \(placeholder)") { printer in
           let inner = inner.render(&printer, "innerResult$")
@@ -1828,7 +1828,7 @@ extension JNISwift2JavaGenerator {
           printer.print(
             """
             var flag$ = Int8(1)
-            environment.interface.SetByteArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
+            environment.swiftInterface.SetByteArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
             """
           )
         }
@@ -1839,7 +1839,7 @@ extension JNISwift2JavaGenerator {
           printer.print(
             """
             var flag$ = Int8(0)
-            environment.interface.SetByteArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
+            environment.swiftInterface.SetByteArrayRegion(environment, \(discriminatorParameterName), 0, 1, &flag$)
             """
           )
         }
@@ -1854,10 +1854,10 @@ extension JNISwift2JavaGenerator {
         printer.printBraceBlock("do") { printer in
           printer.print(
             """
-            environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, \(inner))
+            environment.swiftInterface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, \(inner))
             let metadataPointer = unsafeBitCast(\(swiftFunctionResultType).self, to: UnsafeRawPointer.self)
             let metadataPointerBits$ = Int64(Int(bitPattern: metadataPointer))
-            environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
+            environment.swiftInterface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, metadataPointerBits$.getJNIValue(in: environment))
             """
           )
         }
@@ -1869,8 +1869,8 @@ extension JNISwift2JavaGenerator {
           printer.print(
             """
             let (selfPointerBits$, selfTypePointerBits$) = \(boxed)
-            environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, selfPointerBits$.getJNIValue(in: environment))
-            environment.interface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, selfTypePointerBits$.getJNIValue(in: environment))
+            environment.swiftInterface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfPointer, selfPointerBits$.getJNIValue(in: environment))
+            environment.swiftInterface.SetLongField(environment, \(outArgumentName), _JNIMethodIDCache._OutSwiftGenericInstance.selfTypePointer, selfTypePointerBits$.getJNIValue(in: environment))
             """
           )
         }
@@ -1941,20 +1941,20 @@ extension JNISwift2JavaGenerator {
         // Global ref all indirect returns
         for outParameter in nativeFunctionSignature.result.outParameters {
           printer.print(
-            "nonisolated(unsafe) let \(outParameter.name) = environment.interface.NewGlobalRef(environment, \(outParameter.name))"
+            "nonisolated(unsafe) let \(outParameter.name) = environment.swiftInterface.NewGlobalRef(environment, \(outParameter.name))"
           )
           globalRefs.append(outParameter.name)
         }
 
         // We also need to global ref any objects passed in
         for parameter in nativeFunctionSignature.parameters.flatMap(\.parameters) where !parameter.type.isPrimitive {
-          printer.print("nonisolated(unsafe) let \(parameter.name) = environment.interface.NewGlobalRef(environment, \(parameter.name))")
+          printer.print("nonisolated(unsafe) let \(parameter.name) = environment.swiftInterface.NewGlobalRef(environment, \(parameter.name))")
           globalRefs.append(parameter.name)
         }
 
         printer.print(
           """
-          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let globalFuture = environment.swiftInterface.NewGlobalRef(environment, result_future)
           """
         )
 
@@ -1993,7 +1993,7 @@ extension JNISwift2JavaGenerator {
             printer.print("\(tryAwaitString) \(placeholderWithoutTry)")
             printer.print("environment = try! JavaVirtualMachine.shared().environment()")
             printer.print(
-              "_ = environment.interface.CallBooleanMethodA(environment, globalFuture, \(completeMethodID), [jvalue(l: nil)])"
+              "_ = environment.swiftInterface.CallBooleanMethodA(environment, globalFuture, \(completeMethodID), [JNITypes.objectValue(nil)])"
             )
           } else {
             printer.print("let swiftResult$ = \(tryAwaitString) \(placeholderWithoutTry)")
@@ -2013,7 +2013,7 @@ extension JNISwift2JavaGenerator {
             }
 
             printer.print(
-              "_ = environment.interface.CallBooleanMethodA(environment, globalFuture, \(completeMethodID), [jvalue(l: \(result))])"
+              "_ = environment.swiftInterface.CallBooleanMethodA(environment, globalFuture, \(completeMethodID), [JNITypes.objectValue(\(result))])"
             )
           }
         }
@@ -2026,7 +2026,7 @@ extension JNISwift2JavaGenerator {
             // Defer might on any thread, so we need to attach environment.
             printer.print("let deferEnvironment = try! JavaVirtualMachine.shared().environment()")
             for globalRef in globalRefs {
-              printer.print("deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, \(globalRef))")
+              printer.print("deferEnvironment.swiftInterface.DeleteGlobalRef(deferEnvironment, \(globalRef))")
             }
           }
           if isThrowing {
@@ -2039,7 +2039,7 @@ extension JNISwift2JavaGenerator {
                 """
                 let catchEnvironment = try! JavaVirtualMachine.shared().environment()
                 let exception = catchEnvironment.makeJavaThrowable(for: error)
-                _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, \(completeExceptionallyMethodID), [jvalue(l: exception)])
+                _ = catchEnvironment.swiftInterface.CallBooleanMethodA(catchEnvironment, globalFuture, \(completeExceptionallyMethodID), [JNITypes.objectValue(exception)])
                 """
               )
             }
@@ -2107,9 +2107,9 @@ extension JNISwift2JavaGenerator {
         let releaseMode = mutable ? "0" : "jint(JNI_ABORT)"
         printer.print(
           """
-          let \(countVar) = Int(environment.interface.GetArrayLength(environment, \(inner)))
-          let \(ptrVar) = environment.interface.GetByteArrayElements(environment, \(inner), nil)!
-          defer { environment.interface.ReleaseByteArrayElements(environment, \(inner), \(ptrVar), \(releaseMode)) }
+          let \(countVar) = Int(environment.swiftInterface.GetArrayLength(environment, \(inner)))
+          let \(ptrVar) = environment.swiftInterface.GetByteArrayElements(environment, \(inner), nil)!
+          defer { environment.swiftInterface.ReleaseByteArrayElements(environment, \(inner), \(ptrVar), \(releaseMode)) }
           let \(rbpVar) = \(bufferPointerType)(start: \(ptrVar), count: \(countVar))
           """
         )
@@ -2138,12 +2138,12 @@ extension JNISwift2JavaGenerator {
             let setMethodName = element.javaType.jniSetArrayRegionMethodName
             printer.print("var element_\(element.index)_jni$ = \(converted)")
             printer.print(
-              "environment.interface.\(setMethodName)(environment, \(element.outParamName), 0, 1, &element_\(element.index)_jni$)"
+              "environment.swiftInterface.\(setMethodName)(environment, \(element.outParamName), 0, 1, &element_\(element.index)_jni$)"
             )
           case .class, .array:
             printer.print("let element_\(element.index)_jni$ = \(converted)")
             printer.print(
-              "environment.interface.SetObjectArrayElement(environment, \(element.outParamName), 0, element_\(element.index)_jni$)"
+              "environment.swiftInterface.SetObjectArrayElement(environment, \(element.outParamName), 0, element_\(element.index)_jni$)"
             )
           }
         }

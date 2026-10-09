@@ -4,6 +4,11 @@
 import CompilerPluginSupport
 import PackageDescription
 
+// Enable C++ interoperability only in the consumer targets, not their dependencies.
+let sampleSwiftSettings: [SwiftSetting] =
+  [.swiftLanguageMode(.v5)]
+  + (Context.environment["CXX_INTEROP"] == "1" ? [.interoperabilityMode(.Cxx)] : [])
+
 let package = Package(
   name: "JavaKitSampleApp",
   platforms: [
@@ -35,9 +40,7 @@ let package = Package(
         .product(name: "JavaUtilJar", package: "swift-java"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
       ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ],
+      swiftSettings: sampleSwiftSettings,
       plugins: [
         .plugin(name: "JavaCompilerPlugin", package: "swift-java"),
         .plugin(name: "SwiftJavaPlugin", package: "swift-java"),
@@ -49,9 +52,7 @@ let package = Package(
       dependencies: [
         "JavaKitExample"
       ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
-      ]
+      swiftSettings: sampleSwiftSettings
     ),
   ]
 )
