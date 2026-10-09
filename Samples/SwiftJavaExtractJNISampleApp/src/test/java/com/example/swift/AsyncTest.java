@@ -72,7 +72,7 @@ public class AsyncTest {
 
         Throwable cause = ex.getCause();
         assertNotNull(cause);
-        assertEquals(Exception.class, cause.getClass());
+        assertEquals(MySwiftError.class, cause.getClass());
         assertEquals("swiftError", cause.getMessage());
     }
 
