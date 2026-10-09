@@ -72,4 +72,40 @@ public class ReturnProtocolTest {
             assertEquals("Hej, Verden!", MySwiftLibrary.describeGreeter(greeter));
         }
     }
+
+    @Test
+    void returnExistentialFromMethod() {
+        try (var arena = SwiftArena.ofConfined()) {
+            GreeterFactory factory = GreeterFactory.init("Verden", arena);
+            Greeter greeter = factory.makeDanishGreeter(arena);
+            long danishType = DanishGreeter.init("Verden", arena).$typeMetadataAddress();
+            assertEquals(danishType, ((JNISwiftInstance) greeter).$typeMetadataAddress());
+            assertEquals("Hej, Verden!", greeter.greeting());
+            assertEquals("Hej, Verden! Hej, Verden!", greeter.repeated(2));
+        }
+    }
+
+    @Test
+    void returnOpaqueFromMethod() {
+        try (var arena = SwiftArena.ofConfined()) {
+            GreeterFactory factory = GreeterFactory.init("Verden", arena);
+            Greeter greeter = factory.makeOpaqueGreeter(arena);
+            long danishType = DanishGreeter.init("Verden", arena).$typeMetadataAddress();
+            assertEquals(danishType, ((JNISwiftInstance) greeter).$typeMetadataAddress());
+            assertEquals("Hej, Verden!", greeter.greeting());
+            assertEquals("Hej, Verden!", MySwiftLibrary.describeGreeter(greeter));
+        }
+    }
+
+    @Test
+    void returnExistentialFromComputedProperty() {
+        try (var arena = SwiftArena.ofConfined()) {
+            GreeterFactory factory = GreeterFactory.init("World", arena);
+            Greeter greeter = factory.getEnglishGreeter(arena);
+            long englishType = EnglishGreeter.init("World", arena).$typeMetadataAddress();
+            assertEquals(englishType, ((JNISwiftInstance) greeter).$typeMetadataAddress());
+            assertEquals("Hello, World!", greeter.greeting());
+            assertEquals("Hello, World! Hello, World!", greeter.repeated(2));
+        }
+    }
 }
