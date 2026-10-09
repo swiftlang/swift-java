@@ -379,37 +379,35 @@ extension SwiftType {
       self = .inlineArray(count: count, element: elementType)
 
     case .attributedType(let attributedType):
-      // Recognize "@convention(c)", "@convention(swift)", and "@escaping" attributes on function types.
+      // Recognize "@convention(c)", "@convention(swift)", "@escaping", and "@Sendable" attributes on function types.
       // FIXME: This string matching is a horrible hack.
       let attrs = attributedType.attributes.trimmedDescription
-
-      // Handle @escaping attribute
-      if attrs.contains("@escaping") {
-        let innerType = try SwiftType(attributedType.baseType, lookupContext: lookupContext)
-        switch innerType {
-        case .function(var functionType):
+      let innerType = try SwiftType(attributedType.baseType, lookupContext: lookupContext)
+      switch innerType {
+      case .function(var functionType):
+        var recognized = false
+        if attrs.contains("@escaping") {
           functionType.isEscaping = true
+          recognized = true
+        }
+        if attrs.contains("@Sendable") {
+          functionType.isSendable = true
+          recognized = true
+        }
+        if attrs.contains("@convention(c)") {
+          functionType.convention = .c
+          recognized = true
+        } else if attrs.contains("@convention(swift)") {
+          functionType.convention = .swift
+          recognized = true
+        }
+        if recognized {
           self = .function(functionType)
-        default:
+        } else {
           throw TypeTranslationError.unimplementedType(type)
         }
-      } else {
-        // Handle @convention attributes
-        switch attrs {
-        case "@convention(c)", "@convention(swift)":
-          let innerType = try SwiftType(attributedType.baseType, lookupContext: lookupContext)
-          switch innerType {
-          case .function(var functionType):
-            let isConventionC = attrs == "@convention(c)"
-            let convention: SwiftFunctionType.Convention = isConventionC ? .c : .swift
-            functionType.convention = convention
-            self = .function(functionType)
-          default:
-            throw TypeTranslationError.unimplementedType(type)
-          }
-        default:
-          throw TypeTranslationError.unimplementedType(type)
-        }
+      default:
+        throw TypeTranslationError.unimplementedType(type)
       }
 
     case .functionType(let functionType):
