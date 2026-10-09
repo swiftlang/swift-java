@@ -35,7 +35,10 @@ extension JNISwift2JavaGenerator {
 
       do {
         let translator = JavaInterfaceProtocolWrapperGenerator()
-        wrappers[type] = try translator.generate(for: type)
+        wrappers[type] = try translator.generate(
+          for: type,
+          methods: uniqueProtocolRequirements(type.methods)
+        )
       } catch {
         self.logger.warning("Failed to generate protocol wrapper for: '\(type.swiftNominal.qualifiedName)'; \(error)")
       }
@@ -104,7 +107,7 @@ extension JNISwift2JavaGenerator {
   }
 
   struct JavaInterfaceProtocolWrapperGenerator {
-    func generate(for type: ExtractedNominalType) throws -> JavaInterfaceSwiftWrapper {
+    func generate(for type: ExtractedNominalType, methods: [ExtractedFunc]) throws -> JavaInterfaceSwiftWrapper {
       if !type.initializers.isEmpty
         || type.methods.contains(where: \.isStatic)
         || type.variables.contains(where: \.isStatic)
@@ -112,7 +115,7 @@ extension JNISwift2JavaGenerator {
         throw JavaTranslationError.protocolStaticRequirementsNotSupported
       }
 
-      let functions = try type.methods.map { method in
+      let functions = try methods.map { method in
         try translate(function: method)
       }
 

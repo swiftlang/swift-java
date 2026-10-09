@@ -45,6 +45,7 @@ func assertOutput(
   moduleJavaPackages: [String: String] = [:],
   expectedChunks: [String],
   notExpectedChunks: [String] = [],
+  expectedOccurrences: [String: Int] = [:],
   fileID: String = #fileID,
   filePath: String = #filePath,
   line: Int = #line,
@@ -112,6 +113,7 @@ func assertOutput(
     dump: dump,
     expectedChunks: expectedChunks,
     notExpectedChunks: notExpectedChunks,
+    expectedOccurrences: expectedOccurrences,
     detectChunkByInitialLines: _detectChunkByInitialLines,
     fileID: fileID,
     filePath: filePath,
@@ -126,6 +128,7 @@ func assertOutput(
   dump: Bool = false,
   expectedChunks: [String],
   notExpectedChunks: [String] = [],
+  expectedOccurrences: [String: Int] = [:],
   detectChunkByInitialLines _detectChunkByInitialLines: Int = 4,
   fileID: String = #fileID,
   filePath: String = #filePath,
@@ -145,6 +148,15 @@ func assertOutput(
       \(output)
       ==== ---------------------------------------------------------------
       """,
+      sourceLocation: sourceLocation
+    )
+  }
+
+  for (expectedChunk, expectedCount) in expectedOccurrences {
+    let actualCount = output.components(separatedBy: expectedChunk).count - 1
+    #expect(
+      actualCount == expectedCount,
+      "Expected '\(expectedChunk)' to occur \(expectedCount) time(s), but found \(actualCount).",
       sourceLocation: sourceLocation
     )
   }
