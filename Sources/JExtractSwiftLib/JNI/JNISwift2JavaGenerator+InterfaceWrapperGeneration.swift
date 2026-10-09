@@ -154,10 +154,18 @@ extension JNISwift2JavaGenerator {
         )
       }
 
-      let resultConversion = try self.translateResult(
+      var resultConversion = try self.translateResult(
         type: functionType.resultType,
         methodName: "apply"
       )
+
+      if functionType.isAsync {
+        resultConversion = .awaitFutureResult(
+          .placeholder,
+          resultType: functionType.resultType,
+          isThrowing: functionType.isThrowing
+        )
+      }
 
       return SyntheticEscapingClosureFunctionType(
         javaInterfaceName: javaInterfaceName,
@@ -392,6 +400,12 @@ enum UpcallConversionStep {
 
   indirect case map(UpcallConversionStep, body: UpcallConversionStep)
 
+  indirect case awaitFutureResult(
+    UpcallConversionStep,
+    resultType: SwiftType,
+    isThrowing: Bool
+  )
+
   /// Returns the conversion string applied to the placeholder.
   func render(_ printer: inout SwiftPrinter, _ placeholder: String) -> String {
     switch self {
@@ -455,6 +469,50 @@ enum UpcallConversionStep {
         printer.print("return \(body)")
       }
       return printer.finalize()
+
+    case .awaitFutureResult(let inner, let resultType, let isThrowing):
+      let future = inner.render(&printer, placeholder)
+      let tryKeyword = isThrowing ? "try " : "try! "
+      printer.print(
+        """
+        guard let future$ = \(future) else {
+          fatalError("Async closure upcall to apply returned a nil future")
+        }
+        """
+      )
+      if resultType.isVoid {
+        printer.print("_ = \(tryKeyword)future$.get()")
+        return ""
+      }
+      printer.print(
+        """
+        let environment$ = try! JavaVirtualMachine.shared().environment()
+        let result$ = \(tryKeyword)future$.get()
+        """
+      )
+      switch resultType.asNominalType?.asKnownType {
+      case .optional(let wrapped):
+        switch wrapped.asNominalType?.asKnownType {
+        case .int64:
+          return "Optional(javaOptional: result$?.as(JavaOptionalLong.self))"
+        case .int32:
+          return "Optional(javaOptional: result$?.as(JavaOptionalInt.self))"
+        case .double:
+          return "Optional(javaOptional: result$?.as(JavaOptionalDouble.self))"
+        case .string:
+          return "Optional(javaOptional: result$?.as(JavaOptional<JavaString>.self))"
+        default:
+          return "result$?.as(\(wrapped.description).self)"
+        }
+
+      case .int64, .int32, .int16, .int8, .int,
+        .uint64, .uint32, .uint16, .uint8, .uint,
+        .double, .float, .bool, .string:
+        return "\(resultType.description).fromJavaObject(result$?.javaThis, in: environment$)"
+
+      default:
+        return "result$!.as(\(resultType.description).self)!"
+      }
     }
   }
 }

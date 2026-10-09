@@ -65,6 +65,17 @@ extension JNISwift2JavaGenerator {
     }
     let paramList = "(\(params.joined(separator: .comma)))"
 
+    if type.isAsync {
+      let futureType: String =
+        switch self.config.effectiveAsyncFuncMode {
+        case .completableFuture:
+          "JavaCompletableFuture<JavaObject>?"
+        case .legacyFuture:
+          "SwiftJavaSimpleCompletableFuture?"
+        }
+      return "\(paramList) -> \(futureType)"
+    }
+
     if type.resultType.isVoid {
       return paramList
     } else {
