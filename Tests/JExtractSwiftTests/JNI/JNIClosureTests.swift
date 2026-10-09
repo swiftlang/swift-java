@@ -1063,13 +1063,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntToDoubleFunction__Ljava_util_function_IntToDoubleFunction_2")
-        public func Java_com_example_swift_SwiftModule__00024closureIntToDoubleFunction__Ljava_util_function_IntToDoubleFunction_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureIntToDoubleFunction__Ljava_util_function_IntToDoubleFunction_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureIntToDoubleFunction(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsDouble", "(I)D")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsDouble", "(I)D")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Double(fromJNI: environment.swiftInterface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1088,13 +1088,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongToDoubleFunction__Ljava_util_function_LongToDoubleFunction_2")
-        public func Java_com_example_swift_SwiftModule__00024closureLongToDoubleFunction__Ljava_util_function_LongToDoubleFunction_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureLongToDoubleFunction__Ljava_util_function_LongToDoubleFunction_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureLongToDoubleFunction(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsDouble", "(J)D")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsDouble", "(J)D")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Double(fromJNI: environment.swiftInterface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }

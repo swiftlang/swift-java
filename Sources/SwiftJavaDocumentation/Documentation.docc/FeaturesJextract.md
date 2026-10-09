@@ -139,7 +139,8 @@ generated Java wrapper type.
 ### Throwing functions
 
 Throwing Swift functions are imported as Java methods that throw exceptions.
-In JNI mode the exception type is `Exception`; in FFM mode it is `SwiftJavaErrorException`.
+In FFM mode the exception type is `SwiftJavaErrorException`.
+In JNI mode the thrown exception depends on the Swift error, as described below.
 
 @TabNavigator {
    @Tab("Swift") {
@@ -152,6 +153,32 @@ In JNI mode the exception type is `Exception`; in FFM mode it is `SwiftJavaError
       @Snippet(path: "Snippets/ThrowingJavaFFM", slice: "throwUsageJava")
    }
 }
+
+#### Errors in JNI mode
+
+In JNI mode, extracted Swift types that conform to `Error` or `LocalizedError` are generated as Java classes
+extending `org.swift.swiftkit.core.SwiftError`, which is a `java.lang.Exception`.
+`getMessage()` returns the Swift `String(describing:)` of the error.
+
+When a Swift function throws such an error, Java receives that exact class.
+Errors whose type was not extracted (for example a non-public error type) are thrown as
+`org.swift.swiftkit.core.SwiftErrorException`, which is also a `SwiftError`.
+
+Swift typed throws (`throws(MyError)`) become a checked `throws MyError` in Java,
+while untyped `throws` stays `throws Exception`.
+Async throwing functions return a `CompletableFuture` that completes exceptionally with the
+same exception, available as the cause of the `ExecutionException` thrown by `get()`.
+
+```java
+try {
+    MySwiftLibrary.throwTyped("");
+} catch (MySwiftError e) {
+    switch (e.getCase()) {
+        case MySwiftError.Case.SwiftError _ -> System.out.println("swift error");
+        case MySwiftError.Case.InvalidInput(var reason) -> System.out.println(reason);
+    }
+}
+```
 
 ### Stored properties
 

@@ -52,6 +52,13 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
   /// Cached Java translation result. 'nil' indicates failed translation.
   var translatedDecls: [ExtractedFunc: TranslatedFunctionDecl] = [:]
   var translatedEnumCases: [ExtractedEnumCase: TranslatedEnumCase] = [:]
+
+  /// Module-qualified identities of extracted types that are surfaced to Java as `SwiftError` exceptions.
+  lazy var swiftErrorTypes: Set<SwiftNominalIdentity> = Set(
+    analysis.extractedTypes.values
+      .filter { isSwiftErrorType($0) }
+      .map(\.swiftNominal.identity)
+  )
   var interfaceProtocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper] = [:]
 
   /// Protocols that should be boxed to support returning them as `any P / some P`
@@ -164,6 +171,31 @@ extension JNISwift2JavaGenerator {
       .compactMap {
         self.analysis.extractedTypes[$0.qualifiedName]
       }
+  }
+
+  /// Whether `type` conforms to `Error` and is surfaced to Java as a `SwiftError` subclass.
+  ///
+  /// Types that never get a Java class or bridge (protocols, unspecialized generics,
+  /// specializations and case-less enums such as `Never`) are excluded.
+  func isSwiftErrorType(_ type: ExtractedNominalType) -> Bool {
+    guard type.swiftNominal.kind != .protocol else { return false }
+    guard !type.swiftNominal.isGeneric, !type.isSpecialization else { return false }
+    guard !(type.swiftNominal.kind == .enum && type.cases.isEmpty) else { return false }
+    return type.conformsTo("Error", in: analysis.extractedTypes)
+      || type.conformsTo("LocalizedError", in: analysis.extractedTypes)
+  }
+
+  /// Whether `type` is a class whose superclass is itself an error type, and therefore already
+  /// inherits the generated `_JNIThrowableError` conformance (redeclaring it would not compile).
+  ///
+  /// Such errors are thrown to Java as their root error class, since the generated Java classes
+  /// do not mirror Swift class inheritance.
+  func inheritsThrowableErrorConformance(_ type: ExtractedNominalType) -> Bool {
+    guard type.swiftNominal.kind == .class else { return false }
+    return type.inheritedTypes.contains { inherited in
+      guard let decl = inherited.asNominalTypeDeclaration, decl.kind == .class else { return false }
+      return self.swiftErrorTypes.contains(decl.identity)
+    }
   }
 
   /// The direct (non-inherited) requirements of `type` (a protocol) that are

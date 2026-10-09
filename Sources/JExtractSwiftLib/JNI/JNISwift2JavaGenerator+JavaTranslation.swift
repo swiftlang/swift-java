@@ -29,6 +29,7 @@ extension JNISwift2JavaGenerator {
       knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
       protocolWrappers: self.interfaceProtocolWrappers,
       logger: self.logger,
+      errorTypes: self.swiftErrorTypes,
       javaIdentifiers: self.currentJavaIdentifiers
     )
   }
@@ -40,7 +41,7 @@ extension JNISwift2JavaGenerator {
       return cached
     }
 
-    let translated: TranslatedFunctionDecl?
+    var translated: TranslatedFunctionDecl?
     do {
       translated = try self.javaTranslator.translate(decl)
     } catch {
@@ -48,8 +49,43 @@ extension JNISwift2JavaGenerator {
       translated = nil
     }
 
+    if let candidate = translated, collidesWithThrowableMember(candidate, of: decl) {
+      translated = nil
+    }
+
     translatedDecls[decl] = translated
     return translated
+  }
+
+  /// Zero-argument `Throwable` members that a generated `SwiftError` subclass cannot redeclare with another meaning.
+  static let throwableMemberNames: Set<String> = [
+    "getMessage", "getLocalizedMessage", "getCause", "fillInStackTrace", "printStackTrace", "getStackTrace",
+    "getSuppressed",
+  ]
+
+  /// Whether `translated`, a member of an error type, would clash with a `java.lang.Throwable` method
+  /// on the generated exception class, in which case it is skipped with a warning.
+  private func collidesWithThrowableMember(_ translated: TranslatedFunctionDecl, of decl: ExtractedFunc) -> Bool {
+    guard let parent = decl.parentType?.asNominalTypeDeclaration,
+      self.swiftErrorTypes.contains(parent.identity),
+      translated.translatedFunctionSignature.parameters.isEmpty,
+      Self.throwableMemberNames.contains(translated.name)
+    else {
+      return false
+    }
+
+    // `getMessage()`/`getLocalizedMessage()` returning a String naturally override the Throwable ones.
+    let isStringOverride =
+      ["getMessage", "getLocalizedMessage"].contains(translated.name)
+      && translated.translatedFunctionSignature.result.javaType == .javaLangString
+    if isStringOverride {
+      return false
+    }
+
+    self.logger.warning(
+      "Skipping '\(parent.qualifiedName).\(translated.name)': it collides with 'java.lang.Throwable.\(translated.name)()' on the generated exception class."
+    )
+    return true
   }
 
   func translatedEnumCase(
@@ -70,6 +106,7 @@ extension JNISwift2JavaGenerator {
         knownTypes: SwiftKnownTypes(symbolTable: lookupContext.symbolTable),
         protocolWrappers: self.interfaceProtocolWrappers,
         logger: self.logger,
+        errorTypes: self.swiftErrorTypes,
         javaIdentifiers: self.currentJavaIdentifiers,
       )
       translated = try translation.translate(enumCase: decl)
@@ -91,6 +128,8 @@ extension JNISwift2JavaGenerator {
     var knownTypes: SwiftKnownTypes
     let protocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper]
     let logger: Logger
+    /// Module-qualified identities of extracted types that are surfaced to Java as `SwiftError` exceptions.
+    let errorTypes: Set<SwiftNominalIdentity>
     var javaIdentifiers: JavaIdentifierFactory
 
     func translate(enumCase: ExtractedEnumCase) throws -> TranslatedEnumCase {
@@ -227,10 +266,23 @@ extension JNISwift2JavaGenerator {
         )
       }
 
+      var thrownJavaType: JavaType?
+      if case .nominal(let thrown) = decl.functionSignature.thrownTypedError,
+        self.errorTypes.contains(thrown.nominalTypeDecl.identity)
+      {
+        // Only qualify the package when the error type lives in another Java package
+        let thrownPackage = moduleJavaPackages[thrown.nominalTypeDecl.moduleName]
+        thrownJavaType = .class(
+          package: thrownPackage == self.javaPackage ? nil : thrownPackage,
+          name: thrown.nominalTypeDecl.qualifiedName
+        )
+      }
+
       return TranslatedFunctionDecl(
         name: javaName,
         isStatic: decl.isStatic || decl.isClass || !decl.hasParent || decl.isInitializer,
         isThrowing: decl.isThrowing,
+        thrownJavaType: thrownJavaType,
         isAsync: decl.isAsync,
         isIsolated: decl.isIsolated,
         isImplicitlyAsync: decl.functionSignature.isImplicitlyAsync,
@@ -1697,6 +1749,9 @@ extension JNISwift2JavaGenerator {
 
     var isThrowing: Bool
 
+    /// The Java exception type for functions with typed throws of an extracted error type, `nil` otherwise.
+    var thrownJavaType: JavaType?
+
     var isAsync: Bool
 
     var isIsolated: Bool
@@ -1724,14 +1779,16 @@ extension JNISwift2JavaGenerator {
     }
 
     func throwsClause() -> String {
+      let isSyncThrowing = !(isAsync || isIsolated || isImplicitlyAsync)
+      let thrownException = (isSyncThrowing ? thrownJavaType?.fullyQualifiedClassName : nil) ?? "Exception"
       guard !translatedFunctionSignature.exceptions.isEmpty else {
-        return isThrowing && !(isAsync || isIsolated || isImplicitlyAsync) ? " throws Exception" : ""
+        return isThrowing && isSyncThrowing ? " throws \(thrownException)" : ""
       }
 
       let signatureExceptions = translatedFunctionSignature.exceptions.compactMap(\.type.className).joined(
         separator: ", "
       )
-      return " throws \(signatureExceptions)\(isThrowing ? ", Exception" : "")"
+      return " throws \(signatureExceptions)\(isThrowing ? ", \(thrownException)" : "")"
     }
   }
 
