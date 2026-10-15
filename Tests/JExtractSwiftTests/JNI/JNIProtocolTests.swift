@@ -543,6 +543,36 @@ struct JNIProtocolTests {
   }
 
   @Test
+  func returnsExistentialProtocol_boxing_swift() throws {
+    try assertOutput(
+      input: returnSource,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        let resultExistential$: (any Greeter) = SwiftModule.makeGreeter()
+        func resultBox$<T>(_ value: T) -> (Int64, Int64) {
+          let pointer = UnsafeMutablePointer<T>.allocate(capacity: 1)
+          pointer.initialize(to: value)
+          let metadataPointer = unsafeBitCast(T.self, to: UnsafeRawPointer.self)
+          return (Int64(Int(bitPattern: pointer)), Int64(Int(bitPattern: metadataPointer)))
+        }
+        #if hasFeature(ImplicitOpenExistentials)
+        let resultBoxed$ = resultBox$(resultExistential$)
+        #else
+        let resultBoxed$ = _openExistential(resultExistential$, do: resultBox$)
+        #endif
+        """
+      ],
+      notExpectedChunks: [
+        "UnsafeMutablePointer<type(of: value)>"
+      ]
+    )
+  }
+
+  @Test
   func existentialBoxPropertyAccessors_swift() throws {
     try assertOutput(
       input: returnSource,
