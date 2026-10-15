@@ -262,7 +262,7 @@ jobs:
         if: matrix.sdk_triple == 'aarch64-unknown-linux-android28' && matrix.ndk_version == 'r27d'
         working-directory: Samples/SwiftJavaExtractJNISampleApp
         env:
-          CXX_INTEROP: '1'
+          SWIFT_JAVA_CXX_INTEROP: '1'
         run: ./install-and-build-with-sdk.sh --android --build-command="swift build" --android-sdk-triple="${{ matrix.sdk_triple }}" --android-ndk-version="${{ matrix.ndk_version }}" ${{ matrix.swift_version }}
 
   verify-samples:
@@ -305,7 +305,7 @@ jobs:
       - name: Verify JNI consumer with C++ interoperability
         if: (matrix.sample_app == 'JavaKitSampleApp' || matrix.sample_app == 'SwiftJavaExtractJNISampleApp')
         env:
-          CXX_INTEROP: '1'
+          SWIFT_JAVA_CXX_INTEROP: '1'
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
 
 
@@ -349,7 +349,7 @@ jobs:
       - name: Verify JNI consumer with C++ interoperability
         if: (matrix.sample_app == 'JavaKitSampleApp' || matrix.sample_app == 'SwiftJavaExtractJNISampleApp')
         env:
-          CXX_INTEROP: '1'
+          SWIFT_JAVA_CXX_INTEROP: '1'
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
 
   linkage-test:

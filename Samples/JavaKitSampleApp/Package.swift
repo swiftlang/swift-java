@@ -7,7 +7,7 @@ import PackageDescription
 // Enable C++ interoperability only in the consumer targets, not their dependencies.
 let sampleSwiftSettings: [SwiftSetting] =
   [.swiftLanguageMode(.v5)]
-  + (Context.environment["CXX_INTEROP"] == "1" ? [.interoperabilityMode(.Cxx)] : [])
+  + (Context.environment["SWIFT_JAVA_CXX_INTEROP"] == "1" ? [.interoperabilityMode(.Cxx)] : [])
 
 let package = Package(
   name: "JavaKitSampleApp",
