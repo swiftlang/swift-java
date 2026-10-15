@@ -259,7 +259,7 @@ jobs:
           chmod 500 install-and-build-with-sdk.sh
           ./install-and-build-with-sdk.sh --android --build-command="swift build" --android-sdk-triple="${{ matrix.sdk_triple }}" --android-ndk-version="${{ matrix.ndk_version }}" ${{ matrix.swift_version }}
       - name: Verify Android JNI consumer with C++ interoperability
-        if: matrix.swift_version == '6.3' && matrix.sdk_triple == 'aarch64-unknown-linux-android28' && matrix.ndk_version == 'r27d'
+        if: matrix.sdk_triple == 'aarch64-unknown-linux-android28' && matrix.ndk_version == 'r27d'
         working-directory: Samples/SwiftJavaExtractJNISampleApp
         env:
           CXX_INTEROP: '1'
@@ -304,7 +304,7 @@ jobs:
       - name: "Verify sample: ${{ matrix.sample_app }}"
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
       - name: Verify JNI consumer with C++ interoperability
-        if: matrix.swift_version == '6.3' && (matrix.sample_app == 'JavaKitSampleApp' || matrix.sample_app == 'SwiftJavaExtractJNISampleApp')
+        if: (matrix.sample_app == 'JavaKitSampleApp' || matrix.sample_app == 'SwiftJavaExtractJNISampleApp')
         env:
           CXX_INTEROP: '1'
           SWIFT_JAVA_VERBOSE: true
@@ -349,7 +349,7 @@ jobs:
       - name: "Verify sample ${{ matrix.sample_app }}"
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
       - name: Verify JNI consumer with C++ interoperability
-        if: matrix.swift_version == '6.3' && (matrix.sample_app == 'JavaKitSampleApp' || matrix.sample_app == 'SwiftJavaExtractJNISampleApp')
+        if: (matrix.sample_app == 'JavaKitSampleApp' || matrix.sample_app == 'SwiftJavaExtractJNISampleApp')
         env:
           CXX_INTEROP: '1'
           SWIFT_JAVA_VERBOSE: true
