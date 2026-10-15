@@ -263,7 +263,6 @@ jobs:
         working-directory: Samples/SwiftJavaExtractJNISampleApp
         env:
           CXX_INTEROP: '1'
-          SWIFT_JAVA_VERBOSE: true
         run: ./install-and-build-with-sdk.sh --android --build-command="swift build" --android-sdk-triple="${{ matrix.sdk_triple }}" --android-ndk-version="${{ matrix.ndk_version }}" ${{ matrix.swift_version }}
 
   verify-samples:
@@ -307,7 +306,6 @@ jobs:
         if: (matrix.sample_app == 'JavaKitSampleApp' || matrix.sample_app == 'SwiftJavaExtractJNISampleApp')
         env:
           CXX_INTEROP: '1'
-          SWIFT_JAVA_VERBOSE: true
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
 
 
@@ -352,7 +350,6 @@ jobs:
         if: (matrix.sample_app == 'JavaKitSampleApp' || matrix.sample_app == 'SwiftJavaExtractJNISampleApp')
         env:
           CXX_INTEROP: '1'
-          SWIFT_JAVA_VERBOSE: true
         run: .github/scripts/validate_sample.sh Samples/${{ matrix.sample_app }}
 
   linkage-test:
