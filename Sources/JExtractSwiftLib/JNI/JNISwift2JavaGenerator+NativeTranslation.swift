@@ -1640,23 +1640,20 @@ extension JNISwift2JavaGenerator {
         // existential so the boxing helper below can open it uniformly.
         printer.print("let \(existentialName): \(existentialType) = \(inner)")
 
+        // With ImplicitOpenExistentials, passing the existential to the generic
+        // helper opens it, so T is the dynamic type. Without the feature, T would
+        // be the existential type itself, so it has to be opened explicitly.
         printer.print(
           """
-          #if hasFeature(ImplicitOpenExistentials)
-          let \(boxedName): (Int64, Int64) = {
-            let value = \(existentialName)
-            let pointer = UnsafeMutablePointer<type(of: value)>.allocate(capacity: 1)
-            pointer.initialize(to: value)
-            let metadataPointer = unsafeBitCast(type(of: value), to: UnsafeRawPointer.self)
-            return (Int64(Int(bitPattern: pointer)), Int64(Int(bitPattern: metadataPointer)))
-          }()
-          #else
           func \(name)Box$<T>(_ value: T) -> (Int64, Int64) {
             let pointer = UnsafeMutablePointer<T>.allocate(capacity: 1)
             pointer.initialize(to: value)
             let metadataPointer = unsafeBitCast(T.self, to: UnsafeRawPointer.self)
             return (Int64(Int(bitPattern: pointer)), Int64(Int(bitPattern: metadataPointer)))
           }
+          #if hasFeature(ImplicitOpenExistentials)
+          let \(boxedName) = \(name)Box$(\(existentialName))
+          #else
           let \(boxedName) = _openExistential(\(existentialName), do: \(name)Box$)
           #endif
           """
