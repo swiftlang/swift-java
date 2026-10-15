@@ -37,6 +37,16 @@ final class SwiftAnalysisVisitor {
   }
   private var deferredConstrainedExtensions: [DeferredConstrainedExtension] = []
 
+  /// Unconstrained protocol extensions deferred until all nominal declarations have been visited
+  private struct DeferredProtocolExtension {
+    var node: ExtensionDeclSyntax
+    var target: ExtractedNominalType
+    var sourceFilePath: String
+  }
+  private var deferredProtocolExtensions: [DeferredProtocolExtension] = []
+
+  private var isVisitingExtension: Bool = false
+
   private static func operatorKind(_ node: FunctionDeclSyntax) -> SwiftAPIKind? {
     switch node.name.tokenKind {
     case .binaryOperator:
@@ -170,14 +180,24 @@ final class SwiftAnalysisVisitor {
     }
 
     guard !constraints.isEmpty else {
+      if extractedNominalType.swiftNominal.kind == .protocol {
+        self.deferredProtocolExtensions.append(
+          .init(node: node, target: extractedNominalType, sourceFilePath: sourceFilePath)
+        )
+        return
+      }
+
       // The extension is unconstrained: add to the base type (visible through all specializations)
       extractedNominalType.inheritedTypes +=
         node.inheritanceClause?.inheritedTypes.compactMap {
           try? SwiftType($0.type, lookupContext: analyzer.lookupContext)
         } ?? []
+      let wasVisitingExtension = self.isVisitingExtension
+      self.isVisitingExtension = true
       for memberItem in node.memberBlock.members {
         self.visit(decl: memberItem.decl, in: extractedNominalType, sourceFilePath: sourceFilePath)
       }
+      self.isVisitingExtension = wasVisitingExtension
       return
     }
 
@@ -205,11 +225,14 @@ final class SwiftAnalysisVisitor {
     }
 
     // Visit members in each matching specialization, not the base type
+    let wasVisitingExtension = self.isVisitingExtension
+    self.isVisitingExtension = true
     for specialized in matchingSpecializations {
       for memberItem in node.memberBlock.members {
         self.visit(decl: memberItem.decl, in: specialized, sourceFilePath: sourceFilePath)
       }
     }
+    self.isVisitingExtension = wasVisitingExtension
   }
 
   // ==== -----------------------------------------------------------------------
@@ -382,7 +405,17 @@ final class SwiftAnalysisVisitor {
 
     log.debug("Record extracted method \(node.qualifiedNameForDebug)")
     if let typeContext {
-      typeContext.methods.append(extracted)
+      if typeContext.swiftNominal.kind == .protocol && isVisitingExtension {
+        if let requirement = typeContext.findProtocolRequirement(satisfying: extracted, in: analyzer.extractedTypes) {
+          log.debug("Record protocol default implementation for \(requirement.displayName): \(extracted.displayName)")
+          typeContext.protocolDefaultImplementations.append(extracted)
+        } else {
+          log.debug("Record protocol extension method \(extracted.displayName)")
+          typeContext.protocolExtensionMethods.append(extracted)
+        }
+      } else {
+        typeContext.methods.append(extracted)
+      }
     } else {
       analyzer.extractedGlobalFuncs.append(extracted)
     }
@@ -532,7 +565,11 @@ final class SwiftAnalysisVisitor {
       sourceFilePath: sourceFilePath,
     )
 
-    typeContext.initializers.append(extracted)
+    if typeContext.swiftNominal.kind == .protocol && isVisitingExtension {
+      typeContext.protocolExtensionMethods.append(extracted)
+    } else {
+      typeContext.initializers.append(extracted)
+    }
   }
 
   private func visit(
@@ -646,7 +683,17 @@ final class SwiftAnalysisVisitor {
       "Record extracted variable accessor \(kind == .getter || kind == .subscriptGetter ? "getter" : "setter"):\(node.qualifiedNameForDebug)"
     )
     if let typeContext {
-      typeContext.variables.append(extracted)
+      if typeContext.swiftNominal.kind == .protocol && isVisitingExtension {
+        if let requirement = typeContext.findProtocolRequirement(satisfying: extracted, in: analyzer.extractedTypes) {
+          log.debug("Record protocol default implementation for variable \(requirement.displayName): \(extracted.displayName)")
+          typeContext.protocolDefaultImplementations.append(extracted)
+        } else {
+          log.debug("Record protocol extension variable \(extracted.displayName)")
+          typeContext.protocolExtensionVariables.append(extracted)
+        }
+      } else {
+        typeContext.variables.append(extracted)
+      }
     } else {
       analyzer.extractedGlobalVariables.append(extracted)
     }
@@ -803,6 +850,30 @@ final class SwiftAnalysisVisitor {
       }
     }
     deferredConstrainedExtensions.removeAll()
+  }
+
+  /// Process unconstrained protocol extensions that were deferred until all nominal declarations were visited
+  func processDeferredProtocolExtensions() {
+    let deferred = self.deferredProtocolExtensions
+    self.deferredProtocolExtensions = []
+
+    for item in deferred {
+      let extractedNominalType = item.target
+      let node = item.node
+      let sourceFilePath = item.sourceFilePath
+
+      extractedNominalType.inheritedTypes +=
+        node.inheritanceClause?.inheritedTypes.compactMap {
+          try? SwiftType($0.type, lookupContext: analyzer.lookupContext)
+        } ?? []
+
+      let wasVisitingExtension = self.isVisitingExtension
+      self.isVisitingExtension = true
+      for memberItem in node.memberBlock.members {
+        self.visit(decl: memberItem.decl, in: extractedNominalType, sourceFilePath: sourceFilePath)
+      }
+      self.isVisitingExtension = wasVisitingExtension
+    }
   }
 
   // ==== -----------------------------------------------------------------------

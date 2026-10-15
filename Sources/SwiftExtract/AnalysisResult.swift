@@ -45,6 +45,8 @@ public struct AnalysisResult {
     for type in self.extractedTypes.values {
       type.methods = type.methods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
       type.initializers = type.initializers.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
+      type.protocolDefaultImplementations = type.protocolDefaultImplementations.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
+      type.protocolExtensionMethods = type.protocolExtensionMethods.flatMap { $0.expandingVariadicOverloads(maxOverloads: maxOverloads) }
     }
   }
 }

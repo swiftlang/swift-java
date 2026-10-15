@@ -310,9 +310,11 @@ extension JNISwift2JavaGenerator {
     printHeader(&printer)
     printer.println()
 
-    self.currentJavaIdentifiers = JavaIdentifierFactory(
-      type.initializers + type.variables + type.methods
-    )
+    let methods =
+      type.swiftNominal.kind == .protocol
+      ? self.allProtocolRequirementMethods(of: type)
+      : type.initializers + type.variables + type.methods
+    self.currentJavaIdentifiers = JavaIdentifierFactory(methods)
 
     switch type.swiftNominal.kind {
     case .actor, .class, .enum, .struct:
