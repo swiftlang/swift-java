@@ -16,6 +16,7 @@
 public class CallbackManager {
   private var callback: (() -> Void)?
   private var intCallback: ((Int64) -> Int64)?
+  private var sendableCallback: (@Sendable (Int64) -> Int64)?
 
   public init() {}
 
@@ -37,6 +38,14 @@ public class CallbackManager {
 
   public func triggerIntCallback(value: Int64) -> Int64? {
     intCallback?(value)
+  }
+
+  public func setSendableCallback(callback: @escaping @Sendable (Int64) -> Int64) {
+    self.sendableCallback = callback
+  }
+
+  public func triggerSendableCallback(value: Int64) -> Int64? {
+    sendableCallback?(value)
   }
 }
 // snippet.end
@@ -64,7 +73,6 @@ public class ClosureStore {
     Int64(closures.count)
   }
 }
-
 public func multipleEscapingClosures(
   onSuccess: @escaping (Int64) -> Void,
   onFailure: @escaping (Int64) -> Void,

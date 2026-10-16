@@ -24,6 +24,7 @@ public struct SwiftFunctionType: Equatable {
   public var parameters: [SwiftParameter]
   public var resultType: SwiftType
   public var isEscaping: Bool = false
+  public var isSendable: Bool = false
 
   public var effectSpecifiers: [SwiftEffectSpecifier] = []
 
@@ -38,6 +39,7 @@ public struct SwiftFunctionType: Equatable {
     parameters: [SwiftParameter],
     resultType: SwiftType,
     isEscaping: Bool = false,
+    isSendable: Bool = false,
     effectSpecifiers: [SwiftEffectSpecifier] = [],
     thrownTypedError: SwiftType? = nil
   ) {
@@ -45,6 +47,7 @@ public struct SwiftFunctionType: Equatable {
     self.parameters = parameters
     self.resultType = resultType
     self.isEscaping = isEscaping
+    self.isSendable = isSendable
     self.effectSpecifiers = effectSpecifiers
     self.thrownTypedError = thrownTypedError
   }
@@ -59,6 +62,7 @@ extension SwiftFunctionType: CustomStringConvertible {
       case .swift: ""
       }
     let escapingPrefix = isEscaping ? "@escaping " : ""
+    let sendablePrefix = isSendable ? "@Sendable " : ""
     let throwsString =
       switch (isThrowing, thrownTypedError) {
       case (true, .some(let errorType)): " throws(\(errorType.description))"
@@ -66,7 +70,7 @@ extension SwiftFunctionType: CustomStringConvertible {
       case (false, _): ""
       }
     let effectsSuffix = (isAsync ? " async" : "") + throwsString
-    return "\(escapingPrefix)\(conventionPrefix)(\(parameterString))\(effectsSuffix) -> \(resultType.description)"
+    return "\(escapingPrefix)\(sendablePrefix)\(conventionPrefix)(\(parameterString))\(effectsSuffix) -> \(resultType.description)"
   }
 }
 
@@ -75,10 +79,12 @@ extension SwiftFunctionType {
     _ node: FunctionTypeSyntax,
     convention: Convention,
     isEscaping: Bool = false,
+    isSendable: Bool = false,
     lookupContext: SwiftTypeLookupContext
   ) throws {
     self.convention = convention
     self.isEscaping = isEscaping
+    self.isSendable = isSendable
     self.parameters = try node.parameters.map { param in
       let isInout = param.inoutKeyword != nil
       return SwiftParameter(

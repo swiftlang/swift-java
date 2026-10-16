@@ -152,6 +152,12 @@ extension SwiftParameter {
 
     // Determine the type.
     self.type = try SwiftType(type, lookupContext: lookupContext)
+    if node.attributes.trimmedDescription.contains("@Sendable"),
+      case .function(var fnType) = self.type
+    {
+      fnType.isSendable = true
+      self.type = .function(fnType)
+    }
 
     // Variadic / default-value information.
     self.isVariadic = node.ellipsis != nil

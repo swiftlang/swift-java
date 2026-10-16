@@ -842,6 +842,9 @@ extension JNISwift2JavaGenerator {
       Corresponds to the Swift closure parameter of type {@code \(functionType.swiftType)}.
       """
     )
+    if functionType.swiftType.isSendable {
+      printer.print("@ThreadSafe // Sendable")
+    }
     printer.print(
       """
       @FunctionalInterface

@@ -72,7 +72,64 @@ public class EscapingClosuresTest {
             assertEquals(42, result.getAsLong(), "Callback should double the input");
         }
     }
-    
+
+    @Test
+    void testCallbackManager_sendableCallback() {
+        try (var arena = SwiftArena.ofConfined()) {
+            CallbackManager manager = CallbackManager.init(arena);
+
+            // Verify that the generated interface is annotated with @ThreadSafe
+            assertTrue(
+                CallbackManager.setSendableCallback.callback.class.isAnnotationPresent(
+                    org.swift.swiftkit.core.annotations.ThreadSafe.class
+                ),
+                "Sendable callback interface should be annotated with @ThreadSafe"
+            );
+
+            CallbackManager.setSendableCallback.callback callback = (value) -> {
+                return value * 3;
+            };
+
+            manager.setSendableCallback(callback);
+
+            OptionalLong result = manager.triggerSendableCallback(14);
+            assertTrue(result.isPresent(), "Result should be present");
+            assertEquals(42, result.getAsLong(), "Sendable callback should multiply input by 3");
+        }
+    }
+
+    @Test
+    void testCallbackManager_sendableCallbackConcurrently() throws Exception {
+        var arena = SwiftArena.ofAuto();
+        CallbackManager manager = CallbackManager.init(arena);
+
+        CallbackManager.setSendableCallback.callback callback = (value) -> {
+            return value * 10;
+        };
+
+        manager.setSendableCallback(callback);
+
+        int threadCount = 4;
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threadCount);
+        var futures = new java.util.ArrayList<java.util.concurrent.Future<Long>>();
+
+        for (int i = 0; i < 20; i++) {
+            final long input = i;
+            futures.add(executor.submit(() -> {
+                OptionalLong res = manager.triggerSendableCallback(input);
+                assertTrue(res.isPresent());
+                return res.getAsLong();
+            }));
+        }
+
+        for (int i = 0; i < 20; i++) {
+            assertEquals(i * 10L, futures.get(i).get());
+        }
+
+        executor.shutdown();
+        assertTrue(executor.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS));
+    }
+
     @Test
     void testClosureStore() {
         try (var arena = SwiftArena.ofConfined()) {
