@@ -27,6 +27,7 @@ import java.util.OptionalLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -86,5 +87,96 @@ public class AsyncTest {
     void asyncString() throws Exception {
         Future<String> future = MySwiftLibrary.asyncString("hey");
         assertEquals("hey", future.get());
+    }
+
+    @Test
+    void asyncSchedule_voidClosure() throws Exception {
+        AtomicBoolean called = new AtomicBoolean(false);
+        Future<Void> future = MySwiftLibrary.asyncSchedule(() -> {
+            called.set(true);
+            return CompletableFuture.completedFuture(null);
+        });
+        future.get();
+        assertTrue(called.get(), "Async void closure should have been called");
+    }
+
+    @Test
+    void asyncCompute_primitiveLongClosure() throws Exception {
+        Future<Long> future = MySwiftLibrary.asyncCompute(21, (val) -> {
+            return CompletableFuture.completedFuture(val * 2);
+        });
+        Long result = future.get();
+        assertEquals(42L, result);
+    }
+
+    @Test
+    void asyncCompute_backgroundThreadCompletion() throws Exception {
+        Future<Long> future = MySwiftLibrary.asyncCompute(10, (val) -> {
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return val + 15;
+            });
+        });
+        Long result = future.get();
+        assertEquals(25L, result);
+    }
+
+    @Test
+    void asyncTransformDouble_primitiveDoubleClosure() throws Exception {
+        Future<Double> future = MySwiftLibrary.asyncTransformDouble(3.5, (val) -> {
+            return CompletableFuture.completedFuture(val * 2.0);
+        });
+        Double result = future.get();
+        assertEquals(7.0, result, 0.001);
+    }
+
+    @Test
+    void asyncScheduleThrowing_exceptionPropagates() {
+        Future<Void> future = MySwiftLibrary.asyncScheduleThrowing(() -> {
+            CompletableFuture<Void> failed = new CompletableFuture<>();
+            failed.completeExceptionally(new RuntimeException("Java async failed"));
+            return failed;
+        });
+
+        assertThrows(ExecutionException.class, future::get);
+    }
+
+    @Test
+    void asyncFetchOptional_present() throws Exception {
+        Future<OptionalLong> future = MySwiftLibrary.asyncFetchOptional(() -> {
+            return CompletableFuture.completedFuture(OptionalLong.of(99L));
+        });
+        assertEquals(OptionalLong.of(99L), future.get());
+    }
+
+    @Test
+    void asyncFetchOptional_empty() throws Exception {
+        Future<OptionalLong> future = MySwiftLibrary.asyncFetchOptional(() -> {
+            return CompletableFuture.completedFuture(OptionalLong.empty());
+        });
+        assertEquals(OptionalLong.empty(), future.get());
+    }
+
+    @Test
+    void asyncComputeThrowing_success() throws Exception {
+        Future<Long> future = MySwiftLibrary.asyncComputeThrowing(10, (val) -> {
+            return CompletableFuture.completedFuture(val + 5);
+        });
+        assertEquals(15L, future.get());
+    }
+
+    @Test
+    void asyncComputeThrowing_exceptionPropagates() {
+        Future<Long> future = MySwiftLibrary.asyncComputeThrowing(10, (val) -> {
+            CompletableFuture<Long> failed = new CompletableFuture<>();
+            failed.completeExceptionally(new RuntimeException("compute throwing failed"));
+            return failed;
+        });
+
+        assertThrows(ExecutionException.class, future::get);
     }
 }
