@@ -42,5 +42,8 @@ fi
 # FIXME: disable prebuilts until prebuilt swift-syntax isn't broken on 6.2 anymore: https://github.com/swiftlang/swift-java/issues/418
 swift build $DISABLE_EXPERIMENTAL_PREBUILTS --disable-sandbox  
 
-./gradlew run
-./gradlew test
+# A reused daemon can resolve `swift` using the PATH from an older toolchain.
+./gradlew --no-daemon run
+# Gradle does not track the Swift library as a test input. Rerun tests when
+# switching C++ interoperability so the second configuration is exercised too.
+./gradlew --no-daemon test --rerun-tasks

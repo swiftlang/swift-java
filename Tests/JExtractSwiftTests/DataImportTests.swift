@@ -515,7 +515,7 @@ final class DataImportTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024acceptData__J")
-        public func Java_com_example_swift_SwiftModule__00024acceptData__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, data: jlong) {
+        public func Java_com_example_swift_SwiftModule__00024acceptData__J(environment: JNIEnvironment!, thisClass: JNITypes.jclass, data: jlong) {
         """
       ]
     )
@@ -546,7 +546,7 @@ final class DataImportTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024returnData__")
-        public func Java_com_example_swift_SwiftModule__00024returnData__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jlong {
+        public func Java_com_example_swift_SwiftModule__00024returnData__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> jlong {
         """
       ]
     )
@@ -645,7 +645,7 @@ final class DataImportTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public func Java_com_example_swift_SwiftModule__00024processData__Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, data: jobject?) -> jlong {
+        public func Java_com_example_swift_SwiftModule__00024processData__Ljava_lang_Object_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, data: JNITypes.jobject?) -> jlong {
         """,
         """
           result$.initialize(to: SwiftModule.processData(data: dataswiftObject$))
@@ -669,7 +669,7 @@ final class DataImportTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public func Java_com_example_swift_SwiftModule__00024verify__Ljava_lang_Object_2Ljava_lang_Object_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, first: jobject?, second: jobject?) -> jboolean {
+        public func Java_com_example_swift_SwiftModule__00024verify__Ljava_lang_Object_2Ljava_lang_Object_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, first: JNITypes.jobject?, second: JNITypes.jobject?) -> jboolean {
         """,
         """
           return SwiftModule.verify(first: firstswiftObject$, second: secondswiftObject$).getJNILocalRefValue(in: environment)

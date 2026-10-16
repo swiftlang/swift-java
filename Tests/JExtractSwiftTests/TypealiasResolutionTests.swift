@@ -439,11 +439,11 @@ struct TypealiasResolutionTests {
       expectedChunks: [
         #"""
         @_cdecl("Java_com_example_swift_Foo__00024getId__J")
-        public func Java_com_example_swift_Foo__00024getId__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong) -> jlong {
+        public func Java_com_example_swift_Foo__00024getId__J(environment: JNIEnvironment!, thisClass: JNITypes.jclass, selfPointer: jlong) -> jlong {
         """#,
         #"""
         @_cdecl("Java_com_example_swift_Foo__00024setId__JJ")
-        public func Java_com_example_swift_Foo__00024setId__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jlong, selfPointer: jlong) {
+        public func Java_com_example_swift_Foo__00024setId__JJ(environment: JNIEnvironment!, thisClass: JNITypes.jclass, newValue: jlong, selfPointer: jlong) {
         """#,
       ],
     )

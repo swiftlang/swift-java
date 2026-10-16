@@ -153,7 +153,7 @@ struct IfConfigTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_AppStore__00024init__J")
-        public func Java_com_example_swift_AppStore__00024init__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, storeURL: jlong) -> jlong
+        public func Java_com_example_swift_AppStore__00024init__J(environment: JNIEnvironment!, thisClass: JNITypes.jclass, storeURL: jlong) -> jlong
         """
       ]
     )

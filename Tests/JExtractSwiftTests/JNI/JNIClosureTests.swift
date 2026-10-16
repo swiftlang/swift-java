@@ -638,13 +638,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024emptyClosure__Ljava_lang_Runnable_2")
-        public func Java_com_example_swift_SwiftModule__00024emptyClosure__Ljava_lang_Runnable_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024emptyClosure__Ljava_lang_Runnable_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.emptyClosure(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "run", "()V")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = []
-            environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "run", "()V")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = []
+            environment.swiftInterface.CallVoidMethodA(environment, closure, methodID$, arguments$)
           }
           )
         }
@@ -663,13 +663,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureBoolSupplier__Ljava_util_function_BooleanSupplier_2")
-        public func Java_com_example_swift_SwiftModule__00024closureBoolSupplier__Ljava_util_function_BooleanSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureBoolSupplier__Ljava_util_function_BooleanSupplier_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureBoolSupplier(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsBoolean", "()Z")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = []
-            return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "getAsBoolean", "()Z")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = []
+            return Bool(fromJNI: environment.swiftInterface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -688,13 +688,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntSupplier__Ljava_util_function_IntSupplier_2")
-        public func Java_com_example_swift_SwiftModule__00024closureIntSupplier__Ljava_util_function_IntSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureIntSupplier__Ljava_util_function_IntSupplier_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureIntSupplier(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsInt", "()I")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = []
-            return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "getAsInt", "()I")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = []
+            return Int32(fromJNI: environment.swiftInterface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -713,13 +713,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongSupplier__Ljava_util_function_LongSupplier_2")
-        public func Java_com_example_swift_SwiftModule__00024closureLongSupplier__Ljava_util_function_LongSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureLongSupplier__Ljava_util_function_LongSupplier_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureLongSupplier(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsLong", "()J")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = []
-            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "getAsLong", "()J")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = []
+            return Int64(fromJNI: environment.swiftInterface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -738,13 +738,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleSupplier__Ljava_util_function_DoubleSupplier_2")
-        public func Java_com_example_swift_SwiftModule__00024closureDoubleSupplier__Ljava_util_function_DoubleSupplier_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleSupplier__Ljava_util_function_DoubleSupplier_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureDoubleSupplier(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "getAsDouble", "()D")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = []
-            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "getAsDouble", "()D")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = []
+            return Double(fromJNI: environment.swiftInterface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -763,13 +763,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntConsumer__Ljava_util_function_IntConsumer_2")
-        public func Java_com_example_swift_SwiftModule__00024closureIntConsumer__Ljava_util_function_IntConsumer_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureIntConsumer__Ljava_util_function_IntConsumer_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureIntConsumer(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "accept", "(I)V")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "accept", "(I)V")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            environment.swiftInterface.CallVoidMethodA(environment, closure, methodID$, arguments$)
           }
           )
         }
@@ -788,13 +788,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongConsumer__Ljava_util_function_LongConsumer_2")
-        public func Java_com_example_swift_SwiftModule__00024closureLongConsumer__Ljava_util_function_LongConsumer_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureLongConsumer__Ljava_util_function_LongConsumer_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureLongConsumer(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "accept", "(J)V")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "accept", "(J)V")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            environment.swiftInterface.CallVoidMethodA(environment, closure, methodID$, arguments$)
           }
           )
         }
@@ -813,13 +813,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleConsumer__Ljava_util_function_DoubleConsumer_2")
-        public func Java_com_example_swift_SwiftModule__00024closureDoubleConsumer__Ljava_util_function_DoubleConsumer_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleConsumer__Ljava_util_function_DoubleConsumer_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureDoubleConsumer(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "accept", "(D)V")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            environment.interface.CallVoidMethodA(environment, closure, methodID$, arguments$)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "accept", "(D)V")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            environment.swiftInterface.CallVoidMethodA(environment, closure, methodID$, arguments$)
           }
           )
         }
@@ -838,13 +838,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntPredicate__Ljava_util_function_IntPredicate_2")
-        public func Java_com_example_swift_SwiftModule__00024closureIntPredicate__Ljava_util_function_IntPredicate_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureIntPredicate__Ljava_util_function_IntPredicate_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureIntPredicate(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "test", "(I)Z")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "test", "(I)Z")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Bool(fromJNI: environment.swiftInterface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -863,13 +863,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongPredicate__Ljava_util_function_LongPredicate_2")
-        public func Java_com_example_swift_SwiftModule__00024closureLongPredicate__Ljava_util_function_LongPredicate_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureLongPredicate__Ljava_util_function_LongPredicate_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureLongPredicate(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "test", "(J)Z")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "test", "(J)Z")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Bool(fromJNI: environment.swiftInterface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -888,13 +888,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoublePredicate__Ljava_util_function_DoublePredicate_2")
-        public func Java_com_example_swift_SwiftModule__00024closureDoublePredicate__Ljava_util_function_DoublePredicate_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureDoublePredicate__Ljava_util_function_DoublePredicate_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureDoublePredicate(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "test", "(D)Z")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Bool(fromJNI: environment.interface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "test", "(D)Z")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Bool(fromJNI: environment.swiftInterface.CallBooleanMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -913,13 +913,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntUnaryOperator__Ljava_util_function_IntUnaryOperator_2")
-        public func Java_com_example_swift_SwiftModule__00024closureIntUnaryOperator__Ljava_util_function_IntUnaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureIntUnaryOperator__Ljava_util_function_IntUnaryOperator_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureIntUnaryOperator(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsInt", "(I)I")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsInt", "(I)I")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Int32(fromJNI: environment.swiftInterface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -938,13 +938,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongUnaryOperator__Ljava_util_function_LongUnaryOperator_2")
-        public func Java_com_example_swift_SwiftModule__00024closureLongUnaryOperator__Ljava_util_function_LongUnaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureLongUnaryOperator__Ljava_util_function_LongUnaryOperator_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureLongUnaryOperator(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsLong", "(J)J")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsLong", "(J)J")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Int64(fromJNI: environment.swiftInterface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -963,13 +963,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleToIntFunction__Ljava_util_function_DoubleToIntFunction_2")
-        public func Java_com_example_swift_SwiftModule__00024closureDoubleToIntFunction__Ljava_util_function_DoubleToIntFunction_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleToIntFunction__Ljava_util_function_DoubleToIntFunction_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureDoubleToIntFunction(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsInt", "(D)I")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsInt", "(D)I")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Int32(fromJNI: environment.swiftInterface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -988,13 +988,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongToIntFunction__Ljava_util_function_LongToIntFunction_2")
-        public func Java_com_example_swift_SwiftModule__00024closureLongToIntFunction__Ljava_util_function_LongToIntFunction_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureLongToIntFunction__Ljava_util_function_LongToIntFunction_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureLongToIntFunction(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsInt", "(J)I")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsInt", "(J)I")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Int32(fromJNI: environment.swiftInterface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1013,13 +1013,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleToLongFunction__Ljava_util_function_DoubleToLongFunction_2")
-        public func Java_com_example_swift_SwiftModule__00024closureDoubleToLongFunction__Ljava_util_function_DoubleToLongFunction_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleToLongFunction__Ljava_util_function_DoubleToLongFunction_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureDoubleToLongFunction(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsLong", "(D)J")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsLong", "(D)J")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Int64(fromJNI: environment.swiftInterface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1038,13 +1038,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntToLongFunction__Ljava_util_function_IntToLongFunction_2")
-        public func Java_com_example_swift_SwiftModule__00024closureIntToLongFunction__Ljava_util_function_IntToLongFunction_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureIntToLongFunction__Ljava_util_function_IntToLongFunction_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureIntToLongFunction(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsLong", "(I)J")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsLong", "(I)J")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Int64(fromJNI: environment.swiftInterface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1063,13 +1063,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntToDoubleFunction__Ljava_util_function_IntToDoubleFunction_2")
-        public func Java_com_example_swift_SwiftModule__00024closureIntToDoubleFunction__Ljava_util_function_IntToDoubleFunction_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureIntToDoubleFunction__Ljava_util_function_IntToDoubleFunction_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureIntToDoubleFunction(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsDouble", "(I)D")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsDouble", "(I)D")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Double(fromJNI: environment.swiftInterface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1088,13 +1088,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongToDoubleFunction__Ljava_util_function_LongToDoubleFunction_2")
-        public func Java_com_example_swift_SwiftModule__00024closureLongToDoubleFunction__Ljava_util_function_LongToDoubleFunction_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureLongToDoubleFunction__Ljava_util_function_LongToDoubleFunction_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureLongToDoubleFunction(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsDouble", "(J)D")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsDouble", "(J)D")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Double(fromJNI: environment.swiftInterface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1114,13 +1114,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleUnaryOperator__Ljava_util_function_DoubleUnaryOperator_2")
-        public func Java_com_example_swift_SwiftModule__00024closureDoubleUnaryOperator__Ljava_util_function_DoubleUnaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleUnaryOperator__Ljava_util_function_DoubleUnaryOperator_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureDoubleUnaryOperator(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsDouble", "(D)D")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment)]
-            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsDouble", "(D)D")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment)]
+            return Double(fromJNI: environment.swiftInterface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1139,13 +1139,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureIntBinaryOperator__Ljava_util_function_IntBinaryOperator_2")
-        public func Java_com_example_swift_SwiftModule__00024closureIntBinaryOperator__Ljava_util_function_IntBinaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureIntBinaryOperator__Ljava_util_function_IntBinaryOperator_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureIntBinaryOperator(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsInt", "(II)I")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
-            return Int32(fromJNI: environment.interface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsInt", "(II)I")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
+            return Int32(fromJNI: environment.swiftInterface.CallIntMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1164,13 +1164,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureLongBinaryOperator__Ljava_util_function_LongBinaryOperator_2")
-        public func Java_com_example_swift_SwiftModule__00024closureLongBinaryOperator__Ljava_util_function_LongBinaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureLongBinaryOperator__Ljava_util_function_LongBinaryOperator_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureLongBinaryOperator(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsLong", "(JJ)J")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
-            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsLong", "(JJ)J")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
+            return Int64(fromJNI: environment.swiftInterface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1189,13 +1189,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureDoubleBinaryOperator__Ljava_util_function_DoubleBinaryOperator_2")
-        public func Java_com_example_swift_SwiftModule__00024closureDoubleBinaryOperator__Ljava_util_function_DoubleBinaryOperator_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureDoubleBinaryOperator__Ljava_util_function_DoubleBinaryOperator_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureDoubleBinaryOperator(closure: {
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "applyAsDouble", "(DD)D")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
-            return Double(fromJNI: environment.interface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "applyAsDouble", "(DD)D")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
+            return Double(fromJNI: environment.swiftInterface.CallDoubleMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }
@@ -1248,13 +1248,13 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2")
-        public func Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, closure: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024closureWithArgumentsAndReturn__Lcom_example_swift_SwiftModule_00024closureWithArgumentsAndReturn_00024closure_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, closure: JNITypes.jobject?) {
           SwiftModule.closureWithArgumentsAndReturn(closure: { _0, _1 in
-            let class$ = environment.interface.GetObjectClass(environment, closure)
-            let methodID$ = environment.interface.GetMethodID(environment, class$, "apply", "(JZ)J")!
-            environment.interface.DeleteLocalRef(environment, class$)
-            let arguments$: [jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
-            return Int64(fromJNI: environment.interface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
+            let class$ = environment.swiftInterface.GetObjectClass(environment, closure)
+            let methodID$ = environment.swiftInterface.GetMethodID(environment, class$, "apply", "(JZ)J")!
+            environment.swiftInterface.DeleteLocalRef(environment, class$)
+            let arguments$: [JNITypes.jvalue] = [_0.getJValue(in: environment), _1.getJValue(in: environment)]
+            return Int64(fromJNI: environment.swiftInterface.CallLongMethodA(environment, closure, methodID$, arguments$), in: environment)
           }
           )
         }

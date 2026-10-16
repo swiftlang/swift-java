@@ -57,9 +57,9 @@ struct JNITupleTests {
         """
         let tupleResult$ = SwiftModule.returnPair()
         var element_0_jni$ = tupleResult$.0.getJNILocalRefValue(in: environment)
-        environment.interface.SetLongArrayRegion(environment, result_0$, 0, 1, &element_0_jni$)
+        environment.swiftInterface.SetLongArrayRegion(environment, result_0$, 0, 1, &element_0_jni$)
         let element_1_jni$ = tupleResult$.1.getJNILocalRefValue(in: environment)
-        environment.interface.SetObjectArrayElement(environment, result_1$, 0, element_1_jni$)
+        environment.swiftInterface.SetObjectArrayElement(environment, result_1$, 0, element_1_jni$)
         """
       ]
     )
@@ -140,9 +140,9 @@ struct JNITupleTests {
         """
         let tupleResult$ = SwiftModule.labeledTuple()
         var element_0_jni$ = tupleResult$.x.getJNILocalRefValue(in: environment)
-        environment.interface.SetIntArrayRegion(environment, result_0$, 0, 1, &element_0_jni$)
+        environment.swiftInterface.SetIntArrayRegion(environment, result_0$, 0, 1, &element_0_jni$)
         var element_1_jni$ = tupleResult$.y.getJNILocalRefValue(in: environment)
-        environment.interface.SetIntArrayRegion(environment, result_1$, 0, 1, &element_1_jni$)
+        environment.swiftInterface.SetIntArrayRegion(environment, result_1$, 0, 1, &element_1_jni$)
         """
       ]
     )
@@ -202,7 +202,7 @@ struct JNITupleTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public func Java_com_example_swift_SwiftModule__00024singleTuple__Ljava_lang_String_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, input: jstring?) -> jstring? {
+        public func Java_com_example_swift_SwiftModule__00024singleTuple__Ljava_lang_String_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, input: JNITypes.jstring?) -> JNITypes.jstring? {
           return SwiftModule.singleTuple(input: String(fromJNI: input, in: environment)).getJNILocalRefValue(in: environment)
         } 
         """
