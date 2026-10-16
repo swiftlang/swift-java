@@ -160,3 +160,18 @@ extension AnyJavaObject {
     }
   }
 }
+
+// ==== -----------------------------------------------------------------------
+// MARK: JNI conversions for non-optional Java objects
+
+extension AnyJavaObject {
+  /// Retrieve the underlying JNI reference for this Java object.
+  public func getJNIValue(in environment: JNIEnvironment) -> jobject {
+    self.javaThis
+  }
+
+  /// Return a fresh local reference safe for returning from a JNI thunk.
+  public func getJNILocalRefValue(in environment: JNIEnvironment) -> jobject? {
+    environment.interface.NewLocalRef(environment, self.javaThis)
+  }
+}
