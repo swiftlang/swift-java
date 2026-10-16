@@ -174,6 +174,8 @@ extension SwiftAnalyzer {
       visitor.visit(inputFile: input)
     }
 
+    visitor.processDeferredProtocolExtensions()
+
     try hook(self)
 
     // Apply any specializations registered after their target types were visited

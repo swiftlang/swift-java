@@ -54,6 +54,16 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
   public var methods: [ExtractedFunc] = []
   public var variables: [ExtractedFunc] = []
   public var cases: [ExtractedEnumCase] = []
+
+  /// If this nominal is a protocol, stores default implementations provided in protocol extensions.
+  public var protocolDefaultImplementations: [ExtractedFunc] = []
+
+  /// If this nominal is a protocol, stores methods declared in protocol extensions that are not protocol requirements.
+  public var protocolExtensionMethods: [ExtractedFunc] = []
+
+  /// If this nominal is a protocol, stores variables declared in protocol extensions that are not protocol requirements.
+  public var protocolExtensionVariables: [ExtractedFunc] = []
+
   public var inheritedTypes: [SwiftType]
   public var parent: SwiftNominalTypeDeclaration?
 
@@ -119,6 +129,9 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
     self.methods = base.methods.map { $0.clone(for: selfType) }
     self.variables = base.variables.map { $0.clone(for: selfType) }
     self.cases = base.cases.map { $0.clone(for: selfType) }
+    self.protocolDefaultImplementations = base.protocolDefaultImplementations.map { $0.clone(for: selfType) }
+    self.protocolExtensionMethods = base.protocolExtensionMethods.map { $0.clone(for: selfType) }
+    self.protocolExtensionVariables = base.protocolExtensionVariables.map { $0.clone(for: selfType) }
     self.inheritedTypes = base.inheritedTypes
     self.parent = base.parent
 
@@ -237,6 +250,90 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
       }
     }
     return false
+  }
+
+  /// Returns whether `candidate` satisfies the protocol requirement `requirement`.
+  public static func satisfiesProtocolRequirement(
+    candidate: ExtractedFunc,
+    requirement: ExtractedFunc
+  ) -> Bool {
+    guard candidate.apiKind == requirement.apiKind,
+      candidate.name == requirement.name,
+      candidate.isStatic == requirement.isStatic,
+      candidate.isClass == requirement.isClass
+    else {
+      return false
+    }
+
+    let cSig = candidate.functionSignature
+    let rSig = requirement.functionSignature
+
+    guard cSig.isAsync == rSig.isAsync else {
+      return false
+    }
+
+    // A non-throwing candidate can satisfy a throwing requirement,
+    // but a throwing candidate cannot satisfy a non-throwing requirement.
+    if cSig.isThrowing && !rSig.isThrowing {
+      return false
+    }
+
+    guard cSig.parameters.count == rSig.parameters.count else {
+      return false
+    }
+
+    for (cParam, rParam) in zip(cSig.parameters, rSig.parameters) {
+      guard cParam.argumentLabel == rParam.argumentLabel,
+        cParam.type == rParam.type,
+        cParam.convention == rParam.convention,
+        cParam.isVariadic == rParam.isVariadic
+      else {
+        return false
+      }
+    }
+
+    guard cSig.result == rSig.result else {
+      return false
+    }
+
+    return true
+  }
+
+  /// Finds an existing protocol requirement that `candidate` satisfies in this protocol
+  /// or in any transitively inherited protocol.
+  public func findProtocolRequirement(
+    satisfying candidate: ExtractedFunc,
+    in extractedTypes: [SwiftTypeName: ExtractedNominalType] = [:]
+  ) -> ExtractedFunc? {
+    var visited: Set<ObjectIdentifier> = []
+    var queue: [ExtractedNominalType] = [self]
+
+    while !queue.isEmpty {
+      let current = queue.removeFirst()
+      guard visited.insert(ObjectIdentifier(current)).inserted else { continue }
+
+      let pool =
+        (candidate.apiKind == .getter || candidate.apiKind == .setter)
+        ? current.variables
+        : current.methods
+
+      if let match = pool.first(where: {
+        Self.satisfiesProtocolRequirement(candidate: candidate, requirement: $0)
+      }) {
+        return match
+      }
+
+      for inherited in current.inheritedTypes {
+        if let nominalDecl = inherited.asNominalTypeDeclaration,
+          nominalDecl.kind == .protocol,
+          let parentType = extractedTypes[nominalDecl.qualifiedName]
+        {
+          queue.append(parentType)
+        }
+      }
+    }
+
+    return nil
   }
 }
 
