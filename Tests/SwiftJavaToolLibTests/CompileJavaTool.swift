@@ -56,8 +56,8 @@ struct CompileJavaTool {
     )
 
     guard javacProcess.terminationStatus.isSuccess else {
-      let outString = javacProcess.standardOutput ?? ""
-      let errString = javacProcess.standardError ?? ""
+      let outString = javacProcess.standardOutput
+      let errString = javacProcess.standardError
       fatalError(
         "javac failed (\(javacProcess.terminationStatus));\nOUT: \(outString)\nERROR: \(errString)"
       )
@@ -104,8 +104,8 @@ struct CompileJavaTool {
     )
 
     guard javacProcess.terminationStatus.isSuccess else {
-      let outString = javacProcess.standardOutput ?? ""
-      let errString = javacProcess.standardError ?? ""
+      let outString = javacProcess.standardOutput
+      let errString = javacProcess.standardError
       fatalError(
         "javac '\(sourceFile)' failed (\(javacProcess.terminationStatus));\nOUT: \(outString)\nERROR: \(errString)"
       )
@@ -131,8 +131,8 @@ struct CompileJavaTool {
     )
 
     guard jarProcess.terminationStatus.isSuccess else {
-      let outString = jarProcess.standardOutput ?? ""
-      let errString = jarProcess.standardError ?? ""
+      let outString = jarProcess.standardOutput
+      let errString = jarProcess.standardError
       fatalError(
         "jar failed (\(jarProcess.terminationStatus));\nOUT: \(outString)\nERROR: \(errString)"
       )
