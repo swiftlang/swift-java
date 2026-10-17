@@ -141,8 +141,8 @@ public struct JavaDependencyResolver {
       error: .string(limit: Int.max, encoding: UTF8.self)
     )
 
-    let outString = process.standardOutput ?? ""
-    let errString = process.standardError ?? ""
+    let outString = process.standardOutput
+    let errString = process.standardError
 
     if let found = outString.split(separator: "\n").first(where: { $0.hasPrefix(SwiftJavaClasspathPrefix) }) {
       return String(found.dropFirst(SwiftJavaClasspathPrefix.count))
