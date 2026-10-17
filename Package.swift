@@ -171,7 +171,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
     .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
     .package(url: "https://github.com/apple/swift-collections", from: "1.3.0"), // primarily for ordered collections
-    .package(url: "https://github.com/swiftlang/swift-subprocess.git", "0.4.0"..<"0.5.0", traits: ["SubprocessFoundation"]),
+    .package(url: "https://github.com/swiftlang/swift-subprocess.git", "1.0.0"..<"2.0.0", traits: ["SubprocessFoundation"]),
 
     // Benchmarking
     .package(url: "https://github.com/ordo-one/package-benchmark", .upToNextMajor(from: "1.4.0")),
