@@ -402,7 +402,7 @@ extension JNISwift2JavaGenerator {
       }
       translated.parentName = boxParentName
 
-      printCDecl(&printer, translated) { printer in
+      printCDecl(&printer, translated, mainActorIsolated: isSynchronousMainActorIsolated(method)) { printer in
         self.printFunctionDowncall(&printer, method)
       }
       printer.println()
@@ -485,6 +485,7 @@ extension JNISwift2JavaGenerator {
     printCDecl(
       &printer,
       translatedDecl,
+      mainActorIsolated: isSynchronousMainActorIsolated(decl),
     ) { printer in
       if let parent = decl.parentType?.asNominalType, parent.hasGenericParameter {
         self.printFunctionOpenerCall(&printer, decl)
@@ -598,6 +599,48 @@ extension JNISwift2JavaGenerator {
     ).map {
       $0.value
     }
+  }
+
+  private func isSynchronousMainActorIsolated(_ decl: ExtractedFunc) -> Bool {
+    guard !decl.isAsync, !decl.isIsolated, !decl.isImplicitlyAsync,
+      !decl.functionSignature.isNonisolated
+    else {
+      return false
+    }
+
+    // Initializers and accessors also carry modifiers on their declarations.
+    if decl.swiftDecl.asProtocol(WithModifiersSyntax.self)?.modifiers.contains(where: {
+      $0.name.tokenKind == .keyword(.nonisolated)
+    }) == true {
+      return false
+    }
+
+    func hasMainActor(_ attributes: AttributeListSyntax?) -> Bool {
+      attributes?.contains { element in
+        guard let attribute = element.as(AttributeSyntax.self) else { return false }
+        let name = attribute.attributeName.trimmedDescription
+        return name == "MainActor" || name == "_Concurrency.MainActor"
+      } ?? false
+    }
+
+    if hasMainActor(decl.attributeList)
+      || hasMainActor(decl.parentType?.asNominalType?.nominalTypeDecl.syntax.attributes)
+    {
+      return true
+    }
+
+    // An extension can isolate its members without isolating the nominal type.
+    var context = decl.swiftDecl.parent
+    while let node = context {
+      if let extensionDecl = node.as(ExtensionDeclSyntax.self) {
+        return hasMainActor(extensionDecl.attributes)
+      }
+      if node.isProtocol(DeclGroupSyntax.self) {
+        break
+      }
+      context = node.parent
+    }
+    return false
   }
 
   private func printFunctionDowncall(
@@ -846,6 +889,7 @@ extension JNISwift2JavaGenerator {
   private func printCDecl(
     _ printer: inout SwiftPrinter,
     _ translatedDecl: TranslatedFunctionDecl,
+    mainActorIsolated: Bool = false,
     _ body: (inout SwiftPrinter) -> Void,
   ) {
     let nativeSignature = translatedDecl.nativeFunctionSignature
@@ -865,6 +909,7 @@ extension JNISwift2JavaGenerator {
       parentName: translatedDecl.parentName,
       parameters: parameters,
       resultType: nativeSignature.result.javaType,
+      mainActorIsolated: mainActorIsolated,
     ) { printer in
       body(&printer)
     }
@@ -876,6 +921,7 @@ extension JNISwift2JavaGenerator {
     parentName: SwiftQualifiedTypeName,
     parameters: [JavaParameter],
     resultType: JavaType,
+    mainActorIsolated: Bool = false,
     _ body: (inout SwiftPrinter) -> Void,
   ) {
     let jniSignature = parameters.reduce(into: "") { signature, parameter in
@@ -911,10 +957,15 @@ extension JNISwift2JavaGenerator {
       #if compiler(>=6.4)
       @diagnose(DeprecatedDeclaration, as: ignored)
       #endif
-      @_cdecl("\(cName)")
+      \(mainActorIsolated ? "@MainActor\n" : "")@_cdecl("\(cName)")
       public func \(cName)(\(thunkParameters.joined(separator: .comma)))\(thunkReturnType)
       """
     ) { printer in
+      if mainActorIsolated {
+        // JNI callers must already be on the main actor. Preserve synchronous
+        // calls and diagnose an incorrect executor before accessing Swift state.
+        printer.print("MainActor.preconditionIsolated()")
+      }
       body(&printer)
     }
   }
@@ -1176,6 +1227,10 @@ extension JNISwift2JavaGenerator {
           "thisClass: jclass",
         ] + translatedParameters
       let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""
+
+      if isSynchronousMainActorIsolated(decl) {
+        printer.print("@MainActor")
+      }
 
       let signature = #"static func \#(decl.openerMethodName)(\#(thunkParameters.joined(separator: .comma)))\#(thunkReturnType)"#
       if !skipMethodBody {
