@@ -261,6 +261,21 @@ suspend fun useAsyncSum() {
 
 This relies on the Kotlin `kotlinx-coroutines-jdk8` library which adds the `await()` extension function on `java.util.concurrent.CompletableFuture`.
 
+### Main actor isolation (JNI)
+
+Synchronous functions explicitly isolated to `@MainActor` remain synchronous in
+Java. This also applies to initializers, methods, and property or subscript
+accessors isolated by an enclosing `@MainActor` type or extension.
+
+The generated Swift thunk is annotated with `@MainActor` and calls
+`MainActor.preconditionIsolated` to check that the caller is already executing on
+the main actor. It does not dispatch the call to the main actor. Calling one of
+these synchronous APIs from another executor terminates the process, so Java
+callers must arrange to run on the main actor's executor before invoking it.
+
+Explicitly `nonisolated` members do not perform this check. Explicitly `async`
+functions continue to return futures and await the isolated Swift call instead.
+
 ### Collections
 
 Arrays are copied across the boundary. Dictionaries and sets are handed to Java as
