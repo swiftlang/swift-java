@@ -659,11 +659,48 @@ class Java2SwiftTests: XCTestCase {
         """,
         """
           @JavaMethod
-          open func array() -> [Int8]
+          open func array() -> [UInt8]
         """,
         """
           @JavaMethod
           open override func arrayOffset() -> Int32
+        """,
+      ]
+    )
+  }
+
+  func testByteArrayTranslatesToUInt8AndScalarByteStaysInt8() throws {
+    try assertTranslatedClass(
+      MyJavaString.self,
+      swiftTypeName: "JavaString",
+      expectedChunks: [
+        """
+        @JavaMethod
+        public func getBytes() -> [UInt8]
+        """,
+        """
+        @JavaMethod
+        public func getBytes(_ arg0: String) throws -> [UInt8]
+        """,
+      ]
+    )
+
+    try assertTranslatedClass(
+      ReflectArray.self,
+      swiftTypeName: "ReflectArray",
+      asClass: true,
+      translatedClasses: [
+        "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
+        "java.lang.reflect.Array": SwiftTypeName(module: nil, name: "ReflectArray"),
+      ],
+      expectedChunks: [
+        """
+        @JavaMethod
+        public func getByte(_ arg0: JavaObject?, _ arg1: Int32) throws -> Int8
+        """,
+        """
+        @JavaMethod
+        public func setByte(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Int8) throws
         """,
       ]
     )
@@ -723,6 +760,10 @@ private class NIOBuffer: JavaObject {
 
 @JavaClass("java.nio.ByteBuffer")
 private class NIOByteBuffer: NIOBuffer {
+}
+
+@JavaClass("java.lang.reflect.Array")
+private struct ReflectArray {
 }
 
 /// Translate a Java class and assert that the translated output contains

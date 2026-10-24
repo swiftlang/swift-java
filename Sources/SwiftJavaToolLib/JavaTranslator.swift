@@ -42,8 +42,7 @@ package class JavaTranslator {
   /// A mapping from the name of each known Java class to the corresponding
   /// Swift type name and its Swift module.
   package var translatedClasses: [JavaFullyQualifiedTypeName: SwiftTypeName] = [
-    "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject"),
-    "byte[]": SwiftTypeName(module: nil, name: "[UInt8]"),
+    "java.lang.Object": SwiftTypeName(module: "SwiftJava", name: "JavaObject")
   ]
 
   /// A mapping from the name of each known Java class with the Swift value type
@@ -327,6 +326,11 @@ extension JavaTranslator {
     let swiftTypeName: String
     if !preferValueTypes, case .array(_) = javaType {
       swiftTypeName = try self.getSwiftTypeNameFromJavaClassName("java.lang.reflect.Array", preferValueTypes: false)
+    } else if case .array(.byte) = javaType {
+      // A Java byte[] is a byte buffer, for which Swift's idiomatic element type
+      // is UInt8; this also mirrors the export direction, where UInt8 maps to
+      // byte. Scalar byte stays Int8, matching Java's signed byte.
+      swiftTypeName = "[UInt8]"
     } else {
       swiftTypeName = try javaType.swiftTypeName { javaClassName in
         try self.getSwiftTypeNameFromJavaClassName(javaClassName, preferValueTypes: preferValueTypes)

@@ -62,7 +62,7 @@ open class BufferedInputStream: InputStream {
   /// public synchronized int java.io.BufferedInputStream.read(byte[],int,int) throws java.io.IOException
   /// ```
   @JavaMethod
-  open override func read(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
+  open override func read(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
   /// Java method `reset`.
   ///
