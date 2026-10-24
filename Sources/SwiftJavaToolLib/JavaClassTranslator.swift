@@ -209,9 +209,7 @@ struct JavaClassTranslator {
     if let inputStream = javaClass.getClassLoader()?.getResourceAsStream(resourcePath) {
       do {
         let bytes = try inputStream.readAllBytes()
-        self.runtimeInvisibleAnnotations = JavaClassFileReader.parseRuntimeInvisibleAnnotations(
-          bytes.map { UInt8(bitPattern: $0) }
-        )
+        self.runtimeInvisibleAnnotations = JavaClassFileReader.parseRuntimeInvisibleAnnotations(bytes)
         let classCount = self.runtimeInvisibleAnnotations.classAnnotations.count
         let methodCount = self.runtimeInvisibleAnnotations.methodAnnotations.count
         let fieldCount = self.runtimeInvisibleAnnotations.fieldAnnotations.count
