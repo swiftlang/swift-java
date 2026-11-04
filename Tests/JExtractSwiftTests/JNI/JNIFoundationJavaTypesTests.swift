@@ -34,6 +34,7 @@ struct JNIFoundationJavaTypesTests {
       public var links: [URL]
 
       public func visit(_ body: (URL, Date) -> Void) {}
+      public func update(since: Date?, photo: Data?) {}
     }
     """
 
@@ -63,6 +64,7 @@ struct JNIFoundationJavaTypesTests {
         "private static native double $getScale(long selfPointer);",
         "private static native java.net.URI[] $getLinks(long selfPointer);",
         "void apply(java.net.URI _0, java.util.Date _1);",
+        "public void update(Optional<java.util.Date> since, Optional<byte[]> photo) {",
       ],
       notExpectedChunks: [
         "class URL",
