@@ -82,6 +82,31 @@ struct JNIProtocolTests {
       public func makeChild() -> any ChildProtocol
     """
 
+  let protocolDefaultImplementationSource = """
+      public protocol Test {
+        func action()
+      }
+
+      public extension Test {
+        func action() {}
+      }
+
+      public func makeTest() -> any Test
+    """
+
+  let protocolExtensionNonRequirementSource = """
+      public protocol Test {
+        func req()
+      }
+
+      public extension Test {
+        func req() {}
+        func extraHelper() {}
+      }
+
+      public func makeTest() -> any Test
+    """
+
   @Test
   func generatesJavaInterface() throws {
     try assertOutput(
@@ -568,6 +593,76 @@ struct JNIProtocolTests {
       ],
       notExpectedChunks: [
         "UnsafeMutablePointer<type(of: value)>"
+      ]
+    )
+  }
+
+  @Test
+  func protocolDefaultImplementationDoesNotDuplicateMethod() throws {
+    var config = config
+    config.enableJavaCallbacks = false
+
+    try assertOutput(
+      input: protocolDefaultImplementationSource,
+      config: config,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public void action() {
+          TestBox.$action(this.$memoryAddress(), this.$typeMetadataAddress());
+        }
+        private static native void $action(long selfPointer, long selfTypePointer);
+        """
+      ],
+      notExpectedChunks: ["action_("],
+      expectedOccurrences: [
+        "private static native void $action(long selfPointer, long selfTypePointer);": 1,
+        "public void action();": 1,
+        "public void action() {": 1,
+      ]
+    )
+
+    try assertOutput(
+      input: protocolDefaultImplementationSource,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_TestBox__00024action__JJ")
+        public func Java_com_example_swift_TestBox__00024action__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) {
+          ...
+        }
+        """
+      ],
+      expectedOccurrences: [
+        "@_cdecl(\"Java_com_example_swift_TestBox__00024action__JJ\")": 1,
+        "@_cdecl(\"Java_com_example_swift_TestBox__00024action": 1,
+      ]
+    )
+  }
+
+  @Test
+  func protocolExtensionNonRequirementIsNotTreatedAsRequirement() throws {
+    var config = config
+    config.enableJavaCallbacks = false
+
+    try assertOutput(
+      input: protocolExtensionNonRequirementSource,
+      config: config,
+      .jni,
+      .java,
+      expectedChunks: [
+        "public void req();"
+      ],
+      notExpectedChunks: [
+        "extraHelper"
+      ],
+      expectedOccurrences: [
+        "public void req();": 1
       ]
     )
   }
