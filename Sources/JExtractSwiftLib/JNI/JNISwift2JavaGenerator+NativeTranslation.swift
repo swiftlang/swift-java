@@ -398,6 +398,7 @@ extension JNISwift2JavaGenerator {
           functionType: functionType,
           javaInterfaceName: javaClosureInterfaceName,
           javaBinaryName: javaBinaryName,
+          methodName: config.effectiveClosureMethodName,
         )
 
         return NativeParameter(
@@ -432,7 +433,7 @@ extension JNISwift2JavaGenerator {
 
       let result = try translateClosureResult(functionType.resultType)
       let interfaceJavaType =
-        if let known = KnownJavaFunctionalInterface.find(functionType) {
+        if let known = KnownJavaFunctionalInterface.find(functionType, closureMethodName: config.effectiveClosureMethodName) {
           known.javaType
         } else {
           JavaType.class(
@@ -450,7 +451,8 @@ extension JNISwift2JavaGenerator {
         ],
         conversion: .closureLowering(
           parameters: parameters,
-          result: result
+          result: result,
+          closureMethodName: config.effectiveClosureMethodName
         ),
         indirectConversion: nil,
         conversionCheck: nil
@@ -1364,7 +1366,8 @@ extension JNISwift2JavaGenerator {
     /// of the `Unsafe(Mutable)Pointer` types in Swift.
     indirect case pointee(NativeSwiftConversionStep)
 
-    indirect case closureLowering(parameters: [NativeParameter], result: NativeResult)
+    /// `closureMethodName` is the method of the closure's own interface; a `java.util.function` one keeps its own.
+    indirect case closureLowering(parameters: [NativeParameter], result: NativeResult, closureMethodName: String)
 
     /// Escaping closure lowering using the protocol infrastructure.
     /// This uses UpcallConversionStep for full support of optionals, arrays, custom types, etc.
@@ -1664,7 +1667,7 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(inner).pointee"
 
-      case .closureLowering(let parameters, let nativeResult):
+      case .closureLowering(let parameters, let nativeResult, let closureMethodName):
         var printer = SwiftPrinter()
 
         let methodSignature = MethodSignature(
@@ -1691,10 +1694,10 @@ extension JNISwift2JavaGenerator {
 
 
         let methodName =
-          if let known = KnownJavaFunctionalInterface.find(methodSignature) {
+          if closureMethodName == "apply", let known = KnownJavaFunctionalInterface.find(methodSignature) {
             known.method
           } else {
-            "apply"
+            closureMethodName
           }
 
         printer.print(
@@ -1746,7 +1749,7 @@ extension JNISwift2JavaGenerator {
         // Note: The Java interface is synchronous even for async closures.
         // The async nature is on the Swift side, inferred from the expected type.
         var resultPrinter = SwiftPrinter()
-        let upcallExpr = "\(javaInterfaceVar).apply(\(upcallArguments.joined(separator: .comma)))"
+        let upcallExpr = "\(javaInterfaceVar).\(syntheticFunction.methodName)(\(upcallArguments.joined(separator: .comma)))"
         let resultConverted = syntheticFunction.resultConversion.render(&resultPrinter, upcallExpr)
         let resultPrefix = resultPrinter.finalize()
 

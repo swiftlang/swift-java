@@ -761,7 +761,7 @@ extension JNISwift2JavaGenerator {
       parameterAnnotations: [JavaAnnotation]
     ) -> TranslatedParameter {
       let interfacejavaType =
-        if let known = KnownJavaFunctionalInterface.find(functionType) {
+        if let known = KnownJavaFunctionalInterface.find(functionType, closureMethodName: config.effectiveClosureMethodName) {
           known.javaType
         } else {
           JavaType.class(

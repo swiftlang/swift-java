@@ -99,6 +99,9 @@ extension JNISwift2JavaGenerator {
     /// Conversion step for the result
     let resultConversion: UpcallConversionStep
 
+    /// The name of the interface's single method, `apply` unless `closureMethodName` says otherwise
+    let methodName: String
+
     /// The original Swift function type
     let functionType: SwiftFunctionType
   }
@@ -140,12 +143,13 @@ extension JNISwift2JavaGenerator {
     }
 
     /// Generates a synthetic closure function translation.
-    /// This treats the closure as if it were a protocol with a single `apply` method,
+    /// This treats the closure as if it were a protocol with a single method named `methodName`,
     /// allowing it to use the same conversion infrastructure for optionals, arrays, etc.
     func generateSyntheticClosureFunction(
       functionType: SwiftFunctionType,
       javaInterfaceName: String,
       javaBinaryName: String,
+      methodName: String,
     ) throws -> SyntheticEscapingClosureFunctionType {
       let parameterConversions = try functionType.parameters.enumerated().map { idx, param in
         try self.translateParameter(
@@ -156,7 +160,7 @@ extension JNISwift2JavaGenerator {
 
       let resultConversion = try self.translateResult(
         type: functionType.resultType,
-        methodName: "apply"
+        methodName: methodName
       )
 
       return SyntheticEscapingClosureFunctionType(
@@ -164,6 +168,7 @@ extension JNISwift2JavaGenerator {
         javaBinaryName: javaBinaryName,
         parameterConversions: parameterConversions,
         resultConversion: resultConversion,
+        methodName: methodName,
         functionType: functionType
       )
     }

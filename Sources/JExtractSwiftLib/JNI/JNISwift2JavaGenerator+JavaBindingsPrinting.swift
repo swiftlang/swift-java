@@ -810,7 +810,7 @@ extension JNISwift2JavaGenerator {
     // If contains one function type and it's known java functional interface type, we don't need to print the whole class
     if translated.functionTypes.count == 1,
       let ty = translated.functionTypes.first,
-      KnownJavaFunctionalInterface.find(ty) != nil
+      KnownJavaFunctionalInterface.find(ty, closureMethodName: config.effectiveClosureMethodName) != nil
     {
       return
     }
@@ -821,7 +821,7 @@ extension JNISwift2JavaGenerator {
       """
     ) { printer in
       for functionType in translated.functionTypes {
-        if KnownJavaFunctionalInterface.find(functionType) != nil {
+        if KnownJavaFunctionalInterface.find(functionType, closureMethodName: config.effectiveClosureMethodName) != nil {
           continue
         }
 
@@ -846,7 +846,7 @@ extension JNISwift2JavaGenerator {
       """
       @FunctionalInterface
       public interface \(functionType.name) {
-        \(functionType.result.javaType) apply(\(apiParams.joined(separator: .comma)));
+        \(functionType.result.javaType) \(config.effectiveClosureMethodName)(\(apiParams.joined(separator: .comma)));
       }
       """
     )
