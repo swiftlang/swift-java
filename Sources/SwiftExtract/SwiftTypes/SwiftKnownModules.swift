@@ -143,6 +143,12 @@ private let foundationEssentialsSourceFile: SourceFileSyntax = """
     public init?(string: String)
     public var absoluteString: String { get }
   }
+
+  public struct Locale {}
+
+  public struct TimeZone {}
+
+  public struct CGFloat {}
   """
 
 private var foundationSourceFile: SourceFileSyntax {

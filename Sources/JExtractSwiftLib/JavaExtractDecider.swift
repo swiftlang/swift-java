@@ -21,6 +21,7 @@ public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
     config: config,
     extractDecider: JavaExtractDecider(
       accessLevel: config.effectiveMinimumInputAccessLevelMode,
+      foundationTypesAsJavaTypes: config.effectiveMode == .jni && config.effectiveFoundationTypesAsJavaTypes,
       logLevel: config.logLevel ?? .info
     ),
   )
@@ -40,10 +41,17 @@ public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
 ///   operator-overload syntax, so the generator can't render them
 public struct JavaExtractDecider: ExtractDecider {
   public let accessLevel: AccessLevelMode
+  /// Whether `Data`, `Date` and `URL` cross as Java types, so no wrapper type is extracted for them
+  public let foundationTypesAsJavaTypes: Bool
   let log: Logger
 
-  public init(accessLevel: AccessLevelMode = .default, logLevel: LogLevel = .info) {
+  public init(
+    accessLevel: AccessLevelMode = .default,
+    foundationTypesAsJavaTypes: Bool = false,
+    logLevel: LogLevel = .info
+  ) {
     self.accessLevel = accessLevel
+    self.foundationTypesAsJavaTypes = foundationTypesAsJavaTypes
     self.log = Logger(label: "JavaExtractDecider", logLevel: logLevel)
   }
 
@@ -90,5 +98,14 @@ public struct JavaExtractDecider: ExtractDecider {
       log.trace("Skip '\(decl.qualifiedNameForDebug)': not at least \(accessLevel)")
     }
     return ok
+  }
+
+  public func shouldExtractFoundationType(_ kind: SwiftKnownTypeDeclKind) -> Bool {
+    switch kind {
+    case .foundationData, .essentialsData, .foundationDate, .essentialsDate, .foundationURL, .essentialsURL:
+      !foundationTypesAsJavaTypes
+    default:
+      true
+    }
   }
 }

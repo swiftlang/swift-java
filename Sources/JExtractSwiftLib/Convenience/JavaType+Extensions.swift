@@ -60,13 +60,16 @@ extension JavaType {
     case .float: "Optional<Float>"
     case .double: "OptionalDouble"
     case .javaLangString: "Optional<String>"
+    case .javaNetURI, .javaUtilDate, .javaUtilLocale, .javaUtilTimeZone, .array(.byte): "Optional<\(self)>"
     default: nil
     }
   }
 
   var optionalWrapperType: String? {
     switch self {
-    case .boolean, .byte, .char, .short, .float, .javaLangString: "Optional"
+    case .boolean, .byte, .char, .short, .float, .javaLangString,
+      .javaNetURI, .javaUtilDate, .javaUtilLocale, .javaUtilTimeZone, .array(.byte):
+      "Optional"
     case .int: "OptionalInt"
     case .long: "OptionalLong"
     case .double: "OptionalDouble"
@@ -130,7 +133,8 @@ extension JavaType {
   /// Returns whether this type returns `JavaValue` from SwiftJava
   var implementsJavaValue: Bool {
     switch self {
-    case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void, .javaLangString:
+    case .boolean, .byte, .char, .short, .int, .long, .float, .double, .void, .javaLangString,
+      .javaNetURI, .javaUtilDate, .javaUtilLocale, .javaUtilTimeZone:
       true
     case .array(let element):
       element.implementsJavaValue

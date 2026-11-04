@@ -56,6 +56,7 @@ extension SwiftAnalyzer {
     ]
 
     for group in groups {
+      let group = group.filter { extractDecider.shouldExtractFoundationType($0.candidates[0]) }
       let resolved: [(primary: SwiftNominalTypeDeclaration, source: String, candidates: [SwiftNominalTypeDeclaration])] =
         group.compactMap { type in
           let candidates = type.candidates.compactMap { self.symbolTable[$0] }

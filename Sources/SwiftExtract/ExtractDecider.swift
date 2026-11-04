@@ -38,6 +38,16 @@ public protocol ExtractDecider {
     decl: DeclSyntax,
     in parent: ExtractedNominalType?
   ) -> Bool
+
+  /// Whether a Foundation type the module uses, such as `Data`, `Date` or `URL`, is extracted as a type of
+  /// its own. Return `false` when the target language represents values of `kind` with one of its own types.
+  func shouldExtractFoundationType(_ kind: SwiftKnownTypeDeclKind) -> Bool
+}
+
+extension ExtractDecider {
+  public func shouldExtractFoundationType(_ kind: SwiftKnownTypeDeclKind) -> Bool {
+    true
+  }
 }
 
 /// Minimal `ExtractDecider` that enforces only the configured access-level

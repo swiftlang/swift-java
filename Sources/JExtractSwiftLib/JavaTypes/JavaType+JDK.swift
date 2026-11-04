@@ -174,4 +174,20 @@ extension JavaType {
     .class(package: "java.util", name: "UUID")
   }
 
+  static var javaNetURI: JavaType {
+    .class(package: "java.net", name: "URI")
+  }
+
+  static var javaUtilDate: JavaType {
+    .class(package: "java.util", name: "Date")
+  }
+
+  static var javaUtilLocale: JavaType {
+    .class(package: "java.util", name: "Locale")
+  }
+
+  static var javaUtilTimeZone: JavaType {
+    .class(package: "java.util", name: "TimeZone")
+  }
+
 }
