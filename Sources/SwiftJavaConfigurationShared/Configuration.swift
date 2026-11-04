@@ -181,6 +181,14 @@ public struct Configuration: Codable {
     enableJavaCallbacks ?? false
   }
 
+  /// Which declarations to export: `all` (default) exports every declaration that passes the access level
+  /// and filters, except those opted out with `@JavaExport(false)`. `annotated` exports only declarations marked
+  /// `@JavaExport`, including the members of a marked type or extension.
+  public var exportMode: JExtractExportMode?
+  public var effectiveExportMode: JExtractExportMode {
+    exportMode ?? .default
+  }
+
   /// If specified, JExtract will output to this file a list of paths to all generated Java source files.
   public var generatedJavaSourcesListFileOutput: String?
 

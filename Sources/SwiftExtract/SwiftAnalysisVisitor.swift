@@ -146,6 +146,10 @@ final class SwiftAnalysisVisitor {
       return
 
     case .unresolved:
+      guard analyzer.extractDecider.mayExtractMembers(of: node) else {
+        log.trace("Skip 'extension \(node.extendedType.trimmedDescription)': no member can be extracted")
+        return
+      }
       self.reportSkipped(
         node,
         name: "extension \(node.extendedType.trimmedDescription)",

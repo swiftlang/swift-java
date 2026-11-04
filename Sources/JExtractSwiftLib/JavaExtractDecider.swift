@@ -21,6 +21,7 @@ public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
     config: config,
     extractDecider: JavaExtractDecider(
       accessLevel: config.effectiveMinimumInputAccessLevelMode,
+      exportMode: config.effectiveExportMode,
       logLevel: config.logLevel ?? .info
     ),
   )
@@ -33,6 +34,11 @@ public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
 /// - Skips initializers of unspecialized generic types
 /// - Force-extracts decls annotated `@JavaExport` even if they would
 ///   otherwise be filtered by access level
+/// - Skips decls annotated `@JavaExport(false)`, or inside a type or extension
+///   annotated `@JavaExport(false)`
+/// - With the `annotated` export mode, extracts only decls annotated
+///   `@JavaExport`, inside a type or extension annotated `@JavaExport`, or
+///   types with such a member
 /// - Skips Swift wrappers of Java types (`@JavaClass`, `@JavaInterface`,
 ///   `@JavaField`, `@JavaStaticField`, `@JavaMethod`, `@JavaStaticMethod`,
 ///   `@JavaImplementation`) since those are bridged the other way
@@ -40,10 +46,12 @@ public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
 ///   operator-overload syntax, so the generator can't render them
 public struct JavaExtractDecider: ExtractDecider {
   public let accessLevel: AccessLevelMode
+  public let exportMode: JExtractExportMode
   let log: Logger
 
-  public init(accessLevel: AccessLevelMode = .default, logLevel: LogLevel = .info) {
+  public init(accessLevel: AccessLevelMode = .default, exportMode: JExtractExportMode = .default, logLevel: LogLevel = .info) {
     self.accessLevel = accessLevel
+    self.exportMode = exportMode
     self.log = Logger(label: "JavaExtractDecider", logLevel: logLevel)
   }
 
@@ -62,10 +70,16 @@ public struct JavaExtractDecider: ExtractDecider {
       return false
     }
 
-    let attrs = decl.asProtocol((any WithAttributesSyntax).self)?.attributes
-    if attrs?.contains(where: { $0.isJavaExport }) == true {
+    switch decl.javaExportMarker {
+    case true?:
       return true
+    case false?:
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': annotated @JavaExport(false)")
+      return false
+    case nil:
+      break
     }
+    let attrs = decl.asProtocol((any WithAttributesSyntax).self)?.attributes
     if attrs?.contains(where: { $0.isJavaKitMacro }) == true {
       log.trace("Skip '\(decl.qualifiedNameForDebug)': swift-java macro-wrapped Java type")
       return false
@@ -80,13 +94,32 @@ public struct JavaExtractDecider: ExtractDecider {
       return false
     }
 
+    let inheritedMarker = decl.inheritedJavaExportMarker
+    if inheritedMarker == false {
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': inside a declaration annotated @JavaExport(false)")
+      return false
+    }
+
     guard let mod = decl.asProtocol((any WithModifiersSyntax).self) else {
       return false
     }
-    let ok = mod.isAtLeast(accessLevel, in: parent)
-    if !ok {
+    guard mod.isAtLeast(accessLevel, in: parent) else {
       log.trace("Skip '\(decl.qualifiedNameForDebug)': not at least \(accessLevel)")
+      return false
     }
-    return ok
+
+    if exportMode == .annotated, inheritedMarker != true, !decl.containsJavaExportedMember {
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': not annotated @JavaExport (exportMode: annotated)")
+      return false
+    }
+    return true
+  }
+
+  public func mayExtractMembers(of extensionDecl: ExtensionDeclSyntax) -> Bool {
+    switch extensionDecl.javaExportMarker ?? extensionDecl.inheritedJavaExportMarker {
+    case true?: true
+    case false?: false
+    case nil: exportMode == .all || extensionDecl.containsJavaExportedMember
+    }
   }
 }

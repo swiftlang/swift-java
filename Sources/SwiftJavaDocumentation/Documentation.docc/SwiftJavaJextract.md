@@ -67,6 +67,33 @@ public final class SomeModule ... {
 }
 ```
 
+### Choosing what to export
+
+`@JavaExport(false)`, from the `SwiftJavaAnnotations` module (also re-exported by `SwiftJava`), keeps a
+public declaration out of the Java bindings. On a type or an extension it applies to all their members:
+
+```swift
+import SwiftJavaAnnotations
+
+public struct Session {
+  public var token: String
+  @JavaExport(false) public var debugDump: [String: Any]
+}
+
+@JavaExport(false)
+extension Session {
+  public func swiftOnlyHelper() -> (Int, String) { ... }
+}
+```
+
+With `"exportMode": "annotated"` in `swift-java.config`, jextract does the opposite: it exports only
+declarations marked `@JavaExport`, and the members of a type or extension marked `@JavaExport`. A type
+that isn't marked is still exported, with only its marked members, when one of its members is marked.
+An extension's members are exported only when the extended type is exported too.
+
+Declarations that aren't exported are never translated, so Swift-only API that has no Java
+mapping doesn't produce warnings or generated code.
+
 ## See Also
 
 - <doc:FeaturesJextract>

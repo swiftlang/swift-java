@@ -38,6 +38,16 @@ public protocol ExtractDecider {
     decl: DeclSyntax,
     in parent: ExtractedNominalType?
   ) -> Bool
+
+  /// Whether any member of `extensionDecl` could be extracted. When this is `false`, an extension
+  /// whose extended type doesn't resolve is ignored instead of being reported as skipped.
+  func mayExtractMembers(of extensionDecl: ExtensionDeclSyntax) -> Bool
+}
+
+extension ExtractDecider {
+  public func mayExtractMembers(of extensionDecl: ExtensionDeclSyntax) -> Bool {
+    true
+  }
 }
 
 /// Minimal `ExtractDecider` that enforces only the configured access-level
