@@ -296,7 +296,10 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
       }
     }
 
-    guard cSig.result == rSig.result else {
+    let resultsMatch =
+      cSig.result == rSig.result
+      || (cSig.result.type.isVoid && rSig.result.type.isVoid)
+    guard resultsMatch else {
       return false
     }
 
