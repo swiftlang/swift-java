@@ -206,9 +206,6 @@ let package = Package(
       name: "SwiftJavaAnnotations",
       dependencies: [
         "SwiftJavaMacros"
-      ],
-      swiftSettings: [
-        .swiftLanguageMode(.v5)
       ]
     ),
     .target(
