@@ -106,6 +106,24 @@ In the case of formatting issues, `git add` the formatting changes and attempt t
 
 Some documentation is generated from source and checked in, so CI can catch it drifting out of date. If you changed `Configuration.swift` or a CLI command's flags/help text, run `scripts/generate-docs.sh` and commit the generated changes.
 
+### Developing against local dependency checkouts
+
+swift-java depends on [swift-java-jni-core](https://github.com/swiftlang/swift-java-jni-core) and [swift-binding-generator-core](https://github.com/swiftlang/swift-binding-generator-core) (home of the `SwiftExtract` library) from their `main` branches. To develop against local checkouts instead, clone the repositories next to your swift-java checkout and point the corresponding environment variables at them:
+
+```bash
+export PROJECT_ROOT= # the directory containing your checkouts
+cd $PROJECT_ROOT
+ls
+> swift-java
+> swift-java-jni-core
+> swift-binding-generator-core
+> # ...and all the others here
+
+export SWIFT_JAVA_JNI_CORE_PATH=$PROJECT_ROOT/swift-java-jni-core
+export SWIFT_BINDING_GENERATOR_CORE_PATH=$PROJECT_ROOT/swift-binding-generator-core
+swift build
+```
+
 ## How to contribute your work
 
 Please open a pull request at https://github.com/swiftlang/swift-java. Make sure the CI passes, and then wait for code review.
