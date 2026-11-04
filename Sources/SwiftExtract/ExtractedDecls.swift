@@ -316,10 +316,12 @@ public final class ExtractedNominalType: ExtractedSwiftDecl {
       let current = queue.removeFirst()
       guard visited.insert(ObjectIdentifier(current)).inserted else { continue }
 
-      let pool =
-        (candidate.apiKind == .getter || candidate.apiKind == .setter)
-        ? current.variables
-        : current.methods
+      let pool = switch candidate.apiKind {
+      case .getter, .setter, .subscriptGetter, .subscriptSetter:
+        current.variables
+      default:
+        current.methods
+      }
 
       if let match = pool.first(where: {
         Self.satisfiesProtocolRequirement(candidate: candidate, requirement: $0)
