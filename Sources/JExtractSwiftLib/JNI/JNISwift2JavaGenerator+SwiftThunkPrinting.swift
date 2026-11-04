@@ -458,7 +458,7 @@ extension JNISwift2JavaGenerator {
         }.joined(separator: .comma)
         printer.printBraceBlock("fileprivate func getAs\(enumCase.name)() -> (\(associatedValueTypes))?") { printer in
           let params = enumCase.original.parameters.enumerated().map { i, param in
-            param.name ?? "_\(i)"
+            (param.name ?? "_\(i)").javaSafeIdentifier
           }.joined(separator: .comma)
           printer.printIfBlock("case let .\(enumCase.original.name)(\(params)) = self") { printer in
             printer.print("return (\(params))")
