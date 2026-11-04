@@ -42,10 +42,18 @@ public protocol ExtractDecider {
   /// Whether any member of `extensionDecl` could be extracted. When this is `false`, an extension
   /// whose extended type doesn't resolve is ignored instead of being reported as skipped.
   func mayExtractMembers(of extensionDecl: ExtensionDeclSyntax) -> Bool
+
+  /// Whether `type`, from this module or a dependency, is exported. A declaration whose signature uses a
+  /// type that isn't exported is skipped, since the generated code would refer to a type that doesn't exist.
+  func isExported(_ type: SwiftNominalTypeDeclaration) -> Bool
 }
 
 extension ExtractDecider {
   public func mayExtractMembers(of extensionDecl: ExtensionDeclSyntax) -> Bool {
+    true
+  }
+
+  public func isExported(_ type: SwiftNominalTypeDeclaration) -> Bool {
     true
   }
 }
