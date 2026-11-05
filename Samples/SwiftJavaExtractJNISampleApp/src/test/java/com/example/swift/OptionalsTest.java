@@ -179,4 +179,17 @@ public class OptionalsTest {
             });
         }
     }
+
+    @Test
+    void optionalIntArraySum() {
+        assertEquals(OptionalLong.empty(), MySwiftLibrary.optionalIntArraySum(Optional.empty()));
+        assertEquals(OptionalLong.of(0L), MySwiftLibrary.optionalIntArraySum(Optional.of(new long[] {})));
+        assertEquals(OptionalLong.of(6L), MySwiftLibrary.optionalIntArraySum(Optional.of(new long[] { 1, 2, 3 })));
+    }
+
+    @Test
+    void optionalStringArrayJoined() {
+        assertEquals(Optional.empty(), MySwiftLibrary.optionalStringArrayJoined(Optional.empty()));
+        assertEquals(Optional.of("a,b"), MySwiftLibrary.optionalStringArrayJoined(Optional.of(new String[] { "a", "b" })));
+    }
 }
