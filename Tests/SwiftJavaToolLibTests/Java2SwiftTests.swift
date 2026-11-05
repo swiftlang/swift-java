@@ -695,11 +695,11 @@ class Java2SwiftTests: XCTestCase {
       ],
       expectedChunks: [
         """
-        @JavaMethod
+        @JavaStaticMethod
         public func getByte(_ arg0: JavaObject?, _ arg1: Int32) throws -> Int8
         """,
         """
-        @JavaMethod
+        @JavaStaticMethod
         public func setByte(_ arg0: JavaObject?, _ arg1: Int32, _ arg2: Int8) throws
         """,
       ]
