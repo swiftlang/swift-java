@@ -810,7 +810,7 @@ extension JNISwift2JavaGenerator {
     // If contains one function type and it's known java functional interface type, we don't need to print the whole class
     if translated.functionTypes.count == 1,
       let ty = translated.functionTypes.first,
-      KnownJavaFunctionalInterface.find(ty, closureMethodName: config.effectiveClosureMethodName) != nil
+      KnownJavaFunctionalInterface.find(ty) != nil
     {
       return
     }
@@ -821,7 +821,7 @@ extension JNISwift2JavaGenerator {
       """
     ) { printer in
       for functionType in translated.functionTypes {
-        if KnownJavaFunctionalInterface.find(functionType, closureMethodName: config.effectiveClosureMethodName) != nil {
+        if KnownJavaFunctionalInterface.find(functionType) != nil {
           continue
         }
 
@@ -836,17 +836,26 @@ extension JNISwift2JavaGenerator {
     _ functionType: TranslatedFunctionType,
   ) {
     let apiParams = functionType.parameters.map({ $0.parameter.renderParameter() })
+    let arguments = functionType.parameters.map(\.parameter.name).joined(separator: .comma)
+    let returnKeyword = functionType.result.javaType.isVoid ? "" : "return "
 
     printer.printJavadocComment(
       """
       Corresponds to the Swift closure parameter of type {@code \(functionType.swiftType)}.
       """
     )
+    // `invoke` lets Kotlin call the closure as `handler(x)`: Kotlin treats a Java method named `invoke`
+    // as the invoke operator. Kotlin lambdas still convert to the interface, since `apply` is its only
+    // abstract method.
     printer.print(
       """
       @FunctionalInterface
       public interface \(functionType.name) {
-        \(functionType.result.javaType) \(config.effectiveClosureMethodName)(\(apiParams.joined(separator: .comma)));
+        \(functionType.result.javaType) apply(\(apiParams.joined(separator: .comma)));
+
+        default \(functionType.result.javaType) invoke(\(apiParams.joined(separator: .comma))) {
+          \(returnKeyword)apply(\(arguments));
+        }
       }
       """
     )

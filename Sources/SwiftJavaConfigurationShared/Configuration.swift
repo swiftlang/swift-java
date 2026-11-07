@@ -181,15 +181,6 @@ public struct Configuration: Codable {
     enableJavaCallbacks ?? false
   }
 
-  /// The name of the single method of the functional interfaces jextract generates for Swift closures, `apply` by
-  /// default. With `invoke`, Kotlin calls such a closure as a function, `onTap()` instead of `onTap.apply()`. With
-  /// any name other than `apply`, closures such as `(Int64) -> Int64` also get their own interface instead of a
-  /// `java.util.function` one, so they can be called the same way. Only supported in `jni` mode.
-  public var closureMethodName: String?
-  public var effectiveClosureMethodName: String {
-    closureMethodName ?? "apply"
-  }
-
   /// If specified, JExtract will output to this file a list of paths to all generated Java source files.
   public var generatedJavaSourcesListFileOutput: String?
 
