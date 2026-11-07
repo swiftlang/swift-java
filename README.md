@@ -97,6 +97,8 @@ In this mode the generated sources use JNI to call native code.
 This mode offers less performance and flexibility than FFM, but it is the most compatible: it works on older JVMs as well as on Android.
 Use it when FFM is not available, or when wide deployment compatibility is your priority. When performance is paramount, prefer FFM.
 
+For Android-specific guidance, see also the [Android documentation](Sources/SwiftJavaDocumentation/Documentation.docc/Android.md).
+
 Required language/runtime versions:
 - **Swift 6.2**, because of dependence on rich swift interface files
 - **JDK 17+**; the generated Java sources target the `javaSourceLevel` setting, which supports 17 through 25 (default 22)

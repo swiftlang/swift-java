@@ -4,6 +4,18 @@ Hints and patterns for using swift-java on Android.
 
 ## Overview
 
+### Main actor and the UI thread
+
+When using Swift from an Android app, work submitted to Swift's main executor
+is not executed by default, so integration with the host environment is needed.
+Without it, asynchronous work that switches to the main actor may stop making
+progress. This applies both to public Swift APIs called directly from Java and
+to uses of the main actor inside a Swift library.
+
+The [swift-android-native](https://github.com/swift-android-sdk/swift-android-native/tree/main#running-work-on-the-android-main-thread)
+implementation is one example of this integration. It can run Swift's main
+actor on Android's UI thread.
+
 ### R8/Proguard Rules
 
 Since swift-java uses JNI and reflection APIs, the R8 optimizer must be told to keep the wrapped types.
