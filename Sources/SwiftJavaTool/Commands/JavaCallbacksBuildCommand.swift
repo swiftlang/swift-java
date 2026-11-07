@@ -269,8 +269,8 @@ private func runSubprocess(
     .path(FilePath(executable)),
     arguments: .init(arguments),
     environment: environment,
-    output: FileDescriptorOutput.standardOutput,
-    error: FileDescriptorOutput.standardError,
+    output: FileDescriptorOutput.currentStandardOutput,
+    error: FileDescriptorOutput.currentStandardError,
   )
   guard result.terminationStatus.isSuccess else {
     throw JavaCallbacksBuildError(
