@@ -170,7 +170,9 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.8.0"),
     .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
     .package(url: "https://github.com/apple/swift-log", from: "1.2.0"),
-    .package(url: "https://github.com/apple/swift-collections", from: "1.3.0"), // primarily for ordered collections
+    // primarily for ordered collections
+    // FIXME: swift-collections 1.7.0 raised its minimum toolchain to Swift 6.2; stay below it while we still support Swift 6.1
+    .package(url: "https://github.com/apple/swift-collections", "1.3.0"..<"1.7.0"),
     .package(url: "https://github.com/swiftlang/swift-subprocess.git", "0.4.0"..<"0.5.0", traits: ["SubprocessFoundation"]),
 
     // Benchmarking
