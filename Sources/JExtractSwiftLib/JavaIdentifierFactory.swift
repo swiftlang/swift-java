@@ -73,7 +73,7 @@ package struct JavaIdentifierFactory {
         Self.javaOperatorName(decl.name)
       }
     var methodName = baseName + paramsSuffix(decl, baseName: baseName)
-    if Self.javaKeywords.contains(methodName) {
+    if Self.javaKeywords.contains(methodName) || Self.finalObjectMethods.contains(methodName) {
       methodName += "_"
     }
     return methodName
@@ -167,4 +167,25 @@ package struct JavaIdentifierFactory {
     /// literals
     "true", "false", "null",
   ]
+
+  /// Final methods of `java.lang.Object`, which a generated method can't declare again.
+  static let finalObjectMethods: Set<String> = ["getClass", "notify", "notifyAll", "wait"]
+
+  /// Swift keywords that can't name a parameter or a local variable without backticks.
+  static let reservedSwiftKeywords: Set<String> = [
+    "associatedtype", "class", "deinit", "enum", "extension", "fileprivate", "func", "import", "init", "inout",
+    "internal", "let", "operator", "precedencegroup", "private", "protocol", "public", "rethrows", "static",
+    "struct", "subscript", "typealias", "var", "break", "case", "catch", "continue", "default", "defer", "do",
+    "else", "fallthrough", "for", "guard", "if", "in", "repeat", "return", "switch", "throw", "where", "while",
+    "Any", "as", "false", "is", "nil", "self", "Self", "super", "throws", "true", "try",
+  ]
+}
+
+extension String {
+  /// This name, made usable as a parameter or local variable in both the generated Java and Swift: a Java or
+  /// Swift keyword such as `long` or `default` gets a `_` suffix.
+  package var javaSafeIdentifier: String {
+    JavaIdentifierFactory.javaKeywords.contains(self) || JavaIdentifierFactory.reservedSwiftKeywords.contains(self)
+      ? self + "_" : self
+  }
 }
