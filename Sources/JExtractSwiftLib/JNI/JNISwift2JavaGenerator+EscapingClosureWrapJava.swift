@@ -40,10 +40,11 @@ extension JNISwift2JavaGenerator {
     _ printer: inout SwiftPrinter,
     _ closureTy: SyntheticEscapingClosureFunctionType,
   ) {
+    let sendableSuffix = closureTy.functionType.isSendable ? ": @unchecked Sendable" : ""
     printer.printBraceBlock(
       """
       @JavaInterface("\(closureTy.javaBinaryName)")
-      public struct \(closureTy.javaInterfaceName)
+      public struct \(closureTy.javaInterfaceName)\(sendableSuffix)
       """
     ) { p in
       let signature = self.renderEscapingClosureApplySignature(closureTy.functionType)

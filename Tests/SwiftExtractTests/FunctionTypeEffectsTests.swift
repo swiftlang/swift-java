@@ -126,6 +126,56 @@ struct FunctionTypeEffectSpecifierSuite {
     }
     #expect(fnType.effectSpecifiers == [.async])
   }
+
+  @Test
+  func sendableClosureRecordsSendable() throws {
+    let fnType = try closureParameterType("public func take(_ cb: @Sendable () -> Void) {}")
+
+    #expect(fnType.isSendable)
+    #expect(!fnType.isEscaping)
+    #expect(fnType.description == "@Sendable () -> Void")
+  }
+
+  @Test
+  func escapingSendableClosureRecordsBoth() throws {
+    let fnType = try closureParameterType("public func take(_ cb: @escaping @Sendable (Int) -> Void) {}")
+
+    #expect(fnType.isSendable)
+    #expect(fnType.isEscaping)
+    #expect(fnType.description == "@escaping @Sendable (Int) -> Void")
+  }
+
+  @Test
+  func sendableClosureWithMultipleParametersAndReturn() throws {
+    let fnType = try closureParameterType("public func take(_ cb: @Sendable (Int, Double) -> Bool) {}")
+
+    #expect(fnType.isSendable)
+    #expect(!fnType.isEscaping)
+    #expect(fnType.description == "@Sendable (Int, Double) -> Bool")
+  }
+
+  @Test
+  func functionReturningSendableClosure() throws {
+    let result = try analyze(
+      sources: [
+        (
+          "/fake/Source.swift",
+          """
+          public func make() -> @Sendable (Int) -> String { fatalError() }
+          """
+        )
+      ],
+      moduleName: "Test"
+    )
+
+    let fn = try #require(result.extractedGlobalFuncs.first { $0.name == "make" })
+    guard case .function(let fnType) = fn.functionSignature.result.type else {
+      Issue.record("expected .function result, got \(fn.functionSignature.result.type)")
+      return
+    }
+    #expect(fnType.isSendable)
+    #expect(fnType.description == "@Sendable (Int) -> String")
+  }
 }
 
 private struct TestError: Error, CustomStringConvertible {
