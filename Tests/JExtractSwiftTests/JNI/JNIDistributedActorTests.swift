@@ -73,8 +73,7 @@ struct JNIDistributedActorTests {
         """
         catch {
           let catchEnvironment = try! JavaVirtualMachine.shared().environment()
-          let exception = catchEnvironment.makeJavaThrowable(for: error)
-          _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+          catchEnvironment.completeFutureExceptionally(error, future: globalFuture, method: _JNIMethodIDCache.CompletableFuture.completeExceptionally)
         }
         """,
       ]

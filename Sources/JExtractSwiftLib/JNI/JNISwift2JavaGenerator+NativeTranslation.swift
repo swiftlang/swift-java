@@ -2035,8 +2035,7 @@ extension JNISwift2JavaGenerator {
               printer.print(
                 """
                 let catchEnvironment = try! JavaVirtualMachine.shared().environment()
-                let exception = catchEnvironment.makeJavaThrowable(for: error)
-                _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, \(completeExceptionallyMethodID), [jvalue(l: exception)])
+                catchEnvironment.completeFutureExceptionally(error, future: globalFuture, method: \(completeExceptionallyMethodID))
                 """
               )
             }
