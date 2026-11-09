@@ -71,15 +71,13 @@ public struct JavaExtractDecider: ExtractDecider {
       return false
     }
 
-    // Swift operators have no Java mapping
-    if let fn = decl.as(FunctionDeclSyntax.self) {
-      switch fn.name.tokenKind {
-      case .prefixOperator, .postfixOperator:
-        log.trace("Skip '\(decl.qualifiedNameForDebug)': operators are not supported on Java")
-        return false
-      default:
-        break
-      }
+    // Swift prefix and postfix operators have no Java mapping. A declaration's operator name is
+    // lexed as a binary operator, so only the `prefix` or `postfix` modifier tells them apart.
+    if let fn = decl.as(FunctionDeclSyntax.self),
+      fn.modifiers.contains(where: { $0.name.tokenKind == .keyword(.prefix) || $0.name.tokenKind == .keyword(.postfix) })
+    {
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': operators are not supported on Java")
+      return false
     }
 
     guard let mod = decl.asProtocol((any WithModifiersSyntax).self) else {
