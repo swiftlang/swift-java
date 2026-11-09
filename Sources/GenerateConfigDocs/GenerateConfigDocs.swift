@@ -49,12 +49,28 @@ struct GenerateConfigDocs: ParsableCommand {
       .appendingPathComponent("Documentation.docc", isDirectory: true)
       .appendingPathComponent("SwiftJavaConfigFile.md", isDirectory: false)
 
+    // `SwiftExtractConfigurationShared` lives in the swift-binding-generator-core
+    // package since `SwiftExtract` was split out of this repo. Scan every location
+    // it may be found in.
     let scanDirs: [URL] = [
       repoRoot
         .appendingPathComponent("Sources", isDirectory: true)
         .appendingPathComponent("SwiftJavaConfigurationShared", isDirectory: true),
+      // Legacy in-repo location (pre-split layout).
       repoRoot
         .appendingPathComponent("Sources", isDirectory: true)
+        .appendingPathComponent("SwiftExtractConfigurationShared", isDirectory: true),
+      // Resolved swift-binding-generator-core checkout.
+      repoRoot
+        .appendingPathComponent(".build", isDirectory: true)
+        .appendingPathComponent("checkouts", isDirectory: true)
+        .appendingPathComponent("swift-binding-generator-core", isDirectory: true)
+        .appendingPathComponent("Sources", isDirectory: true)
+        .appendingPathComponent("SwiftExtractConfigurationShared", isDirectory: true),
+      // Vendored copy shared with the build plugins.
+      repoRoot
+        .appendingPathComponent("Plugins", isDirectory: true)
+        .appendingPathComponent("PluginsShared", isDirectory: true)
         .appendingPathComponent("SwiftExtractConfigurationShared", isDirectory: true),
     ]
 
