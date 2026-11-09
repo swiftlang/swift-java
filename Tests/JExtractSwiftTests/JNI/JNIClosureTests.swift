@@ -1217,6 +1217,10 @@ struct JNIClosureTests {
           @FunctionalInterface
           public interface closure {
             long apply(long _0, boolean _1);
+
+            default long invoke(long _0, boolean _1) {
+              return apply(_0, _1);
+            }
           }
         }
         """,

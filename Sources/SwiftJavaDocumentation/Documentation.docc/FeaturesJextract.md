@@ -855,6 +855,12 @@ Subscripts taking parameters keep them on the generated Java methods.
 Swift closure parameters become Java functional interfaces that can be
 implemented with a lambda expression.
 
+In JNI mode, an interface jextract generates declares `apply` and a default
+`invoke` method that calls it. Kotlin treats a method named `invoke` as the
+invoke operator, so Kotlin code can call a closure value as `handler(x)`.
+Closures that a `java.util.function` interface covers, such as
+`(Int64) -> Int64` with `LongUnaryOperator`, use that interface instead.
+
 #### Non-escaping closures
 
 Non-escaping closures with `Void` return or primitive arguments/results are supported
