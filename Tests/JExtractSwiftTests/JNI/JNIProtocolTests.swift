@@ -369,14 +369,14 @@ struct JNIProtocolTests {
   @Test
   func takeAsSetterNewValue() throws {
     let source = """
-    public protocol Animal {
-      public func bark()
-    }
+      public protocol Animal {
+        public func bark()
+      }
 
-    public struct Owner {
-      public var animal: any Animal
-    }
-    """
+      public struct Owner {
+        public var animal: any Animal
+      }
+      """
 
     try assertOutput(
       input: source,
@@ -415,6 +415,34 @@ struct JNIProtocolTests {
         """
             newValueswiftObject$ = _Owner_setAnimal_newValue_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: newValue!, environment: environment))
         """,
+      ]
+    )
+  }
+
+  @Test
+  func takeAsOverloadedParameter() throws {
+    let source = """
+      public protocol Animal {
+        func bark()
+      }
+
+      public struct Owner {
+        public func take(first: any Animal) {}
+        public func take(second: any Animal) {}
+      }
+      """
+
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "final class _Owner_takeFirst_first_Wrapper: SwiftJavaAnimalWrapper {",
+        "firstswiftObject$ = _Owner_takeFirst_first_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: first!, environment: environment))",
+        "final class _Owner_takeSecond_second_Wrapper: SwiftJavaAnimalWrapper {",
+        "secondswiftObject$ = _Owner_takeSecond_second_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: second!, environment: environment))",
       ]
     )
   }

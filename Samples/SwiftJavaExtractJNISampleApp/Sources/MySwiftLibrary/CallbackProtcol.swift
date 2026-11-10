@@ -107,9 +107,9 @@ public func outputCallbacks(
 }
 
 public struct CallbackHolder {
-    public init(callback: any CallbackProtocol) {
-        self.callback = callback
-    }
+  public init(callback: any CallbackProtocol) {
+    self.callback = callback
+  }
 
-    public var callback: any CallbackProtocol
+  public var callback: any CallbackProtocol
 }
