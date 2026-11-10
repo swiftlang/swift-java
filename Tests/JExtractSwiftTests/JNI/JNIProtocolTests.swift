@@ -367,6 +367,59 @@ struct JNIProtocolTests {
   }
 
   @Test
+  func takeAsSetterNewValue() throws {
+    let source = """
+    public protocol Animal {
+      public func bark()
+    }
+
+    public struct Owner {
+      public var animal: any Animal
+    }
+    """
+
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public <_T0 extends Animal> void setAnimal(_T0 newValue) {
+          Owner.$setAnimal(newValue, this.$memoryAddress());
+        }
+        """,
+        """
+        private static native void $setAnimal(java.lang.Object newValue, long selfPointer);
+        """,
+      ]
+    )
+
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        final class _Owner_setAnimal_newValue_Wrapper: SwiftJavaAnimalWrapper {
+          ...
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_Owner__00024setAnimal__Ljava_lang_Object_2J")
+        public func Java_com_example_swift_Owner__00024setAnimal__Ljava_lang_Object_2J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jobject?, selfPointer: jlong) {
+        """,
+        """
+            newValueswiftObject$ = _Owner_setAnimal_newValue_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: newValue!, environment: environment))
+        """,
+      ]
+    )
+  }
+
+  @Test
   func generatesProtocolWrappers() throws {
     try assertOutput(
       input: source,
