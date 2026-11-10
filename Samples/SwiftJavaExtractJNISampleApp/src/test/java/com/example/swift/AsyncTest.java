@@ -77,6 +77,17 @@ public class AsyncTest {
     }
 
     @Test
+    void asyncThrowsJavaFailure_preservesRuntimeExceptionCause() {
+        Future<Void> future = MySwiftLibrary.asyncThrowsJavaFailure();
+
+        ExecutionException ex = assertThrows(ExecutionException.class, future::get);
+        Throwable cause = ex.getCause();
+        assertNotNull(cause);
+        assertEquals(RuntimeException.class, cause.getClass());
+        assertEquals("Java async failed", cause.getMessage());
+    }
+
+    @Test
     void asyncOptional() throws Exception {
         Future<OptionalLong> future = MySwiftLibrary.asyncOptional(42);
         assertEquals(OptionalLong.of(42), future.get());

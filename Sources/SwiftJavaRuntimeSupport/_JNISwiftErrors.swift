@@ -42,6 +42,46 @@ extension JNIEnvironment {
     return makeSwiftErrorException(for: error)
   }
 
+  /// Completes a Java future exceptionally from an async JNI thunk.
+  ///
+  /// `Future.get()` surfaces failure as `java.util.concurrent.ExecutionException`.
+  /// The throwable the Java caller completed with is that exception's cause.
+  /// Passing the wrapper itself to `completeExceptionally` makes the outer
+  /// future's cause a generic wrapper instead of the original exception
+  /// (swift-java issue #915). One `ExecutionException` layer is removed when
+  /// its cause is non-null. Every other error uses ``makeJavaThrowable(for:)``.
+  public func completeFutureExceptionally(
+    _ error: any Error,
+    future: jobject?,
+    method: jmethodID
+  ) {
+    let failure = asyncFailureThrowable(for: error)
+    _ = interface.CallBooleanMethodA(self, future, method, [jvalue(l: failure.throwable)])
+    if failure.deleteLocalRef, let throwable = failure.throwable {
+      interface.DeleteLocalRef(self, throwable)
+    }
+  }
+
+  /// The throwable to pass to `completeExceptionally`, plus whether it is a
+  /// local ref this function allocated and must delete after the JNI call.
+  private func asyncFailureThrowable(
+    for error: any Error
+  ) -> (throwable: jthrowable?, deleteLocalRef: Bool) {
+    if let javaObject = error as? any AnyJavaObject,
+      let throwable = javaObject.as(Throwable.self),
+      interface.IsInstanceOf(self, throwable.javaThis, _JNIMethodIDCache.ExecutionException.class) == JNI_TRUE,
+      let cause = interface.CallObjectMethodA(
+        self,
+        throwable.javaThis,
+        _JNIMethodIDCache.ExecutionException.getCause,
+        nil
+      )
+    {
+      return (cause, true)
+    }
+    return (makeJavaThrowable(for: error), false)
+  }
+
   /// Throw the given Swift error as a Java exception.
   public func throwSwiftErrorAsJava(_ error: any Error) {
     guard let throwable = makeJavaThrowable(for: error) else {

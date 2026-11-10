@@ -154,8 +154,7 @@ struct JNIAsyncTests {
                 }
                 catch {
                   let catchEnvironment = try! JavaVirtualMachine.shared().environment()
-                  let exception = catchEnvironment.makeJavaThrowable(for: error)
-                  _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+                  catchEnvironment.completeFutureExceptionally(error, future: globalFuture, method: _JNIMethodIDCache.CompletableFuture.completeExceptionally)
                 }
               }
             }
@@ -174,11 +173,31 @@ struct JNIAsyncTests {
               }
               catch {
                 let catchEnvironment = try! JavaVirtualMachine.shared().environment()
-                let exception = catchEnvironment.makeJavaThrowable(for: error)
-                _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+                catchEnvironment.completeFutureExceptionally(error, future: globalFuture, method: _JNIMethodIDCache.CompletableFuture.completeExceptionally)
               }
             }
           }
+        }
+        """
+      ]
+    )
+  }
+
+  /// Issue #915: a failed Java future is observed as `ExecutionException`.
+  /// The thunk must hand that failure to `completeFutureExceptionally`, which
+  /// keeps `getCause()` rather than completing with the wrapper.
+  @Test("Async JNI failure preserves the Java exception cause (#915)")
+  func asyncFailurePreservesJavaExceptionCause() throws {
+    try assertOutput(
+      input: "public func async() async throws",
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        catch {
+          let catchEnvironment = try! JavaVirtualMachine.shared().environment()
+          catchEnvironment.completeFutureExceptionally(error, future: globalFuture, method: _JNIMethodIDCache.CompletableFuture.completeExceptionally)
         }
         """
       ]
