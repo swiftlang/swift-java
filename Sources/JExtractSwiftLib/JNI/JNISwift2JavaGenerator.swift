@@ -60,6 +60,8 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
       .map(\.swiftNominal.identity)
   )
   var interfaceProtocolWrappers: [ExtractedNominalType: JavaInterfaceSwiftWrapper] = [:]
+  /// Protocol parameter adapter class names already emitted in the current output file.
+  var emittedProtocolParameterWrappers: Set<String> = []
 
   /// Protocols that should be boxed to support returning them as `any P / some P`
   private(set) var existentialProtocolBoxes: [ExtractedNominalType] = []

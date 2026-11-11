@@ -191,7 +191,7 @@ struct JNIProtocolTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        final class _SwiftModule_takeGeneric_s_Wrapper: SwiftJavaSomeProtocolWrapper {
+        fileprivate final class _Java_SomeProtocol_Box: SwiftJavaSomeProtocolWrapper {
           let _javaSomeProtocolInterface: JavaSomeProtocol
           init(_javaSomeProtocolInterface: JavaSomeProtocol) {
             self._javaSomeProtocolInterface = _javaSomeProtocolInterface
@@ -219,7 +219,7 @@ struct JNIProtocolTests {
             xswiftObject$ = xpointer$Existential$
           }
           else {
-            xswiftObject$ = _SwiftModule_takeProtocol_x_Wrapper(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: x!, environment: environment))
+            xswiftObject$ = _Java_SomeProtocol_Box(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: x!, environment: environment))
           }
           let yswiftObject$: (any SomeProtocol)
           if environment.interface.IsInstanceOf(environment, y, _JNIMethodIDCache.JNISwiftInstance.class) != 0 {
@@ -227,7 +227,7 @@ struct JNIProtocolTests {
             yswiftObject$ = ypointer$Existential$
           }
           else {
-            yswiftObject$ = _SwiftModule_takeProtocol_y_Wrapper(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: y!, environment: environment))
+            yswiftObject$ = _Java_SomeProtocol_Box(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: y!, environment: environment))
           }
           SwiftModule.takeProtocol(x: xswiftObject$, y: yswiftObject$)
         }
@@ -267,7 +267,7 @@ struct JNIProtocolTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        final class _SwiftModule_takeGeneric_s_Wrapper: SwiftJavaSomeProtocolWrapper {
+        fileprivate final class _Java_SomeProtocol_Box: SwiftJavaSomeProtocolWrapper {
           let _javaSomeProtocolInterface: JavaSomeProtocol
           init(_javaSomeProtocolInterface: JavaSomeProtocol) {
             self._javaSomeProtocolInterface = _javaSomeProtocolInterface
@@ -283,7 +283,7 @@ struct JNIProtocolTests {
             sswiftObject$ = spointer$Existential$
           }
           else {
-            sswiftObject$ = _SwiftModule_takeGeneric_s_Wrapper(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: s!, environment: environment))
+            sswiftObject$ = _Java_SomeProtocol_Box(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: s!, environment: environment))
           }
           SwiftModule.takeGeneric(s: sswiftObject$)
         }
@@ -323,7 +323,7 @@ struct JNIProtocolTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        final class _SwiftModule_takeComposite_x_Wrapper: SwiftJavaSomeProtocolWrapper, SwiftJavaBWrapper {
+        fileprivate final class _Java_SomeProtocol$B_Box: SwiftJavaSomeProtocolWrapper, SwiftJavaBWrapper {
           let _javaSomeProtocolInterface: JavaSomeProtocol
           let _javaBInterface: JavaB
           init(_javaSomeProtocolInterface: JavaSomeProtocol, _javaBInterface: JavaB) {
@@ -357,7 +357,7 @@ struct JNIProtocolTests {
             xswiftObject$ = xpointer$Existential$
           }
           else {
-            xswiftObject$ = _SwiftModule_takeComposite_x_Wrapper(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: x!, environment: environment), _javaBInterface: JavaB(javaThis: x!, environment: environment))
+            xswiftObject$ = _Java_SomeProtocol$B_Box(_javaSomeProtocolInterface: JavaSomeProtocol(javaThis: x!, environment: environment), _javaBInterface: JavaB(javaThis: x!, environment: environment))
           }
           SwiftModule.takeComposite(x: xswiftObject$)
         }
@@ -404,7 +404,7 @@ struct JNIProtocolTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        final class _Owner_setAnimal_newValue_Wrapper: SwiftJavaAnimalWrapper {
+        fileprivate final class _Java_Animal_Box: SwiftJavaAnimalWrapper {
           ...
         }
         """,
@@ -413,8 +413,31 @@ struct JNIProtocolTests {
         public func Java_com_example_swift_Owner__00024setAnimal__Ljava_lang_Object_2J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, newValue: jobject?, selfPointer: jlong) {
         """,
         """
-            newValueswiftObject$ = _Owner_setAnimal_newValue_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: newValue!, environment: environment))
+            newValueswiftObject$ = _Java_Animal_Box(_javaAnimalInterface: JavaAnimal(javaThis: newValue!, environment: environment))
         """,
+      ]
+    )
+  }
+
+  @Test
+  func takeAsTuple() throws {
+    let source = """
+      public protocol Store {
+        func value() -> Int64
+      }
+      public func take(pair: (any Store, some Store)) {}
+      """
+
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "fileprivate final class _Java_Store_Box: SwiftJavaStoreWrapper {",
+        "pair_0swiftObject$ = _Java_Store_Box(_javaStoreInterface: JavaStore(javaThis: pair_0!, environment: environment))",
+        "pair_1swiftObject$ = _Java_Store_Box(_javaStoreInterface: JavaStore(javaThis: pair_1!, environment: environment))",
       ]
     )
   }
@@ -429,6 +452,7 @@ struct JNIProtocolTests {
       public struct Owner {
         public func take(first: any Animal) {}
         public func take(second: any Animal) {}
+        public func take(second: any Animal, option: Bool) {}
       }
       """
 
@@ -439,10 +463,9 @@ struct JNIProtocolTests {
       .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
-        "final class _Owner_takeFirst_first_Wrapper: SwiftJavaAnimalWrapper {",
-        "firstswiftObject$ = _Owner_takeFirst_first_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: first!, environment: environment))",
-        "final class _Owner_takeSecond_second_Wrapper: SwiftJavaAnimalWrapper {",
-        "secondswiftObject$ = _Owner_takeSecond_second_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: second!, environment: environment))",
+        "fileprivate final class _Java_Animal_Box: SwiftJavaAnimalWrapper {",
+        "firstswiftObject$ = _Java_Animal_Box(_javaAnimalInterface: JavaAnimal(javaThis: first!, environment: environment))",
+        "secondswiftObject$ = _Java_Animal_Box(_javaAnimalInterface: JavaAnimal(javaThis: second!, environment: environment))",
       ]
     )
   }

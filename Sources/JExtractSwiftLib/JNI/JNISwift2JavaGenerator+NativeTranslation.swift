@@ -277,18 +277,14 @@ extension JNISwift2JavaGenerator {
       case .opaque(let proto), .existential(let proto):
         return try translateProtocolParameter(
           protocolType: proto,
-          methodName: methodName,
-          parameterName: parameterName,
-          parentName: parentName
+          parameterName: parameterName
         )
 
       case .genericParameter:
         if let concreteTy = type.typeIn(genericParameters: genericParameters, genericRequirements: genericRequirements) {
           return try translateProtocolParameter(
             protocolType: concreteTy,
-            methodName: methodName,
-            parameterName: parameterName,
-            parentName: parentName
+            parameterName: parameterName
           )
         }
 
@@ -459,17 +455,13 @@ extension JNISwift2JavaGenerator {
 
     func translateProtocolParameter(
       protocolType: SwiftType,
-      methodName: String,
-      parameterName: String,
-      parentName: SwiftQualifiedTypeName?
+      parameterName: String
     ) throws -> NativeParameter {
       switch protocolType {
       case .nominal(let nominalType):
         return try translateProtocolParameter(
           protocolTypes: [nominalType],
-          methodName: methodName,
-          parameterName: parameterName,
-          parentName: parentName
+          parameterName: parameterName
         )
 
       case .composite(let types):
@@ -482,9 +474,7 @@ extension JNISwift2JavaGenerator {
 
         return try translateProtocolParameter(
           protocolTypes: protocolTypes,
-          methodName: methodName,
-          parameterName: parameterName,
-          parentName: parentName
+          parameterName: parameterName
         )
 
       default:
@@ -494,9 +484,7 @@ extension JNISwift2JavaGenerator {
 
     private func translateProtocolParameter(
       protocolTypes: [SwiftNominalType],
-      methodName: String,
-      parameterName: String,
-      parentName: SwiftQualifiedTypeName?
+      parameterName: String
     ) throws -> NativeParameter {
       // We allow Java implementations if we are able to generate the needed
       // Swift wrappers for all the protocol types.
@@ -510,10 +498,8 @@ extension JNISwift2JavaGenerator {
         ],
         conversion: .interfaceToSwiftObject(
           .placeholder,
-          swiftWrapperClassName: JNISwift2JavaGenerator.protocolParameterWrapperClassName(
-            methodName: methodName,
-            parameterName: parameterName,
-            parentName: parentName
+          swiftWrapperClassName: JNISwift2JavaGenerator.protocolParameterBoxClassName(
+            protocolTypes: protocolTypes
           ),
           protocolTypes: protocolTypes,
           allowsJavaImplementations: allowsJavaImplementations
