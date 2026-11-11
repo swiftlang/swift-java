@@ -111,5 +111,9 @@ public struct CallbackHolder {
     self.callback = callback
   }
 
+  public init(callback: any CallbackProtocol, _ extra: Int) {
+    self.callback = callback
+  }
+
   public var callback: any CallbackProtocol
 }
