@@ -105,3 +105,11 @@ public func outputCallbacks(
     optionalString: callbacks.withOptionalString(optionalString)
   )
 }
+
+public struct CallbackHolder {
+  public init(callback: any CallbackProtocol) {
+    self.callback = callback
+  }
+
+  public var callback: any CallbackProtocol
+}

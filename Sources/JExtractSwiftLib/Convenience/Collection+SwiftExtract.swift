@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2025 Apple Inc. and the Swift.org project authors
+// Copyright (c) 2024 Apple Inc. and the Swift.org project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -12,7 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-public enum SwiftEffectSpecifier: Equatable {
-  case `throws`
-  case `async`
+extension Collection {
+  package typealias IsLastElement = Bool
+  package var withIsLast: any Collection<(Element, IsLastElement)> {
+    var i = 1
+    let totalCount = self.count
+
+    return self.map { element in
+      let isLast = i == totalCount
+      i += 1
+      return (element, isLast)
+    }
+  }
 }
