@@ -66,6 +66,12 @@ let package = Package(
       targets: ["SwiftJavaConfigurationShared"]
     ),
 
+    // Marker macros such as `@JavaExport` that steer jextract, without the JNI runtime
+    .library(
+      name: "SwiftJavaAnnotations",
+      targets: ["SwiftJavaAnnotations"]
+    ),
+
     .library(
       name: "JavaUtil",
       targets: ["JavaUtil"]
@@ -197,9 +203,16 @@ let package = Package(
       ]
     ),
     .target(
+      name: "SwiftJavaAnnotations",
+      dependencies: [
+        "SwiftJavaMacros"
+      ]
+    ),
+    .target(
       name: "SwiftJava",
       dependencies: [
         .product(name: "SwiftJavaJNICore", package: "swift-java-jni-core"),
+        "SwiftJavaAnnotations",
         "SwiftJavaMacros",
       ],
       exclude: ["swift-java.config"],
