@@ -1,0 +1,14 @@
+DO NOT EDIT THESE FILES IN THIS REPOSITORY.
+
+The files in this directory are vendored, byte-identical copies of:
+
+    https://github.com/swiftlang/swift-binding-generator-core
+    Sources/SwiftExtractConfigurationShared/
+
+They exist because SwiftPM package plugins cannot take sources from a package
+dependency, so the plugins in this repository compile these files directly.
+
+Make any changes in swift-binding-generator-core instead, and then copy the
+updated files here. The swift-java compatibility CI job in
+swift-binding-generator-core diffs these copies against its own sources and
+will flag any drift.

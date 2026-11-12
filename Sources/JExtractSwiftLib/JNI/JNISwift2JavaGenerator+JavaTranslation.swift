@@ -136,7 +136,7 @@ extension JNISwift2JavaGenerator {
       let methodName = "" // TODO: Used for closures, replace with better name?
 
       let parameterResults = try enumCase.parameters.enumerated().map { idx, parameter in
-        let resultName = parameter.name ?? "arg\(idx)"
+        let resultName = (parameter.name ?? "arg\(idx)").javaSafeIdentifier
         let translatedResult = try self.translateResult(
           swiftType: parameter.type,
           methodName: methodName,
@@ -226,7 +226,7 @@ extension JNISwift2JavaGenerator {
       // Closures.
       var funcTypes: [TranslatedFunctionType] = []
       for (idx, param) in decl.functionSignature.parameters.enumerated() {
-        let parameterName = param.parameterName ?? "_\(idx)"
+        let parameterName = (param.parameterName ?? "_\(idx)").javaSafeIdentifier
 
         switch param.type {
         case .function(let funcTy):
@@ -303,7 +303,7 @@ extension JNISwift2JavaGenerator {
       var translatedParams: [TranslatedParameter] = []
 
       for (i, param) in swiftType.parameters.enumerated() {
-        let paramName = param.parameterName ?? "_\(i)"
+        let paramName = (param.parameterName ?? "_\(i)").javaSafeIdentifier
         translatedParams.append(
           try translateParameter(
             swiftType: param.type,
@@ -387,7 +387,7 @@ extension JNISwift2JavaGenerator {
       genericRequirements: [SwiftGenericRequirement],
     ) throws -> [TranslatedParameter] {
       try parameters.enumerated().map { idx, param in
-        let parameterName = param.name ?? "arg\(idx)"
+        let parameterName = (param.name ?? "arg\(idx)").javaSafeIdentifier
         return try translateParameter(
           swiftType: param.type,
           parameterName: parameterName,
