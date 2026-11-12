@@ -506,7 +506,12 @@ extension JNISwift2JavaGenerator {
               genericRequirements: genericRequirements,
             )
 
-          case .foundationDate, .essentialsDate, .foundationData, .essentialsData, .foundationURL, .essentialsURL:
+          case .foundationDate where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsDate where !config.effectiveFoundationTypesAsJavaTypes,
+            .foundationData where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsData where !config.effectiveFoundationTypesAsJavaTypes,
+            .foundationURL where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsURL where !config.effectiveFoundationTypesAsJavaTypes:
             break // Handled as wrapped struct
 
           case .unsafeRawBufferPointer, .unsafeMutableRawBufferPointer:
@@ -851,11 +856,13 @@ extension JNISwift2JavaGenerator {
 
         if let knownType = nominalType.nominalTypeDecl.knownTypeKind {
           switch knownType {
-          case .foundationDate, .essentialsDate:
+          case .foundationDate where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsDate where !config.effectiveFoundationTypesAsJavaTypes:
             // Handled as wrapped struct
             break
 
-          case .foundationData, .essentialsData:
+          case .foundationData where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsData where !config.effectiveFoundationTypesAsJavaTypes:
             // Handled as wrapped struct
             break
 
@@ -971,7 +978,12 @@ extension JNISwift2JavaGenerator {
               genericRequirements: genericRequirements,
             )
 
-          case .foundationDate, .essentialsDate, .foundationData, .essentialsData, .foundationURL, .essentialsURL:
+          case .foundationDate where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsDate where !config.effectiveFoundationTypesAsJavaTypes,
+            .foundationData where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsData where !config.effectiveFoundationTypesAsJavaTypes,
+            .foundationURL where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsURL where !config.effectiveFoundationTypesAsJavaTypes:
             // Handled as wrapped struct
             break
 
@@ -1161,16 +1173,19 @@ extension JNISwift2JavaGenerator {
             )
             return .swiftSet(elementJavaType)
 
-          case .foundationDate, .essentialsDate:
+          case .foundationDate where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsDate where !config.effectiveFoundationTypesAsJavaTypes:
             return .class(package: nil, name: "Date")
 
-          case .foundationData, .essentialsData:
+          case .foundationData where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsData where !config.effectiveFoundationTypesAsJavaTypes:
             return .class(package: nil, name: "Data")
 
           case .foundationDataProtocol, .essentialsDataProtocol:
             return .class(package: nil, name: "DataProtocol")
 
-          case .foundationURL, .essentialsURL:
+          case .foundationURL where !config.effectiveFoundationTypesAsJavaTypes,
+            .essentialsURL where !config.effectiveFoundationTypesAsJavaTypes:
             return .class(package: nil, name: "URL")
 
           case .foundationUUID, .essentialsUUID:

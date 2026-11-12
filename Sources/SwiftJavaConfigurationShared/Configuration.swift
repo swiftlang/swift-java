@@ -181,6 +181,15 @@ public struct Configuration: Codable {
     enableJavaCallbacks ?? false
   }
 
+  /// If true, Foundation values cross as standard Java types instead of Swift-backed wrapper classes generated
+  /// into each module: `URL` as `java.net.URI`, `Date` as `java.util.Date`, `Data` as `byte[]`, `Locale` as
+  /// `java.util.Locale` and `TimeZone` as `java.util.TimeZone`. Values are copied when they cross, and a `Date` keeps
+  /// millisecond precision. `UUID` is always a `java.util.UUID`. Only supported in `jni` mode.
+  public var foundationTypesAsJavaTypes: Bool?
+  public var effectiveFoundationTypesAsJavaTypes: Bool {
+    foundationTypesAsJavaTypes ?? false
+  }
+
   /// If specified, JExtract will output to this file a list of paths to all generated Java source files.
   public var generatedJavaSourcesListFileOutput: String?
 

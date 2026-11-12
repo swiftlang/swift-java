@@ -703,6 +703,27 @@ Java returns an `Optional<URL>`.
    }
 }
 
+#### Foundation values as Java types
+
+The `Data`, `Date` and `URL` wrapper classes are generated into the Java package of every module that uses
+them, so a `URL` returned by one module's API is a different Java type from the `URL` another module's API
+accepts. With `"foundationTypesAsJavaTypes": true` in `swift-java.config` (JNI mode), Foundation values cross
+as standard Java types instead, and no wrapper classes are generated:
+
+| Swift | Java |
+|---|---|
+| `URL` | `java.net.URI` |
+| `Date` | `java.util.Date` |
+| `Data` | `byte[]` |
+| `Locale` | `java.util.Locale` |
+| `TimeZone` | `java.util.TimeZone` |
+
+They work wherever a `String` does: as parameters and results, optionals, arrays, and closure parameters.
+Values are copied when they cross. A `Date` keeps millisecond precision, and a `Locale` crosses as its
+language tag (`pt-BR` in Java for `pt_BR` in Swift). Java-implemented protocols don't support these types yet.
+
+`CGFloat` is a `double` in Java, with or without this option.
+
 ### Optional parameters and return types
 
 Optional primitives use Java's `OptionalLong`, `OptionalInt`, etc.
