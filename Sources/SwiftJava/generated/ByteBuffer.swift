@@ -27,7 +27,7 @@ extension JavaClass<ByteBuffer> {
   /// public static java.nio.ByteBuffer java.nio.ByteBuffer.wrap(byte[])
   /// ```
   @JavaStaticMethod
-  public func wrap(_ arg0: [Int8]) -> ByteBuffer!
+  public func wrap(_ arg0: [UInt8]) -> ByteBuffer!
 
   /// Java method `wrap`.
   ///
@@ -36,7 +36,7 @@ extension JavaClass<ByteBuffer> {
   /// public static java.nio.ByteBuffer java.nio.ByteBuffer.wrap(byte[],int,int)
   /// ```
   @JavaStaticMethod
-  public func wrap(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
+  public func wrap(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
 }
 /// Java `sealed class`, permits: `java.nio.HeapByteBuffer`, `java.nio.MappedByteBuffer`
 @JavaClass("java.nio.ByteBuffer")
@@ -66,7 +66,7 @@ open class ByteBuffer: JavaObject {
   /// public final byte[] java.nio.ByteBuffer.array()
   /// ```
   @JavaMethod
-  open func array() -> [Int8]
+  open func array() -> [UInt8]
 
   /// Java method `arrayOffset`.
   ///
@@ -228,7 +228,7 @@ open class ByteBuffer: JavaObject {
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.get(byte[])
   /// ```
   @JavaMethod
-  open func get(_ arg0: [Int8]) -> ByteBuffer!
+  open func get(_ arg0: [UInt8]) -> ByteBuffer!
 
   /// Java method `get`.
   ///
@@ -237,7 +237,7 @@ open class ByteBuffer: JavaObject {
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.get(byte[],int,int)
   /// ```
   @JavaMethod
-  open func get(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
+  open func get(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
 
   /// Java method `get`.
   ///
@@ -246,7 +246,7 @@ open class ByteBuffer: JavaObject {
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.get(int,byte[])
   /// ```
   @JavaMethod
-  open func get(_ arg0: Int32, _ arg1: [Int8]) -> ByteBuffer!
+  open func get(_ arg0: Int32, _ arg1: [UInt8]) -> ByteBuffer!
 
   /// Java method `get`.
   ///
@@ -255,7 +255,7 @@ open class ByteBuffer: JavaObject {
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.get(int,byte[],int,int)
   /// ```
   @JavaMethod
-  open func get(_ arg0: Int32, _ arg1: [Int8], _ arg2: Int32, _ arg3: Int32) -> ByteBuffer!
+  open func get(_ arg0: Int32, _ arg1: [UInt8], _ arg2: Int32, _ arg3: Int32) -> ByteBuffer!
 
   /// Java method `hasArray`.
   ///
@@ -363,7 +363,7 @@ open class ByteBuffer: JavaObject {
   /// public final java.nio.ByteBuffer java.nio.ByteBuffer.put(byte[])
   /// ```
   @JavaMethod
-  open func put(_ arg0: [Int8]) -> ByteBuffer!
+  open func put(_ arg0: [UInt8]) -> ByteBuffer!
 
   /// Java method `put`.
   ///
@@ -372,7 +372,7 @@ open class ByteBuffer: JavaObject {
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.put(byte[],int,int)
   /// ```
   @JavaMethod
-  open func put(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
+  open func put(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32) -> ByteBuffer!
 
   /// Java method `put`.
   ///
@@ -381,7 +381,7 @@ open class ByteBuffer: JavaObject {
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.put(int,byte[])
   /// ```
   @JavaMethod
-  open func put(_ arg0: Int32, _ arg1: [Int8]) -> ByteBuffer!
+  open func put(_ arg0: Int32, _ arg1: [UInt8]) -> ByteBuffer!
 
   /// Java method `put`.
   ///
@@ -390,7 +390,7 @@ open class ByteBuffer: JavaObject {
   /// public java.nio.ByteBuffer java.nio.ByteBuffer.put(int,byte[],int,int)
   /// ```
   @JavaMethod
-  open func put(_ arg0: Int32, _ arg1: [Int8], _ arg2: Int32, _ arg3: Int32) -> ByteBuffer!
+  open func put(_ arg0: Int32, _ arg1: [UInt8], _ arg2: Int32, _ arg3: Int32) -> ByteBuffer!
 
   /// Java method `put`.
   ///

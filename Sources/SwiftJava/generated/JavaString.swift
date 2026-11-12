@@ -125,30 +125,30 @@ open class JavaString: JavaObject {
   @_nonoverride public convenience init(environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: [UInt8], environment: JNIEnvironment? = nil)
 
   @available(*, deprecated)
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: [UInt8], _ arg1: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32, environment: JNIEnvironment? = nil)
 
   @available(*, deprecated)
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, _ arg3: Int32, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32, _ arg3: Int32, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, _ arg3: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32, _ arg3: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32, _ arg3: Charset?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32, _ arg3: Charset?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: String, environment: JNIEnvironment? = nil) throws
+  @_nonoverride public convenience init(_ arg0: [UInt8], _ arg1: String, environment: JNIEnvironment? = nil) throws
 
   @JavaMethod
-  @_nonoverride public convenience init(_ arg0: [Int8], _ arg1: Charset?, environment: JNIEnvironment? = nil)
+  @_nonoverride public convenience init(_ arg0: [UInt8], _ arg1: Charset?, environment: JNIEnvironment? = nil)
 
   @JavaMethod
   @_nonoverride public convenience init(_ arg0: [UInt16], environment: JNIEnvironment? = nil)
@@ -178,7 +178,7 @@ open class JavaString: JavaObject {
   /// public byte[] java.lang.String.getBytes()
   /// ```
   @JavaMethod
-  open func getBytes() -> [Int8]
+  open func getBytes() -> [UInt8]
 
   /// Java method `getBytes`.
   ///
@@ -187,7 +187,7 @@ open class JavaString: JavaObject {
   /// public byte[] java.lang.String.getBytes(java.lang.String) throws java.io.UnsupportedEncodingException
   /// ```
   @JavaMethod
-  open func getBytes(_ arg0: String) throws -> [Int8]
+  open func getBytes(_ arg0: String) throws -> [UInt8]
 
   /// Java method `getBytes`.
   ///
@@ -196,7 +196,7 @@ open class JavaString: JavaObject {
   /// public byte[] java.lang.String.getBytes(java.nio.charset.Charset)
   /// ```
   @JavaMethod
-  open func getBytes(_ arg0: Charset?) -> [Int8]
+  open func getBytes(_ arg0: Charset?) -> [UInt8]
 
   /// Java method `getBytes`.
   ///
@@ -206,7 +206,7 @@ open class JavaString: JavaObject {
   /// ```
   @available(*, deprecated)
   @JavaMethod
-  open func getBytes(_ arg0: Int32, _ arg1: Int32, _ arg2: [Int8], _ arg3: Int32)
+  open func getBytes(_ arg0: Int32, _ arg1: Int32, _ arg2: [UInt8], _ arg3: Int32)
 
   /// Java method `charAt`.
   ///
