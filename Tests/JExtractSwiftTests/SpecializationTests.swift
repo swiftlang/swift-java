@@ -313,7 +313,7 @@ struct SpecializationTests {
         // FishBox constrained extension method: direct downcall with concrete type
         """
         @_cdecl("Java_com_example_swift_FishBox__00024observeTheFish__JJ")
-        public func Java_com_example_swift_FishBox__00024observeTheFish__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) {
+        public func Java_com_example_swift_FishBox__00024observeTheFish__JJ(environment: JNIEnvironment!, thisClass: JNITypes.jclass, selfPointer: jlong, selfTypePointer: jlong) {
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
           let selfPointer$ = UnsafeMutablePointer<FishBox>(bitPattern: selfPointerBits$)
@@ -326,7 +326,7 @@ struct SpecializationTests {
         // FishBox base method: also uses direct downcall (not opening protocols)
         """
         @_cdecl("Java_com_example_swift_FishBox__00024count__JJ")
-        public func Java_com_example_swift_FishBox__00024count__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, selfPointer: jlong, selfTypePointer: jlong) -> jlong {
+        public func Java_com_example_swift_FishBox__00024count__JJ(environment: JNIEnvironment!, thisClass: JNITypes.jclass, selfPointer: jlong, selfTypePointer: jlong) -> jlong {
           assert(selfPointer != 0, "selfPointer memory address was null")
           let selfPointerBits$ = Int(Int64(fromJNI: selfPointer, in: environment))
           let selfPointer$ = UnsafeMutablePointer<FishBox>(bitPattern: selfPointerBits$)

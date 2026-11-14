@@ -34,7 +34,7 @@ struct TimeIntervalTests {
         [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024delay__D")
-          public func Java_com_example_swift_SwiftModule__00024delay__D(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, seconds: jdouble) {
+          public func Java_com_example_swift_SwiftModule__00024delay__D(environment: JNIEnvironment!, thisClass: JNITypes.jclass, seconds: jdouble) {
             SwiftModule.delay(seconds: Double(fromJNI: seconds, in: environment))
           }
           """
@@ -88,7 +88,7 @@ struct TimeIntervalTests {
         [
           """
           @_cdecl("Java_com_example_swift_SwiftModule__00024now__")
-          public func Java_com_example_swift_SwiftModule__00024now__(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass) -> jdouble {
+          public func Java_com_example_swift_SwiftModule__00024now__(environment: JNIEnvironment!, thisClass: JNITypes.jclass) -> jdouble {
             return SwiftModule.now()
           }
           """

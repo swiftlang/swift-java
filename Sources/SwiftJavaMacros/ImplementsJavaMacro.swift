@@ -105,11 +105,12 @@ extension JavaImplementationMacro: PeerMacro {
         parametersClause.parameters.remove(at: environmentIndex)
       }
 
-      // Map the parameters.
+      // Map the parameters using JNIEnvironment from the runtime's C import
+      // context: Android's JNIEnv becomes a C++ struct in C++-enabled clients.
       let cParameters: [FunctionParameterSyntax] =
         [
-          "environment: UnsafeMutablePointer<JNIEnv?>!",
-          isStatic ? "thisClass: jclass" : "thisObj: jobject",
+          "environment: JNIEnvironment!",
+          isStatic ? "thisClass: JNITypes.jclass" : "thisObj: JNITypes.jobject",
         ]
         + parametersClause.parameters.map { param in
           param.with(\.type, "\(param.type).JNIType")

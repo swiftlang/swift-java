@@ -71,7 +71,7 @@ struct JNIOptionalTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalSugar__BJ")
-        public func Java_com_example_swift_SwiftModule__00024optionalSugar__BJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jlong) -> jlong {
+        public func Java_com_example_swift_SwiftModule__00024optionalSugar__BJ(environment: JNIEnvironment!, thisClass: JNITypes.jclass, arg_discriminator: jbyte, arg_value: jlong) -> jlong {
           let result_value$ = SwiftModule.optionalSugar(arg_discriminator == 1 ? Int64(fromJNI: arg_value, in: environment) : nil).map {
             Int64($0) << 32 | Int64(1)
           } ?? 0
@@ -121,17 +121,17 @@ struct JNIOptionalTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B")
-        public func Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jstring?, result_discriminator$: jbyteArray?) -> jstring? {
-          let result$: jstring?
+        public func Java_com_example_swift_SwiftModule__00024optionalExplicit__BLjava_lang_String_2_3B(environment: JNIEnvironment!, thisClass: JNITypes.jclass, arg_discriminator: jbyte, arg_value: JNITypes.jstring?, result_discriminator$: JNITypes.jbyteArray?) -> JNITypes.jstring? {
+          let result$: JNITypes.jstring?
           if let innerResult$ = SwiftModule.optionalExplicit(arg_discriminator == 1 ? String(fromJNI: arg_value, in: environment) : nil) {
             result$ = innerResult$.getJNIValue(in: environment)
             var flag$ = Int8(1)
-            environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+            environment.swiftInterface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           else {
             result$ = nil
             var flag$ = Int8(0)
-            environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+            environment.swiftInterface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           return result$
         }
@@ -179,7 +179,7 @@ struct JNIOptionalTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalClass__J_3B")
-        public func Java_com_example_swift_SwiftModule__00024optionalClass__J_3B(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jlong, result_discriminator$: jbyteArray?) -> jlong {
+        public func Java_com_example_swift_SwiftModule__00024optionalClass__J_3B(environment: JNIEnvironment!, thisClass: JNITypes.jclass, arg: jlong, result_discriminator$: JNITypes.jbyteArray?) -> jlong {
           let argBits$ = Int(Int64(fromJNI: arg, in: environment))
           let arg$ = UnsafeMutablePointer<MyClass>(bitPattern: argBits$)
           let result$: jlong
@@ -189,12 +189,12 @@ struct JNIOptionalTests {
             let resultWrappedBits$ = Int64(Int(bitPattern: resultWrapped$))
             result$ = resultWrappedBits$.getJNILocalRefValue(in: environment)
             var flag$ = Int8(1)
-            environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+            environment.swiftInterface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           else {
             result$ = 0
             var flag$ = Int8(0)
-            environment.interface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
+            environment.swiftInterface.SetByteArrayRegion(environment, result_discriminator$, 0, 1, &flag$)
           }
           return result$
         }
@@ -240,7 +240,7 @@ struct JNIOptionalTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2")
-        public func Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg: jobject?) {
+        public func Java_com_example_swift_SwiftModule__00024optionalJavaKitClass__Ljava_lang_Long_2(environment: JNIEnvironment!, thisClass: JNITypes.jclass, arg: JNITypes.jobject?) {
           SwiftModule.optionalJavaKitClass(arg.map {
             return JavaLong(javaThis: $0, environment: environment)
           }

@@ -90,28 +90,28 @@ struct JNIErrorTests {
       expectedChunks: [
         """
         extension NetworkError: _JNIThrowableError {
-          public func _makeJavaThrowable(in environment: JNIEnvironment) -> jthrowable? {
+          public func _makeJavaThrowable(in environment: JNIEnvironment) -> JNITypes.jthrowable? {
             _JNIBridge_NetworkError.toJavaObject(self, in: environment)
           }
         }
         """,
         """
         extension ParseError: _JNIThrowableError {
-          public func _makeJavaThrowable(in environment: JNIEnvironment) -> jthrowable? {
+          public func _makeJavaThrowable(in environment: JNIEnvironment) -> JNITypes.jthrowable? {
             _JNIBridge_ParseError.toJavaObject(self, in: environment)
           }
         }
         """,
         """
         extension StorageError: _JNIThrowableError {
-          public func _makeJavaThrowable(in environment: JNIEnvironment) -> jthrowable? {
+          public func _makeJavaThrowable(in environment: JNIEnvironment) -> JNITypes.jthrowable? {
             _JNIBridge_StorageError.toJavaObject(self, in: environment)
           }
         }
         """,
         """
         extension LateError: _JNIThrowableError {
-          public func _makeJavaThrowable(in environment: JNIEnvironment) -> jthrowable? {
+          public func _makeJavaThrowable(in environment: JNIEnvironment) -> JNITypes.jthrowable? {
             _JNIBridge_LateError.toJavaObject(self, in: environment)
           }
         }
@@ -140,7 +140,7 @@ struct JNIErrorTests {
       expectedChunks: [
         """
         extension BaseError: _JNIThrowableError {
-          public func _makeJavaThrowable(in environment: JNIEnvironment) -> jthrowable? {
+          public func _makeJavaThrowable(in environment: JNIEnvironment) -> JNITypes.jthrowable? {
             _JNIBridge_BaseError.toJavaObject(self, in: environment)
           }
         }

@@ -889,15 +889,17 @@ extension JNISwift2JavaGenerator {
     self.generatedCDeclSymbolNames.append(cName)
 
     let translatedParameters = parameters.map {
-      "\($0.name): \($0.type.jniTypeName)"
+      "\($0.name): \($0.type.swiftJNITypeName)"
     }
 
+    // Use the Swift alias defined in the runtime's C import context. Importing
+    // Android's JNIEnv directly in a C++-enabled client makes it a C++ struct.
     let thunkParameters =
       [
-        "environment: UnsafeMutablePointer<JNIEnv?>!",
-        "thisClass: jclass",
+        "environment: JNIEnvironment!",
+        "thisClass: JNITypes.jclass",
       ] + translatedParameters
-    let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""
+    let thunkReturnType = resultType != .void ? " -> \(resultType.swiftJNITypeName)" : ""
 
     // TODO: Think about function overloads
     printer.printBraceBlock(
@@ -941,7 +943,7 @@ extension JNISwift2JavaGenerator {
           methods: [wrapMemoryAddressUnsafeMethod]
         )
 
-        static var javaClass: jclass {
+        static var javaClass: JNITypes.jclass {
           cache.javaClass
         }
 
@@ -957,7 +959,7 @@ extension JNISwift2JavaGenerator {
   private func printThrowableErrorConformance(_ printer: inout SwiftPrinter, _ type: ExtractedNominalType) {
     let bridgeName = JNICaching.bridgeName(for: type)
     printer.printBraceBlock("extension \(type.effectiveSwiftTypeName): _JNIThrowableError") { printer in
-      printer.printBraceBlock("public func _makeJavaThrowable(in environment: JNIEnvironment) -> jthrowable?") { printer in
+      printer.printBraceBlock("public func _makeJavaThrowable(in environment: JNIEnvironment) -> JNITypes.jthrowable?") { printer in
         printer.print("\(bridgeName).toJavaObject(self, in: environment)")
       }
     }
@@ -992,7 +994,7 @@ extension JNISwift2JavaGenerator {
     printer.printBraceBlock(bridgeDeclaration) { printer in
       printer.print("typealias SwiftType = \(bridgedSwiftType)")
       printer.println()
-      printer.printBraceBlock("static var javaClass: jclass") { printer in
+      printer.printBraceBlock("static var javaClass: JNITypes.jclass") { printer in
         printer.print("\(cacheName).javaClass")
       }
       printer.println()
@@ -1164,15 +1166,15 @@ extension JNISwift2JavaGenerator {
       let resultType = nativeSignature.result.javaType
 
       let translatedParameters = parameters.map {
-        "\($0.name): \($0.type.jniTypeName)"
+        "\($0.name): \($0.type.swiftJNITypeName)"
       }
 
       let thunkParameters =
         [
-          "environment: UnsafeMutablePointer<JNIEnv?>!",
-          "thisClass: jclass",
+          "environment: JNIEnvironment!",
+          "thisClass: JNITypes.jclass",
         ] + translatedParameters
-      let thunkReturnType = resultType != .void ? " -> \(resultType.jniTypeName)" : ""
+      let thunkReturnType = resultType != .void ? " -> \(resultType.swiftJNITypeName)" : ""
 
       let signature = #"static func \#(decl.openerMethodName)(\#(thunkParameters.joined(separator: .comma)))\#(thunkReturnType)"#
       if !skipMethodBody {
