@@ -61,13 +61,15 @@ extension ExtractedFunc {
     }
 
     let returnsBoolean = self.functionSignature.result.type.asNominalTypeDeclaration?.knownTypeKind == .bool
+    // A property named with backticks, such as `default`, is `getDefault` in Java.
+    let name = self.name.unescapedSwiftName
 
     if !returnsBoolean {
-      return "get\(self.name.firstCharacterUppercased)"
-    } else if !self.name.hasJavaBooleanNamingConvention {
-      return "is\(self.name.firstCharacterUppercased)"
+      return "get\(name.firstCharacterUppercased)"
+    } else if !name.hasJavaBooleanNamingConvention {
+      return "is\(name.firstCharacterUppercased)"
     } else {
-      return self.name
+      return name
     }
   }
 
@@ -85,13 +87,14 @@ extension ExtractedFunc {
     }
 
     let isBooleanSetter = self.functionSignature.parameters.first?.type.asNominalTypeDeclaration?.knownTypeKind == .bool
+    let name = self.name.unescapedSwiftName
 
-    if isBooleanSetter && self.name.hasJavaBooleanNamingConvention {
+    if isBooleanSetter && name.hasJavaBooleanNamingConvention {
       // Safe to force unwrap due to `hasJavaBooleanNamingConvention` check.
-      let propertyName = self.name.split(separator: "is", maxSplits: 1).last!
+      let propertyName = name.split(separator: "is", maxSplits: 1).last!
       return "set\(propertyName)"
     } else {
-      return "set\(self.name.firstCharacterUppercased)"
+      return "set\(name.firstCharacterUppercased)"
     }
   }
 }

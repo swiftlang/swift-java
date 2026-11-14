@@ -122,13 +122,27 @@ info "Generated config docs are up to date."
 # MARK: Determine latest swift-java-jni-core release
 
 info "Fetching latest swift-java-jni-core release tag..."
-JNI_CORE_LATEST=$(gh api repos/swiftlang/swift-java-jni-core/tags --jq '.[0].name')
+JNI_CORE_LATEST=$(gh api repos/swiftlang/swift-java-jni-core/tags --jq '.[0].name // empty')
 
 if [[ -z "$JNI_CORE_LATEST" ]]; then
   error "Could not determine latest swift-java-jni-core release."
 fi
 
 info "Latest swift-java-jni-core release: ${BOLD}$JNI_CORE_LATEST${NC}"
+
+# ==== -----------------------------------------------------------------------
+# MARK: Determine latest swift-binding-generator-core release
+
+info "Fetching latest swift-binding-generator-core release tag..."
+BINDING_GENERATOR_CORE_LATEST=$(gh api repos/swiftlang/swift-binding-generator-core/tags --jq '.[0].name // empty')
+
+if [[ -z "$BINDING_GENERATOR_CORE_LATEST" ]]; then
+  error "Could not determine latest swift-binding-generator-core release.
+       Tag a release in https://github.com/swiftlang/swift-binding-generator-core first,
+       so this release can pin a specific compatible version of it."
+fi
+
+info "Latest swift-binding-generator-core release: ${BOLD}$BINDING_GENERATOR_CORE_LATEST${NC}"
 
 # ==== -----------------------------------------------------------------------
 # MARK: Update Package.swift for release
@@ -148,6 +162,19 @@ sed -i '' -E \
 # Verify the change was applied
 if ! grep -q "from: \"$JNI_CORE_LATEST\"" "$PACKAGE_SWIFT"; then
   error "Failed to update swift-java-jni-core version in Package.swift"
+fi
+
+info "Pinning swift-binding-generator-core to version ${BOLD}$BINDING_GENERATOR_CORE_LATEST${NC} in Package.swift..."
+
+# Replace any existing binding-generator-core version specification with the pinned version.
+# This handles both `from: "X.Y.Z"` and `branch: "main"` forms.
+sed -i '' -E \
+  's|(swiftBindingGeneratorCoreDep = \.package\(url: "https://github\.com/swiftlang/swift-binding-generator-core"), .*\)|swiftBindingGeneratorCoreDep = .package(url: "https://github.com/swiftlang/swift-binding-generator-core", from: "'"$BINDING_GENERATOR_CORE_LATEST"'")|' \
+  "$PACKAGE_SWIFT"
+
+# Verify the change was applied
+if ! grep -q "from: \"$BINDING_GENERATOR_CORE_LATEST\"" "$PACKAGE_SWIFT"; then
+  error "Failed to update swift-binding-generator-core version in Package.swift"
 fi
 
 info "Package.swift updated."
@@ -214,6 +241,16 @@ sed -i '' -E \
 # Verify the change was applied
 if ! grep -q 'branch: "main"' "$PACKAGE_SWIFT"; then
   error "Failed to update swift-java-jni-core to branch: \"main\" in Package.swift"
+fi
+
+info "Updating Package.swift to use swift-binding-generator-core from main branch..."
+sed -i '' -E \
+  's|(swiftBindingGeneratorCoreDep = \.package\(url: "https://github\.com/swiftlang/swift-binding-generator-core"), .*\)|swiftBindingGeneratorCoreDep = .package(url: "https://github.com/swiftlang/swift-binding-generator-core", branch: "main")|' \
+  "$PACKAGE_SWIFT"
+
+# Verify the change was applied
+if ! grep -q 'swift-binding-generator-core", branch: "main")' "$PACKAGE_SWIFT"; then
+  error "Failed to update swift-binding-generator-core to branch: \"main\" in Package.swift"
 fi
 
 info "Package.swift updated for development."

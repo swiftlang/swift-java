@@ -367,6 +367,87 @@ struct JNIProtocolTests {
   }
 
   @Test
+  func takeAsSetterNewValue() throws {
+    let source = """
+      public protocol Animal {
+        public func bark()
+      }
+
+      public struct Owner {
+        public var animal: any Animal
+      }
+      """
+
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public <_T0 extends Animal> void setAnimal(_T0 newValue) {
+          Owner.$setAnimal(newValue, this.$memoryAddress());
+        }
+        """,
+        """
+        private static native void $setAnimal(java.lang.Object newValue, long selfPointer);
+        """,
+      ]
+    )
+
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        final class _Owner_setAnimal_newValue_Wrapper: SwiftJavaAnimalWrapper {
+          ...
+        }
+        """,
+        """
+        @_cdecl("Java_com_example_swift_Owner__00024setAnimal__Ljava_lang_Object_2J")
+        public func Java_com_example_swift_Owner__00024setAnimal__Ljava_lang_Object_2J(environment: JNIEnvironment!, thisClass: JNITypes.jclass, newValue: JNITypes.jobject?, selfPointer: jlong) {
+        """,
+        """
+            newValueswiftObject$ = _Owner_setAnimal_newValue_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: newValue!, environment: environment))
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func takeAsOverloadedParameter() throws {
+    let source = """
+      public protocol Animal {
+        func bark()
+      }
+
+      public struct Owner {
+        public func take(first: any Animal) {}
+        public func take(second: any Animal) {}
+      }
+      """
+
+    try assertOutput(
+      input: source,
+      config: config,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        "final class _Owner_takeFirst_first_Wrapper: SwiftJavaAnimalWrapper {",
+        "firstswiftObject$ = _Owner_takeFirst_first_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: first!, environment: environment))",
+        "final class _Owner_takeSecond_second_Wrapper: SwiftJavaAnimalWrapper {",
+        "secondswiftObject$ = _Owner_takeSecond_second_Wrapper(_javaAnimalInterface: JavaAnimal(javaThis: second!, environment: environment))",
+      ]
+    )
+  }
+
+  @Test
   func generatesProtocolWrappers() throws {
     try assertOutput(
       input: source,

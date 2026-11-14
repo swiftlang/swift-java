@@ -97,6 +97,8 @@ In this mode the generated sources use JNI to call native code.
 This mode offers less performance and flexibility than FFM, but it is the most compatible: it works on older JVMs as well as on Android.
 Use it when FFM is not available, or when wide deployment compatibility is your priority. When performance is paramount, prefer FFM.
 
+For Android-specific guidance, see also the [Android documentation](Sources/SwiftJavaDocumentation/Documentation.docc/Android.md).
+
 Required language/runtime versions:
 - **Swift 6.2**, because of dependence on rich swift interface files
 - **JDK 17+**; the generated Java sources target the `javaSourceLevel` setting, which supports 17 through 25 (default 22)
@@ -220,23 +222,19 @@ Please read the documentation of both performance testing tools, and note that r
 
 ## User Guide
 
-More details about the project can be found in [docc](https://www.swift.org/documentation/docc/) documentation.
+The swift-java project's [documentation](https://swiftpackageindex.com/swiftlang/swift-java/main/documentation/swiftjavadocumentation) is available on the Swift Package Index.
 
-To view the rendered docc documentation you can use the docc preview command:
+To preview the [DocC](https://www.swift.org/documentation/docc/) documentation, run:
 
 ```bash
+# macOS
 xcrun docc preview Sources/SwiftJavaDocumentation/Documentation.docc
 
-# OR SwiftJava to view SwiftJava documentation:
-# xcrun docc preview Sources/SwiftJava/Documentation.docc
-
-# ========================================
-# Starting Local Preview Server
-#	 Address: http://localhost:8080/documentation/documentation
-# ========================================
-# Monitoring /Users/ktoso/code/swift-java/Sources/SwiftJavaDocumentation/Documentation.docc for changes...
-
+# Linux (or any setup where docc is on your PATH)
+docc preview Sources/SwiftJavaDocumentation/Documentation.docc
 ```
+
+To preview the `SwiftJava` documentation instead, use `Sources/SwiftJava/Documentation.docc` as the path.
 
 ## Project Status
 
