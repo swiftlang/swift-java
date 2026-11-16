@@ -31,13 +31,3 @@ runs:
       # - name: Check Java environment
       #  shell: bash
       #  run: ./gradlew -q javaToolchains
-    - name: Cache local SwiftPM repository
-      if: matrix.os_version == 'noble'
-      uses: actions/cache@v6
-      continue-on-error: true
-      with:
-        path: /__w/swift-java/swift-java/.build/checkouts
-        key: ${{ runner.os }}-swiftpm-cache-${{ hashFiles('Package.swift') }}
-        restore-keys: |
-          ${{ runner.os }}-swiftpm-cache
-          ${{ runner.os }}-swiftpm-
