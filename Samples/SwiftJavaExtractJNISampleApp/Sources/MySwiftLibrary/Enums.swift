@@ -34,9 +34,9 @@ public enum EnumWithCaseNameValue {
 
 /// An enum case has the same name as an enclosing type.
 public struct Calendar {
-    public enum Component {
-        case calendar
-    }
+  public enum Component {
+    case calendar
+  }
 }
 
 public enum ComplexAssociatedValues {
