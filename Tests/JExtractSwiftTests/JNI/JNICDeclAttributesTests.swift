@@ -31,6 +31,7 @@ struct JNICDeclAttributesTests {
         #endif
         #if compiler(>=6.4)
         @diagnose(DeprecatedDeclaration, as: ignored)
+        @diagnose(VariableNeverMutated, as: ignored)
         #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024hello__")
         ...
@@ -52,6 +53,7 @@ struct JNICDeclAttributesTests {
         #endif
         #if compiler(>=6.4)
         @diagnose(DeprecatedDeclaration, as: ignored)
+        @diagnose(VariableNeverMutated, as: ignored)
         #endif
         @_cdecl("Java_com_example_swift_SwiftModule__00024add__JJ")
         ...
