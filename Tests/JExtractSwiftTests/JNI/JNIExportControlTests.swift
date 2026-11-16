@@ -212,7 +212,7 @@ struct JNIExportControlTests {
     #expect(java.contains("public java.lang.String getName()"), "\(java)")
     #expect(!java.contains("getInternal"), "\(java)")
     #expect(!java.contains("make("), "\(java)")
-    #expect(skipped.contains { $0.hasPrefix("Uses.internal") && $0.contains("'Internal', which is not exported") }, "\(skipped)")
+    #expect(skipped.contains { $0.hasPrefix("Uses.internal") && $0.contains("'Internal', which is not extracted") }, "\(skipped)")
   }
 
   @Test
@@ -233,7 +233,7 @@ struct JNIExportControlTests {
     let annotated = try generate(source, .annotated, dependencies: ["Models": (models, .annotated)])
     #expect(annotated.java.contains("getItem"), "\(annotated.java)")
     #expect(!annotated.java.contains("getCache"), "\(annotated.java)")
-    #expect(annotated.skipped.contains { $0.contains("'Cache', which is not exported") }, "\(annotated.skipped)")
+    #expect(annotated.skipped.contains { $0.contains("'Cache', which is not extracted") }, "\(annotated.skipped)")
 
     // A dependency that exports everything exports `Cache` too.
     let all = try generate(source, .annotated, dependencies: ["Models": (models, .all)])

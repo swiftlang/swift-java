@@ -130,7 +130,7 @@ public struct JavaExtractDecider: ExtractDecider {
     }
 
     if exportMode == .annotated, inheritedMarker != true, !decl.containsJavaExportedMember,
-      !decl.isFromKnownModuleSource
+      !SwiftKnownModule.swift.contains(decl), !SwiftKnownModule.foundation.contains(decl)
     {
       log.trace("Skip '\(decl.qualifiedNameForDebug)': not annotated @JavaExport (exportMode: annotated)")
       return false
@@ -138,7 +138,7 @@ public struct JavaExtractDecider: ExtractDecider {
     return true
   }
 
-  public func isExported(_ type: SwiftNominalTypeDeclaration) -> Bool {
+  public func isExtracted(_ type: SwiftNominalTypeDeclaration) -> Bool {
     let mode: JExtractExportMode
     if type.moduleName == swiftModuleName {
       mode = exportMode
@@ -155,11 +155,11 @@ public struct JavaExtractDecider: ExtractDecider {
     }
   }
 
-  public func mayExtractMembers(of extensionDecl: ExtensionDeclSyntax) -> Bool {
-    switch extensionDecl.javaExportMarker ?? extensionDecl.inheritedJavaExportMarker {
+  public func shouldExtract(decl: DeclSyntax, in extensionDecl: ExtensionDeclSyntax) -> Bool {
+    switch decl.javaExportMarker ?? decl.inheritedJavaExportMarker {
     case true?: true
     case false?: false
-    case nil: exportMode == .all || extensionDecl.containsJavaExportedMember
+    case nil: exportMode == .all || decl.containsJavaExportedMember
     }
   }
 }
