@@ -1479,9 +1479,6 @@ extension JNISwift2JavaGenerator {
       "\(inner)swiftObject$"
     }
 
-    /// The non-`Sendable` locals that `render` declares for a parameter whose conversion starts at
-    /// `placeholder`. The task closures of an async thunk capture them, so the thunk copies them
-    /// through `nonisolated(unsafe)` variables, as it does for the `self` pointer.
     func asyncTaskCaptures(placeholder: String) -> [(name: String, isExistential: Bool)] {
       switch self {
       case .extractSwiftValue(.placeholder, _, _, _), .extractMetatypeValue(.placeholder):
@@ -2002,9 +1999,7 @@ extension JNISwift2JavaGenerator {
         }
         for capture in taskCaptures {
           if capture.isExistential {
-            // In the Swift 6 language mode a `nonisolated(unsafe) let` holding an existential still fails the
-            // `sending` check of the task closures; a `var` passes it. `@diagnose` on the thunk silences the
-            // "never mutated" warning from Swift 6.4 on.
+            // In the Swift 6 a `nonisolated(unsafe) let` holding an existential still fails the `sending` check of the task closures
             printer.print(
               """
               #if swift(>=6)
