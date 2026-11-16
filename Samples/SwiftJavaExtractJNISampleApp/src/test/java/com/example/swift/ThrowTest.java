@@ -47,8 +47,8 @@ public class ThrowTest {
             MySwiftLibrary.throwString("");
         });
         switch (error.getCase()) {
-            case MySwiftError.Case.SwiftError _ -> {}
-            case MySwiftError.Case.InvalidInput _ -> fail("unexpected case");
+            case MySwiftError.SwiftErrorCase _ -> {}
+            case MySwiftError.InvalidInputCase _ -> fail("unexpected case");
         }
     }
 
@@ -71,7 +71,7 @@ public class ThrowTest {
             fail("expected MySwiftError");
         } catch (MySwiftError e) {
             switch (e.getCase()) {
-                case MySwiftError.Case.InvalidInput(var reason) -> assertEquals("input was 'invalid'", reason);
+                case MySwiftError.InvalidInputCase(var reason) -> assertEquals("input was 'invalid'", reason);
                 default -> fail("unexpected case");
             }
         }

@@ -145,16 +145,15 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public sealed interface Case {
-          record First() implements Case {}
-          record Second(java.lang.String arg0) implements Case {}
-          record Third(long x, int y, MyValue arg2) implements Case {}
-        }
+        public sealed interface Case {}
+        public record FirstCase() implements Case {}
+        public record SecondCase(java.lang.String arg0) implements Case {}
+        public record ThirdCase(long x, int y, MyValue arg2) implements Case {}
         """,
         """
         public Case getCase(SwiftArena swiftArena) {
           return switch (this.getDiscriminator()) {
-            case FIRST -> new Case.First();
+            case FIRST -> new FirstCase();
             case SECOND -> this.getAsSecond().orElseThrow();
             case THIRD -> this.getAsThird(swiftArena).orElseThrow();
           }
@@ -245,27 +244,27 @@ struct JNIEnumTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        public java.util.Optional<Case.First> getAsFirst() {
+        public java.util.Optional<FirstCase> getAsFirst() {
           if (getDiscriminator() != Discriminator.FIRST) {
             return java.util.Optional.empty();
           }
-          return java.util.Optional.of(new Case.First());
+          return java.util.Optional.of(new FirstCase());
         }
         """,
         """
-        public java.util.Optional<Case.Second> getAsSecond() {
+        public java.util.Optional<SecondCase> getAsSecond() {
           ...
           return associatedValues$.map((t) -> {
-            return new Case.Second(t);
+            return new SecondCase(t);
           }
           );
         }
         """,
         """
-        public java.util.Optional<Case.Third> getAsThird(SwiftArena swiftArena) {
+        public java.util.Optional<ThirdCase> getAsThird(SwiftArena swiftArena) {
           ...
           return associatedValues$.map((t) -> {
-            return new Case.Third(t.$0, t.$1, t.$2);
+            return new ThirdCase(t.$0, t.$1, t.$2);
           }
           );
         }
