@@ -36,8 +36,6 @@ public func makeSwiftJavaAnalyzer(config: Configuration) -> SwiftAnalyzer {
 /// - Skips Swift wrappers of Java types (`@JavaClass`, `@JavaInterface`,
 ///   `@JavaField`, `@JavaStaticField`, `@JavaMethod`, `@JavaStaticMethod`,
 ///   `@JavaImplementation`) since those are bridged the other way
-/// - Skips file-scope Swift operators. Operators declared in a type are
-///   extracted as static methods named after the operator (`-` is `minus`)
 public struct JavaExtractDecider: ExtractDecider {
   public let accessLevel: AccessLevelMode
   let log: Logger
@@ -69,18 +67,6 @@ public struct JavaExtractDecider: ExtractDecider {
     if attrs?.contains(where: { $0.isJavaKitMacro }) == true {
       log.trace("Skip '\(decl.qualifiedNameForDebug)': swift-java macro-wrapped Java type")
       return false
-    }
-
-    // Operators are extracted as static Java methods on their type, so a file-scope operator
-    // has nowhere to go.
-    if parent == nil, let fn = decl.as(FunctionDeclSyntax.self) {
-      switch fn.name.tokenKind {
-      case .binaryOperator, .prefixOperator, .postfixOperator:
-        log.trace("Skip '\(decl.qualifiedNameForDebug)': file-scope operators are not supported on Java")
-        return false
-      default:
-        break
-      }
     }
 
     guard let mod = decl.asProtocol((any WithModifiersSyntax).self) else {

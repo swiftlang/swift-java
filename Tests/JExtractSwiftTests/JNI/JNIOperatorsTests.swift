@@ -344,14 +344,41 @@ struct JNIOperatorsTests {
   }
 
   @Test
-  func fileScopeOperator_isSkipped() throws {
+  func fileScopeOperator_javaBindings() throws {
     try assertOutput(
       input: prefixAndPostfixSource,
       .jni,
       .java,
-      expectedChunks: [],
-      notExpectedChunks: [
-        "bitwiseNot"
+      detectChunkByInitialLines: 2,
+      expectedChunks: [
+        """
+        public static Number bitwiseNot(Number value, SwiftArena swiftArena) {
+          return Number.wrapMemoryAddressUnsafe(SwiftModule.$bitwiseNot(value.$memoryAddress()), swiftArena);
+        }
+        """,
+        """
+        private static native long $bitwiseNot(long value);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func fileScopeOperator_swiftThunks() throws {
+    try assertOutput(
+      input: prefixAndPostfixSource,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024bitwiseNot__J")
+        public func Java_com_example_swift_SwiftModule__00024bitwiseNot__J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, value: jlong) -> jlong {
+          ...
+          result$.initialize(to: ((~(value$.pointee))))
+          ...
+        }
+        """
       ]
     )
   }

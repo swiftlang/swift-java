@@ -162,9 +162,38 @@ struct FFMOperatorsTests {
         """
         public static Number dotDotDotPostfix(Number value, AllocatingSwiftArena swiftArena) {
         """,
-      ],
-      notExpectedChunks: [
-        "bitwiseNot"
+      ]
+    )
+  }
+
+  @Test
+  func fileScopeOperator_swiftThunk() throws {
+    try assertOutput(
+      input: prefixAndPostfixSource,
+      .ffm,
+      .swift,
+      expectedChunks: [
+        """
+        @_cdecl("swiftjava_SwiftModule_bitwiseNot_value")
+        public func swiftjava_SwiftModule_bitwiseNot_value(_ value: UnsafeRawPointer, _ _result: UnsafeMutableRawPointer) {
+          _result.assumingMemoryBound(to: Number.self).initialize(to: (~value.assumingMemoryBound(to: Number.self).pointee))
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func fileScopeOperator_javaBinding() throws {
+    try assertOutput(
+      input: prefixAndPostfixSource,
+      .ffm,
+      .java,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        public static Number bitwiseNot(Number value, AllocatingSwiftArena swiftArena) {
+        """
       ]
     )
   }

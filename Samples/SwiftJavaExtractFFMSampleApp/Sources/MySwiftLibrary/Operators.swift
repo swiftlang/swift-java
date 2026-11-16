@@ -42,3 +42,7 @@ public struct OperatorScore {
     OperatorScore(value: value.value + 1)
   }
 }
+
+public func * (left: Int64, right: OperatorScore) -> OperatorScore {
+  OperatorScore(value: left * right.value)
+}

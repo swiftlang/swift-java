@@ -22,26 +22,6 @@ public struct OperatorScore {
     self.value = value
   }
 
-  // snippet.operators
-  public static func + (left: OperatorScore, right: OperatorScore) -> OperatorScore {
-    OperatorScore(value: left.value + right.value)
-  }
-
-  public static func +-==* (left: OperatorScore, right: OperatorScore) -> String {
-    "Called +-==* in Java successfully with left: \(left.value) and right: \(right.value)"
-  }
-  // snippet.end
-
-  // snippet.prefixPostfixOperators
-  public static prefix func - (value: OperatorScore) -> OperatorScore {
-    OperatorScore(value: -value.value)
-  }
-
-  public static postfix func ++ (value: OperatorScore) -> OperatorScore {
-    OperatorScore(value: value.value + 1)
-  }
-  // snippet.end
-
   public static func - (left: OperatorScore, right: OperatorScore) -> OperatorScore {
     OperatorScore(value: left.value - right.value)
   }
@@ -54,3 +34,31 @@ public struct OperatorScore {
     OperatorScore(value: left.value / right.value)
   }
 }
+
+// snippet.operators
+extension OperatorScore {
+  public static func + (left: OperatorScore, right: OperatorScore) -> OperatorScore {
+    OperatorScore(value: left.value + right.value)
+  }
+
+  public static func +-==* (left: OperatorScore, right: OperatorScore) -> String {
+    "Called +-==* in Java successfully with left: \(left.value) and right: \(right.value)"
+  }
+}
+
+public func * (left: Int64, right: OperatorScore) -> OperatorScore {
+  OperatorScore(value: left * right.value)
+}
+// snippet.end
+
+// snippet.prefixPostfixOperators
+extension OperatorScore {
+  public static prefix func - (value: OperatorScore) -> OperatorScore {
+    OperatorScore(value: -value.value)
+  }
+
+  public static postfix func ++ (value: OperatorScore) -> OperatorScore {
+    OperatorScore(value: value.value + 1)
+  }
+}
+// snippet.end

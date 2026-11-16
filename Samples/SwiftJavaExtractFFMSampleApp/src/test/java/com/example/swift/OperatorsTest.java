@@ -34,6 +34,10 @@ public class OperatorsTest {
             // left +-==* right
             var result = OperatorScore.plusMinusIsEqualTimes(left, right);
             assertEquals("Called +-==* in Java successfully with left: 40 and right: 2", result);
+
+            // 2 * left, declared at file scope
+            var doubled = MySwiftLibrary.times(2, left, arena);
+            assertEquals(80, doubled.getValue());
         }
         // snippet.end
     }
