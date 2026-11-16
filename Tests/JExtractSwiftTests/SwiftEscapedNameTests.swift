@@ -47,7 +47,7 @@ struct SwiftEscapedNameTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         "public static MyEnum let(SwiftArena swiftArena) {",
-        "record Let() implements Case {",
+        "public record LetCase() implements Case {",
       ],
     )
   }

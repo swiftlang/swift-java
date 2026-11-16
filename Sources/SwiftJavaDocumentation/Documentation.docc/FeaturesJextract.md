@@ -93,8 +93,8 @@ bind the associated values of each case directly:
 
 @Snippet(path: "Snippets/EnumsJavaJNI", slice: "enumSwitchUsageJava")
 
-Each nested `Vehicle.Case.*` type is a `record`, so on Java 21+ you can also
-destructure it positionally (`case Vehicle.Case.Car(var name, var trailer)`), and
+Each case type, such as `Vehicle.CarCase`, is a `record`, so on Java 21+ you can also
+destructure it positionally (`case Vehicle.CarCase(var name, var trailer)`), and
 on Java 16+ reach the same values with
 [pattern matching for instanceof](https://openjdk.org/jeps/394).
 
@@ -174,8 +174,8 @@ try {
     MySwiftLibrary.throwTyped("");
 } catch (MySwiftError e) {
     switch (e.getCase()) {
-        case MySwiftError.Case.SwiftError _ -> System.out.println("swift error");
-        case MySwiftError.Case.InvalidInput(var reason) -> System.out.println(reason);
+        case MySwiftError.SwiftErrorCase _ -> System.out.println("swift error");
+        case MySwiftError.InvalidInputCase(var reason) -> System.out.println(reason);
     }
 }
 ```

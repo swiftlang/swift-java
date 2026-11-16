@@ -665,19 +665,16 @@ extension JNISwift2JavaGenerator {
         "<\(decl.genericParameterNames.joined(separator: .comma))>"
       }
 
-    printer.printBraceBlock("public sealed interface Case\(caseGenericClause)") { printer in
-      for enumCase in decl.cases {
-        guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
-          continue
-        }
-
-        let members = translatedCase.parameters.map {
-          $0.renderParameter()
-        }
-
-        // Print record
-        printer.print("record \(translatedCase.name)\(caseGenericClause)(\(members.joined(separator: .comma))) implements Case\(caseGenericClause) {}")
+    printer.print("public sealed interface Case\(caseGenericClause) {}")
+    for enumCase in decl.cases {
+      guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+        continue
       }
+
+      let members = translatedCase.parameters.map {
+        $0.renderParameter()
+      }
+      printer.print("public record \(translatedCase.name)Case\(caseGenericClause)(\(members.joined(separator: .comma))) implements Case\(caseGenericClause) {}")
     }
     printer.println()
 
@@ -691,7 +688,7 @@ extension JNISwift2JavaGenerator {
           if let translatedCase = self.translatedEnumCase(for: enumCase) {
             if enumCase.parameters.isEmpty {
               printer.print(
-                "case \(enumCase.name.uppercased()) -> new Case.\(translatedCase.name)\(caseGenericClause)();"
+                "case \(enumCase.name.uppercased()) -> new \(translatedCase.name)Case\(caseGenericClause)();"
               )
             } else {
               let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
@@ -732,7 +729,7 @@ extension JNISwift2JavaGenerator {
         continue
       }
 
-      let caseType = JavaType.class(package: nil, name: "Case.\(translatedCase.name)", typeParameters: caseTypeParameters)
+      let caseType = JavaType.class(package: nil, name: "\(translatedCase.name)Case", typeParameters: caseTypeParameters)
       let resultType = JavaType.optional(caseType)
       if let getAsCaseFunctionDecl = translatedCase.getAsCaseFunction,
         var getAsCaseFunction = self.translatedDecl(for: getAsCaseFunctionDecl)
@@ -766,7 +763,7 @@ extension JNISwift2JavaGenerator {
             if (getDiscriminator() != Discriminator.\(enumCase.name.uppercased())) {
               return java.util.Optional.empty();
             }
-            return java.util.Optional.of(new Case.\(translatedCase.name)\(caseTypeParameters.isEmpty ? "" : "<>")());
+            return java.util.Optional.of(new \(translatedCase.name)Case\(caseTypeParameters.isEmpty ? "" : "<>")());
           }
           """
         )
