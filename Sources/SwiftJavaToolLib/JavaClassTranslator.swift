@@ -436,14 +436,14 @@ extension JavaClassTranslator {
     }
 
     // Render all of the instance methods in Swift.
-    let instanceMethods = methods.methods.sortedForEmission().compactMap { method in
+    let instanceMethods = methods.methods.sortedForEmission().flatMap { method -> [DeclSyntax] in
       do {
         return try renderMethod(method, implementedInSwift: false)
       } catch {
         translator.logUntranslated(
           "Unable to translate '\(javaClass.getName())' method '\(method.getName())': \(error)"
         )
-        return nil
+        return []
       }
     }
 
@@ -588,10 +588,10 @@ extension JavaClassTranslator {
     }
 
     // Render static methods.
-    let methods = staticMethods.methods.sortedForEmission().compactMap { method -> DeclSyntax? in
+    let methods = staticMethods.methods.sortedForEmission().flatMap { method -> [DeclSyntax] in
       // Translate each static method.
       guard !asCrossModuleExtension || referencesCurrentModule(method) else {
-        return nil
+        return []
       }
       do {
         return try renderMethod(
@@ -606,7 +606,7 @@ extension JavaClassTranslator {
         translator.logUntranslated(
           "Unable to translate '\(javaClass.getName())' static method '\(method.getName())': \(error)"
         )
-        return nil
+        return []
       }
     }
 
@@ -686,9 +686,9 @@ extension JavaClassTranslator {
       }
     }
 
-    let renderedMethods: [DeclSyntax] = methods.methods.sortedForEmission().compactMap { method -> DeclSyntax? in
+    let renderedMethods: [DeclSyntax] = methods.methods.sortedForEmission().flatMap { method -> [DeclSyntax] in
       guard referencesCurrentModule(method) else {
-        return nil
+        return []
       }
       do {
         return try renderMethod(method, implementedInSwift: false, asCrossModuleExtensionMember: true)
@@ -696,7 +696,7 @@ extension JavaClassTranslator {
         translator.logUntranslated(
           "Unable to translate '\(javaClass.getName())' method '\(method.getName())': \(error)"
         )
-        return nil
+        return []
       }
     }
 
@@ -721,7 +721,7 @@ extension JavaClassTranslator {
       return nil
     }
 
-    let nativeMembers = nativeMethods.sortedForEmission().compactMap { method in
+    let nativeMembers = nativeMethods.sortedForEmission().flatMap { method -> [DeclSyntax] in
       do {
         return try renderMethod(
           method,
@@ -731,7 +731,7 @@ extension JavaClassTranslator {
         translator.logUntranslated(
           "Unable to translate '\(javaClass.getName())' method '\(method.getName())': \(error)"
         )
-        return nil
+        return []
       }
     }
 
@@ -1035,14 +1035,14 @@ extension JavaClassTranslator {
     return allGenericParameters
   }
 
-  /// Translates the given Java method into a Swift declaration.
+  /// Translates the given Java method into Swift declarations.
   package func renderMethod(
     _ javaMethod: Method,
     implementedInSwift: Bool,
     genericParameters: [String] = [],
     whereClause: String = "",
     asCrossModuleExtensionMember: Bool = false
-  ) throws -> DeclSyntax {
+  ) throws -> [DeclSyntax] {
     // Map the generic params on the method.
     let allGenericParameters = collectMethodGenericParameters(genericParameters: genericParameters, method: javaMethod)
     let genericParameterClauseStr =
@@ -1159,7 +1159,12 @@ extension JavaClassTranslator {
       ? "override "
       : ""
 
-    // FIXME: refactor this so we don't have to duplicate the method signatures
+    let methodDeclaration: DeclSyntax =
+      """
+      \(raw: docsString)
+      \(raw: availableAttributes.render())\(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
+      """
+
     if resultType.optionalWrappedType() != nil
       || parameters.contains(where: { $0.type.trimmedDescription.optionalWrappedType() != nil })
     {
@@ -1183,21 +1188,15 @@ extension JavaClassTranslator {
           baseBody
         }
 
-      return
+      let optionalMethodDeclaration: DeclSyntax =
         """
-        \(raw: docsString)
-        \(raw: availableAttributes.render())\(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
-
         \(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftOptionalMethodName)\(raw: genericParameterClauseStr)(\(raw: parameters.map(\.clause.description).joined(separator: ", ")))\(raw: throwsStr) -> \(raw: resultOptional)\(raw: whereClause) {
           \(body)
         }
         """
+      return [methodDeclaration, optionalMethodDeclaration]
     } else {
-      return
-        """
-        \(raw: docsString)
-        \(raw: availableAttributes.render())\(methodAttribute)\(raw: accessModifier)\(raw: overrideOpt)func \(raw: swiftMethodName)\(raw: genericParameterClauseStr)(\(raw: parametersStr))\(raw: throwsStr)\(raw: resultTypeStr)\(raw: whereClause)
-        """
+      return [methodDeclaration]
     }
   }
 
