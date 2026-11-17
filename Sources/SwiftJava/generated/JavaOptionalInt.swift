@@ -12,7 +12,7 @@ extension JavaClass<JavaOptionalInt> {
   public func empty() -> JavaOptionalInt!
 
   public func emptyOptional() -> Int32? {
-    Optional(javaOptional: empty())
+    Optional(javaOptional: self.empty())
   }
 
   /// Java method `of`.
@@ -25,7 +25,7 @@ extension JavaClass<JavaOptionalInt> {
   public func of(_ arg0: Int32) -> JavaOptionalInt!
 
   public func ofOptional(_ arg0: Int32) -> Int32? {
-    Optional(javaOptional: of(arg0))
+    Optional(javaOptional: self.of(arg0))
   }
 }
 @JavaClass("java.util.OptionalInt")

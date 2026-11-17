@@ -251,7 +251,7 @@ open class JavaFloat: JavaNumber {
   open func describeConstable() -> JavaOptional<JavaFloat>!
 
   open func describeConstableOptional() -> JavaFloat? {
-    Optional(javaOptional: describeConstable())
+    Optional(javaOptional: self.describeConstable())
   }
 
   /// Java method `doubleValue`.

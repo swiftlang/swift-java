@@ -321,4 +321,32 @@ final class BasicWrapJavaTests: XCTestCase {
       ]
     )
   }
+
+  func testSpecializedOptionalMethodParameter() async throws {
+    let classpathURL = try await compileJava(
+      """
+      package com.example;
+      class Example {
+        public java.util.OptionalLong arg0(java.util.OptionalLong value) { return value; }
+      }
+      """
+    )
+
+    try assertWrapJavaOutput(
+      javaClassNames: ["java.util.OptionalLong", "com.example.Example"],
+      classNameMappings: ["java.util.OptionalLong": "JavaOptionalLong"],
+      classpath: [classpathURL],
+      expectedChunks: [
+        """
+        @JavaMethod
+        open func arg0(_ arg0: JavaOptionalLong?) -> JavaOptionalLong!
+        """,
+        """
+        open func arg0Optional(_ arg0: Int64?) -> Int64? {
+          Optional(javaOptional: self.arg0(arg0.toJavaOptional()))
+        }
+        """,
+      ]
+    )
+  }
 }
