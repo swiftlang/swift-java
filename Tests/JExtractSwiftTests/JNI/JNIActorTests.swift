@@ -273,3 +273,52 @@ struct JNIActor1MethodsTests {
     )
   }
 }
+
+@Suite
+struct JNIActorPropertyIsolationTests {
+  static let source = """
+    public actor Record {
+      public nonisolated let identifier: Int64
+      public nonisolated var label: Int64 { 7 }
+      public nonisolated(unsafe) var unsafeValue: Int64
+      public var isolatedValue: Int64
+    }
+    """
+
+  @Test
+  func javaAccessors() throws {
+    try assertOutput(
+      input: Self.source,
+      .jni,
+      .java,
+      expectedChunks: [
+        "public long getIdentifier() {",
+        "public long getLabel() {",
+        "public long getUnsafeValue() {",
+        "public void setUnsafeValue(long newValue) {",
+        "public java.util.concurrent.CompletableFuture<java.lang.Long> getIsolatedValue() {",
+        "public java.util.concurrent.CompletableFuture<java.lang.Void> setIsolatedValue(long newValue) {",
+      ]
+    )
+  }
+
+  @Test
+  func swiftAccessors() throws {
+    try assertOutput(
+      input: Self.source,
+      .jni,
+      .swift,
+      expectedChunks: [
+        "return selfPointer$.pointee.identifier.getJNILocalRefValue(in: environment)",
+        "return selfPointer$.pointee.label.getJNILocalRefValue(in: environment)",
+        "selfPointer$.pointee.unsafeValue = Int64(fromJNI: newValue, in: environment)",
+        "let swiftResult$ = await selfPointer$.pointee.isolatedValue",
+      ],
+      notExpectedChunks: [
+        "await selfPointer$.pointee.identifier",
+        "await selfPointer$.pointee.label",
+        "await selfPointer$.pointee.unsafeValue",
+      ]
+    )
+  }
+}
