@@ -12,7 +12,7 @@ extension JavaClass<JavaOptionalDouble> {
   public func empty() -> JavaOptionalDouble!
 
   public func emptyOptional() -> Double? {
-    Optional(javaOptional: empty())
+    Optional(javaOptional: self.empty())
   }
 
   /// Java method `of`.
@@ -25,7 +25,7 @@ extension JavaClass<JavaOptionalDouble> {
   public func of(_ arg0: Double) -> JavaOptionalDouble!
 
   public func ofOptional(_ arg0: Double) -> Double? {
-    Optional(javaOptional: of(arg0))
+    Optional(javaOptional: self.of(arg0))
   }
 }
 @JavaClass("java.util.OptionalDouble")

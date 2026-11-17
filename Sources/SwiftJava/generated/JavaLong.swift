@@ -424,7 +424,7 @@ open class JavaLong: JavaNumber {
   open func describeConstable() -> JavaOptional<JavaLong>!
 
   open func describeConstableOptional() -> JavaLong? {
-    Optional(javaOptional: describeConstable())
+    Optional(javaOptional: self.describeConstable())
   }
 
   /// Java method `doubleValue`.
