@@ -210,7 +210,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.3']
+        swift_version: ['6.4.2']
         os_version: ['macos']
         jdk_vendor: ['corretto']
     env:
@@ -223,10 +223,6 @@ jobs:
         run: ./.github/scripts/install_swiftly.sh
         env:
           SWIFT_VERSION: "${{ matrix.swift_version }}"
-      - name: "EXPERIMENT: prefer Xcode Swift (swiftly 6.3.3 cannot read the macOS 27 SDK)"
-        run: |
-          echo "$(dirname "$(xcrun --find swift)")" >> "$GITHUB_PATH"
-          "$(xcrun --find swift)" --version
       - name: Swift Build
         run: swift build --disable-sandbox
       - name: Use Xcode Swift for tests
@@ -308,7 +304,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift_version: ['6.3']  # no nightly testing on macOS
+        swift_version: ['6.4.2']  # no nightly testing on macOS
         os_version: ['macos']
         jdk_vendor: ['corretto']
         sample_app: [  # TODO: use a reusable-workflow to generate those names
@@ -328,10 +324,6 @@ jobs:
         run: ./.github/scripts/install_swiftly.sh
         env:
           SWIFT_VERSION: "${{ matrix.swift_version }}"
-      - name: "EXPERIMENT: prefer Xcode Swift (swiftly 6.3.3 cannot read the macOS 27 SDK)"
-        run: |
-          echo "$(dirname "$(xcrun --find swift)")" >> "$GITHUB_PATH"
-          "$(xcrun --find swift)" --version
       - name: Cache sample .build
         uses: actions/cache@v6
         continue-on-error: true
