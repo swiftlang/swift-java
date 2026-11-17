@@ -6,15 +6,11 @@ set -x
 # WORKAROUND: prebuilts broken on Swift 6.2.1 and Linux and tests using macros https://github.com/swiftlang/swift-java/issues/418
 if [ "$(uname)" = "Darwin" ]; then
   DISABLE_EXPERIMENTAL_PREBUILTS=''
-  # EXPERIMENT: swift-build in 6.4.2 fails CopySwiftLibs for .xctest bundles with swiftly toolchains
-  # ("--strip-bitcode without --strip-bitcode-tool", no bitcode_strip in the swiftly toolchain).
-  BUILD_SYSTEM='--build-system native'
 else
   DISABLE_EXPERIMENTAL_PREBUILTS='--disable-experimental-prebuilts'
-  BUILD_SYSTEM=''
 fi
 
-swift build --build-tests $DISABLE_EXPERIMENTAL_PREBUILTS $BUILD_SYSTEM
+swift build --build-tests $DISABLE_EXPERIMENTAL_PREBUILTS
 
 run_java() {
   "$JAVA_HOME/bin/java" \
@@ -38,4 +34,4 @@ fi
 echo "java application run (swift-argument-parser main): OK"
 
 
-swift test $DISABLE_EXPERIMENTAL_PREBUILTS $BUILD_SYSTEM
+swift test $DISABLE_EXPERIMENTAL_PREBUILTS
