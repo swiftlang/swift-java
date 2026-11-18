@@ -28,7 +28,7 @@ let package = Package(
     .executableTarget(
       name: "JavaDependencySample",
       dependencies: [
-        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "SwiftJavaStatic", package: "swift-java"),
         .product(name: "SwiftJavaConfigurationShared", package: "swift-java"),
         .product(name: "JavaUtilFunction", package: "swift-java"),
         "JavaCommonsCSV",
@@ -45,7 +45,7 @@ let package = Package(
     .target(
       name: "JavaCommonsCSV",
       dependencies: [
-        .product(name: "SwiftJava", package: "swift-java"),
+        .product(name: "SwiftJavaStatic", package: "swift-java"),
         .product(name: "JavaUtilFunction", package: "swift-java"),
         .product(name: "JavaUtil", package: "swift-java"),
         .product(name: "JavaIO", package: "swift-java"),

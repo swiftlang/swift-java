@@ -84,6 +84,22 @@ fi
 echo "Displaying swift version"
 swiftly run "${runSelector[@]}" swift --version
 
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    # EXPERIMENT/WORKAROUND: with a custom SWIFTLY_TOOLCHAINS_DIR, swiftly (<= 1.2.0) points DEVELOPER_DIR at a synthesized
+    # $SWIFTLY_HOME_DIR/CommandLineTools with an empty usr/bin, so swift-build (Swift 6.4.0 to 6.4.2) finds no
+    # bitcode_strip and CopySwiftLibs fails for .xctest bundles: "Passed --strip-bitcode without --strip-bitcode-tool".
+    # Upstream fixes: swiftly c8cf2e35 (#585, unreleased), swift-build 155aefe7 (#1797, release/6.4.x + main).
+    # Remove once both ship.
+    bitcodeStrip=/Library/Developer/CommandLineTools/usr/bin/bitcode_strip
+    [[ -x "$bitcodeStrip" ]] || bitcodeStrip="$(xcrun --find bitcode_strip 2>/dev/null || true)"
+    if [[ -n "$bitcodeStrip" ]]; then
+        mkdir -p "$SWIFTLY_HOME_DIR/CommandLineTools/usr/bin"
+        ln -sf "$bitcodeStrip" "$SWIFTLY_HOME_DIR/CommandLineTools/usr/bin/bitcode_strip"
+    else
+        echo "::warning::bitcode_strip not found; swiftbuild CopySwiftLibs may fail for .xctest bundles"
+    fi
+fi
+
 if [[ "$(uname -s)" == "Linux" ]]; then
     if [[ -f "$(dirname "$0")/install-libarchive.sh" ]]; then
         CC=clang swiftly run "${runSelector[@]}" "$(dirname "$0")/install-libarchive.sh"
