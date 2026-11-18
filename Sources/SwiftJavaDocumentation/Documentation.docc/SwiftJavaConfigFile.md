@@ -246,6 +246,22 @@ only supported in `jni` mode.
 
 ---
 
+#### exportMode
+
+- **Type:** `JExtractExportMode?`
+- **Default:** `all`
+
+Which declarations to export: `all` (default) exports every declaration that passes the access level
+and filters, except those opted out with `@JavaExport(false)`. `annotated` exports only declarations marked
+`@JavaExport`, including the members of a marked type or extension.
+
+**Values:**
+
+- `all` - Export every declaration that passes the access level and filters, except those marked `@JavaExport(false)` or inside a type or extension marked `@JavaExport(false)`.
+- `annotated` - Export only declarations marked `@JavaExport`, or inside a type or extension marked `@JavaExport`. A type that isn't marked is still exported when one of its members is.
+
+---
+
 #### generatedJavaSourcesListFileOutput
 
 - **Type:** `String?`

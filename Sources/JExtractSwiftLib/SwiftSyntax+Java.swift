@@ -49,9 +49,47 @@ extension AttributeListSyntax.Element {
   /// Whether this is a `@JavaExport` attribute (used on typealiases for specialization,
   /// or on struct/class/enum to force-include them even when excluded by filters)
   package var isJavaExport: Bool {
-    guard case let .attribute(attr) = self else { return false }
-    guard let attrName = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text else { return false }
-    return attrName == "JavaExport"
+    javaExportValue != nil
+  }
+
+  /// `true` for `@JavaExport`, `false` for `@JavaExport(false)`, `nil` for any other attribute
+  package var javaExportValue: Bool? {
+    guard case let .attribute(attr) = self else { return nil }
+    guard attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "JavaExport" else { return nil }
+    guard case .argumentList(let arguments) = attr.arguments,
+      let literal = arguments.first?.expression.as(BooleanLiteralExprSyntax.self)
+    else {
+      return true
+    }
+    return literal.literal.tokenKind == .keyword(.true)
+  }
+}
+
+extension SyntaxProtocol {
+  /// The value of this declaration's own `@JavaExport` attribute, if it has one
+  package var javaExportMarker: Bool? {
+    guard let attributes = self.asProtocol((any WithAttributesSyntax).self)?.attributes else { return nil }
+    return attributes.lazy.compactMap(\.javaExportValue).first
+  }
+
+  /// The `@JavaExport` value of the nearest enclosing type or extension that has one
+  package var inheritedJavaExportMarker: Bool? {
+    var node = self.parent
+    while let current = node {
+      if current.is(DeclSyntax.self), let marker = current.javaExportMarker {
+        return marker
+      }
+      node = current.parent
+    }
+    return nil
+  }
+
+  /// Whether a member of this type, at any depth, is marked `@JavaExport`
+  package var containsJavaExportedMember: Bool {
+    guard let group = self.asProtocol((any DeclGroupSyntax).self) else { return false }
+    return group.memberBlock.members.contains { item in
+      item.decl.javaExportMarker == true || item.decl.containsJavaExportedMember
+    }
   }
 }
 

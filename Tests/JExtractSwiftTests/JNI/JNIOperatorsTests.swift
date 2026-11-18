@@ -149,4 +149,60 @@ struct JNIOperatorsTests {
       ]
     )
   }
+
+  let prefixAndPostfixSource =
+    """
+    postfix operator ++
+
+    public struct Number {
+      public static prefix func - (value: Number) -> Number {
+        value
+      }
+
+      public static postfix func ++ (value: Number) -> Number {
+        value
+      }
+
+      public static func + (left: Number, right: Number) -> Number {
+        Number()
+      }
+    }
+    """
+
+  @Test
+  func prefixAndPostfixOperators_areSkipped_javaBindings() throws {
+    try assertOutput(
+      input: prefixAndPostfixSource,
+      .jni,
+      .java,
+      expectedChunks: [
+        """
+        private static native long $plus(long left, long right);
+        """
+      ],
+      notExpectedChunks: [
+        "prefix func",
+        "postfix func",
+      ]
+    )
+  }
+
+  @Test
+  func prefixAndPostfixOperators_areSkipped_swiftThunks() throws {
+    try assertOutput(
+      input: prefixAndPostfixSource,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_Number__00024plus__JJ")
+        """
+      ],
+      notExpectedChunks: [
+        "minus",
+        "++",
+      ]
+    )
+  }
 }
