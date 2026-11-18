@@ -33,13 +33,7 @@ package struct JavaIdentifierFactory {
     // Group methods by their Java base name.
     var methodsByBaseName: [String: [ExtractedFunc]] = [:]
     for method in methods {
-      let baseName: String =
-        switch method.apiKind {
-        case .getter, .subscriptGetter: method.javaGetterName!
-        case .setter, .subscriptSetter: method.javaSetterName!
-        case .function, .initializer, .enumCase, .binaryOperator, .prefixOperator, .postfixOperator: method.name
-        }
-      methodsByBaseName[baseName, default: []].append(method)
+      methodsByBaseName[Self.javaBaseName(method), default: []].append(method)
     }
 
     // For each group with 2+ methods, check if any two share the same
@@ -64,14 +58,7 @@ package struct JavaIdentifierFactory {
 
   /// Compute the disambiguated Java method name for a declaration.
   package func makeJavaMethodName(_ decl: ExtractedFunc) -> String {
-    let baseName: String =
-      switch decl.apiKind {
-      case .getter, .subscriptGetter: decl.javaGetterName!
-      case .setter, .subscriptSetter: decl.javaSetterName!
-      case .function, .initializer, .enumCase: decl.name
-      case .binaryOperator, .prefixOperator, .postfixOperator:
-        Self.javaOperatorName(decl.name)
-      }
+    let baseName = Self.javaBaseName(decl)
     var methodName = baseName + paramsSuffix(decl, baseName: baseName)
     if Self.javaKeywords.contains(methodName) || Self.finalObjectMethods.contains(methodName) {
       methodName += "_"
@@ -79,10 +66,24 @@ package struct JavaIdentifierFactory {
     return methodName
   }
 
+  private static func javaBaseName(_ decl: ExtractedFunc) -> String {
+    switch decl.apiKind {
+    case .getter, .subscriptGetter: decl.javaGetterName!
+    case .setter, .subscriptSetter: decl.javaSetterName!
+    case .function, .initializer, .enumCase: decl.name
+    case .binaryOperator, .prefixOperator, .postfixOperator: javaOperatorName(decl.name)
+    }
+  }
+
   private func paramsSuffix(_ decl: ExtractedFunc, baseName: String) -> String {
     switch decl.apiKind {
     case .getter, .subscriptGetter, .setter, .subscriptSetter:
       return ""
+    case .prefixOperator, .postfixOperator:
+      // A prefix and a postfix form of one operator, like `prefix func ...` and
+      // `postfix func ...`, take the same parameter, so only the fixity tells them apart.
+      guard needsSuffix(for: baseName) else { return "" }
+      return decl.apiKind == .prefixOperator ? "Prefix" : "Postfix"
     default:
       guard needsSuffix(for: baseName) else { return "" }
       if decl.functionSignature.parameters.isEmpty {

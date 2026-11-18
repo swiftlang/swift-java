@@ -712,10 +712,12 @@ extension JNISwift2JavaGenerator {
       result = "(\(tryClause)((\(arguments.first!)) \(decl.name) (\(arguments.last!))))"
     case .prefixOperator:
       precondition(arguments.count == 1, "Prefix operator must have exactly 1 argument: \(decl)")
-      result = "(\(tryClause)(\(decl.name) (\(arguments.first!))))"
+      // No whitespace between the operator and its operand, or Swift doesn't parse it as a prefix operator.
+      result = "(\(tryClause)(\(decl.name)(\(arguments.first!))))"
     case .postfixOperator:
       precondition(arguments.count == 1, "Postfix operator must have exactly 1 argument: \(decl)")
-      result = "(\(tryClause)((\(arguments.first!)) \(decl.name)))"
+      // No whitespace between the operand and the operator, or Swift doesn't parse it as a postfix operator.
+      result = "(\(tryClause)((\(arguments.first!))\(decl.name)))"
     case .enumCase:
       let downcallArguments = zip(
         decl.functionSignature.parameters,

@@ -13,16 +13,13 @@
 //===----------------------------------------------------------------------===//
 
 infix operator +-==*
+postfix operator ++
 
 public struct OperatorScore {
   public var value: Int64
 
   public init(value: Int64) {
     self.value = value
-  }
-
-  public static func + (left: OperatorScore, right: OperatorScore) -> OperatorScore {
-    OperatorScore(value: left.value + right.value)
   }
 
   public static func - (left: OperatorScore, right: OperatorScore) -> OperatorScore {
@@ -36,8 +33,32 @@ public struct OperatorScore {
   public static func / (left: OperatorScore, right: OperatorScore) -> OperatorScore {
     OperatorScore(value: left.value / right.value)
   }
+}
+
+// snippet.operators
+extension OperatorScore {
+  public static func + (left: OperatorScore, right: OperatorScore) -> OperatorScore {
+    OperatorScore(value: left.value + right.value)
+  }
 
   public static func +-==* (left: OperatorScore, right: OperatorScore) -> String {
     "Called +-==* in Java successfully with left: \(left.value) and right: \(right.value)"
   }
 }
+
+public func * (left: Int64, right: OperatorScore) -> OperatorScore {
+  OperatorScore(value: left * right.value)
+}
+// snippet.end
+
+// snippet.prefixPostfixOperators
+extension OperatorScore {
+  public static prefix func - (value: OperatorScore) -> OperatorScore {
+    OperatorScore(value: -value.value)
+  }
+
+  public static postfix func ++ (value: OperatorScore) -> OperatorScore {
+    OperatorScore(value: value.value + 1)
+  }
+}
+// snippet.end

@@ -21,26 +21,41 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class OperatorsTest {
     @Test
-    void plus() {
+    void binaryOperators() {
+        // snippet.operatorsUsageJava
         try (var arena = SwiftArena.ofConfined()) {
             var left = OperatorScore.init(40, arena);
             var right = OperatorScore.init(2, arena);
 
-            var result = OperatorScore.plus(left, right, arena);
+            // left + right
+            var sum = OperatorScore.plus(left, right, arena);
+            assertEquals(42, sum.getValue());
 
-            assertEquals(42, result.getValue());
+            // left +-==* right
+            var result = OperatorScore.plusMinusIsEqualTimes(left, right);
+            assertEquals("Called +-==* in Java successfully with left: 40 and right: 2", result);
+
+            // 2 * left, declared at file scope
+            var doubled = MySwiftLibrary.times(2, left, arena);
+            assertEquals(80, doubled.getValue());
         }
+        // snippet.end
     }
 
     @Test
-    void randomOperator() {
+    void prefixAndPostfixOperators() {
+        // snippet.prefixPostfixOperatorsUsageJava
         try (var arena = SwiftArena.ofConfined()) {
-            var left = OperatorScore.init(40, arena);
-            var right = OperatorScore.init(2, arena);
+            var score = OperatorScore.init(42, arena);
 
-            var result = OperatorScore.plusMinusIsEqualTimes(left, right);
+            // -score
+            var negated = OperatorScore.minus(score, arena);
+            assertEquals(-42, negated.getValue());
 
-            assertEquals("Called +-==* in Java successfully with left: 40 and right: 2", result);
+            // score++
+            var incremented = OperatorScore.plusPlus(score, arena);
+            assertEquals(43, incremented.getValue());
         }
+        // snippet.end
     }
 }

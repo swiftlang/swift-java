@@ -850,6 +850,39 @@ Subscripts taking parameters keep them on the generated Java methods.
    }
 }
 
+### Operators
+
+Swift operators are imported as static Java methods named after the operator components; For example `+` becomes `plus`, and `++` becomes `plusPlus`. Some methods have special names, and as such `==` becomes `isEqual`. Prefix and Postfix operators are supported as well.
+
+@TabNavigator {
+   @Tab("Swift") {
+      @Snippet(path: "Snippets/OperatorsSwift.swift", slice: "operators")
+   }
+   @Tab("Java (JNI)") {
+      @Snippet(path: "Snippets/OperatorsJavaJNI", slice: "operatorsUsageJava")
+   }
+   @Tab("Java (FFM)") {
+      @Snippet(path: "Snippets/OperatorsJavaFFM", slice: "operatorsUsageJava")
+   }
+}
+
+#### Prefix and postfix operators
+
+@TabNavigator {
+   @Tab("Swift") {
+      @Snippet(path: "Snippets/OperatorsSwift.swift", slice: "prefixPostfixOperators")
+   }
+   @Tab("Java (JNI)") {
+      @Snippet(path: "Snippets/OperatorsJavaJNI", slice: "prefixPostfixOperatorsUsageJava")
+   }
+   @Tab("Java (FFM)") {
+      @Snippet(path: "Snippets/OperatorsJavaFFM", slice: "prefixPostfixOperatorsUsageJava")
+   }
+}
+
+If a type declares both a prefix and a postfix form of the same operator, like `prefix func ...` and `postfix func ...`,
+the Java methods get a `Prefix` or `Postfix` suffix: `dotDotDotPrefix` and `dotDotDotPostfix`.
+
 ### Closures
 
 Swift closure parameters become Java functional interfaces that can be
