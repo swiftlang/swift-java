@@ -61,6 +61,17 @@ public interface JNISwiftInstance extends SwiftInstance {
      * and cache the result in a field exposed via {@link #$cleanup()}.
      */
     default SwiftInstanceCleanup $createCleanup() {
-        return new JNISwiftInstanceCleanup($createDestroyFunction());
+        return $createCleanup(null);
+    }
+
+    /**
+     * Build a fresh {@link SwiftInstanceCleanup} that also clears {@code memoryAddress}
+     * after the underlying Swift value has been destroyed.
+     * <p>
+     * The cleanup stores the pointer holder rather than {@code this}, so it remains safe
+     * for use with a {@link java.lang.ref.Cleaner}.
+     */
+    default SwiftInstanceCleanup $createCleanup(SwiftInstancePointer memoryAddress) {
+        return new JNISwiftInstanceCleanup($createDestroyFunction(), memoryAddress);
     }
 }

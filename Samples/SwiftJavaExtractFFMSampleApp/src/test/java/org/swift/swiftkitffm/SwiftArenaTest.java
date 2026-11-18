@@ -58,12 +58,11 @@ public class SwiftArenaTest {
             unsafelyEscapedOutsideArenaScope = obj;
         }
 
-        try {
-            unsafelyEscapedOutsideArenaScope.echoIntMethod(1);
-            fail("Expected exception to be thrown! Object was supposed to be dead.");
-        } catch (IllegalStateException ex) {
-            return;
-        }
+        IllegalStateException methodEx = assertThrows(IllegalStateException.class,
+                () -> unsafelyEscapedOutsideArenaScope.echoIntMethod(1));
+        assertTrue(methodEx.getMessage().contains("already destroyed"));
+        assertThrows(IllegalStateException.class, unsafelyEscapedOutsideArenaScope::$memorySegment);
+        assertThrows(IllegalStateException.class, unsafelyEscapedOutsideArenaScope::$memoryAddress);
     }
 
     // FIXME: The destroy witness table call hangs on x86_64 platforms during the destroy witness table call
@@ -77,12 +76,11 @@ public class SwiftArenaTest {
             unsafelyEscapedOutsideArenaScope = s;
         }
 
-        try {
-            unsafelyEscapedOutsideArenaScope.echoIntMethod(1);
-            fail("Expected exception to be thrown! Object was supposed to be dead.");
-        } catch (IllegalStateException ex) {
-            return;
-        }
+        IllegalStateException methodEx = assertThrows(IllegalStateException.class,
+                () -> unsafelyEscapedOutsideArenaScope.echoIntMethod(1));
+        assertTrue(methodEx.getMessage().contains("already destroyed"));
+        assertThrows(IllegalStateException.class, unsafelyEscapedOutsideArenaScope::$memorySegment);
+        assertThrows(IllegalStateException.class, unsafelyEscapedOutsideArenaScope::$memoryAddress);
     }
 
     @Test

@@ -20,7 +20,7 @@ import org.swift.swiftkit.core.SwiftInstanceCleanup;
 import java.lang.foreign.MemorySegment;
 
 public abstract class FFMSwiftInstance implements SwiftInstance {
-    private final MemorySegment memorySegment;
+    private final FFMInstanceMemory memorySegment;
     private final FFMSwiftInstanceCleanup cleanup;
 
     /**
@@ -30,8 +30,8 @@ public abstract class FFMSwiftInstance implements SwiftInstance {
      * @param arena the arena this object belongs to. When the arena goes out of scope, this value is destroyed.
      */
     protected FFMSwiftInstance(MemorySegment segment, AllocatingSwiftArena arena) {
-        this.memorySegment = segment;
-        this.cleanup = new FFMSwiftInstanceCleanup(segment, $swiftType());
+        this.memorySegment = new FFMInstanceMemory(segment);
+        this.cleanup = new FFMSwiftInstanceCleanup(this.memorySegment, $swiftType());
 
         // Only register once we have fully initialized the object since this will need the object pointer.
         arena.register(this);
@@ -41,7 +41,12 @@ public abstract class FFMSwiftInstance implements SwiftInstance {
      * The pointer to the instance in memory. I.e. the {@code self} of the Swift object or value.
      */
     public final MemorySegment $memorySegment() {
-        return this.memorySegment;
+        $ensureAlive();
+        MemorySegment segment = this.memorySegment.get();
+        if (segment == null) {
+            throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!");
+        }
+        return segment;
     }
 
     @Override

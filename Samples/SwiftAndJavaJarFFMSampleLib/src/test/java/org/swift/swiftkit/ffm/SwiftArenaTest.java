@@ -20,6 +20,7 @@ import org.junit.jupiter.api.condition.DisabledIf;
 import org.swift.swiftkit.core.util.PlatformUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.swift.swiftkit.ffm.SwiftRuntime.*;
 
 public class SwiftArenaTest {
@@ -33,8 +34,9 @@ public class SwiftArenaTest {
     @Test
     @DisabledIf("isAmd64")
     public void arena_releaseClassOnClose_class_ok() {
+        MySwiftClass obj;
         try (var arena = AllocatingSwiftArena.ofConfined()) {
-            var obj = MySwiftClass.init(1, 2, arena);
+            obj = MySwiftClass.init(1, 2, arena);
 
             retain(obj);
             assertEquals(2, retainCount(obj));
@@ -43,6 +45,7 @@ public class SwiftArenaTest {
             assertEquals(1, retainCount(obj));
         }
 
-        // TODO: should we zero out the $memorySegment perhaps?
+        assertThrows(IllegalStateException.class, obj::$memorySegment);
+        assertThrows(IllegalStateException.class, obj::$memoryAddress);
     }
 }

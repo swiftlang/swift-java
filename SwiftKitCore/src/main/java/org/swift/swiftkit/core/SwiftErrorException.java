@@ -29,7 +29,7 @@ package org.swift.swiftkit.core;
 public final class SwiftErrorException extends SwiftError {
 
     /** Pointer to the boxed {@code any Error}. */
-    private final long selfPointer;
+    private final SwiftInstancePointer selfPointer;
 
     /** The metadata address of {@code (any Error).self}. */
     private final long typeMetadataAddress;
@@ -47,9 +47,9 @@ public final class SwiftErrorException extends SwiftError {
     private SwiftErrorException(long selfPointer, long typeMetadataAddress, SwiftArena swiftArena) {
         SwiftObjects.requireNonZero(selfPointer, "selfPointer");
         SwiftObjects.requireNonZero(typeMetadataAddress, "typeMetadataAddress");
-        this.selfPointer = selfPointer;
+        this.selfPointer = new SwiftInstancePointer(selfPointer);
         this.typeMetadataAddress = typeMetadataAddress;
-        this.$cleanup = $createCleanup();
+        this.$cleanup = $createCleanup(this.selfPointer);
 
         // Only register once we have fully initialized the object since this will need the object pointer.
         swiftArena.register(this);
@@ -70,7 +70,8 @@ public final class SwiftErrorException extends SwiftError {
 
     @Override
     public long $memoryAddress() {
-        return this.selfPointer;
+        $ensureAlive();
+        return this.selfPointer.get();
     }
 
     @Override

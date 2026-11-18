@@ -25,25 +25,30 @@ import java.lang.foreign.MemorySegment;
  * {@link SwiftInstance} for proper lifecycle management.
  */
 public abstract class FFMSwiftErrorInstance extends Exception implements SwiftInstance {
-    private final MemorySegment memorySegment;
+    private final FFMInstanceMemory memorySegment;
     private final FFMSwiftInstanceCleanup cleanup;
 
     protected FFMSwiftErrorInstance(String message, MemorySegment segment, AllocatingSwiftArena arena) {
         super(message);
-        this.memorySegment = segment;
-        this.cleanup = new FFMSwiftInstanceCleanup(segment, $swiftType());
+        this.memorySegment = new FFMInstanceMemory(segment);
+        this.cleanup = new FFMSwiftInstanceCleanup(this.memorySegment, $swiftType());
         arena.register(this);
     }
 
     protected FFMSwiftErrorInstance(MemorySegment segment, AllocatingSwiftArena arena) {
         super();
-        this.memorySegment = segment;
-        this.cleanup = new FFMSwiftInstanceCleanup(segment, $swiftType());
+        this.memorySegment = new FFMInstanceMemory(segment);
+        this.cleanup = new FFMSwiftInstanceCleanup(this.memorySegment, $swiftType());
         arena.register(this);
     }
 
     public final MemorySegment $memorySegment() {
-        return memorySegment;
+        $ensureAlive();
+        MemorySegment segment = memorySegment.get();
+        if (segment == null) {
+            throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!");
+        }
+        return segment;
     }
 
     @Override

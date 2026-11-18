@@ -25,13 +25,13 @@ class FFMSwiftInstanceCleanup implements SwiftInstanceCleanup {
     private static final AtomicIntegerFieldUpdater<FFMSwiftInstanceCleanup> DESTROYED =
             AtomicIntegerFieldUpdater.newUpdater(FFMSwiftInstanceCleanup.class, "destroyed");
 
-    private final MemorySegment memoryAddress;
+    private final FFMInstanceMemory memoryAddress;
     private final SwiftAnyType type;
 
     @SuppressWarnings("unused") // accessed via DESTROYED field updater
     private volatile int destroyed;
 
-    public FFMSwiftInstanceCleanup(MemorySegment memoryAddress, SwiftAnyType type) {
+    public FFMSwiftInstanceCleanup(FFMInstanceMemory memoryAddress, SwiftAnyType type) {
         this.memoryAddress = memoryAddress;
         this.type = type;
     }
@@ -44,10 +44,14 @@ class FFMSwiftInstanceCleanup implements SwiftInstanceCleanup {
     @Override
     public void run() {
         if (DESTROYED.compareAndSet(this, 0, 1)) {
+            MemorySegment address = memoryAddress != null ? memoryAddress.get() : null;
             // Allow null pointers just for AutoArena tests.
-            if (type != null && memoryAddress != null) {
-                SwiftRuntime.log(LIFECYCLE, "Destroy swift value [" + type.getSwiftName() + "]: " + memoryAddress);
-                SwiftValueWitnessTable.destroy(type, memoryAddress);
+            if (type != null && address != null) {
+                SwiftRuntime.log(LIFECYCLE, "Destroy swift value [" + type.getSwiftName() + "]: " + address);
+                SwiftValueWitnessTable.destroy(type, address);
+            }
+            if (memoryAddress != null) {
+                memoryAddress.clear();
             }
         } else {
             throw new IllegalStateException("Double destruction attempt detected!");
