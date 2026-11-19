@@ -32,7 +32,7 @@ struct JNIAsyncSelfCaptureTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_MyClass__00024compute__JLjava_util_concurrent_CompletableFuture_2")
+        @_cdecl("Java_com_example_swift_MyClass__00024compute__JLorg_swift_swiftkit_core_SwiftAsyncResultSink_2")
         ...
         nonisolated(unsafe) let selfPointerUnsafeSendable$ = selfPointer$
         ...
@@ -59,7 +59,7 @@ struct JNIAsyncSelfCaptureTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_WorkerBox__00024work__JJLjava_util_concurrent_CompletableFuture_2")
+        @_cdecl("Java_com_example_swift_WorkerBox__00024work__JJLorg_swift_swiftkit_core_SwiftAsyncResultSink_2")
         ...
         nonisolated(unsafe) let selfPointerExistentialUnsafeSendable$ = selfPointerExistential$
         ...

@@ -47,11 +47,11 @@ public class SwiftAsyncResultSink: JavaObject {
     methods: [bindTask, isDone, complete, fail]
   )
 
-  public static func bind(_ task: Task<Void, Never>, to completion: jobject?, in environment: JNIEnvironment) {
+  public static func bind(_ task: Task<Void, Never>, to resultSink: jobject?, in environment: JNIEnvironment) {
     let handle = Unmanaged.passRetained(_JNISwiftTask(task))
     environment.interface.CallVoidMethodA(
       environment,
-      completion,
+      resultSink,
       cache[bindTask]!,
       [jvalue(j: Int64(Int(bitPattern: handle.toOpaque())))]
     )

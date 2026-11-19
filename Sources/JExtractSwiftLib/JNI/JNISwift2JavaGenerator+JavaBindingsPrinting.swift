@@ -947,7 +947,7 @@ extension JNISwift2JavaGenerator {
     }
 
     if translatedSignature.requiresSwiftArena {
-      parameters.append("SwiftArena swiftArena")
+      parameters.append("SwiftArena \(ArenaParameterName.caller)")
     }
     if let importedFunc {
       TranslatedDocumentation.printDocumentation(
@@ -1016,8 +1016,9 @@ extension JNISwift2JavaGenerator {
 
     // Indirect return receivers
     for outParameter in translatedFunctionSignature.result.outParameters {
+      let initializer = outParameter.allocation.render(type: outParameter.type, printer: &printer)
       printer.print(
-        "\(outParameter.type) \(outParameter.name) = \(outParameter.allocation.render(type: outParameter.type));"
+        "\(outParameter.type) \(outParameter.name) = \(initializer);"
       )
       arguments.append(outParameter.name)
     }

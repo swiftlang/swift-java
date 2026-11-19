@@ -49,7 +49,7 @@ enum TranslatedDocumentation {
     if translatedDecl.translatedFunctionSignature.requiresSwiftArena {
       documentation?.parameters.append(
         SwiftDocumentation.Parameter(
-          name: "swiftArena",
+          name: JNISwift2JavaGenerator.ArenaParameterName.caller,
           description: "the arena that the the returned object will be attached to"
         )
       )
