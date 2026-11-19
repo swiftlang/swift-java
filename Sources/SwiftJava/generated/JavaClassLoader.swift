@@ -102,7 +102,7 @@ open class JavaClassLoader: JavaObject {
   /// ```
   @available(*, deprecated)
   @JavaMethod
-  open func defineClass(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> JavaClass<JavaObject>!
+  open func defineClass(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32) throws -> JavaClass<JavaObject>!
 
   /// Java method `defineClass`.
   ///
@@ -111,7 +111,7 @@ open class JavaClassLoader: JavaObject {
   /// protected final java.lang.Class<?> java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int) throws java.lang.ClassFormatError
   /// ```
   @JavaMethod
-  open func defineClass(_ arg0: String, _ arg1: [Int8], _ arg2: Int32, _ arg3: Int32) throws -> JavaClass<JavaObject>!
+  open func defineClass(_ arg0: String, _ arg1: [UInt8], _ arg2: Int32, _ arg3: Int32) throws -> JavaClass<JavaObject>!
 
   /// Java method `findClass`.
   ///

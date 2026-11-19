@@ -10,7 +10,7 @@ extension JavaClass<BitSet> {
   /// public static java.util.BitSet java.util.BitSet.valueOf(byte[])
   /// ```
   @JavaStaticMethod
-  public func valueOf(_ arg0: [Int8]) -> BitSet!
+  public func valueOf(_ arg0: [UInt8]) -> BitSet!
 
   /// Java method `valueOf`.
   ///
@@ -252,7 +252,7 @@ open class BitSet: JavaObject {
   /// public byte[] java.util.BitSet.toByteArray()
   /// ```
   @JavaMethod
-  open func toByteArray() -> [Int8]
+  open func toByteArray() -> [UInt8]
 
   /// Java method `toLongArray`.
   ///

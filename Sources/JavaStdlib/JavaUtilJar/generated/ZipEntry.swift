@@ -87,7 +87,7 @@ open class ZipEntry: JavaObject {
   /// public byte[] java.util.zip.ZipEntry.getExtra()
   /// ```
   @JavaMethod
-  open func getExtra() -> [Int8]
+  open func getExtra() -> [UInt8]
 
   /// Java method `setExtra`.
   ///
@@ -96,7 +96,7 @@ open class ZipEntry: JavaObject {
   /// public void java.util.zip.ZipEntry.setExtra(byte[])
   /// ```
   @JavaMethod
-  open func setExtra(_ arg0: [Int8])
+  open func setExtra(_ arg0: [UInt8])
 
   /// Java method `getMethod`.
   ///

@@ -26,7 +26,7 @@ struct JavaKitArrayRuntimeTests {
     let env = try jvm.environment()
     let arrays = HelloJavaKitArrays(environment: env)
 
-    let bytes: [Int8] = arrays.getFixedBytes()
+    let bytes: [UInt8] = arrays.getFixedBytes()
     #expect(bytes == [1, 2, 3, 4, 5])
   }
 
@@ -36,7 +36,7 @@ struct JavaKitArrayRuntimeTests {
     let arrays = HelloJavaKitArrays(environment: env)
 
     // snippet.arraysUsage
-    let reversed: [Int8] = arrays.reverseBytes([10, 20, 30])
+    let reversed: [UInt8] = arrays.reverseBytes([10, 20, 30])
     #expect(reversed == [30, 20, 10])
     // snippet.end
   }
@@ -55,7 +55,7 @@ struct JavaKitArrayRuntimeTests {
     let env = try jvm.environment()
     let arrays = HelloJavaKitArrays(environment: env)
 
-    let bytes: [Int8] = arrays.getEmptyBytes()
+    let bytes: [UInt8] = arrays.getEmptyBytes()
     #expect(bytes.isEmpty)
   }
 
@@ -64,7 +64,7 @@ struct JavaKitArrayRuntimeTests {
     let env = try jvm.environment()
     let arrays = HelloJavaKitArrays(environment: env)
 
-    let bytes: [Int8] = arrays.filledBytes(4, 42)
+    let bytes: [UInt8] = arrays.filledBytes(4, 42)
     #expect(bytes == [42, 42, 42, 42])
   }
 
@@ -91,7 +91,7 @@ struct JavaKitArrayRuntimeTests {
     let env = try jvm.environment()
     let arrays = HelloJavaKitArrays(environment: env)
 
-    let bytes: [Int8] = arrays.stringToBytes("Hi")
+    let bytes: [UInt8] = arrays.stringToBytes("Hi")
     // "Hi" in UTF-8 is [0x48, 0x69]
     #expect(bytes == [0x48, 0x69])
   }
