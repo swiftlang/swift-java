@@ -51,38 +51,34 @@ public class SwiftArenaTest {
     //        See: https://github.com/swiftlang/swift-java/issues/97
     @Test
     public void arena_markAsDestroyed_preventUseAfterFree_class() {
-        MySwiftClass unsafelyEscapedOutsideArenaScope = null;
+        final MySwiftClass unsafelyEscapedOutsideArenaScope;
 
         try (var arena = AllocatingSwiftArena.ofConfined()) {
-            var obj = MySwiftClass.init(1, 2, arena);
-            unsafelyEscapedOutsideArenaScope = obj;
+            unsafelyEscapedOutsideArenaScope = MySwiftClass.init(1, 2, arena);
         }
 
-        try {
-            unsafelyEscapedOutsideArenaScope.echoIntMethod(1);
-            fail("Expected exception to be thrown! Object was supposed to be dead.");
-        } catch (IllegalStateException ex) {
-            return;
-        }
+        IllegalStateException methodEx = assertThrows(IllegalStateException.class,
+                () -> unsafelyEscapedOutsideArenaScope.echoIntMethod(1));
+        assertTrue(methodEx.getMessage().contains("already destroyed"));
+        assertThrows(IllegalStateException.class, unsafelyEscapedOutsideArenaScope::$memorySegment);
+        assertThrows(IllegalStateException.class, unsafelyEscapedOutsideArenaScope::$memoryAddress);
     }
 
     // FIXME: The destroy witness table call hangs on x86_64 platforms during the destroy witness table call
     //        See: https://github.com/swiftlang/swift-java/issues/97
     @Test
     public void arena_markAsDestroyed_preventUseAfterFree_struct() {
-        MySwiftStruct unsafelyEscapedOutsideArenaScope = null;
+        final MySwiftStruct unsafelyEscapedOutsideArenaScope;
 
         try (var arena = AllocatingSwiftArena.ofConfined()) {
-            var s = MySwiftStruct.init(1, 2, arena);
-            unsafelyEscapedOutsideArenaScope = s;
+            unsafelyEscapedOutsideArenaScope = MySwiftStruct.init(1, 2, arena);
         }
 
-        try {
-            unsafelyEscapedOutsideArenaScope.echoIntMethod(1);
-            fail("Expected exception to be thrown! Object was supposed to be dead.");
-        } catch (IllegalStateException ex) {
-            return;
-        }
+        IllegalStateException methodEx = assertThrows(IllegalStateException.class,
+                () -> unsafelyEscapedOutsideArenaScope.echoIntMethod(1));
+        assertTrue(methodEx.getMessage().contains("already destroyed"));
+        assertThrows(IllegalStateException.class, unsafelyEscapedOutsideArenaScope::$memorySegment);
+        assertThrows(IllegalStateException.class, unsafelyEscapedOutsideArenaScope::$memoryAddress);
     }
 
     @Test
