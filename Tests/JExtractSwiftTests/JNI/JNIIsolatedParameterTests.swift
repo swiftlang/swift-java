@@ -41,7 +41,7 @@ struct JNIIsolatedParameterTests {
         public java.util.concurrent.CompletableFuture<java.lang.Long> run(MyActor actor) {
         """,
         """
-        private static native void $run(long actor, long selfPointer, java.util.concurrent.CompletableFuture<java.lang.Long> result_future);
+        private static native void $run(long actor, long selfPointer, org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Long, java.lang.Long> result_sink);
         """,
       ]
     )

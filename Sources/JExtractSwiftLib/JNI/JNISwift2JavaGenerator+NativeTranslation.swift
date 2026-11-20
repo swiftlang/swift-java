@@ -1417,8 +1417,7 @@ extension JNISwift2JavaGenerator {
       swiftFunctionResultType: SwiftType,
       nativeFunctionSignature: NativeFunctionSignature,
       isThrowing: Bool,
-      completeMethodID: String,
-      completeExceptionallyMethodID: String
+      mode: JExtractAsyncFuncMode
     )
 
     /// `{ (args) -> return body }`
@@ -1916,10 +1915,12 @@ extension JNISwift2JavaGenerator {
         let swiftFunctionResultType,
         let nativeFunctionSignature,
         let isThrowing,
-        let completeMethodID,
-        let completeExceptionallyMethodID
+        let mode
       ):
-        var globalRefs: [String] = ["globalFuture"]
+        let cancellable = mode == .completableFuture
+        let resultParameter = cancellable ? "result_sink" : "result_future"
+        let receiver = cancellable ? "globalResultSink" : "globalFuture"
+        var globalRefs = [receiver]
 
         // Global ref all indirect returns
         for outParameter in nativeFunctionSignature.result.outParameters {
@@ -1937,7 +1938,7 @@ extension JNISwift2JavaGenerator {
 
         printer.print(
           """
-          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let \(receiver) = environment.interface.NewGlobalRef(environment, \(resultParameter))
           """
         )
 
@@ -1972,19 +1973,21 @@ extension JNISwift2JavaGenerator {
             } else {
               "await"
             }
-          if swiftFunctionResultType.isVoid {
-            printer.print("\(tryAwaitString) \(placeholderWithoutTry)")
-            printer.print("environment = try! JavaVirtualMachine.shared().environment()")
-            printer.print(
-              "_ = environment.interface.CallBooleanMethodA(environment, globalFuture, \(completeMethodID), [jvalue(l: nil)])"
-            )
+          let isVoid = swiftFunctionResultType.isVoid
+          let binding = isVoid ? "" : "let swiftResult$ = "
+          printer.print("\(binding)\(tryAwaitString) \(placeholderWithoutTry)")
+          printer.print("environment = try! JavaVirtualMachine.shared().environment()")
+          if cancellable {
+            printer.print("if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(\(receiver), in: environment) { return }")
+          }
+
+          let result: String
+          if isVoid {
+            result = "nil"
           } else {
-            printer.print("let swiftResult$ = \(tryAwaitString) \(placeholderWithoutTry)")
-            printer.print("environment = try! JavaVirtualMachine.shared().environment()")
             let inner = nativeFunctionSignature.result.conversion.render(&printer, "swiftResult$")
-            let result: String
             if nativeFunctionSignature.result.javaType.isVoid {
-              // The result was written to the out parameters, so the Java future is completed with Void
+              // The result was written to the out parameters.
               result = "nil"
             } else if nativeFunctionSignature.result.javaType.requiresBoxing {
               printer.print(
@@ -1994,9 +1997,15 @@ extension JNISwift2JavaGenerator {
             } else {
               result = inner
             }
+          }
 
+          if cancellable {
             printer.print(
-              "_ = environment.interface.CallBooleanMethodA(environment, globalFuture, \(completeMethodID), [jvalue(l: \(result))])"
+              "SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(\(receiver), \(result), in: environment)"
+            )
+          } else {
+            printer.print(
+              "_ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.SimpleCompletableFuture.complete, [jvalue(l: \(result))])"
             )
           }
         }
@@ -2018,13 +2027,20 @@ extension JNISwift2JavaGenerator {
             }
             printer.printBraceBlock("catch") { printer in
               // We might not be on the same thread after the suspension, so we need to attach the thread again.
-              printer.print(
-                """
-                let catchEnvironment = try! JavaVirtualMachine.shared().environment()
-                let exception = catchEnvironment.makeJavaThrowable(for: error)
-                _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, \(completeExceptionallyMethodID), [jvalue(l: exception)])
-                """
-              )
+              printer.print("let catchEnvironment = try! JavaVirtualMachine.shared().environment()")
+              if cancellable {
+                printer.print(
+                  "if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(\(receiver), in: catchEnvironment) { return }"
+                )
+              }
+              printer.print("let exception = catchEnvironment.makeJavaThrowable(for: error)")
+              if cancellable {
+                printer.print("SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(\(receiver), exception, in: catchEnvironment)")
+              } else {
+                printer.print(
+                  "_ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.SimpleCompletableFuture.completeExceptionally, [jvalue(l: exception)])"
+                )
+              }
             }
           } else {
             printDo(printer: &printer)
@@ -2048,6 +2064,10 @@ extension JNISwift2JavaGenerator {
             printer.print("var environment = try! JavaVirtualMachine.shared().environment()")
             printTaskBody(printer: &printer)
           }
+        }
+
+        if cancellable {
+          printer.print("SwiftJavaRuntimeSupport.SwiftAsyncResultSink.bind(task!, to: \(resultParameter), in: environment)")
         }
 
         return ""

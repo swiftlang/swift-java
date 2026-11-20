@@ -19,6 +19,11 @@ import SwiftJavaJNICore
 import SwiftSyntax
 
 extension JNISwift2JavaGenerator {
+  enum ArenaParameterName {
+    static let caller = "swiftArena"
+    static let asyncResult = "resultArena$"
+  }
+
   var javaTranslator: JavaTranslation {
     JavaTranslation(
       config: config,
@@ -131,6 +136,7 @@ extension JNISwift2JavaGenerator {
     /// Module-qualified identities of extracted types that are surfaced to Java as `SwiftError` exceptions.
     let errorTypes: Set<SwiftNominalIdentity>
     var javaIdentifiers: JavaIdentifierFactory
+    var resultArenaName = ArenaParameterName.caller
 
     func translate(enumCase: ExtractedEnumCase) throws -> TranslatedEnumCase {
       let methodName = "" // TODO: Used for closures, replace with better name?
@@ -210,7 +216,12 @@ extension JNISwift2JavaGenerator {
       let javaName = javaIdentifiers.makeJavaMethodName(decl)
 
       // Swift -> Java
-      var translatedFunctionSignature = try self.translate(
+      let isAsync = decl.isAsync || decl.isIsolated || decl.isImplicitlyAsync
+      var signatureTranslation = self
+      if isAsync && config.effectiveAsyncFuncMode == .completableFuture {
+        signatureTranslation.resultArenaName = ArenaParameterName.asyncResult
+      }
+      var translatedFunctionSignature = try signatureTranslation.translate(
         functionSignature: decl.functionSignature,
         methodName: javaName,
         parentName: parentName,
@@ -255,9 +266,7 @@ extension JNISwift2JavaGenerator {
       }
 
       // Handle async methods and isolated methods
-      if decl.functionSignature.isAsync || decl.functionSignature.isIsolated
-        || decl.functionSignature.isImplicitlyAsync
-      {
+      if isAsync {
         self.convertToAsync(
           translatedFunctionSignature: &translatedFunctionSignature,
           nativeFunctionSignature: &nativeFunctionSignature,
@@ -375,6 +384,7 @@ extension JNISwift2JavaGenerator {
         selfTypeParameter: selfTypeParameter,
         parameters: parameters,
         result: resultType,
+        requiresSwiftArena: resultType.conversion.requiresSwiftArena,
         exceptions: exceptions,
       )
     }
@@ -696,40 +706,27 @@ extension JNISwift2JavaGenerator {
       originalFunctionSignature: SwiftFunctionSignature,
       mode: JExtractAsyncFuncMode,
     ) {
-      // Update translated function
-      let nativeFutureType: JavaType
+      let result = translatedFunctionSignature.result
+      let nativeResultType = nativeFunctionSignature.result.javaType
+      let receiver: OutParameter
       let translatedFutureType: JavaType
-      let completeMethodID: String
-      let completeExceptionallyMethodID: String
+      let conversion: JavaNativeConversionStep
 
       switch mode {
       case .completableFuture:
-        nativeFutureType = .completableFuture(nativeFunctionSignature.result.javaType)
-        translatedFutureType = .completableFuture(translatedFunctionSignature.result.javaType)
-        completeMethodID = "_JNIMethodIDCache.CompletableFuture.complete"
-        completeExceptionallyMethodID = "_JNIMethodIDCache.CompletableFuture.completeExceptionally"
+        translatedFutureType = .completableFuture(result.javaType)
+        receiver = .init(
+          name: "resultSink$",
+          type: .SwiftAsyncResultSink(nativeResultType, result.javaType),
+          allocation: .asyncResultSink(result.conversion)
+        )
+        conversion = .method(.constant(receiver.name), function: "future")
 
       case .legacyFuture:
-        nativeFutureType = .simpleCompletableFuture(nativeFunctionSignature.result.javaType)
-        translatedFutureType = .future(translatedFunctionSignature.result.javaType)
-        completeMethodID = "_JNIMethodIDCache.SimpleCompletableFuture.complete"
-        completeExceptionallyMethodID = "_JNIMethodIDCache.SimpleCompletableFuture.completeExceptionally"
-      }
-
-      let futureOutParameter = OutParameter(
-        name: "future$",
-        type: nativeFutureType,
-        allocation: .new,
-      )
-
-      let result = translatedFunctionSignature.result
-      translatedFunctionSignature.result = TranslatedResult(
-        javaType: translatedFutureType,
-        nativeJavaType: .void,
-        annotations: result.annotations,
-        outParameters: result.outParameters + [futureOutParameter],
-        conversion: .method(
-          .constant("future$"),
+        translatedFutureType = .future(result.javaType)
+        receiver = .init(name: "future$", type: .simpleCompletableFuture(nativeResultType), allocation: .new)
+        conversion = .method(
+          .constant(receiver.name),
           function: "thenApply",
           arguments: [
             .lambda(
@@ -738,18 +735,26 @@ extension JNISwift2JavaGenerator {
             )
           ]
         )
+      }
+
+      translatedFunctionSignature.result = TranslatedResult(
+        javaType: translatedFutureType,
+        nativeJavaType: .void,
+        annotations: result.annotations,
+        outParameters: result.outParameters + [receiver],
+        conversion: conversion
       )
 
-      // Update native function
       nativeFunctionSignature.result.conversion = .asyncCompleteFuture(
         swiftFunctionResultType: originalFunctionSignature.result.type,
         nativeFunctionSignature: nativeFunctionSignature,
         isThrowing: originalFunctionSignature.isThrowing || originalFunctionSignature.isImplicitlyThrowing,
-        completeMethodID: completeMethodID,
-        completeExceptionallyMethodID: completeExceptionallyMethodID,
+        mode: mode
       )
       nativeFunctionSignature.result.javaType = .void
-      nativeFunctionSignature.result.outParameters.append(.init(name: "result_future", type: nativeFutureType))
+      nativeFunctionSignature.result.outParameters.append(
+        .init(name: mode == .completableFuture ? "result_sink" : "result_future", type: receiver.type)
+      )
     }
 
     func translateFunctionParameter(
@@ -1039,7 +1044,8 @@ extension JNISwift2JavaGenerator {
                 .member(.constant(resultName), field: "selfPointer"),
                 .member(.constant(resultName), field: "selfTypePointer"),
               ]),
-              javaType
+              javaType,
+              arena: resultArenaName
             )
           )
         } else {
@@ -1048,7 +1054,7 @@ extension JNISwift2JavaGenerator {
             nativeJavaType: .long,
             annotations: resultAnnotations,
             outParameters: [],
-            conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType),
+            conversion: .wrapMemoryAddressUnsafe(.placeholder, javaType, arena: resultArenaName),
           )
         }
 
@@ -1097,7 +1103,8 @@ extension JNISwift2JavaGenerator {
               .member(.constant(resultName), field: "selfPointer"),
               .member(.constant(resultName), field: "selfTypePointer"),
             ]),
-            boxJavaType
+            boxJavaType,
+            arena: resultArenaName
           )
         )
 
@@ -1593,7 +1600,7 @@ extension JNISwift2JavaGenerator {
               arguments: [
                 .lambda(
                   args: ["pointer"],
-                  body: .wrapMemoryAddressUnsafe(.constant("pointer"), javaType),
+                  body: .wrapMemoryAddressUnsafe(.constant("pointer"), javaType, arena: resultArenaName),
                 )
               ],
             ),
@@ -1677,7 +1684,7 @@ extension JNISwift2JavaGenerator {
         javaType: dictType,
         nativeJavaType: .long,
         outParameters: [],
-        conversion: .wrapMemoryAddressUnsafe(.placeholder, dictType),
+        conversion: .wrapMemoryAddressUnsafe(.placeholder, dictType, arena: resultArenaName),
       )
     }
 
@@ -1720,7 +1727,7 @@ extension JNISwift2JavaGenerator {
         javaType: setType,
         nativeJavaType: .long,
         outParameters: [],
-        conversion: .wrapMemoryAddressUnsafe(.placeholder, setType),
+        conversion: .wrapMemoryAddressUnsafe(.placeholder, setType, arena: resultArenaName),
       )
     }
   }
@@ -1797,16 +1804,13 @@ extension JNISwift2JavaGenerator {
     var selfTypeParameter: TranslatedParameter?
     var parameters: [TranslatedParameter]
     var result: TranslatedResult
+    var requiresSwiftArena: Bool
     var exceptions: [JavaExceptionType]
 
     // if the result type implied any annotations,
     // propagate them onto the function the result is returned from
     var annotations: [JavaAnnotation] {
       self.result.annotations
-    }
-
-    var requiresSwiftArena: Bool {
-      self.result.conversion.requiresSwiftArena
     }
   }
 
@@ -1836,8 +1840,9 @@ extension JNISwift2JavaGenerator {
     enum Allocation {
       case newArray(JavaType, size: Int)
       case new
+      case asyncResultSink(JavaNativeConversionStep)
 
-      func render(type: JavaType) -> String {
+      func render(type: JavaType, printer: inout JavaPrinter) -> String {
         switch self {
         case .newArray(let javaType, let size):
           // For array element types like byte[], we need "new byte[size][]"
@@ -1852,6 +1857,16 @@ extension JNISwift2JavaGenerator {
 
         case .new:
           return "new \(type)()"
+
+        case .asyncResultSink(let conversion):
+          let typeName = type.fullyQualifiedClassName!
+          if conversion.requiresSwiftArena {
+            let mapper = JavaNativeConversionStep.lambda(args: ["futureResult$", ArenaParameterName.asyncResult], body: conversion)
+            return "\(typeName).create(\(ArenaParameterName.caller), \(mapper.render(&printer, "futureResult$")))"
+          } else {
+            let mapper = JavaNativeConversionStep.lambda(args: ["futureResult$"], body: conversion)
+            return "\(typeName).create(\(mapper.render(&printer, "futureResult$")))"
+          }
         }
       }
     }
@@ -1902,13 +1917,13 @@ extension JNISwift2JavaGenerator {
     indirect case typeMetadataAddress(JavaNativeConversionStep)
 
     /// Call `new \(Type)(\(placeholder), swiftArena)`
-    indirect case constructSwiftValue(JavaNativeConversionStep, JavaType)
+    indirect case constructSwiftValue(JavaNativeConversionStep, JavaType, arena: String)
 
     /// Call `new \(Type)(\(placeholder))`
     indirect case constructJavaClass(JavaNativeConversionStep, JavaType)
 
     /// Call the `MyType.wrapMemoryAddressUnsafe` in order to wrap a memory address using the Java binding type
-    indirect case wrapMemoryAddressUnsafe(JavaNativeConversionStep, JavaType)
+    indirect case wrapMemoryAddressUnsafe(JavaNativeConversionStep, JavaType, arena: String)
 
     indirect case call(JavaNativeConversionStep, function: String)
 
@@ -2014,11 +2029,11 @@ extension JNISwift2JavaGenerator {
         let inner = inner.render(&printer, placeholder)
         return "\(inner).$typeMetadataAddress()"
 
-      case .constructSwiftValue(let inner, let javaType):
+      case .constructSwiftValue(let inner, let javaType, let arena):
         let inner = inner.render(&printer, placeholder)
-        return "new \(javaType)(\(inner), swiftArena)"
+        return "new \(javaType)(\(inner), \(arena))"
 
-      case .wrapMemoryAddressUnsafe(let inner, let javaType):
+      case .wrapMemoryAddressUnsafe(let inner, let javaType, let arena):
         let inner = inner.render(&printer, placeholder)
         guard case .class(_, _, let typeParameters) = javaType else {
           fatalError("\(javaType) is not class.")
@@ -2029,7 +2044,7 @@ extension JNISwift2JavaGenerator {
           } else {
             ""
           }
-        return "\(javaType.fullyQualifiedClassName!).\(genericClause)wrapMemoryAddressUnsafe(\(inner), swiftArena)"
+        return "\(javaType.fullyQualifiedClassName!).\(genericClause)wrapMemoryAddressUnsafe(\(inner), \(arena))"
 
       case .constructJavaClass(let inner, let javaType):
         let inner = inner.render(&printer, placeholder)
@@ -2125,7 +2140,7 @@ extension JNISwift2JavaGenerator {
         return inner.render(&printer, placeholder)
 
       case .lambda(let args, let body):
-        var printer = JavaPrinter()
+        var printer = JavaPrinter(options: printer.options)
         printer.printBraceBlock("(\(args.joined(separator: .comma))) ->") { printer in
           let body = body.render(&printer, placeholder)
           if !body.isEmpty {

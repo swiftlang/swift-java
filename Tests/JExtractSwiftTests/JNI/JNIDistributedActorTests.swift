@@ -34,16 +34,16 @@ struct JNIDistributedActorTests {
       expectedChunks: [
         """
         public java.util.concurrent.CompletableFuture<java.lang.Void> hi() {
-          java.util.concurrent.CompletableFuture<java.lang.Void> future$ = new java.util.concurrent.CompletableFuture<java.lang.Void>();
-          D.$hi(this.$memoryAddress(), future$);
-          return future$.thenApply((futureResult$) -> {
+          org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Void, java.lang.Void> resultSink$ = org.swift.swiftkit.core.SwiftAsyncResultSink.create((futureResult$) -> {
             return futureResult$;
           }
           );
+          D.$hi(this.$memoryAddress(), resultSink$);
+          return resultSink$.future();
         }
         """,
         """
-        private static native void $hi(long selfPointer, java.util.concurrent.CompletableFuture<java.lang.Void> result_future);
+        private static native void $hi(long selfPointer, org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Void, java.lang.Void> result_sink);
         """,
       ],
       notExpectedChunks: [
@@ -62,7 +62,7 @@ struct JNIDistributedActorTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_D__00024hi__JLjava_util_concurrent_CompletableFuture_2")
+        @_cdecl("Java_com_example_swift_D__00024hi__JLorg_swift_swiftkit_core_SwiftAsyncResultSink_2")
         ...
         task = Task.immediate {
         ...
@@ -73,8 +73,9 @@ struct JNIDistributedActorTests {
         """
         catch {
           let catchEnvironment = try! JavaVirtualMachine.shared().environment()
+          if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: catchEnvironment) { return }
           let exception = catchEnvironment.makeJavaThrowable(for: error)
-          _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(globalResultSink, exception, in: catchEnvironment)
         }
         """,
       ]

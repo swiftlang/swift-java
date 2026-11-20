@@ -27,6 +27,7 @@ public interface SwiftArena {
     /**
      * Register a Swift object.
      * Its memory should be considered managed by this arena, and be destroyed when the arena is closed.
+     * If registration throws, the caller retains responsibility for cleanup.
      */
     void register(SwiftInstance instance);
 
