@@ -859,6 +859,34 @@ extension JNISwift2JavaGenerator {
             // Handled as wrapped struct
             break
 
+          case .array:
+            // Arrays of imported classes and nested arrays aren't supported yet.
+            guard case .array(let elementType) = nominalType.asKnownType,
+              case .nominal(let elementNominalType) = elementType,
+              let elementKnownType = elementNominalType.nominalTypeDecl.knownTypeKind,
+              elementKnownType != .array
+            else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            let arrayParameter = try translateArrayParameter(
+              elementType: elementType,
+              parameterName: parameterName,
+              genericParameters: genericParameters,
+              genericRequirements: genericRequirements
+            )
+            return TranslatedParameter(
+              parameter: JavaParameter(
+                name: parameterName,
+                type: .optional(arrayParameter.parameter.type.javaType),
+                annotations: parameterAnnotations,
+              ),
+              conversion: .commaSeparated([
+                .isOptionalPresent,
+                .method(.placeholder, function: "orElse", arguments: [.constant("null")]),
+              ]),
+            )
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config) else {
               throw JavaTranslationError.unsupportedSwiftType(swiftType)

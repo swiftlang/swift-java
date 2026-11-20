@@ -530,6 +530,30 @@ extension JNISwift2JavaGenerator {
             // Handled as wrapped struct
             break
 
+          case .array:
+            guard case .array(let elementType) = nominalType.asKnownType else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            let arrayParameter = try translateArrayParameter(elementType: elementType, parameterName: parameterName)
+            guard case .concrete(let arrayJavaType) = arrayParameter.parameters.first?.type else {
+              throw JavaTranslationError.unsupportedSwiftType(swiftType)
+            }
+
+            return NativeParameter(
+              parameters: [
+                JavaParameter(name: discriminatorName, type: .byte),
+                JavaParameter(name: valueName, type: arrayJavaType),
+              ],
+              conversion: .optionalLowering(
+                arrayParameter.conversion,
+                discriminatorName: discriminatorName,
+                valueName: valueName
+              ),
+              indirectConversion: nil,
+              conversionCheck: nil
+            )
+
           default:
             guard let javaType = JNIJavaTypeTranslator.translate(knownType: knownType, config: self.config),
               javaType.implementsJavaValue

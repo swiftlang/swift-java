@@ -107,3 +107,11 @@ public func optionalTuple() -> (Int64, String)? {
 public func optionalTuple2() -> (Int64?, Alignment?)? {
   (42, .horizontal)
 }
+
+public func optionalIntArraySum(input: [Int]?) -> Int? {
+  input?.reduce(0, +)
+}
+
+public func optionalStringArrayJoined(input: [String]?) -> String? {
+  input?.joined(separator: ",")
+}
