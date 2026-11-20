@@ -321,11 +321,13 @@ struct JNIAsyncTests {
             fatalError("c memory address was null in call to \\(#function)!")
           }
           nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let cUnsafeSendable$ = c$
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
             if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
               task = Task.immediate {
                 var environment = try! JavaVirtualMachine.shared().environment()
+                let c$ = cUnsafeSendable$
                 defer {
                   let deferEnvironment = try! JavaVirtualMachine.shared().environment()
                   deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
@@ -343,6 +345,7 @@ struct JNIAsyncTests {
           if task == nil {
             task = Task {
               var environment = try! JavaVirtualMachine.shared().environment()
+              let c$ = cUnsafeSendable$
               defer {
                 let deferEnvironment = try! JavaVirtualMachine.shared().environment()
                 deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
