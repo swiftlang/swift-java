@@ -46,6 +46,28 @@ extension _JNIMethodIDCache {
     }
   }
 
+  /// `Future.get()` wraps the throwable a future was completed with.
+  public enum ExecutionException {
+    private static let getCauseMethod = Method(
+      name: "getCause",
+      signature: "()Ljava/lang/Throwable;"
+    )
+
+    private static let cache = _JNIMethodIDCache(
+      className: "java/util/concurrent/ExecutionException",
+      methods: [getCauseMethod]
+    )
+
+    public static var `class`: jclass {
+      cache.javaClass
+    }
+
+    /// Throwable.getCause(), resolved on `ExecutionException` so the inherited method is found.
+    public static var getCause: jmethodID {
+      cache.methods[getCauseMethod]!
+    }
+  }
+
   public enum SimpleCompletableFuture {
     private static let completeMethod = Method(
       name: "complete",
