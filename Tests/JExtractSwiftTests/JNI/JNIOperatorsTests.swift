@@ -138,7 +138,7 @@ struct JNIOperatorsTests {
       expectedChunks: [
         """
         @_cdecl("Java_com_example_swift_Number__00024plus__JJ")
-        public func Java_com_example_swift_Number__00024plus__JJ(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, left: jlong, right: jlong) -> jlong {
+        public func Java_com_example_swift_Number__00024plus__JJ(environment: JNIEnvironment!, thisClass: JNITypes.jclass, left: jlong, right: jlong) -> jlong {
           ...
           let result$ = UnsafeMutablePointer<Number>.allocate(capacity: 1)
           result$.initialize(to: (((left$.pointee) + (right$.pointee)))

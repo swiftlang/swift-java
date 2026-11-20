@@ -166,7 +166,7 @@ struct JavaKeywordTests {
       .swift,
       detectChunkByInitialLines: 1,
       expectedChunks: [
-        "thisClass: jclass, double_: jdouble, int_: jlong, default_: jboolean, selfPointer: jlong) -> jdouble {",
+        "thisClass: JNITypes.jclass, double_: jdouble, int_: jlong, default_: jboolean, selfPointer: jlong) -> jdouble {",
         "scale(double: Double(fromJNI: double_, in: environment), int: Int64(fromJNI: int_, in: environment), default: Bool(fromJNI: default_, in: environment))",
       ]
     )
