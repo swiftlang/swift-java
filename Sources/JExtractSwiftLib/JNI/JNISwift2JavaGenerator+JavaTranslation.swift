@@ -717,11 +717,7 @@ extension JNISwift2JavaGenerator {
         translatedFutureType = .completableFuture(result.javaType)
         receiver = .init(
           name: "resultSink$",
-          type: .class(
-            package: "org.swift.swiftkit.core",
-            name: "SwiftAsyncResultSink",
-            typeParameters: [nativeResultType.boxedType, result.javaType.boxedType]
-          ),
+          type: .SwiftAsyncResultSink(nativeResultType, result.javaType),
           allocation: .asyncResultSink(result.conversion)
         )
         conversion = .method(.constant(receiver.name), function: "future")
