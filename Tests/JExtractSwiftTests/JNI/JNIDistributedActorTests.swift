@@ -75,7 +75,7 @@ struct JNIDistributedActorTests {
           let catchEnvironment = try! JavaVirtualMachine.shared().environment()
           if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: catchEnvironment) { return }
           let exception = catchEnvironment.makeJavaThrowable(for: error)
-          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(self: globalResultSink, exception, in: catchEnvironment)
+          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(globalResultSink, exception, in: catchEnvironment)
         }
         """,
       ]

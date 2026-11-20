@@ -2001,7 +2001,7 @@ extension JNISwift2JavaGenerator {
 
           if cancellable {
             printer.print(
-              "SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: \(receiver), \(result), in: environment)"
+              "SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(\(receiver), \(result), in: environment)"
             )
           } else {
             printer.print(
@@ -2035,7 +2035,7 @@ extension JNISwift2JavaGenerator {
               }
               printer.print("let exception = catchEnvironment.makeJavaThrowable(for: error)")
               if cancellable {
-                printer.print("SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(self: \(receiver), exception, in: catchEnvironment)")
+                printer.print("SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(\(receiver), exception, in: catchEnvironment)")
               } else {
                 printer.print(
                   "_ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.SimpleCompletableFuture.completeExceptionally, [jvalue(l: exception)])"

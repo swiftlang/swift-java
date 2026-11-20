@@ -64,11 +64,11 @@ public class SwiftAsyncResultSink: JavaObject {
     environment.interface.CallBooleanMethodA(environment, `self`, cache[isDone]!, nil) != 0
   }
 
-  public static func complete(`self`: jobject?, _ boxedResult: jobject?, in environment: JNIEnvironment) {
+  public static func complete(_ `self`: jobject?, _ boxedResult: jobject?, in environment: JNIEnvironment) {
     environment.interface.CallVoidMethodA(environment, `self`, cache[complete]!, [jvalue(l: boxedResult)])
   }
 
-  public static func fail(`self`: jobject?, _ error: jthrowable?, in environment: JNIEnvironment) {
+  public static func fail(_ `self`: jobject?, _ error: jthrowable?, in environment: JNIEnvironment) {
     environment.interface.CallVoidMethodA(environment, `self`, cache[fail]!, [jvalue(l: error)])
   }
 }

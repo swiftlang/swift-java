@@ -74,7 +74,7 @@ struct JNIAsyncTests {
                 await SwiftModule.asyncVoid()
                 environment = try! JavaVirtualMachine.shared().environment()
                 if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
-                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, nil, in: environment)
+                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
               }
             }
           #endif
@@ -88,7 +88,7 @@ struct JNIAsyncTests {
               await SwiftModule.asyncVoid()
               environment = try! JavaVirtualMachine.shared().environment()
               if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
-              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, nil, in: environment)
+              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
             }
           }
           SwiftJavaRuntimeSupport.SwiftAsyncResultSink.bind(task!, to: result_sink, in: environment)
@@ -154,13 +154,13 @@ struct JNIAsyncTests {
                   try await SwiftModule.async()
                   environment = try! JavaVirtualMachine.shared().environment()
                   if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
-                  SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, nil, in: environment)
+                  SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
                 }
                 catch {
                   let catchEnvironment = try! JavaVirtualMachine.shared().environment()
                   if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: catchEnvironment) { return }
                   let exception = catchEnvironment.makeJavaThrowable(for: error)
-                  SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(self: globalResultSink, exception, in: catchEnvironment)
+                  SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(globalResultSink, exception, in: catchEnvironment)
                 }
               }
             }
@@ -176,13 +176,13 @@ struct JNIAsyncTests {
                 try await SwiftModule.async()
                 environment = try! JavaVirtualMachine.shared().environment()
                 if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
-                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, nil, in: environment)
+                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
               }
               catch {
                 let catchEnvironment = try! JavaVirtualMachine.shared().environment()
                 if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: catchEnvironment) { return }
                 let exception = catchEnvironment.makeJavaThrowable(for: error)
-                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(self: globalResultSink, exception, in: catchEnvironment)
+                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(globalResultSink, exception, in: catchEnvironment)
               }
             }
           }
@@ -249,7 +249,7 @@ struct JNIAsyncTests {
               environment = try! JavaVirtualMachine.shared().environment()
               if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNILocalRefValue(in: environment), in: environment)
-              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, boxedResult$, in: environment)
+              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, boxedResult$, in: environment)
             }
           }
           #endif // end of swift(>=6.2)
@@ -264,7 +264,7 @@ struct JNIAsyncTests {
               environment = try! JavaVirtualMachine.shared().environment()
               if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNILocalRefValue(in: environment), in: environment)
-              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, boxedResult$, in: environment)
+              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, boxedResult$, in: environment)
             }
           }
           SwiftJavaRuntimeSupport.SwiftAsyncResultSink.bind(task!, to: result_sink, in: environment)
@@ -348,7 +348,7 @@ struct JNIAsyncTests {
                 result$.initialize(to: swiftResult$)
                 let resultBits$ = Int64(Int(bitPattern: result$))
                 let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNILocalRefValue(in: environment), in: environment)
-                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, boxedResult$, in: environment)
+                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, boxedResult$, in: environment)
               }
             }
           #endif
@@ -366,7 +366,7 @@ struct JNIAsyncTests {
               result$.initialize(to: swiftResult$)
               let resultBits$ = Int64(Int(bitPattern: result$))
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNILocalRefValue(in: environment), in: environment)
-              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, boxedResult$, in: environment)
+              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, boxedResult$, in: environment)
             }
           }
           SwiftJavaRuntimeSupport.SwiftAsyncResultSink.bind(task!, to: result_sink, in: environment)
@@ -426,7 +426,7 @@ struct JNIAsyncTests {
             deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, s)
           }
           ...
-          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, swiftResult$.getJNILocalRefValue(in: environment), in: environment)
+          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, swiftResult$.getJNILocalRefValue(in: environment), in: environment)
           ...
         }
         """
@@ -536,7 +536,7 @@ struct JNIAsyncTests {
         environment = try! JavaVirtualMachine.shared().environment()
         if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
         ...
-        SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(self: globalResultSink, nil, in: environment)
+        SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
         """
       ],
       notExpectedChunks: [
