@@ -182,9 +182,15 @@ info "Package.swift updated."
 # ==== -----------------------------------------------------------------------
 # MARK: Verify build
 
-info "Verifying build..."
+info "Verifying Swift build..."
 if ! xcrun swift build --package-path "$REPO_ROOT" 2>&1; then
   error "Build failed! Please fix the issues before releasing."
+fi
+
+info "Verifying Gradle build..."
+if ! "$REPO_ROOT/gradlew" -p "$REPO_ROOT" \
+    :SwiftKitCore:build :SwiftKitFFM:build -x test 2>&1; then
+  error "Gradle build failed! Please fix the issues before releasing."
 fi
 
 info "Build succeeded."
@@ -213,6 +219,8 @@ echo -e "  3. Merge the pull request"
 echo -e "  4. Tag the merge commit on main:"
 echo -e "       ${BOLD}git tag -s $RELEASE_VERSION -m $RELEASE_VERSION${NC}"
 echo -e "       ${BOLD}git push origin $RELEASE_VERSION${NC}"
+echo -e "     Pushing the tag publishes the release to Maven Central (.github/workflows/publish.yml),"
+echo -e "     or only dry-runs it while publishing is not enabled (see RELEASING.md)"
 echo -e "  5. Create a GitHub release for the tag"
 echo -e "  6. Come back here and press Enter to prepare the next development snapshot"
 echo -e "     Or run: ${BOLD}./scripts/release.sh --next${NC}"

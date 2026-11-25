@@ -69,6 +69,7 @@ val ffmModules = setOf(
 val skipped = mutableListOf<String>()
 
 include("SwiftKitCore")
+include("SwiftKitNative")
 if (ffmCapable) {
     include("SwiftKitFFM")
 } else {

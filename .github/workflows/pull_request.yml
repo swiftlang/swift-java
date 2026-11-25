@@ -6,9 +6,14 @@ permissions:
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+  # publish.yml runs the tests before it builds and publishes anything.
+  workflow_call:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # When called from publish.yml, `github.workflow` is the caller's name. The
+  # `tests-` prefix keeps this group distinct from publish.yml's own group, which
+  # GitHub would otherwise cancel as a deadlock.
+  group: tests-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
