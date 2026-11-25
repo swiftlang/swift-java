@@ -12,16 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-import org.swift.build.utils.resolveSwiftKitVersion
-
 plugins {
     id("build-logic.java-application-conventions")
-    `maven-publish`
+    id("build-logic.java-publishing-conventions")
+    `java-library`
 }
 
-group = "org.swift.swiftkit"
-
-version = resolveSwiftKitVersion()
+description = "SwiftKit FFM: Swift/Java interop using java.lang.foreign (Panama). Requires JDK 22+."
 
 base {
     archivesName = "swiftkit-ffm"
@@ -32,16 +29,6 @@ repositories {
     mavenCentral()
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = group as? String
-            artifactId = "swiftkit-ffm"
-            from(components["java"])
-        }
-    }
-}
-
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of((gradle.extra.properties["swiftJavaJdk"] as? Int) ?: 25))
@@ -49,7 +36,9 @@ java {
 }
 
 dependencies {
-    implementation(projects.swiftKitCore)
+    // `api`: the public API exposes SwiftKitCore types (e.g. AllocatingSwiftArena extends SwiftArena),
+    // so consumers of swiftkit-ffm need swiftkit-core on their compile classpath.
+    api(projects.swiftKitCore)
 
     testRuntimeOnly(libs.junit.platform.launcher) // TODO: workaround for not finding junit: https://github.com/gradle/gradle/issues/34512
     testImplementation(platform(libs.junit.bom))
