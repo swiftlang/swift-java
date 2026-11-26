@@ -12,30 +12,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Marker macro that controls whether jextract exports a Swift declaration to Java.
+/// Marker macro that forces a Swift declaration to be exported to Java via jextract.
 ///
-/// `@JavaExport` forces a declaration to be exported. When applied to a `typealias`,
-/// it registers a specialization entry for generic types:
+/// When applied to a `typealias`, it registers a specialization entry for generic types:
 /// ```swift
 /// @JavaExport public typealias FishTank = Tank<Fish>
 /// ```
 /// This tells jextract to generate a concrete `FishTank` Java class for `Tank<Fish>`,
 /// even if `Tank` was included in the `filterExclude` configuration.
 ///
-/// `@JavaExport(false)` keeps a declaration out of the Java bindings. On a type or an
-/// extension, it also applies to their members and nested types:
-/// ```swift
-/// public struct Session {
-///   public var token: String
-///   @JavaExport(false) public var debugDump: [String: Any]
-/// }
-/// ```
-///
 /// With `"exportMode": "annotated"` in `swift-java.config`, jextract exports only declarations
 /// marked `@JavaExport`, together with the members of a marked type or extension.
+///
+/// To keep a declaration out of the Java bindings instead, use ``JavaIgnore()``.
 ///
 /// This module has no JNI dependency, so code that is also built for platforms
 /// without Java can use the marker.
 @attached(peer)
-public macro JavaExport(_ isExported: Bool = true) =
+public macro JavaExport() =
   #externalMacro(module: "SwiftJavaMacros", type: "JavaExportMacro")
+
+/// Marker macro that keeps a Swift declaration out of the Java bindings jextract generates.
+///
+/// On a type or an extension, it also applies to their members and nested types:
+/// ```swift
+/// public struct Session {
+///   public var token: String
+///   @JavaIgnore public var debugDump: [String: Any]
+/// }
+///
+/// @JavaIgnore
+/// extension Session { ... }
+/// ```
+@attached(peer)
+public macro JavaIgnore() =
+  #externalMacro(module: "SwiftJavaMacros", type: "JavaIgnoreMacro")

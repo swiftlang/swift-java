@@ -182,7 +182,7 @@ public struct Configuration: Codable {
   }
 
   /// Which declarations to export: `all` (default) exports every declaration that passes the access level
-  /// and filters, except those opted out with `@JavaExport(false)`. `annotated` exports only declarations marked
+  /// and filters, except those opted out with `@JavaIgnore`. `annotated` exports only declarations marked
   /// `@JavaExport`, including the members of a marked type or extension.
   public var exportMode: JExtractExportMode?
   public var effectiveExportMode: JExtractExportMode {

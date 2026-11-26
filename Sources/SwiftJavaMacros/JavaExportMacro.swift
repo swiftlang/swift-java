@@ -32,3 +32,19 @@ extension JavaExportMacro: PeerMacro {
     []
   }
 }
+
+/// Marker macro for jextract: keeps a Swift declaration, and the members of a type or extension,
+/// out of the Java bindings.
+///
+/// This macro produces no code — it is purely a marker read by the jextract tool.
+package enum JavaIgnoreMacro {}
+
+extension JavaIgnoreMacro: PeerMacro {
+  package static func expansion(
+    of node: AttributeSyntax,
+    providingPeersOf declaration: some DeclSyntaxProtocol,
+    in context: some MacroExpansionContext,
+  ) throws -> [DeclSyntax] {
+    []
+  }
+}

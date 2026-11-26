@@ -69,7 +69,7 @@ public final class SomeModule ... {
 
 ### Choosing what to export
 
-`@JavaExport(false)`, from the `SwiftJavaAnnotations` module (also re-exported by `SwiftJava`), keeps a
+`@JavaIgnore`, from the `SwiftJavaAnnotations` module (also re-exported by `SwiftJava`), keeps a
 public declaration out of the Java bindings. On a type or an extension it applies to all their members:
 
 ```swift
@@ -77,10 +77,10 @@ import SwiftJavaAnnotations
 
 public struct Session {
   public var token: String
-  @JavaExport(false) public var debugDump: [String: Any]
+  @JavaIgnore public var debugDump: [String: Any]
 }
 
-@JavaExport(false)
+@JavaIgnore
 extension Session {
   public func swiftOnlyHelper() -> (Int, String) { ... }
 }

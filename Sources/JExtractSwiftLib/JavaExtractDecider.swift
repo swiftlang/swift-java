@@ -43,8 +43,8 @@ public func makeSwiftJavaAnalyzer(
 /// - Skips initializers of unspecialized generic types
 /// - Force-extracts decls annotated `@JavaExport` even if they would
 ///   otherwise be filtered by access level
-/// - Skips decls annotated `@JavaExport(false)`, or inside a type or extension
-///   annotated `@JavaExport(false)`
+/// - Skips decls annotated `@JavaIgnore`, or inside a type or extension
+///   annotated `@JavaIgnore`
 /// - With the `annotated` export mode, extracts only decls annotated
 ///   `@JavaExport`, inside a type or extension annotated `@JavaExport`, or
 ///   types with such a member
@@ -93,7 +93,7 @@ public struct JavaExtractDecider: ExtractDecider {
     case true?:
       return true
     case false?:
-      log.trace("Skip '\(decl.qualifiedNameForDebug)': annotated @JavaExport(false)")
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': annotated @JavaIgnore")
       return false
     case nil:
       break
@@ -106,7 +106,7 @@ public struct JavaExtractDecider: ExtractDecider {
 
     let inheritedMarker = decl.inheritedJavaExportMarker
     if inheritedMarker == false {
-      log.trace("Skip '\(decl.qualifiedNameForDebug)': inside a declaration annotated @JavaExport(false)")
+      log.trace("Skip '\(decl.qualifiedNameForDebug)': inside a declaration annotated @JavaIgnore")
       return false
     }
 

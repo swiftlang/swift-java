@@ -15,7 +15,7 @@
 /// Which declarations jextract exports to Java.
 public enum JExtractExportMode: String, Codable {
   /// Export every declaration that passes the access level and filters, except those marked
-  /// `@JavaExport(false)` or inside a type or extension marked `@JavaExport(false)`.
+  /// `@JavaIgnore` or inside a type or extension marked `@JavaIgnore`.
   case all
 
   /// Export only declarations marked `@JavaExport`, or inside a type or extension marked `@JavaExport`.

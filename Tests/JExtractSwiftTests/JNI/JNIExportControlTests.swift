@@ -19,26 +19,26 @@ import SwiftJavaConfigurationShared
 import SwiftParser
 import Testing
 
-/// `@JavaExport(false)` opts declarations out, and `exportMode: annotated` exports only marked ones.
+/// `@JavaIgnore` opts declarations out, and `exportMode: annotated` exports only marked ones.
 @Suite
 struct JNIExportControlTests {
   let optOutSource =
     """
     public struct Session {
       public var token: String
-      @JavaExport(false) public var secret: String
-      @JavaExport(false) public func load(_ request: URLRequest) {}
-      @JavaExport(false) public func pairs() -> [(Int64, String)] { [] }
+      @JavaIgnore public var secret: String
+      @JavaIgnore public func load(_ request: URLRequest) {}
+      @JavaIgnore public func pairs() -> [(Int64, String)] { [] }
     }
-    @JavaExport(false)
+    @JavaIgnore
     public struct Hidden {
       public func load(_ request: URLRequest) {}
     }
-    @JavaExport(false)
+    @JavaIgnore
     extension Session {
       public func fromExtension(_ request: URLRequest) {}
     }
-    @JavaExport(false)
+    @JavaIgnore
     extension UnknownType {
       public func helper() {}
     }
@@ -49,7 +49,7 @@ struct JNIExportControlTests {
     @JavaExport
     public struct Exported {
       public var name: String
-      @JavaExport(false) public var hidden: String
+      @JavaIgnore public var hidden: String
     }
     public struct Partial {
       @JavaExport public func picked() {}
@@ -145,7 +145,7 @@ struct JNIExportControlTests {
     let skipped = try skipped(optOutSource, .all)
     #expect(skipped.isEmpty, "\(skipped)")
     // Without the markers, the same declarations are reported.
-    let unmarked = try self.skipped(optOutSource.replacingOccurrences(of: "@JavaExport(false)", with: ""), .all)
+    let unmarked = try self.skipped(optOutSource.replacingOccurrences(of: "@JavaIgnore", with: ""), .all)
     #expect(unmarked.count == 4, "\(unmarked)")
   }
 
