@@ -12,7 +12,7 @@ extension JavaClass<JavaOptionalLong> {
   public func empty() -> JavaOptionalLong!
 
   public func emptyOptional() -> Int64? {
-    Optional(javaOptional: empty())
+    Optional(javaOptional: self.empty())
   }
 
   /// Java method `of`.
@@ -25,7 +25,7 @@ extension JavaClass<JavaOptionalLong> {
   public func of(_ arg0: Int64) -> JavaOptionalLong!
 
   public func ofOptional(_ arg0: Int64) -> Int64? {
-    Optional(javaOptional: of(arg0))
+    Optional(javaOptional: self.of(arg0))
   }
 }
 @JavaClass("java.util.OptionalLong")

@@ -433,7 +433,7 @@ open class JavaInteger: JavaNumber {
   open func describeConstable() -> JavaOptional<JavaInteger>!
 
   open func describeConstableOptional() -> JavaInteger? {
-    Optional(javaOptional: describeConstable())
+    Optional(javaOptional: self.describeConstable())
   }
 
   /// Java method `doubleValue`.

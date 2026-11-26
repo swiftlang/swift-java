@@ -27,7 +27,7 @@ public class EnumTest {
     void enumWithValueCases() {
         try (var arena = SwiftArena.ofConfined()) {
             EnumWithValueCases e = EnumWithValueCases.firstCase(48, arena);
-            EnumWithValueCases.Case.FirstCase c = (EnumWithValueCases.Case.FirstCase) e.getCase();
+            EnumWithValueCases.FirstCaseCase c = (EnumWithValueCases.FirstCaseCase) e.getCase();
             assertNotNull(c);
         }
     }
@@ -47,9 +47,18 @@ public class EnumTest {
             EnumWithCaseNameValue e = EnumWithCaseNameValue.success(success, arena);
 
             switch (e.getCase(arena)) {
-            case EnumWithCaseNameValue.Case.Success(var s):
+            case EnumWithCaseNameValue.SuccessCase(var s):
                 assertEquals("ok", s.getMessage());
             }
+        }
+    }
+
+    @Test
+    void enumCaseNamedAfterEnclosingType() {
+        try (var arena = SwiftArena.ofConfined()) {
+            var component = Calendar.Component.calendar(arena);
+            assertTrue(component.getAsCalendar().isPresent());
+            assertInstanceOf(Calendar.Component.CalendarCase.class, component.getCase());
         }
     }
 

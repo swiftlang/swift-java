@@ -93,8 +93,8 @@ bind the associated values of each case directly:
 
 @Snippet(path: "Snippets/EnumsJavaJNI", slice: "enumSwitchUsageJava")
 
-Each nested `Vehicle.Case.*` type is a `record`, so on Java 21+ you can also
-destructure it positionally (`case Vehicle.Case.Car(var name, var trailer)`), and
+Each case type, such as `Vehicle.CarCase`, is a `record`, so on Java 21+ you can also
+destructure it positionally (`case Vehicle.CarCase(var name, var trailer)`), and
 on Java 16+ reach the same values with
 [pattern matching for instanceof](https://openjdk.org/jeps/394).
 
@@ -174,8 +174,8 @@ try {
     MySwiftLibrary.throwTyped("");
 } catch (MySwiftError e) {
     switch (e.getCase()) {
-        case MySwiftError.Case.SwiftError _ -> System.out.println("swift error");
-        case MySwiftError.Case.InvalidInput(var reason) -> System.out.println(reason);
+        case MySwiftError.SwiftErrorCase _ -> System.out.println("swift error");
+        case MySwiftError.InvalidInputCase(var reason) -> System.out.println(reason);
     }
 }
 ```
@@ -850,10 +850,49 @@ Subscripts taking parameters keep them on the generated Java methods.
    }
 }
 
+### Operators
+
+Swift operators are imported as static Java methods named after the operator components; For example `+` becomes `plus`, and `++` becomes `plusPlus`. Some methods have special names, and as such `==` becomes `isEqual`. Prefix and Postfix operators are supported as well.
+
+@TabNavigator {
+   @Tab("Swift") {
+      @Snippet(path: "Snippets/OperatorsSwift.swift", slice: "operators")
+   }
+   @Tab("Java (JNI)") {
+      @Snippet(path: "Snippets/OperatorsJavaJNI", slice: "operatorsUsageJava")
+   }
+   @Tab("Java (FFM)") {
+      @Snippet(path: "Snippets/OperatorsJavaFFM", slice: "operatorsUsageJava")
+   }
+}
+
+#### Prefix and postfix operators
+
+@TabNavigator {
+   @Tab("Swift") {
+      @Snippet(path: "Snippets/OperatorsSwift.swift", slice: "prefixPostfixOperators")
+   }
+   @Tab("Java (JNI)") {
+      @Snippet(path: "Snippets/OperatorsJavaJNI", slice: "prefixPostfixOperatorsUsageJava")
+   }
+   @Tab("Java (FFM)") {
+      @Snippet(path: "Snippets/OperatorsJavaFFM", slice: "prefixPostfixOperatorsUsageJava")
+   }
+}
+
+If a type declares both a prefix and a postfix form of the same operator, like `prefix func ...` and `postfix func ...`,
+the Java methods get a `Prefix` or `Postfix` suffix: `dotDotDotPrefix` and `dotDotDotPostfix`.
+
 ### Closures
 
 Swift closure parameters become Java functional interfaces that can be
 implemented with a lambda expression.
+
+In JNI mode, an interface jextract generates declares `apply` and a default
+`invoke` method that calls it. Kotlin treats a method named `invoke` as the
+invoke operator, so Kotlin code can call a closure value as `handler(x)`.
+Closures that a `java.util.function` interface covers, such as
+`(Int64) -> Int64` with `LongUnaryOperator`, use that interface instead.
 
 #### Non-escaping closures
 

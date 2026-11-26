@@ -276,9 +276,8 @@ struct JNIGenericTypeTests {
       detectChunkByInitialLines: 2,
       expectedChunks: [
         #"""
-        public sealed interface Case {
-          record Foo(MyID<java.lang.Double> arg0) implements Case {}
-        }
+        public sealed interface Case {}
+        public record FooCase(MyID<java.lang.Double> arg0) implements Case {}
         """#
       ]
     )
@@ -319,15 +318,14 @@ struct JNIGenericTypeTests {
         }
         """,
         """
-        public sealed interface Case<Wrapped> {
-          record None<Wrapped>() implements Case<Wrapped> {}
-        }
+        public sealed interface Case<Wrapped> {}
+        public record NoneCase<Wrapped>() implements Case<Wrapped> {}
         """,
         """
         public Case<Wrapped> getCase() {
           return switch (this.getDiscriminator()) {
            case SOME -> throw new UnsupportedOperationException("MyOptional.some contains unsupported values.");
-           case NONE -> new Case.None<Wrapped>();
+           case NONE -> new NoneCase<Wrapped>();
           };
         }
         """,

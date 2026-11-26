@@ -51,8 +51,6 @@ public func makeSwiftJavaAnalyzer(
 /// - Skips Swift wrappers of Java types (`@JavaClass`, `@JavaInterface`,
 ///   `@JavaField`, `@JavaStaticField`, `@JavaMethod`, `@JavaStaticMethod`,
 ///   `@JavaImplementation`) since those are bridged the other way
-/// - Skips Swift operators (`+`, `-`, prefix/postfix forms) — Java has no
-///   operator-overload syntax, so the generator can't render them
 public struct JavaExtractDecider: ExtractDecider {
   public let accessLevel: AccessLevelMode
   public let exportMode: JExtractExportMode
@@ -103,15 +101,6 @@ public struct JavaExtractDecider: ExtractDecider {
     let attrs = decl.asProtocol((any WithAttributesSyntax).self)?.attributes
     if attrs?.contains(where: { $0.isJavaKitMacro }) == true {
       log.trace("Skip '\(decl.qualifiedNameForDebug)': swift-java macro-wrapped Java type")
-      return false
-    }
-
-    // Swift prefix and postfix operators have no Java mapping. A declaration's operator name is
-    // lexed as a binary operator, so only the `prefix` or `postfix` modifier tells them apart.
-    if let fn = decl.as(FunctionDeclSyntax.self),
-      fn.modifiers.contains(where: { $0.name.tokenKind == .keyword(.prefix) || $0.name.tokenKind == .keyword(.postfix) })
-    {
-      log.trace("Skip '\(decl.qualifiedNameForDebug)': operators are not supported on Java")
       return false
     }
 

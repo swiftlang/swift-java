@@ -13,7 +13,7 @@ extension JavaOptional {
   public func filter(_ arg0: JavaPredicate<JavaObject>?) -> JavaOptional<T>!
 
   public func filterOptional(_ arg0: JavaPredicate<JavaObject>?) -> T? {
-    Optional(javaOptional: filter(arg0))
+    Optional(javaOptional: self.filter(arg0))
   }
 
   /// Java method `flatMap`.
@@ -26,7 +26,7 @@ extension JavaOptional {
   public func flatMap<U: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, JavaOptional<U>>?) -> JavaOptional<U>!
 
   public func flatMapOptional<U: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, JavaOptional<U>>?) -> U? {
-    Optional(javaOptional: flatMap(arg0))
+    Optional(javaOptional: self.flatMap(arg0))
   }
 
   /// Java method `ifPresent`.
@@ -48,7 +48,7 @@ extension JavaOptional {
   public func map<U: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, U>?) -> JavaOptional<U>!
 
   public func mapOptional<U: AnyJavaObject>(_ arg0: JavaFunction<JavaObject, U>?) -> U? {
-    Optional(javaOptional: map(arg0))
+    Optional(javaOptional: self.map(arg0))
   }
 
   /// Java method `or`.
@@ -61,7 +61,7 @@ extension JavaOptional {
   public func or(_ arg0: JavaSupplier<JavaOptional<T>>?) -> JavaOptional<T>!
 
   public func orOptional(_ arg0: JavaSupplier<JavaOptional<T>>?) -> T? {
-    Optional(javaOptional: or(arg0))
+    Optional(javaOptional: self.or(arg0))
   }
 
   /// Java method `orElseGet`.

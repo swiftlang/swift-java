@@ -317,7 +317,7 @@ open class JavaString: JavaObject {
   open func describeConstable() -> JavaOptional<JavaString>!
 
   open func describeConstableOptional() -> JavaString? {
-    Optional(javaOptional: describeConstable())
+    Optional(javaOptional: self.describeConstable())
   }
 
   /// Java method `isEmpty`.

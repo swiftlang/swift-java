@@ -51,8 +51,8 @@ public class EnumBenchmark {
     }
 
     @Benchmark
-    public Vehicle.Case.Motorbike getAssociatedValues(BenchmarkState state, Blackhole bh) {
-        Vehicle.Case.Motorbike motorbike = state.vehicle.getAsMotorbike().orElseThrow();
+    public Vehicle.MotorbikeCase getAssociatedValues(BenchmarkState state, Blackhole bh) {
+        Vehicle.MotorbikeCase motorbike = state.vehicle.getAsMotorbike().orElseThrow();
         bh.consume(motorbike.arg0());
         bh.consume(motorbike.horsePower());
         return motorbike;

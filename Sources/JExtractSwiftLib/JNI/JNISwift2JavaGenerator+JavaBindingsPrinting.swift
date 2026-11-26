@@ -665,19 +665,16 @@ extension JNISwift2JavaGenerator {
         "<\(decl.genericParameterNames.joined(separator: .comma))>"
       }
 
-    printer.printBraceBlock("public sealed interface Case\(caseGenericClause)") { printer in
-      for enumCase in decl.cases {
-        guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
-          continue
-        }
-
-        let members = translatedCase.parameters.map {
-          $0.renderParameter()
-        }
-
-        // Print record
-        printer.print("record \(translatedCase.name)\(caseGenericClause)(\(members.joined(separator: .comma))) implements Case\(caseGenericClause) {}")
+    printer.print("public sealed interface Case\(caseGenericClause) {}")
+    for enumCase in decl.cases {
+      guard let translatedCase = self.translatedEnumCase(for: enumCase) else {
+        continue
       }
+
+      let members = translatedCase.parameters.map {
+        $0.renderParameter()
+      }
+      printer.print("public record \(translatedCase.name)Case\(caseGenericClause)(\(members.joined(separator: .comma))) implements Case\(caseGenericClause) {}")
     }
     printer.println()
 
@@ -691,7 +688,7 @@ extension JNISwift2JavaGenerator {
           if let translatedCase = self.translatedEnumCase(for: enumCase) {
             if enumCase.parameters.isEmpty {
               printer.print(
-                "case \(enumCase.name.uppercased()) -> new Case.\(translatedCase.name)\(caseGenericClause)();"
+                "case \(enumCase.name.uppercased()) -> new \(translatedCase.name)Case\(caseGenericClause)();"
               )
             } else {
               let arenaArgument = translatedCase.requiresSwiftArena ? "swiftArena" : ""
@@ -732,7 +729,7 @@ extension JNISwift2JavaGenerator {
         continue
       }
 
-      let caseType = JavaType.class(package: nil, name: "Case.\(translatedCase.name)", typeParameters: caseTypeParameters)
+      let caseType = JavaType.class(package: nil, name: "\(translatedCase.name)Case", typeParameters: caseTypeParameters)
       let resultType = JavaType.optional(caseType)
       if let getAsCaseFunctionDecl = translatedCase.getAsCaseFunction,
         var getAsCaseFunction = self.translatedDecl(for: getAsCaseFunctionDecl)
@@ -766,7 +763,7 @@ extension JNISwift2JavaGenerator {
             if (getDiscriminator() != Discriminator.\(enumCase.name.uppercased())) {
               return java.util.Optional.empty();
             }
-            return java.util.Optional.of(new Case.\(translatedCase.name)\(caseTypeParameters.isEmpty ? "" : "<>")());
+            return java.util.Optional.of(new \(translatedCase.name)Case\(caseTypeParameters.isEmpty ? "" : "<>")());
           }
           """
         )
@@ -836,17 +833,26 @@ extension JNISwift2JavaGenerator {
     _ functionType: TranslatedFunctionType,
   ) {
     let apiParams = functionType.parameters.map({ $0.parameter.renderParameter() })
+    let arguments = functionType.parameters.map(\.parameter.name).joined(separator: .comma)
+    let returnKeyword = functionType.result.javaType.isVoid ? "" : "return "
 
     printer.printJavadocComment(
       """
       Corresponds to the Swift closure parameter of type {@code \(functionType.swiftType)}.
       """
     )
+    // `invoke` lets Kotlin call the closure as `handler(x)`: Kotlin treats a Java method named `invoke`
+    // as the invoke operator. Kotlin lambdas still convert to the interface, since `apply` is its only
+    // abstract method.
     printer.print(
       """
       @FunctionalInterface
       public interface \(functionType.name) {
         \(functionType.result.javaType) apply(\(apiParams.joined(separator: .comma)));
+
+        default \(functionType.result.javaType) invoke(\(apiParams.joined(separator: .comma))) {
+          \(returnKeyword)apply(\(arguments));
+        }
       }
       """
     )

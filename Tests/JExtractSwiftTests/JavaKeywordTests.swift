@@ -70,7 +70,7 @@ struct JavaKeywordTests {
         public static MyEnum null_(SwiftArena swiftArena) {
         """,
         """
-        record Null() implements Case {
+        public record NullCase() implements Case {
         """,
       ]
     )
@@ -95,10 +95,10 @@ struct JavaKeywordTests {
         public static MyEnumWithValue instanceof_(java.lang.String arg0, SwiftArena swiftArena) {
         """,
         """
-        record Instanceof(java.lang.String arg0) implements Case {
+        public record InstanceofCase(java.lang.String arg0) implements Case {
         """,
         """
-        public java.util.Optional<Case.Instanceof> getAsInstanceof() {
+        public java.util.Optional<InstanceofCase> getAsInstanceof() {
         """,
       ]
     )
@@ -134,7 +134,7 @@ struct JavaKeywordTests {
         public static MyEnum default_(SwiftArena swiftArena) {
         """,
         """
-        record Default() implements Case {
+        public record DefaultCase() implements Case {
         """,
       ]
     )
@@ -187,7 +187,7 @@ struct JavaKeywordTests {
       .java,
       detectChunkByInitialLines: 1,
       expectedChunks: [
-        "record Quote(java.lang.String slug, long long_) implements Case {}"
+        "public record QuoteCase(java.lang.String slug, long long_) implements Case {}"
       ]
     )
 

@@ -12,7 +12,7 @@ extension JavaClass {
   public func empty<T: AnyJavaObject>() -> JavaOptional<T>! where ObjectType == JavaOptional<T>
 
   public func emptyOptional<T: AnyJavaObject>() -> T? where ObjectType == JavaOptional<T> {
-    Optional(javaOptional: empty())
+    Optional(javaOptional: self.empty())
   }
 
   /// Java method `of`.
@@ -25,7 +25,7 @@ extension JavaClass {
   public func of<T: AnyJavaObject>(_ arg0: T?) -> JavaOptional<T>! where ObjectType == JavaOptional<T>
 
   public func ofOptional<T: AnyJavaObject>(_ arg0: T?) -> T? where ObjectType == JavaOptional<T> {
-    Optional(javaOptional: of(arg0))
+    Optional(javaOptional: self.of(arg0))
   }
 
   /// Java method `ofNullable`.
@@ -38,7 +38,7 @@ extension JavaClass {
   public func ofNullable<T: AnyJavaObject>(_ arg0: T?) -> JavaOptional<T>! where ObjectType == JavaOptional<T>
 
   public func ofNullableOptional<T: AnyJavaObject>(_ arg0: T?) -> T? where ObjectType == JavaOptional<T> {
-    Optional(javaOptional: ofNullable(arg0))
+    Optional(javaOptional: self.ofNullable(arg0))
   }
 }
 @JavaClass("java.util.Optional")
