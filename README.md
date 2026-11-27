@@ -40,26 +40,52 @@ E.g sdkman install command:
 sdk install java 25.0.1-amzn
 ```
 
-## Self-publish supporting Java libraries
+## Consuming the Java libraries
 
-swift-java relies on supporting libraries that are under active development and not yet published to Maven Central. To use the project, you'll need to self-publish these libraries locally so your Java project can depend on them.
-
-To publish the libraries to your local maven repository (`$HOME/.m2`), run this in `swift-java/`:
-
-```bash
-./gradlew publishToMavenLocal
-```
-
-To consume these libraries in your Java project built using Gradle, include the local repository in the repositories to resolve dependencies from:
+swift-java's supporting Java libraries are published to Maven Central as
+`org.swift.swiftjava:swiftkit-core` (JNI mode) and `org.swift.swiftjava:swiftkit-ffm`
+(FFM mode), together with `org.swift.swiftjava:swiftkit-native`, which ships the
+Swift libraries they load at runtime as one classifier jar per platform:
 
 ```kotlin
 repositories {
     mavenLocal()
     mavenCentral()
 }
+
+dependencies {
+    implementation("org.swift.swiftjava:swiftkit-core:<version>")
+    runtimeOnly("org.swift.swiftjava:swiftkit-native:<version>:osx-aarch_64")
+}
 ```
 
-We anticipate simplifying this in the future.
+Rather than hardcoding the classifier, you can let the
+[osdetector Gradle plugin](https://github.com/google/osdetector-gradle-plugin)
+pick the one for the machine running the build. On Linux the classifier also
+names the Ubuntu release and the Swift version installed on the machine:
+
+```kotlin
+plugins {
+    id("com.google.osdetector") version "1.7.3"
+}
+
+// e.g. `osx-aarch_64` or `ubuntu24.04-swift_6.3-x86_64`
+val swiftkitNativeClassifier =
+    if (osdetector.os == "linux") {
+        "${osdetector.release.id}${osdetector.release.version}-swift_6.3-${osdetector.arch}"
+    } else {
+        osdetector.classifier
+    }
+
+dependencies {
+    implementation("org.swift.swiftjava:swiftkit-core:<version>")
+    runtimeOnly("org.swift.swiftjava:swiftkit-native:<version>:$swiftkitNativeClassifier")
+}
+```
+
+See [PUBLISHING.md](./PUBLISHING.md) for the available classifiers, `-SNAPSHOT`
+builds of `main`, and how to publish your own checkout to `~/.m2` with
+`publishToMavenLocal`.
 
 ## SwiftJava macros: calling Java from Swift
 
