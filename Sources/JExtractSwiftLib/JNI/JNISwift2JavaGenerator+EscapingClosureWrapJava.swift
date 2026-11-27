@@ -40,6 +40,9 @@ extension JNISwift2JavaGenerator {
     _ printer: inout SwiftPrinter,
     _ closureTy: SyntheticEscapingClosureFunctionType,
   ) {
+    guard printedEscapingClosureWrappers.insert(closureTy.javaInterfaceName).inserted else {
+      return
+    }
     printer.printBraceBlock(
       """
       @JavaInterface("\(closureTy.javaBinaryName)")

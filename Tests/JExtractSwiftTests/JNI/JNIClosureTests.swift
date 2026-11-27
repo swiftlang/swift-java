@@ -1213,6 +1213,7 @@ struct JNIClosureTests {
       expectedChunks: [
         """
         public static class closureWithArgumentsAndReturn {
+          private closureWithArgumentsAndReturn() {}
           /** Corresponds to the Swift closure parameter of type {@code (Int64, Bool) -> Int64}. */
           @FunctionalInterface
           public interface closure {
