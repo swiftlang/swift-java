@@ -25,6 +25,7 @@ struct JNIOptionalTests {
     public func optionalExplicit(_ arg: Optional<String>) -> Optional<String>
     public func optionalClass(_ arg: MyClass?) -> MyClass?
     public func optionalJavaKitClass(_ arg: JavaLong?)
+    public func optionalArray(_ arg: [Int64]?)
     """
 
   let classLookupTable = [
@@ -245,6 +246,51 @@ struct JNIOptionalTests {
             return JavaLong(javaThis: $0, environment: environment)
           }
           )
+        }
+        """
+      ]
+    )
+  }
+
+  @Test
+  func optionalArray_javaBindings() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .java,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        /**
+         * Downcall to Swift:
+         * {@snippet lang=swift :
+         * public func optionalArray(_ arg: [Int64]?)
+         * }
+         */
+        public static void optionalArray(java.util.Optional<long[]> arg) {
+          SwiftModule.$optionalArray((byte) (arg.isPresent() ? 1 : 0), arg.orElse(null));
+        }
+        """,
+        """
+        private static native void $optionalArray(byte arg_discriminator, long[] arg_value);
+        """,
+      ]
+    )
+  }
+
+  @Test
+  func optionalArray_swiftThunks() throws {
+    try assertOutput(
+      input: source,
+      .jni,
+      .swift,
+      detectChunkByInitialLines: 1,
+      javaClassLookupTable: classLookupTable,
+      expectedChunks: [
+        """
+        @_cdecl("Java_com_example_swift_SwiftModule__00024optionalArray__B_3J")
+        public func Java_com_example_swift_SwiftModule__00024optionalArray__B_3J(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, arg_discriminator: jbyte, arg_value: jlongArray?) {
+          SwiftModule.optionalArray(arg_discriminator == 1 ? [Int64](fromJNI: arg_value, in: environment) : nil)
         }
         """
       ]
