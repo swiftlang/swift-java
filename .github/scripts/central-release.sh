@@ -28,7 +28,7 @@
 set -euo pipefail
 
 version="${1:?usage: $0 <version>}"
-namespace="org.swift.swiftjava"
+namespace="pl.project13" # [DNM] experiment
 staging_api="https://ossrh-staging-api.central.sonatype.com"
 portal_api="https://central.sonatype.com/api/v1/publisher"
 deployments_url="https://central.sonatype.com/publishing/deployments"
@@ -61,7 +61,7 @@ deployment_status() {
 }
 
 echo "Handing the staging repository for $version to the Central Portal"
-api -X POST "$staging_api/manual/upload/defaultRepository/$namespace?publishing_type=automatic"
+api -X POST "$staging_api/manual/upload/defaultRepository/$namespace?publishing_type=user_managed" # [DNM] experiment: stage, do NOT publish
 echo
 
 deadline=$(($(date +%s) + timeout_seconds))
@@ -78,9 +78,9 @@ while true; do
       exit 1
       ;;
     VALIDATED)
-      # Doesn't change on its own: automatic publishing didn't engage
-      echo "::error::Central validated $version but didn't publish it, someone with access to $deployments_url has to publish it"
-      exit 1
+      # [DNM] experiment: user_managed stops here, nothing is published
+      echo "::notice::Central validated $version and did NOT publish it. View it at $deployments_url, then drop it there"
+      exit 0
       ;;
   esac
   if (($(date +%s) > deadline)); then

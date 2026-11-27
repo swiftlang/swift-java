@@ -33,26 +33,11 @@ name: Publish
 # Maintainer setup (credentials, signing key) and the release procedure are
 # described in RELEASING.md.
 
+# [DNM] experiment: only runs for a push to this branch, stages under
+# pl.project13 and does NOT publish.
 on:
   push:
-    branches: [main]
-    tags: ['[0-9]+.[0-9]+.[0-9]+']
-    # Only applies to branch pushes, tag pushes always publish
-    paths-ignore:
-      - '**.md'
-      - '**.docc/**'
-  pull_request:
-    paths:
-      - '.github/workflows/publish.yml'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - 'gradle.properties'
-      - 'BuildLogic/**'
-      - 'SwiftKitCore/build.gradle.kts'
-      - 'SwiftKitFFM/build.gradle.kts'
-      - 'SwiftKitNative/**'
-  # Re-run a publish, e.g. after a transient failure. Select `main` or a release tag.
-  workflow_dispatch:
+    branches: [ktoso/staging-experiment]
 
 permissions:
   contents: read
@@ -67,19 +52,9 @@ env:
   DRY_RUN: ${{ github.event_name == 'pull_request' || vars.MAVEN_CENTRAL_PUBLISHING != 'true' }}
 
 jobs:
-  tests:
-    name: Tests
-    # Pull requests run pull_request.yml on their own, and only dry-run here.
-    if: github.repository == 'swiftlang/swift-java' && github.event_name != 'pull_request'
-    uses: ./.github/workflows/pull_request.yml
-
   natives:
     name: Build natives (${{ matrix.classifier }})
-    needs: tests
-    # `tests` is skipped in pull requests, everywhere else it has to pass.
-    if: >-
-      ${{ !cancelled() && github.repository == 'swiftlang/swift-java' &&
-      (needs.tests.result == 'success' || github.event_name == 'pull_request') }}
+    if: github.repository == 'swiftlang/swift-java'
     runs-on: ${{ matrix.runs-on }}
     container: ${{ matrix.container }}
     strategy:
@@ -177,64 +152,8 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="$(./gradlew -q printVersion | tail -n 1)"
-          echo "Version: $VERSION"
-          case "$GITHUB_REF" in
-            refs/tags/*)
-              if [[ "$VERSION" != "$GITHUB_REF_NAME" ]]; then
-                echo "::error::Tag $GITHUB_REF_NAME does not match the computed version $VERSION"
-                exit 1
-              fi
-              ;;
-            refs/heads/main)
-              if [[ "$VERSION" != *-SNAPSHOT ]]; then
-                echo "::notice::HEAD is tagged $VERSION, the workflow run for the tag publishes it"
-                exit 0
-              fi
-              ;;
-            refs/pull/*)
-              ;; # always a dry run
-            *)
-              echo "::error::Only main (snapshots) and N.N.N tags (releases) are published, not $GITHUB_REF"
-              exit 1
-              ;;
-          esac
-
-          gradle() {
-            ./gradlew -PnativeLibsDir=natives -PswiftVersion="$SWIFT_VERSION" --no-daemon --no-parallel --stacktrace "$@"
-          }
-
-          if [[ "$DRY_RUN" != true ]]; then
-            gradle publishAllPublicationsToSonatypeRepository
-            if [[ "$VERSION" != *-SNAPSHOT ]]; then
-              # The upload above went to a staging repository of the OSSRH Staging API.
-              # Hand it to the Central Portal, which publishes it automatically, and
-              # wait until Central has validated it.
-              .github/scripts/central-release.sh "$VERSION"
-              echo "::notice::Released $VERSION, it shows up on Maven Central shortly"
-            fi
-            exit 0
-          fi
-
-          echo "::notice::Dry run: $VERSION is built and signed into build/staging-deploy, but not uploaded"
-          export GNUPGHOME="$(mktemp -d)"
-          if [[ -z "$ORG_GRADLE_PROJECT_signingKey" ]]; then
-            # No signing key, e.g. in pull requests from forks: sign with a throwaway key.
-            export ORG_GRADLE_PROJECT_signingPassword=dry-run
-            gpg --batch --pinentry-mode loopback --passphrase "$ORG_GRADLE_PROJECT_signingPassword" \
-              --quick-gen-key 'swift-java dry run <dry-run@invalid>' rsa3072 sign 1d
-            export ORG_GRADLE_PROJECT_signingKey="$(gpg --batch --pinentry-mode loopback --passphrase "$ORG_GRADLE_PROJECT_signingPassword" --armor --export-secret-keys)"
-          else
-            gpg --batch --pinentry-mode loopback --passphrase "$ORG_GRADLE_PROJECT_signingPassword" --import <<< "$ORG_GRADLE_PROJECT_signingKey"
-          fi
-          rm -rf build/staging-deploy
-          gradle publishAllPublicationsToStagingRepository
-
-          # Central rejects anything without a valid signature, so check them all.
-          find build/staging-deploy -type f ! -name '*.asc' ! -name '*.md5' ! -name '*.sha*' ! -name 'maven-metadata.xml' -print0 | sort -z |
-            while IFS= read -r -d '' file; do
-              if ! gpg --batch --verify "$file.asc" "$file" 2>/dev/null; then
-                echo "::error::Missing or bad signature: $file"
-                exit 1
-              fi
-              echo "signed: ${file#build/staging-deploy/}"
-            done
+          VERSION="${VERSION%-SNAPSHOT}"
+          echo "::notice::[DNM] Staging $VERSION under pl.project13, it is NOT published"
+          ./gradlew publishAllPublicationsToSonatypeRepository -PnativeLibsDir=natives -PswiftVersion="$SWIFT_VERSION" \
+            -PswiftkitVersion="$VERSION" --no-daemon --no-parallel --stacktrace
+          .github/scripts/central-release.sh "$VERSION"
