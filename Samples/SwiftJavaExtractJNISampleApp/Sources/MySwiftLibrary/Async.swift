@@ -39,6 +39,14 @@ public func asyncThrows() async throws {
   throw MySwiftError.swiftError
 }
 
+/// Issue #915. `Future.get()` reports failure as `ExecutionException`.
+/// The generated async thunk must complete the outer future with that
+/// exception's cause, not with the wrapper itself.
+public func asyncThrowsJavaFailure() async throws {
+  let cause = RuntimeException("Java async failed")
+  throw ExecutionException(cause)
+}
+
 public func asyncString(input: String) async -> String {
   input
 }
