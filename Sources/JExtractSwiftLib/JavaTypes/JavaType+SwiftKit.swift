@@ -21,4 +21,11 @@ extension JavaType {
     .class(package: "org.swift.swiftkit.core", name: "_OutSwiftGenericInstance")
   }
 
+  static func SwiftAsyncResultSink(_ S: JavaType, _ T: JavaType) -> JavaType {
+    .class(
+      package: "org.swift.swiftkit.core",
+      name: "SwiftAsyncResultSink",
+      typeParameters: [S.boxedType, T.boxedType]
+    )
+  }
 }

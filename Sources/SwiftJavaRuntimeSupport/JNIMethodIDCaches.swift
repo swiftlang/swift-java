@@ -15,37 +15,6 @@
 import SwiftJava
 
 extension _JNIMethodIDCache {
-  public enum CompletableFuture {
-    private static let completeMethod = Method(
-      name: "complete",
-      signature: "(Ljava/lang/Object;)Z"
-    )
-
-    private static let completeExceptionallyMethod = Method(
-      name: "completeExceptionally",
-      signature: "(Ljava/lang/Throwable;)Z"
-    )
-
-    private static let cache = _JNIMethodIDCache(
-      className: "java/util/concurrent/CompletableFuture",
-      methods: [completeMethod, completeExceptionallyMethod]
-    )
-
-    public static var `class`: jclass {
-      cache.javaClass
-    }
-
-    /// CompletableFuture<T>.complete(T)
-    public static var complete: jmethodID {
-      cache.methods[completeMethod]!
-    }
-
-    /// CompletableFuture<T>.completeExceptionally(Throwable)
-    public static var completeExceptionally: jmethodID {
-      cache.methods[completeExceptionallyMethod]!
-    }
-  }
-
   public enum SimpleCompletableFuture {
     private static let completeMethod = Method(
       name: "complete",

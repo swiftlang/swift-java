@@ -35,16 +35,16 @@ struct JNIAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<java.lang.Void> asyncVoid() {
-          java.util.concurrent.CompletableFuture<java.lang.Void> future$ = new java.util.concurrent.CompletableFuture<java.lang.Void>();
-          SwiftModule.$asyncVoid(future$);
-          return future$.thenApply((futureResult$) -> {
+          org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Void, java.lang.Void> resultSink$ = org.swift.swiftkit.core.SwiftAsyncResultSink.create((futureResult$) -> {
             return futureResult$;
           }
           );
+          SwiftModule.$asyncVoid(resultSink$);
+          return resultSink$.future();
         }
         """,
         """
-        private static native void $asyncVoid(java.util.concurrent.CompletableFuture<java.lang.Void> result_future);
+        private static native void $asyncVoid(org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Void, java.lang.Void> result_sink);
         """,
       ]
     )
@@ -59,9 +59,9 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2")
-        public func Java_com_example_swift_SwiftModule__00024asyncVoid__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
-          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+        @_cdecl("Java_com_example_swift_SwiftModule__00024asyncVoid__Lorg_swift_swiftkit_core_SwiftAsyncResultSink_2")
+        public func Java_com_example_swift_SwiftModule__00024asyncVoid__Lorg_swift_swiftkit_core_SwiftAsyncResultSink_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_sink: jobject?) {
+          nonisolated(unsafe) let globalResultSink = environment.interface.NewGlobalRef(environment, result_sink)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
             if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
@@ -69,11 +69,12 @@ struct JNIAsyncTests {
                 var environment = try! JavaVirtualMachine.shared().environment()
                 defer {
                   let deferEnvironment = try! JavaVirtualMachine.shared().environment()
-                  deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+                  deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalResultSink)
                 }
                 await SwiftModule.asyncVoid()
                 environment = try! JavaVirtualMachine.shared().environment()
-                _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+                if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
+                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
               }
             }
           #endif
@@ -82,13 +83,15 @@ struct JNIAsyncTests {
               var environment = try! JavaVirtualMachine.shared().environment()
               defer {
                 let deferEnvironment = try! JavaVirtualMachine.shared().environment()
-                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalResultSink)
               }
               await SwiftModule.asyncVoid()
               environment = try! JavaVirtualMachine.shared().environment()
-              _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+              if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
+              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
             }
           }
+          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.bind(task!, to: result_sink, in: environment)
         }
         """
       ]
@@ -111,16 +114,16 @@ struct JNIAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<java.lang.Void> async() {
-          java.util.concurrent.CompletableFuture<java.lang.Void> future$ = new java.util.concurrent.CompletableFuture<java.lang.Void>();
-          SwiftModule.$async(future$);
-          return future$.thenApply((futureResult$) -> {
+          org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Void, java.lang.Void> resultSink$ = org.swift.swiftkit.core.SwiftAsyncResultSink.create((futureResult$) -> {
             return futureResult$;
           }
           );
+          SwiftModule.$async(resultSink$);
+          return resultSink$.future();
         }
         """,
         """
-        private static native void $async(java.util.concurrent.CompletableFuture<java.lang.Void> result_future);
+        private static native void $async(org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Void, java.lang.Void> result_sink);
         """,
       ]
     )
@@ -135,9 +138,9 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2")
-        public func Java_com_example_swift_SwiftModule__00024async__Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_future: jobject?) {
-          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__Lorg_swift_swiftkit_core_SwiftAsyncResultSink_2")
+        public func Java_com_example_swift_SwiftModule__00024async__Lorg_swift_swiftkit_core_SwiftAsyncResultSink_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, result_sink: jobject?) {
+          nonisolated(unsafe) let globalResultSink = environment.interface.NewGlobalRef(environment, result_sink)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
             if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
@@ -145,17 +148,19 @@ struct JNIAsyncTests {
                 var environment = try! JavaVirtualMachine.shared().environment()
                 defer {
                   let deferEnvironment = try! JavaVirtualMachine.shared().environment()
-                  deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+                  deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalResultSink)
                 }
                 do {
                   try await SwiftModule.async()
                   environment = try! JavaVirtualMachine.shared().environment()
-                  _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+                  if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
+                  SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
                 }
                 catch {
                   let catchEnvironment = try! JavaVirtualMachine.shared().environment()
+                  if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: catchEnvironment) { return }
                   let exception = catchEnvironment.makeJavaThrowable(for: error)
-                  _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+                  SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(globalResultSink, exception, in: catchEnvironment)
                 }
               }
             }
@@ -165,20 +170,23 @@ struct JNIAsyncTests {
               var environment = try! JavaVirtualMachine.shared().environment()
               defer {
                 let deferEnvironment = try! JavaVirtualMachine.shared().environment()
-                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalResultSink)
               }
               do {
                 try await SwiftModule.async()
                 environment = try! JavaVirtualMachine.shared().environment()
-                _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+                if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
+                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
               }
               catch {
                 let catchEnvironment = try! JavaVirtualMachine.shared().environment()
+                if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: catchEnvironment) { return }
                 let exception = catchEnvironment.makeJavaThrowable(for: error)
-                _ = catchEnvironment.interface.CallBooleanMethodA(catchEnvironment, globalFuture, _JNIMethodIDCache.CompletableFuture.completeExceptionally, [jvalue(l: exception)])
+                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.fail(globalResultSink, exception, in: catchEnvironment)
               }
             }
           }
+          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.bind(task!, to: result_sink, in: environment)
         }
         """
       ]
@@ -201,16 +209,16 @@ struct JNIAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<java.lang.Long> async(long i) {
-          java.util.concurrent.CompletableFuture<java.lang.Long> future$ = new java.util.concurrent.CompletableFuture<java.lang.Long>();
-          SwiftModule.$async(i, future$);
-          return future$.thenApply((futureResult$) -> {
+          org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Long, java.lang.Long> resultSink$ = org.swift.swiftkit.core.SwiftAsyncResultSink.create((futureResult$) -> {
             return futureResult$;
           }
           );
+          SwiftModule.$async(i, resultSink$);
+          return resultSink$.future();
         }
         """,
         """
-        private static native void $async(long i, java.util.concurrent.CompletableFuture<java.lang.Long> result_future);
+        private static native void $async(long i, org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Long, java.lang.Long> result_sink);
         """,
       ]
     )
@@ -225,9 +233,9 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
-        public func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i: jlong, result_future: jobject?) {
-          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SwiftAsyncResultSink_2")
+        public func Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SwiftAsyncResultSink_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, i: jlong, result_sink: jobject?) {
+          nonisolated(unsafe) let globalResultSink = environment.interface.NewGlobalRef(environment, result_sink)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
           if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
@@ -235,12 +243,13 @@ struct JNIAsyncTests {
               var environment = try! JavaVirtualMachine.shared().environment()
               defer {
                 let deferEnvironment = try! JavaVirtualMachine.shared().environment()
-                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalResultSink)
               }
               let swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
               environment = try! JavaVirtualMachine.shared().environment()
+              if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNILocalRefValue(in: environment), in: environment)
-              _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
+              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, boxedResult$, in: environment)
             }
           }
           #endif // end of swift(>=6.2)
@@ -249,14 +258,16 @@ struct JNIAsyncTests {
               var environment = try! JavaVirtualMachine.shared().environment()
               defer {
                 let deferEnvironment = try! JavaVirtualMachine.shared().environment()
-                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalResultSink)
               }
               let swiftResult$ = await SwiftModule.async(i: Int64(fromJNI: i, in: environment))
               environment = try! JavaVirtualMachine.shared().environment()
+              if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(swiftResult$.getJNILocalRefValue(in: environment), in: environment)
-              _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
+              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, boxedResult$, in: environment)
             }
           }
+          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.bind(task!, to: result_sink, in: environment)
           return
         }
         """
@@ -284,16 +295,16 @@ struct JNIAsyncTests {
          * }
          */
         public static java.util.concurrent.CompletableFuture<MyClass> async(MyClass c, SwiftArena swiftArena) {
-          java.util.concurrent.CompletableFuture<java.lang.Long> future$ = new java.util.concurrent.CompletableFuture<java.lang.Long>();
-          SwiftModule.$async(c.$memoryAddress(), future$);
-          return future$.thenApply((futureResult$) -> {
-            return MyClass.wrapMemoryAddressUnsafe(futureResult$, swiftArena);
+          org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Long, MyClass> resultSink$ = org.swift.swiftkit.core.SwiftAsyncResultSink.create(swiftArena, (futureResult$, resultArena$) -> {
+            return MyClass.wrapMemoryAddressUnsafe(futureResult$, resultArena$);
           }
           );
+          SwiftModule.$async(c.$memoryAddress(), resultSink$);
+          return resultSink$.future();
         }
         """,
         """
-        private static native void $async(long c, java.util.concurrent.CompletableFuture<java.lang.Long> result_future);
+        private static native void $async(long c, org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.Long, MyClass> result_sink);
         """,
       ]
     )
@@ -312,15 +323,15 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2")
-        public func Java_com_example_swift_SwiftModule__00024async__JLjava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_future: jobject?) {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SwiftAsyncResultSink_2")
+        public func Java_com_example_swift_SwiftModule__00024async__JLorg_swift_swiftkit_core_SwiftAsyncResultSink_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, c: jlong, result_sink: jobject?) {
           assert(c != 0, "c memory address was null")
           let cBits$ = Int(Int64(fromJNI: c, in: environment))
           let c$ = UnsafeMutablePointer<MyClass>(bitPattern: cBits$)
           guard let c$ else {
             fatalError("c memory address was null in call to \\(#function)!")
           }
-          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let globalResultSink = environment.interface.NewGlobalRef(environment, result_sink)
           var task: Task<Void, Never>? = nil
           #if swift(>=6.2)
             if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
@@ -328,15 +339,16 @@ struct JNIAsyncTests {
                 var environment = try! JavaVirtualMachine.shared().environment()
                 defer {
                   let deferEnvironment = try! JavaVirtualMachine.shared().environment()
-                  deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+                  deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalResultSink)
                 }
                 let swiftResult$ = await SwiftModule.async(c: c$.pointee)
                 environment = try! JavaVirtualMachine.shared().environment()
+                if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
                 let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
                 result$.initialize(to: swiftResult$)
                 let resultBits$ = Int64(Int(bitPattern: result$))
                 let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNILocalRefValue(in: environment), in: environment)
-                _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
+                SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, boxedResult$, in: environment)
               }
             }
           #endif
@@ -345,17 +357,19 @@ struct JNIAsyncTests {
               var environment = try! JavaVirtualMachine.shared().environment()
               defer {
                 let deferEnvironment = try! JavaVirtualMachine.shared().environment()
-                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+                deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalResultSink)
               }
               let swiftResult$ = await SwiftModule.async(c: c$.pointee)
               environment = try! JavaVirtualMachine.shared().environment()
+              if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
               let result$ = UnsafeMutablePointer<MyClass>.allocate(capacity: 1)
               result$.initialize(to: swiftResult$)
               let resultBits$ = Int64(Int(bitPattern: result$))
               let boxedResult$ = SwiftJavaRuntimeSupport._JNIBoxedConversions.box(resultBits$.getJNILocalRefValue(in: environment), in: environment)
-              _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: boxedResult$)])
+              SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, boxedResult$, in: environment)
             }
           }
+          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.bind(task!, to: result_sink, in: environment)
           return
         }
         """
@@ -375,16 +389,16 @@ struct JNIAsyncTests {
       expectedChunks: [
         """
         public static java.util.concurrent.CompletableFuture<java.lang.String> async(java.lang.String s) {
-          java.util.concurrent.CompletableFuture<java.lang.String> future$ = new java.util.concurrent.CompletableFuture<java.lang.String>();
-          SwiftModule.$async(s, future$);
-          return future$.thenApply((futureResult$) -> {
+          org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.String, java.lang.String> resultSink$ = org.swift.swiftkit.core.SwiftAsyncResultSink.create((futureResult$) -> {
             return futureResult$;
           }
           );
+          SwiftModule.$async(s, resultSink$);
+          return resultSink$.future();
         }
         """,
         """
-        private static native void $async(java.lang.String s, java.util.concurrent.CompletableFuture<java.lang.String> result_future);
+        private static native void $async(java.lang.String s, org.swift.swiftkit.core.SwiftAsyncResultSink<java.lang.String, java.lang.String> result_sink);
         """,
       ]
     )
@@ -401,18 +415,18 @@ struct JNIAsyncTests {
       detectChunkByInitialLines: 1,
       expectedChunks: [
         """
-        @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2")
-        public func Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Ljava_util_concurrent_CompletableFuture_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jstring?, result_future: jobject?) {
+        @_cdecl("Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Lorg_swift_swiftkit_core_SwiftAsyncResultSink_2")
+        public func Java_com_example_swift_SwiftModule__00024async__Ljava_lang_String_2Lorg_swift_swiftkit_core_SwiftAsyncResultSink_2(environment: UnsafeMutablePointer<JNIEnv?>!, thisClass: jclass, s: jstring?, result_sink: jobject?) {
           nonisolated(unsafe) let s = environment.interface.NewGlobalRef(environment, s)
-          nonisolated(unsafe) let globalFuture = environment.interface.NewGlobalRef(environment, result_future)
+          nonisolated(unsafe) let globalResultSink = environment.interface.NewGlobalRef(environment, result_sink)
           ...
           defer {
             let deferEnvironment = try! JavaVirtualMachine.shared().environment()
-            deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalFuture)
+            deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, globalResultSink)
             deferEnvironment.interface.DeleteGlobalRef(deferEnvironment, s)
           }
           ...
-          _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: swiftResult$.getJNILocalRefValue(in: environment))])
+          SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, swiftResult$.getJNILocalRefValue(in: environment), in: environment)
           ...
         }
         """
@@ -520,8 +534,9 @@ struct JNIAsyncTests {
         """
         let swiftResult$ = await SwiftModule.\(functionName)()
         environment = try! JavaVirtualMachine.shared().environment()
+        if SwiftJavaRuntimeSupport.SwiftAsyncResultSink.isDone(globalResultSink, in: environment) { return }
         ...
-        _ = environment.interface.CallBooleanMethodA(environment, globalFuture, _JNIMethodIDCache.CompletableFuture.complete, [jvalue(l: nil)])
+        SwiftJavaRuntimeSupport.SwiftAsyncResultSink.complete(globalResultSink, nil, in: environment)
         """
       ],
       notExpectedChunks: [
