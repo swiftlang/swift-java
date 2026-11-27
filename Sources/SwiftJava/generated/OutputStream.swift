@@ -50,7 +50,7 @@ open class OutputStream: JavaObject {
   /// public void java.io.OutputStream.write(byte[]) throws java.io.IOException
   /// ```
   @JavaMethod
-  open func write(_ arg0: [Int8]) throws
+  open func write(_ arg0: [UInt8]) throws
 
   /// Java method `write`.
   ///
@@ -59,5 +59,5 @@ open class OutputStream: JavaObject {
   /// public void java.io.OutputStream.write(byte[],int,int) throws java.io.IOException
   /// ```
   @JavaMethod
-  open func write(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws
+  open func write(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32) throws
 }

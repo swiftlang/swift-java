@@ -68,7 +68,7 @@ open class InputStream: JavaObject {
   /// public int java.io.InputStream.read(byte[]) throws java.io.IOException
   /// ```
   @JavaMethod
-  open func read(_ arg0: [Int8]) throws -> Int32
+  open func read(_ arg0: [UInt8]) throws -> Int32
 
   /// Java method `read`.
   ///
@@ -77,7 +77,7 @@ open class InputStream: JavaObject {
   /// public int java.io.InputStream.read(byte[],int,int) throws java.io.IOException
   /// ```
   @JavaMethod
-  open func read(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
+  open func read(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
   /// Java method `readAllBytes`.
   ///
@@ -86,7 +86,7 @@ open class InputStream: JavaObject {
   /// public byte[] java.io.InputStream.readAllBytes() throws java.io.IOException
   /// ```
   @JavaMethod
-  open func readAllBytes() throws -> [Int8]
+  open func readAllBytes() throws -> [UInt8]
 
   /// Java method `readNBytes`.
   ///
@@ -95,7 +95,7 @@ open class InputStream: JavaObject {
   /// public byte[] java.io.InputStream.readNBytes(int) throws java.io.IOException
   /// ```
   @JavaMethod
-  open func readNBytes(_ arg0: Int32) throws -> [Int8]
+  open func readNBytes(_ arg0: Int32) throws -> [UInt8]
 
   /// Java method `readNBytes`.
   ///
@@ -104,7 +104,7 @@ open class InputStream: JavaObject {
   /// public int java.io.InputStream.readNBytes(byte[],int,int) throws java.io.IOException
   /// ```
   @JavaMethod
-  open func readNBytes(_ arg0: [Int8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
+  open func readNBytes(_ arg0: [UInt8], _ arg1: Int32, _ arg2: Int32) throws -> Int32
 
   /// Java method `reset`.
   ///
