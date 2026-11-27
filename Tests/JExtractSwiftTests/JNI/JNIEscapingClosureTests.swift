@@ -57,6 +57,7 @@ struct JNIEscapingClosureTests {
       expectedChunks: [
         """
         public static class setCallback {
+          private setCallback() {}
           /** Corresponds to the Swift closure parameter of type {@code @escaping () -> Void}. */
           @FunctionalInterface
           public interface callback {
@@ -97,6 +98,7 @@ struct JNIEscapingClosureTests {
       expectedChunks: [
         """
         public static class delayedExecution {
+          private delayedExecution() {}
           /** Corresponds to the Swift closure parameter of type {@code @escaping (Int64) -> Int64}. */
           @FunctionalInterface
           public interface closure {
@@ -154,6 +156,7 @@ struct JNIEscapingClosureTests {
       expectedChunks: [
         """
         public static class setCallback {
+          private setCallback() {}
           /** Corresponds to the Swift closure parameter of type {@code @escaping () -> Void}. */
           @FunctionalInterface
           public interface callback {

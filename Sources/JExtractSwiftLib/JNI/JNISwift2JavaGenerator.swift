@@ -44,6 +44,10 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
 
   var thunkNameRegistry = ThunkNameRegistry()
 
+  /// Overloads for default arguments share their closure parameters' wrappers and Java interfaces.
+  var printedEscapingClosureWrappers: Set<String> = []
+  var printedJavaClosureHelperClasses: Set<String> = []
+
   /// Accumulates every ``@_cdecl`` symbol name emitted during thunk printing.
   /// Written to a linker version script after generation when
   /// ``Configuration/linkerExportListOutput`` is set.
@@ -132,6 +136,8 @@ package class JNISwift2JavaGenerator: Swift2JavaGenerator {
     // Expand variadic functions into N overloads
     var expandedAnalysis = analysis
     expandedAnalysis.expandVariadicOverloads(maxOverloads: config.effectiveMaxVariadicOverloads)
+    // Default arguments become overloads without the trailing defaulted parameters
+    expandedAnalysis.expandDefaultArgumentOverloads()
     self.analysis = expandedAnalysis
 
     // Every extracted protocol that also gets a plain Java `interface`

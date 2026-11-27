@@ -136,6 +136,27 @@ generated Java wrapper type.
    }
 }
 
+### Default arguments
+
+In JNI mode, a function or initializer with trailing default arguments gets one
+Java overload for each argument a caller can leave out. Swift fills in the
+default value, so the default expression is never translated to Java:
+
+```swift
+public func greeting(name: String = "world", excited: Bool = false) -> String
+```
+
+```java
+MySwiftLibrary.greeting();             // "Hello, world."
+MySwiftLibrary.greeting("Ana");        // "Hello, Ana."
+MySwiftLibrary.greeting("Ana", true);  // "Hello, Ana!"
+```
+
+An overload is left out when a declared function already has the same Java
+signature, or when calling the Swift function with those arguments would be
+ambiguous. A defaulted parameter that isn't trailing (`f(a: Int = 0, b: Int)`)
+must still be passed.
+
 ### Throwing functions
 
 Throwing Swift functions are imported as Java methods that throw exceptions.
