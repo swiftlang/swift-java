@@ -61,7 +61,11 @@ struct JNIAsyncSelfCaptureTests {
         """
         @_cdecl("Java_com_example_swift_WorkerBox__00024work__JJLjava_util_concurrent_CompletableFuture_2")
         ...
+        #if swift(>=6)
+        nonisolated(unsafe) var selfPointerExistentialUnsafeSendable$ = selfPointerExistential$
+        #else
         nonisolated(unsafe) let selfPointerExistentialUnsafeSendable$ = selfPointerExistential$
+        #endif
         ...
         task = Task.immediate {
         ...
