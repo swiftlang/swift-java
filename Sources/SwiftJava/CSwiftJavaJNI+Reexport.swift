@@ -12,4 +12,5 @@
 //
 //===----------------------------------------------------------------------===//
 
+@_exported import SwiftJavaAnnotations
 @_exported import SwiftJavaJNICore
