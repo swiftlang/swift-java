@@ -78,12 +78,9 @@ extension SwiftAsyncResultSink {
   @JavaMethod
   public static func finishTask(
     environment: UnsafeMutablePointer<JNIEnv?>!,
-    taskPointer: Int64,
-    isCancel: Bool
+    taskPointer: Int64
   ) {
     let owner = Unmanaged<_JNISwiftTask>.fromOpaque(UnsafeRawPointer(bitPattern: Int(taskPointer))!).takeRetainedValue()
-    if isCancel {
-      owner.task.cancel()
-    }
+    owner.task.cancel()
   }
 }

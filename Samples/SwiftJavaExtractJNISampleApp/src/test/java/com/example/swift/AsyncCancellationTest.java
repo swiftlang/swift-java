@@ -45,6 +45,37 @@ public class AsyncCancellationTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"orTimeout", "completeOnTimeout", "complete", "completeExceptionally"})
+    void completionCancelsSwiftTask(String completion) throws Exception {
+        try (var arena = SwiftArena.ofConfined()) {
+            var probe = AsyncCancellationProbe.init(arena);
+            var future = probe.waitForCancellation();
+            switch (completion) {
+                case "orTimeout" -> {
+                    future.orTimeout(10, TimeUnit.MILLISECONDS);
+                    var failure = assertThrows(ExecutionException.class, () -> get(future));
+                    assertInstanceOf(TimeoutException.class, failure.getCause());
+                }
+                case "completeOnTimeout" -> {
+                    future.completeOnTimeout(42L, 10, TimeUnit.MILLISECONDS);
+                    assertEquals(42L, get(future));
+                }
+                case "complete" -> {
+                    assertTrue(future.complete(42L));
+                    assertEquals(42L, get(future));
+                }
+                case "completeExceptionally" -> {
+                    var error = new IllegalStateException("Completed by caller");
+                    assertTrue(future.completeExceptionally(error));
+                    var failure = assertThrows(ExecutionException.class, () -> get(future));
+                    assertSame(error, failure.getCause());
+                }
+                default -> throw new IllegalArgumentException();
+            }
+            awaitCondition(probe::wasCancelled, "Swift task did not observe cancellation");
+        }
+    }
 
     @Test
     void closingArenaReleasesResult() throws Exception {

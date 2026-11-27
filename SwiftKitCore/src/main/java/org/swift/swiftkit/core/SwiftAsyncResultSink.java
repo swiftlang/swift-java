@@ -15,7 +15,6 @@
 package org.swift.swiftkit.core;
 
 import java.util.ArrayDeque;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.BiConsumer;
@@ -71,12 +70,11 @@ public final class SwiftAsyncResultSink<S, T> {
 
     @SuppressWarnings("unused")
     private void bindTask(long taskPointer) {
-        future.whenComplete((value, error) -> {
-            finishTask(taskPointer, error instanceof CancellationException);
-        });
+        // Once the future is complete, the Swift task no longer needs to produce a result.
+        future.whenComplete((value, error) -> finishTask(taskPointer));
     }
 
-    private static native void finishTask(long taskPointer, boolean isCancel);
+    private static native void finishTask(long taskPointer);
 
     @SuppressWarnings("unused")
     private boolean isDone() {
