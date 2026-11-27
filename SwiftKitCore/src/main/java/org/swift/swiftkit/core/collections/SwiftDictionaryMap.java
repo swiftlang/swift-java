@@ -31,12 +31,12 @@ import org.swift.swiftkit.core.*;
  */
 public class SwiftDictionaryMap<K, V> extends AbstractMap<K, V> implements JNISwiftInstance {
 
-    private final long selfPointer;
+    private final SwiftInstancePointer selfPointer;
     private final SwiftInstanceCleanup cleanup;
 
     private SwiftDictionaryMap(long selfPointer) {
-        this.selfPointer = selfPointer;
-        this.cleanup = $createCleanup();
+        this.selfPointer = new SwiftInstancePointer(selfPointer);
+        this.cleanup = $createCleanup(this.selfPointer);
     }
 
     public static <K, V> SwiftDictionaryMap<K, V> wrapMemoryAddressUnsafe(long selfPointer, SwiftArena arena) {
@@ -48,13 +48,13 @@ public class SwiftDictionaryMap<K, V> extends AbstractMap<K, V> implements JNISw
     @Override
     public long $memoryAddress() {
         $ensureAlive();
-        return selfPointer;
+        return selfPointer.get();
     }
 
     @Override
     public long $typeMetadataAddress() {
         $ensureAlive();
-        return $typeMetadataAddress(selfPointer);
+        return $typeMetadataAddress(selfPointer.get());
     }
 
     @Override
@@ -64,7 +64,7 @@ public class SwiftDictionaryMap<K, V> extends AbstractMap<K, V> implements JNISw
 
     @Override
     public Runnable $createDestroyFunction() {
-        final long p = this.selfPointer;
+        final long p = this.selfPointer.get();
         return () -> $destroy(p);
     }
 
@@ -73,28 +73,28 @@ public class SwiftDictionaryMap<K, V> extends AbstractMap<K, V> implements JNISw
     @Override
     public int size() {
         $ensureAlive();
-        return $size(selfPointer);
+        return $size(selfPointer.get());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public V get(Object key) {
         $ensureAlive();
-        return (V) $get(selfPointer, key);
+        return (V) $get(selfPointer.get(), key);
     }
 
     @Override
     public boolean containsKey(Object key) {
         $ensureAlive();
-        return $containsKey(selfPointer, key);
+        return $containsKey(selfPointer.get(), key);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Set<Entry<K, V>> entrySet() {
         $ensureAlive();
-        Object[] keys = $keys(selfPointer);
-        Object[] values = $values(selfPointer);
+        Object[] keys = $keys(selfPointer.get());
+        Object[] values = $values(selfPointer.get());
         Set<Entry<K, V>> entries = new LinkedHashSet<>();
         for (int i = 0; i < keys.length; i++) {
             entries.add(new AbstractMap.SimpleImmutableEntry<>((K) keys[i], (V) values[i]));

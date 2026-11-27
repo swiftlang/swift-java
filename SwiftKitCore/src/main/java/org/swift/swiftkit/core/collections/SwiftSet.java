@@ -30,12 +30,12 @@ import org.swift.swiftkit.core.*;
  */
 public class SwiftSet<E> extends AbstractSet<E> implements JNISwiftInstance {
 
-    private final long selfPointer;
+    private final SwiftInstancePointer selfPointer;
     private final SwiftInstanceCleanup cleanup;
 
     private SwiftSet(long selfPointer) {
-        this.selfPointer = selfPointer;
-        this.cleanup = $createCleanup();
+        this.selfPointer = new SwiftInstancePointer(selfPointer);
+        this.cleanup = $createCleanup(this.selfPointer);
     }
 
     public static <E> SwiftSet<E> wrapMemoryAddressUnsafe(long selfPointer, SwiftArena arena) {
@@ -47,13 +47,13 @@ public class SwiftSet<E> extends AbstractSet<E> implements JNISwiftInstance {
     @Override
     public long $memoryAddress() {
         $ensureAlive();
-        return selfPointer;
+        return selfPointer.get();
     }
 
     @Override
     public long $typeMetadataAddress() {
         $ensureAlive();
-        return $typeMetadataAddress(selfPointer);
+        return $typeMetadataAddress(selfPointer.get());
     }
 
     @Override
@@ -63,7 +63,7 @@ public class SwiftSet<E> extends AbstractSet<E> implements JNISwiftInstance {
 
     @Override
     public Runnable $createDestroyFunction() {
-        final long p = this.selfPointer;
+        final long p = this.selfPointer.get();
         return () -> $destroy(p);
     }
 
@@ -72,20 +72,20 @@ public class SwiftSet<E> extends AbstractSet<E> implements JNISwiftInstance {
     @Override
     public int size() {
         $ensureAlive();
-        return $size(selfPointer);
+        return $size(selfPointer.get());
     }
 
     @Override
     public boolean contains(Object o) {
         $ensureAlive();
-        return $contains(selfPointer, o);
+        return $contains(selfPointer.get(), o);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Iterator<E> iterator() {
         $ensureAlive();
-        Object[] elements = $toArray(selfPointer);
+        Object[] elements = $toArray(selfPointer.get());
         return new Iterator<E>() {
             private int index = 0;
 

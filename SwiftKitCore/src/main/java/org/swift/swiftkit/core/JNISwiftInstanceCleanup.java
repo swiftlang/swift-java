@@ -21,12 +21,18 @@ class JNISwiftInstanceCleanup implements SwiftInstanceCleanup {
             AtomicIntegerFieldUpdater.newUpdater(JNISwiftInstanceCleanup.class, "destroyed");
 
     private final Runnable destroyFunction;
+    private final SwiftInstancePointer memoryAddress;
 
     @SuppressWarnings("unused") // accessed via DESTROYED field updater
     private volatile int destroyed;
 
     public JNISwiftInstanceCleanup(Runnable destroyFunction) {
+        this(destroyFunction, null);
+    }
+
+    JNISwiftInstanceCleanup(Runnable destroyFunction, SwiftInstancePointer memoryAddress) {
         this.destroyFunction = destroyFunction;
+        this.memoryAddress = memoryAddress;
     }
 
     @Override
@@ -38,6 +44,9 @@ class JNISwiftInstanceCleanup implements SwiftInstanceCleanup {
     public void run() {
         if (DESTROYED.compareAndSet(this, 0, 1)) {
             destroyFunction.run();
+            if (memoryAddress != null) {
+                memoryAddress.clear();
+            }
         } else {
             throw new IllegalStateException("Double destruction attempt detected!");
         }

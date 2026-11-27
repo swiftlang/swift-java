@@ -64,19 +64,20 @@ struct JNIEnumTests {
         """
         private MyEnum(long selfPointer, SwiftArena swiftArena) {
           SwiftObjects.requireNonZero(selfPointer, "selfPointer");
-          this.selfPointer = selfPointer;
-          this.$cleanup = $createCleanup();
+          this.selfPointer = new SwiftInstancePointer(selfPointer);
+          this.$cleanup = $createCleanup(this.selfPointer);
 
           // Only register once we have fully initialized the object since this will need the object pointer.
           swiftArena.register(this);
         }
         """,
         """
-        private final long selfPointer;
+        private final SwiftInstancePointer selfPointer;
         """,
         """
         public long $memoryAddress() {
-          return this.selfPointer;
+          $ensureAlive();
+          return this.selfPointer.get();
         }
         """,
         """

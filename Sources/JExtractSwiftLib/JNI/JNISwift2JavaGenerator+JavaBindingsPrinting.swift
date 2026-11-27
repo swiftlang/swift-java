@@ -257,7 +257,7 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         /** Pointer to the "self". */
-        private final long selfPointer;
+        private final SwiftInstancePointer selfPointer;
 
         /** Pointer to the metatype of the concrete dynamic value boxed here. */
         private final long selfTypePointer;
@@ -266,7 +266,8 @@ extension JNISwift2JavaGenerator {
         private final SwiftInstanceCleanup $cleanup;
 
         public long $memoryAddress() {
-          return this.selfPointer;
+          $ensureAlive();
+          return this.selfPointer.get();
         }
 
         @Override
@@ -378,13 +379,14 @@ extension JNISwift2JavaGenerator {
       printer.print(
         """
         /** Pointer to the "self". */
-        private final long selfPointer;
+        private final SwiftInstancePointer selfPointer;
 
         /** Tracks whether this instance has been destroyed; doubles as the destroyed-state holder. */
         private final SwiftInstanceCleanup $cleanup;
 
         public long $memoryAddress() {
-          return this.selfPointer;
+          $ensureAlive();
+          return this.selfPointer.get();
         }
 
         @Override
@@ -458,16 +460,25 @@ extension JNISwift2JavaGenerator {
     let pointerArg = pointerParams.map { "long \($0)" }.joined(separator: ", ")
     printer.printBraceBlock("private \(javaName)(\(pointerArg), SwiftArena swiftArena)") { printer in
       for param in pointerParams {
-        printer.print(
-          """
-          SwiftObjects.requireNonZero(\(param), "\(param)");
-          this.\(param) = \(param);
-          """
-        )
+        if param == "selfPointer" {
+          printer.print(
+            """
+            SwiftObjects.requireNonZero(selfPointer, "selfPointer");
+            this.selfPointer = new SwiftInstancePointer(selfPointer);
+            """
+          )
+        } else {
+          printer.print(
+            """
+            SwiftObjects.requireNonZero(\(param), "\(param)");
+            this.\(param) = \(param);
+            """
+          )
+        }
       }
       printer.print(
         """
-        this.$cleanup = $createCleanup();
+        this.$cleanup = $createCleanup(this.selfPointer);
 
         // Only register once we have fully initialized the object since this will need the object pointer.
         swiftArena.register(this);

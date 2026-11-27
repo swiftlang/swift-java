@@ -18,9 +18,13 @@ public interface SwiftInstance {
     /**
      * Pointer to the {@code self} of the underlying Swift object or value.
      *
-     * <b>API Note:</b> When using this pointer one must ensure that the underlying object
-     * is kept alive using some means (e.g. a class remains retained), as
-     * this function does not ensure safety of the address in any way.
+     * <p>Throws {@link IllegalStateException} if this instance has already been destroyed,
+     * for example after its {@link SwiftArena} was closed.
+     *
+     * <b>API Note:</b> When using this pointer one must still ensure that the underlying object
+     * is kept alive using some means (e.g. a class remains retained). This method prevents
+     * reaching freed Swift memory after an explicit destroy, but does not otherwise guarantee
+     * that the address remains valid.
      */
     long $memoryAddress();
 
@@ -43,7 +47,8 @@ public interface SwiftInstance {
      * use-after-free errors.
      */
     default void $ensureAlive() {
-        if (this.$cleanup().isDestroyed()) {
+        SwiftInstanceCleanup cleanup = this.$cleanup();
+        if (cleanup != null && cleanup.isDestroyed()) {
             throw new IllegalStateException("Attempted to call method on already destroyed instance of " + getClass().getSimpleName() + "!");
         }
     }
